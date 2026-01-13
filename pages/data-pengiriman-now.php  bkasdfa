@@ -1,0 +1,394 @@
+<?PHP
+include "vendor/autoload.php";
+use GuzzleHttp\Client;
+ini_set("error_reporting", 1);
+session_start();
+include "koneksi.php";
+
+?>
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Aftersales NOW</title>
+</head>
+
+<body>
+  <?php
+  $Order = isset($_POST['order']) ? $_POST['order'] : '';
+  $PO = isset($_POST['po']) ? $_POST['po'] : '';
+  $Pelanggan = isset($_POST['pelanggan']) ? $_POST['pelanggan'] : '';
+  $Warna = isset($_POST['warna']) ? $_POST['warna'] : '';
+  $Prodorder = isset($_POST['prodorder']) ? $_POST['prodorder'] : '';
+  $tgl_awal = isset($_POST['tgl_awal']) ? $_POST['tgl_awal'] : '';
+  $tgl_akhir = isset($_POST['tgl_akhir']) ? $_POST['tgl_akhir'] : '';
+  ?>
+  <div class="box">
+    <div class="box-header with-border">
+      <h3 class="box-title"> Filter Data Pengiriman NOW</h3>
+      <div class="box-tools pull-right">
+        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+      </div>
+    </div>
+    <!-- /.box-header -->
+    <!-- form start -->
+    <form method="post" enctype="multipart/form-data" name="form1" class="form-horizontal" id="form1">
+      <div class="box-body">
+        <div class="form-group">
+          <div class="col-sm-2">
+            <input name="tgl_awal" type="date" class="form-control pull-right" placeholder="Tgl Awal Pengiriman"
+              value="<?php echo $tgl_awal; ?>" />
+          </div>
+          <div class="col-sm-2">
+            <input name="tgl_akhir" type="date" class="form-control pull-right" placeholder="Tgl Akhir Pengiriman"
+              value="<?php echo $tgl_akhir; ?>" />
+          </div>
+
+          <!-- /.input group -->
+        </div>
+
+
+        <div class="form-group">
+          <div class="col-sm-2">
+            <input name="po" type="text" class="form-control pull-right" id="po" placeholder="No PO"
+              value="<?php echo $PO; ?>" />
+          </div>
+          <div class="col-sm-2">
+            <input name="order" type="text" class="form-control pull-right" id="order" placeholder="No Order"
+              value="<?php echo $Order; ?>" />
+          </div>
+          <div class="col-sm-2">
+            <input name="pelanggan" type="text" class="form-control pull-right" id="pelanggan" placeholder="Pelanggan"
+              value="<?php echo $Pelanggan; ?>" />
+          </div>
+          <!-- /.input group -->
+        </div>
+        <div class="form-group">
+          <div class="col-sm-3">
+            <input name="warna" type="text" class="form-control pull-right" id="warna" placeholder="Warna"
+              value="<?php echo $Warna; ?>" />
+          </div>
+          <div class="col-sm-2">
+            <input name="prodorder" type="text" class="form-control pull-right" id="prodorder" placeholder="Prod. Order"
+              value="<?php echo $Prodorder; ?>" />
+          </div>
+        </div>
+      </div>
+      <!-- /.box-body -->
+      <div class="box-footer">
+        <div class="col-sm-2">
+          <button type="submit" class="btn btn-block btn-social btn-linkedin btn-sm" name="save"
+            style="width: 60%">Search <i class="fa fa-search"></i></button>
+        </div>
+      </div>
+      <!-- /.box-footer -->
+    </form>
+  </div>
+
+  <?php if (isset($_POST['save'])) { ?>
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="box">
+          <div class="box-header with-border">
+            <h3 class="box-title">Data Pengiriman NOW</h3><br>
+          </div>
+          <div class="box-body">
+            <table class="table table-bordered table-hover table-striped nowrap" id="example3" style="width:100%">
+              <thead class="bg-blue">
+                <tr>
+                  <th>
+                    <div align="center">Tgl Kirim</div>
+                  </th>
+                  <th>
+                    <div align="center">No SJ</div>
+                  </th>
+                  <th>
+                    <div align="center">No PO</div>
+                  </th>
+                  <th>
+                    <div align="center">No Order</div>
+                  </th>
+                  <th>
+                    <div align="center">Hanger</div>
+                  </th>
+                  <th>
+                    <div align="center">Roll</div>
+                  </th>
+                  <th>
+                    <div align="center">KG</div>
+                  </th>
+                  <th>
+                    <div align="center">Yd/Mtr</div>
+                  </th>
+                  <th>
+                    <div align="center">Production Order</div>
+                  </th>
+                  <th>
+                    <div align="center">Warna</div>
+                  </th>
+                  <th>
+                    <div align="center">Note</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php
+                $no = 1;
+                // Inisialisasi client
+                $client = new Client();
+
+                // Membuat URL dengan menggantikan variabel PHP di dalam string
+                $url = sprintf(
+                  'http://localhost/qc-final-new/pages/api/pengiriman-now.php?tgl_awal=%s&tgl_akhir=%s&po=%s&order=%s&pelanggan=%s&warna=%s&prodorder=%s',
+                  urlencode($tgl_awal),  // Pastikan untuk melakukan encoding URL untuk menghindari karakter spesial
+                  urlencode($tgl_akhir),
+                  urlencode($PO),
+                  urlencode($Order),
+                  urlencode($Pelanggan),
+                  urlencode($Warna),
+                  urlencode($Prodorder)
+                );
+
+                // Melakukan request GET
+                try {
+                  $response = $client->request('GET', $url);
+
+                  // Mendapatkan isi response dan mendecode JSON
+                  $datas = json_decode($response->getBody()->getContents(), true);
+
+
+                } catch (\GuzzleHttp\Exception\RequestException $e) {
+                  // Menangani error jika terjadi masalah pada permintaan
+                  echo "Error: " . $e->getMessage();
+                }
+                foreach($datas as $data) {
+
+                $q_ket_foc = db2_exec($conn1, "SELECT 
+                                                      COUNT(QUALITYREASONCODE) AS ROLL,
+                                                      SUM(FOC_KG) AS KG,
+                                                      SUM(FOC_YARDMETER) AS YARD_MTR,
+                                                      KET_YARDMETER,
+                                                      ALLOCATIONCODE
+                                                  FROM
+                                                      ITXVIEW_SURATJALAN_EXIM2A
+                                                  WHERE 
+                                                      QUALITYREASONCODE = 'FOC'
+                                                      AND PROVISIONALCODE = '$data[PROVISIONALCODE]'
+                                                      AND ALLOCATIONCODE = '$data[CODE]'
+                                                  GROUP BY 
+                                                      KET_YARDMETER,
+                                                      ALLOCATIONCODE");
+                  $d_ket_foc = db2_fetch_assoc($q_ket_foc); ?>
+
+                  <?php if ($d_ket_foc['ROLL'] > 0 and $d_ket_foc['KG'] > 0 and $d_ket_foc['YARD_MTR'] > 0): ?>
+                  <tr bgcolor="<?php echo $bgcolor; ?>">
+                    <td align="center"><?php echo $data['GOODSISSUEDATE']; ?></td>
+                    <td align="center"><a href="#" id='<?php echo $data['PROVISIONALCODE']; ?>'
+                        nowarna='<?php echo $data['SUBCODE05']; ?>'
+                        project='<?php echo $data['DLVSALORDERLINESALESORDERCODE']; ?>'
+                        lotcode='<?php echo $data['LOTCODE']; ?>' 
+                        foc='<?= trim($data['NOTE'] ?: '') ?>'
+                        class="detail_kirim_kain">
+                        <?php echo $data['PROVISIONALCODE']; ?></a></td>
+                    <td align="center"><?php echo $data['PO_NUMBER']; ?></td>
+                    <td align="center"><?php echo $data['DLVSALORDERLINESALESORDERCODE']; ?></td>
+                    <td align="center"><?php echo $data['SUBCODE02'].$data['SUBCODE03']; ?></td>
+                    <td align="center"><?php echo $d_ket_foc['ROLL']; ?></td>
+                    <td align="center"><?php echo str_replace(",", "", number_format($d_ket_foc['KG'], 2)) ?></td>
+                    <td align="center"><?php echo str_replace(",", "", number_format($d_ket_foc['YARD_MTR'], 2)) ?></td>
+                    <td align="center"><?php echo $data['LOTCODE']; ?></td>
+                    <td align="center"><?php echo $data['WARNA']; ?></td>
+                    <td>FOC</td>
+                  </tr>
+
+                  <!-- Perhitungan roll baru -->
+                  <?php
+                    if (in_array($data['DEFINITIVECOUNTERCODE'], array('CESDEF', 'DREDEF', 'DSEDEF', 'EXDPROV', 'EXPPROV', 'GSEPROV', 'CESPROV', 'DREPROV', 'EXDDEF', 'EXPDEF', 'GSEDEF', 'PSEPROV'))) {
+                      $q_roll = db2_exec($conn1, "SELECT
+                                                COUNT(ise.COUNTROLL) AS ROLL,
+                                                SUM(ise.QTY_KG) AS QTY_SJ_KG,
+                                                SUM(ise.QTY_YARDMETER) AS QTY_SJ_YARD,
+                                                inpe.PROJECT,
+                                                ise.ADDRESSEE,
+                                                ise.BRAND_NM,
+                                                ise.ALLOCATIONCODE
+                                            FROM
+                                                ITXVIEW_SURATJALAN_EXIM2A ise 
+                                            LEFT JOIN ITXVIEW_NO_PROJECTS_EXIM inpe ON inpe.PROVISIONALCODE = ise.PROVISIONALCODE 
+                                            WHERE 
+                                                ise.PROVISIONALCODE = '$data[PROVISIONALCODE]'
+                                                AND ise.ALLOCATIONCODE = '$data[CODE]'
+                                                -- AND (ise.QUALITYREASONCODE <> 'FOC' OR ise.QUALITYREASONCODE IS NULL)
+                                            GROUP BY 
+                                                inpe.PROJECT,ise.ADDRESSEE,ise.BRAND_NM,ise.ALLOCATIONCODE
+                                                ");
+                      $d_roll = db2_fetch_assoc($q_roll);
+                      $q_rollfoc = db2_exec($conn1, "SELECT
+                                                        COUNT(ise.COUNTROLL) AS ROLL,
+                                                        SUM(ise.QTY_KG) AS QTY_SJ_KG,
+                                                        SUM(ise.QTY_YARDMETER) AS QTY_SJ_YARD,
+                                                        inpe.PROJECT,
+                                                        ise.ADDRESSEE,
+                                                        ise.BRAND_NM,
+                                                        ise.ALLOCATIONCODE
+                                                    FROM
+                                                        ITXVIEW_SURATJALAN_EXIM2A ise 
+                                                    LEFT JOIN ITXVIEW_NO_PROJECTS_EXIM inpe ON inpe.PROVISIONALCODE = ise.PROVISIONALCODE 
+                                                    WHERE 
+                                                        ise.PROVISIONALCODE = '$data[PROVISIONALCODE]'
+                                                        AND ise.ALLOCATIONCODE = '$data[CODE]'
+                                                        AND ise.QUALITYREASONCODE = 'FOC' 
+                                                    GROUP BY 
+                                                        inpe.PROJECT,ise.ADDRESSEE,ise.BRAND_NM,ise.ALLOCATIONCODE
+                                                        ");
+                      $d_rollfoc = db2_fetch_assoc($q_rollfoc);
+                      $roll = $d_roll['ROLL'] - $d_rollfoc['ROLL']; // MENGHITUNG JIKA FOC SEBAGIAN, MAKA ROLL UNTUK FOC TIDAK PERLU DIPISAH DARI KESELURUHAN
+                    } else {
+                      $q_roll = db2_exec($conn1, "SELECT COUNT(CODE) AS ROLL,
+                                                          SUM(BASEPRIMARYQUANTITY) AS QTY_SJ_KG,
+                                                          SUM(BASESECONDARYQUANTITY) AS QTY_SJ_YARD,
+                                                          LISTAGG(TRIM(LOTCODE), ', ') AS LOTCODE
+                                                  FROM 
+                                                      ITXVIEWALLOCATION0 
+                                                  WHERE 
+                                                      CODE = '$data[CODE]' AND LOTCODE IN ($data[LOTCODE2])");
+                      $d_roll = db2_fetch_assoc($q_roll);
+                      $roll = $d_roll['ROLL'];
+                    }
+                    ?>
+                    <!-- Kondisi pertama -->
+                    <?php if ($roll > 0): ?>
+                    <tr bgcolor="<?php echo $bgcolor; ?>">
+                    <td align="center"><?php echo $data['GOODSISSUEDATE']; ?></td>
+                    <td align="center"><a href="#" id='<?php echo $data['PROVISIONALCODE']; ?>'
+                        nowarna='<?php echo $data['SUBCODE05']; ?>'
+                        project='<?php echo $data['DLVSALORDERLINESALESORDERCODE']; ?>'
+                        lotcode='<?php echo $data['LOTCODE']; ?>' 
+                        foc='<?= trim($data['NOTE'] ?: '') ?>'
+                        class="detail_kirim_kain">
+                        <?php echo $data['PROVISIONALCODE']; ?></a></td>
+                    <td align="center"><?php echo $data['PO_NUMBER']; ?></td>
+                    <td align="center"><?php echo $data['DLVSALORDERLINESALESORDERCODE']; ?></td>
+                    <td align="center"><?php echo $data['SUBCODE02'].$data['SUBCODE03']; ?></td>
+                    <td align="center"><?php echo $roll; ?></td>
+                    <td align="center"><?php echo str_replace(",", "", number_format($d_roll['QTY_SJ_KG'], 2)) ?></td>
+                    <td align="center"><?php
+                          if ($data['PRICEUNITOFMEASURECODE'] == 'm') {
+                            echo str_replace(",", "", round(number_format($d_roll['QTY_SJ_YARD'], 2) * 0.9144, 2));
+                          } else {
+                            echo str_replace(",", "", number_format($d_roll['QTY_SJ_YARD'], 2));
+                          }
+                          ?></td>
+                    <td align="center"><?php echo $data['LOTCODE']; ?></td>
+                    <td align="center"><?php echo $data['WARNA']; ?></td>
+                    <td><?php echo $data['PAYMENTMETHODCODE']; ?></td>
+                  </tr>
+                    <?php endif; ?>
+                    <!-- Kondisi lagi -->
+                    <?php else: ?>
+                      <tr bgcolor="<?php echo $bgcolor; ?>">
+                        <td align="center"><?php echo $data['GOODSISSUEDATE']; ?></td>
+                        <td align="center"><a href="#" id='<?php echo $data['PROVISIONALCODE']; ?>'
+                            nowarna='<?php echo $data['SUBCODE05']; ?>' project='<?php echo $data['DLVSALORDERLINESALESORDERCODE']; ?>'
+                            lotcode='<?php echo $data['LOTCODE']; ?>' foc='<?= trim($data['NOTE'] ?: '') ?>' class="detail_kirim_kain">
+                            <?php echo $data['PROVISIONALCODE']; ?></a></td>
+                        <td align="center"><?php echo $data['PO_NUMBER']; ?></td>
+                        <td align="center"><?php echo $data['DLVSALORDERLINESALESORDERCODE']; ?></td>
+                        <td align="center"><?php echo $data['SUBCODE02'].$data['SUBCODE03']; ?></td>
+                        <td align="center"><?php
+                          if (in_array($data['DEFINITIVECOUNTERCODE'], array('CESDEF', 'DREDEF', 'DSEDEF', 'EXDPROV', 'EXPPROV', 'GSEPROV', 'CESPROV', 'DREPROV', 'EXDDEF', 'EXPDEF', 'GSEDEF', 'PSEPROV'))) {
+                            $q_roll = db2_exec($conn1, "SELECT
+                                                            COUNT(ise.COUNTROLL) AS ROLL,
+                                                            SUM(ise.QTY_KG) AS QTY_SJ_KG,
+                                                            SUM(ise.QTY_YARDMETER) AS QTY_SJ_YARD,
+                                                            inpe.PROJECT,
+                                                            ise.ADDRESSEE,
+                                                            ise.BRAND_NM,
+                                                            ise.ALLOCATIONCODE
+                                                        FROM
+                                                            ITXVIEW_SURATJALAN_EXIM2A ise 
+                                                        LEFT JOIN ITXVIEW_NO_PROJECTS_EXIM inpe ON inpe.PROVISIONALCODE = ise.PROVISIONALCODE 
+                                                        WHERE 
+                                                            ise.PROVISIONALCODE = '$data[PROVISIONALCODE]'
+                                                            AND ise.ALLOCATIONCODE = '$data[CODE]'
+                                                        GROUP BY 
+                                                            inpe.PROJECT,ise.ADDRESSEE,ise.BRAND_NM,ise.ALLOCATIONCODE");
+                            $d_roll = db2_fetch_assoc($q_roll);
+                            echo $d_roll['ROLL']; // MENGHITUNG JIKA FOC SEBAGIAN, MAKA ROLL UNTUK FOC TIDAK PERLU DIPISAH DARI KESELURUHAN
+                          } else {
+                            $q_roll = db2_exec($conn1, "SELECT COUNT(CODE) AS ROLL,
+                                                                SUM(BASEPRIMARYQUANTITY) AS QTY_SJ_KG,
+                                                                SUM(BASESECONDARYQUANTITY) AS QTY_SJ_YARD,
+                                                                LISTAGG(TRIM(LOTCODE), ', ') AS LOTCODE
+                                                        FROM 
+                                                            ITXVIEWALLOCATION0 
+                                                        WHERE 
+                                                            CODE = '$data[CODE]' AND LOTCODE IN ($data[LOTCODE2])");
+                            $d_roll = db2_fetch_assoc($q_roll);
+                            echo $d_roll['ROLL'];
+                          }
+                          ?></td>
+                        <td align="center"><?php echo str_replace(",", "", number_format($d_roll['QTY_SJ_KG'], 2)) ?></td>
+                        <td align="center"><?php
+                        if ($data['PRICEUNITOFMEASURECODE'] == 'm') {
+                          echo str_replace(",", "", round(number_format($d_roll['QTY_SJ_YARD'], 2) * 0.9144, 2));
+                        } else {
+                          echo str_replace(",", "", number_format($d_roll['QTY_SJ_YARD'], 2));
+                        }
+                        ?></td>
+                        <td align="center"><?php echo $data['LOTCODE']; ?></td>
+                        <td align="center"><?php echo $data['WARNA']; ?></td>
+                        <td><?php echo $data['PAYMENTMETHODCODE']; ?></td>
+                      </tr>
+                  <?php endif; ?>
+
+                  <?php $no++;
+                } ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  <?php } ?>
+  <div class="modal fade" id="modal_del" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content" style="margin-top:100px;">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" style="text-align:center;">Are you sure to delete all data ?</h4>
+        </div>
+
+        <div class="modal-footer" style="margin:0px; border-top:0px; text-align:center;">
+          <a href="#" class="btn btn-danger" id="delete_link">Delete</a>
+          <button type="button" class="btn btn-success" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="StsGKEdit" class="modal fade modal-3d-slit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    aria-hidden="true"></div>
+  <div id="DetailKirimKain" class="modal fade modal-3d-slit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    aria-hidden="true"></div>
+
+
+  <script type="text/javascript">
+    function confirm_delete(delete_url) {
+      $('#modal_del').modal('show', { backdrop: 'static' });
+      document.getElementById('delete_link').setAttribute('href', delete_url);
+    }
+  </script>
+
+
+  <script>
+    $(document).ready(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+
+  </script>
+</body>
+
+</html>

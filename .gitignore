@@ -1,2 +1,4 @@
 # koneksi.php
 dist/
+vendor_bkp/
+bower_components/
