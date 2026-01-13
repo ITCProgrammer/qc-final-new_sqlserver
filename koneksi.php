@@ -7,6 +7,17 @@ $db_name="TM";
 $connInfo = array( "Database"=>$db_name, "UID"=>$username, "PWD"=>$password);
 // $conn     = sqlsrv_connect( $host, $connInfo);
 
+// SQL Server: database db_qc (migrated from MySQL)
+$db_qc_host = "10.0.0.221";
+$db_qc_option = array(
+    "Database" => "db_qc",
+    "UID" => "sa",
+    "PWD" => "Ind@taichen2024",
+    "CharacterSet" => "UTF-8"
+);
+$con_db_qc_sqlsrv = sqlsrv_connect($db_qc_host, $db_qc_option);
+
+
 
 $hostname="10.0.0.21";
 $database = "NOWPRD";

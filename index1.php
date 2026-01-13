@@ -186,8 +186,9 @@ $page = strtolower($page);
                 <!-- Navbar Right Menu -->
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
-                        <?php $qryNCP = mysqli_query($con, "SELECT COUNT(*) as jml from tbl_ncp_qcf WHERE ISNULL(tgl_rencana) $Wdept AND status='Belum OK'");
-                        $rNCP = mysqli_fetch_array($qryNCP);
+                        <?php 
+                            $qryNCP = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) as jml from db_qc.tbl_ncp_qcf WHERE tgl_rencana IS NULL $Wdept AND status='Belum OK'");
+                            $rNCP = sqlsrv_fetch_array($qryNCP);
                         ?>
 
                         <!-- Notifications Menu -->
@@ -203,8 +204,8 @@ $page = strtolower($page);
                                 <li>
                                     <!-- Inner Menu: contains the notifications -->
                                     <ul class="menu">
-                                        <?php $qryNCP1 = mysqli_query($con, "SELECT no_ncp FROM tbl_ncp_qcf WHERE ISNULL(tgl_rencana) $Wdept AND status='Belum OK'");
-                                        while ($rNCP1 = mysqli_fetch_array($qryNCP1)) {
+                                        <?php $qryNCP1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT no_ncp FROM db_qc.tbl_ncp_qcf WHERE tgl_rencana IS NULL $Wdept AND status='Belum OK'");
+                                        while ($rNCP1 = sqlsrv_fetch_array($qryNCP1)) {
                                             ?>
                                             <li><!-- start notification -->
                                                 <a href="StatusNCP">
@@ -219,18 +220,17 @@ $page = strtolower($page);
                                 <li class="footer"><a href="StatusNCP">Tampil Semua</a></li>
                             </ul>
                         </li>
-                        <?php $qryNCP2 = mysqli_query($con, "SELECT
-                                                           
-                                                                    COUNT(*) AS jml 
-                                                                FROM
-                                                                    tbl_ncp_qcf 
-                                                                WHERE
-                                                                    NOT ISNULL( tgl_rencana ) $Wdept 
-                                                                    AND STATUS = 'Belum OK' 
-                                                                    AND (
-                                                                    penyelesaian = '' 
-                                                                    OR ISNULL( penyelesaian ))");
-                        $rNCP2 = mysqli_fetch_array($qryNCP2);
+                        <?php $qryNCP2 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) AS jml
+                                                            FROM db_qc.tbl_ncp_qcf
+                                                            WHERE tgl_rencana IS NOT NULL
+                                                            $Wdept
+                                                            AND status = 'Belum OK'
+                                                            AND (
+                                                                    penyelesaian IS NULL
+                                                                    OR penyelesaian = ''
+                                                            );
+                                                    ");
+                        $rNCP2 = sqlsrv_fetch_array($qryNCP2);
                         ?>
 
                         <!-- Tasks Menu -->
@@ -247,17 +247,17 @@ $page = strtolower($page);
                                 <li>
                                     <!-- Inner menu: contains the tasks -->
                                     <ul class="menu">
-                                        <?php $qryNCP3 = mysqli_query($con, "SELECT
-                                                                                    no_ncp 
-                                                                                FROM
-                                                                                    tbl_ncp_qcf 
-                                                                                WHERE
-                                                                                    NOT ISNULL( tgl_rencana ) $Wdept 
-                                                                                    AND STATUS = 'Belum OK' 
-                                                                                    AND (
-                                                                                    penyelesaian = '' 
-                                                                                    OR ISNULL( penyelesaian ))");
-                                        while ($rNCP3 = mysqli_fetch_array($qryNCP3)) {
+                                        <?php $qryNCP3 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT no_ncp
+                                                            FROM db_qc.tbl_ncp_qcf
+                                                            WHERE tgl_rencana IS NOT NULL
+                                                            $Wdept
+                                                            AND status = 'Belum OK'
+                                                            AND (
+                                                                    penyelesaian IS NULL
+                                                                    OR penyelesaian = ''
+                                                            );
+                                                        ");
+                                        while ($rNCP3 = sqlsrv_fetch_array($qryNCP3)) {
                                             ?>
                                             <li><!-- Task item -->
                                                 <a href="StatusNCP">
@@ -290,15 +290,16 @@ $page = strtolower($page);
                                 </li>
                             </ul>
                         </li>
-                        <?php $qryNCP4 = mysqli_query($con, "SELECT
-                                                                    COUNT(*) AS jml 
-                                                                FROM
-                                                                    tbl_ncp_qcf 
-                                                                WHERE
-                                                                    NOT ISNULL( tgl_rencana ) $Wdept 
-                                                                    AND STATUS = 'Belum OK' 
-                                                                    AND NOT penyelesaian = ''");
-                        $rNCP4 = mysqli_fetch_array($qryNCP4);
+                        <?php $qryNCP4 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
+                                            COUNT(*) AS jml 
+                                            FROM
+                                            db_qc.tbl_ncp_qcf 
+                                            WHERE
+                                            tgl_rencana IS NOT NULL
+                                            $Wdept
+                                            AND STATUS = 'Belum OK' 
+                                            AND NOT penyelesaian = ''");
+                        $rNCP4 = sqlsrv_fetch_array($qryNCP4);
                         ?>
                         <!-- Revisi Menu -->
                         <li class="dropdown tasks-menu">
@@ -314,15 +315,16 @@ $page = strtolower($page);
                                 <li>
                                     <!-- Inner menu: contains the tasks -->
                                     <ul class="menu">
-                                        <?php $qryNCP5 = mysqli_query($con, "SELECT
-                                                                                no_ncp 
-                                                                            FROM
-                                                                                tbl_ncp_qcf 
-                                                                            WHERE
-                                                                                NOT ISNULL( tgl_rencana ) $Wdept 
-                                                                                AND STATUS = 'Belum OK' 
-                                                                                AND NOT penyelesaian = ''");
-                                        while ($rNCP5 = mysqli_fetch_array($qryNCP5)) { ?>
+                                         <?php $qryNCP5 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
+                                                                    no_ncp
+                                                                    FROM
+                                                                    db_qc.tbl_ncp_qcf 
+                                                                    WHERE
+                                                                    tgl_rencana IS NOT NULL
+                                                                    $Wdept
+                                                                    AND STATUS = 'Belum OK' 
+                                                                    AND NOT penyelesaian = ''");
+                                        while ($rNCP5 = sqlsrv_fetch_array($qryNCP5)) { ?>
                                             <li><!-- Task item -->
                                                 <a href="#">
                                                     <!-- Task title and progress text -->
@@ -533,19 +535,15 @@ $page = strtolower($page);
                                             <span class="pull-right-container">
                                                 <?php
                                                 $delay = date('Y-m-d');
-                                                $sqldt = mysqli_query($con, "SELECT
-                                                                                    COUNT(*) AS cnt 
-                                                                                FROM
-                                                                                    tbl_tq_nokk a
-                                                                                    LEFT JOIN tbl_tq_test b ON a.id = b.id_nokk 
-                                                                                WHERE
-                                                                                    ( `status` = '' OR `status` IS NULL ) 
-                                                                                    AND tgl_masuk BETWEEN date_sub( now(), INTERVAL 30 DAY ) 
-                                                                                    AND now() 
-                                                                                    AND tgl_target < '$delay' 
-                                                                                ORDER BY
-                                                                                    no_test DESC");
-                                                $row = mysqli_fetch_array($sqldt);
+                                                $sqldt = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) AS cnt
+                                                            FROM db_qc.tbl_tq_nokk a
+                                                            LEFT JOIN db_qc.tbl_tq_test b
+                                                                ON a.id = b.id_nokk
+                                                            WHERE (b.status = '' OR b.status IS NULL)
+                                                            AND a.tgl_masuk BETWEEN DATEADD(DAY, -30, GETDATE())
+                                                                                AND GETDATE()
+                                                            AND a.tgl_target < '$delay'");
+                                                $row = sqlsrv_fetch_array($sqldt);
                                                 ?>
                                                 <small class="label pull-right bg-red"><?php echo $row['cnt']; ?></small>
                                             </span>
@@ -782,8 +780,15 @@ $page = strtolower($page);
                                         <span class="pull-right-container">
                                             <?php
                                             $delay = date('Y-m-d');
-                                            $sqldt = mysqli_query($con, "SELECT COUNT(*) AS cnt FROM tbl_tq_nokk a LEFT JOIN tbl_tq_test b ON a.id = b.id_nokk WHERE (`status` = '' OR `status` IS NULL) AND tgl_masuk BETWEEN date_sub(now(), INTERVAL 30 DAY) AND now() AND tgl_target < '$delay' ORDER BY no_test DESC");
-                                            $row = mysqli_fetch_array($sqldt);
+                                            $sqldt = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) AS cnt
+                                                            FROM db_qc.tbl_tq_nokk a
+                                                            LEFT JOIN db_qc.tbl_tq_test b
+                                                                ON a.id = b.id_nokk
+                                                            WHERE (b.status = '' OR b.status IS NULL)
+                                                            AND a.tgl_masuk BETWEEN DATEADD(DAY, -30, GETDATE())
+                                                                                AND GETDATE()
+                                                            AND a.tgl_target < '$delay'");
+                                            $row = sqlsrv_fetch_array($sqldt);
                                             ?>
                                             <small class="label pull-right bg-red"><?= $row['cnt']; ?></small>
                                         </span>
@@ -1545,14 +1550,14 @@ $page = strtolower($page);
                                         <span class="pull-right-container">
                                             <?php
                                             $today = date('Y-m-d');
-                                            $sqlrow = mysqli_query($con, "SELECT
+                                            $sqlrow = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
                                                                             COUNT(*) AS cnt 
                                                                         FROM
-                                                                            tbl_firstlot 
+                                                                            db_qc.tbl_firstlot 
                                                                         WHERE
                                                                             tgl_expired < '$today' 
-                                                                            AND tgl_expired != '0000-00-00'");
-                                            $r = mysqli_fetch_array($sqlrow);
+                                                                            AND tgl_expired IS NOT NULL");
+                                            $r = sqlsrv_fetch_array($sqlrow);
                                             ?>
                                             <small class="label pull-right bg-red"><?php echo $r['cnt']; ?></small>
                                         </span>
@@ -1565,8 +1570,8 @@ $page = strtolower($page);
                                             class="fa fa-file-text text-orange"></i> <span>Laporan Potong</span>
                                         <span class="pull-right-container">
                                             <?php
-                                            $sqlr = mysqli_query($con, "SELECT COUNT(*) as cnt FROM tbl_potong");
-                                            $r1 = mysqli_fetch_array($sqlr);
+                                            $sqlr = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) as cnt FROM db_qc.tbl_potong");
+                                            $r1 = sqlsrv_fetch_array($sqlr);
                                             ?>
                                             <small class="label pull-right bg-red"><?php echo $r1['cnt']; ?></small>
                                         </span>

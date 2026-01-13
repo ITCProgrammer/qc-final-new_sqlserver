@@ -124,36 +124,51 @@ include"koneksi.php";
 <?php
 if($_POST){ //login user
   extract($_POST);
-  $username = mysqli_real_escape_string($con,$_POST['username']);
-  $password = mysqli_real_escape_string($con,$_POST['password']);
-  $sql="SELECT * FROM user_login WHERE user='$username' AND password='$password' AND (dept = 'QC' OR dept = 'CQA' OR dept = 'MKT' OR dept = 'DYE' OR dept = 'FIN' OR dept = 'KNT' OR dept = 'BRS' OR dept = 'RMP' OR dept='PRO' OR dept='YND' OR dept='PRT' OR dept='KNT' OR dept='TAS' OR dept='PPC' OR dept='DMF' OR dept='LAB' OR dept='GAS' OR dept='GKG') LIMIT 1";
-  $query = mysqli_query($con,$sql) or die ("error: ".mysqli_error());;
-  $jml=mysqli_num_rows($query);
-  if($jml>0)
-  {
-  $_SESSION['usrid']=$username;
-  $_SESSION['pasid']=$password;
-  $r = mysqli_fetch_array($query);
-  $_SESSION['lvl_id']=$r['level'];
-  $_SESSION['status']=$r['status'];
-  $_SESSION['user_id']=$r['id'];
-  $_SESSION['mamber']=$r['mamber'];
-  $_SESSION['foto']=$r['foto'];
-  $_SESSION['dept']=$r['dept'];
-  $_SESSION['ket']=$r['ket'];
-  $_SESSION['akses']=$r['akses'];
-  $_SESSION['nama1']=$r['nama'];	  
-  //login_validate();
-    //echo "<script>window.location='index1.php?p=Home';</script>";
-	echo "<script>swal({
-  title: 'Login Success!!',
-  text: 'Click Ok to continue',
-  type: 'success',
-  }).then((result) => {
-  if (result.value) {
-    window.location='Home';
+  $username = $_POST['username'];
+  $password = $_POST['password'];
+
+$sql = "SELECT TOP 1 *
+  FROM db_qc.user_login
+  WHERE [user] = ?
+    AND [password] = ?
+    AND dept IN (
+      'QC','CQA','MKT','DYE','FIN','KNT','BRS','RMP','PRO',
+      'YND','PRT','TAS','PPC','DMF','LAB','GAS','GKG'
+    )
+  ";  
+  $params = [$username, $password];
+  $stmt = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+ 
+  if ($stmt === false) {
+      die(print_r(sqlsrv_errors(), true));
   }
-});</script>";
+
+  if(sqlsrv_has_rows($stmt))
+  {
+    $r = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+    
+    $_SESSION['usrid']=$username;
+    $_SESSION['pasid']=$password;
+    $_SESSION['lvl_id']=$r['level'];
+    $_SESSION['status']=$r['status'];
+    $_SESSION['user_id']=$r['id'];
+    $_SESSION['mamber']=$r['mamber'];
+    $_SESSION['foto']=$r['foto'];
+    $_SESSION['dept']=$r['dept'];
+    $_SESSION['ket']=$r['ket'];
+    $_SESSION['akses']=$r['akses'];
+    $_SESSION['nama1']=$r['nama'];	  
+    //login_validate();
+      //echo "<script>window.location='index1.php?p=Home';</script>";
+    echo "<script>swal({
+      title: 'Login Success!!',
+      text: 'Click Ok to continue',
+      type: 'success',
+      }).then((result) => {
+      if (result.value) {
+        window.location='Home';
+      }
+    });</script>";
 
   }else {
 	  // echo "<script>alert('Login Gagal!! $username');window.location='index.php';</script>";
@@ -166,18 +181,17 @@ if($_POST){ //login user
         });</script>";
   }
 
-}else
-if( $_GET['act']=="logout" ){ //logout user
-unset($_SESSION['usrid']);
-//echo "<script>window.location='index.php';</script>";
-echo "<script>swal({
-  title: 'You are Logged out!!',
-  text: 'Click Ok to redirect',
-  type: 'success',
-  }).then((result) => {
-  if (result.value) {
-    window.location='login';
-  }
-});</script>";
+}else if( $_GET['act']=="logout" ){ //logout user
+  unset($_SESSION['usrid']);
+  //echo "<script>window.location='index.php';</script>";
+  echo "<script>swal({
+    title: 'You are Logged out!!',
+    text: 'Click Ok to redirect',
+    type: 'success',
+    }).then((result) => {
+    if (result.value) {
+      window.location='login';
+    }
+  });</script>";
 }
 ?>

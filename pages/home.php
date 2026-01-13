@@ -2,11 +2,6 @@
 ini_set("error_reporting", 1);
 session_start();
 include "koneksi.php";
-// if (mysqli_connect_errno()) {
-// printf("Connect failed: %s\n", mysqli_connect_error());
-//    header("Refresh:3");
-// exit();
-// 
 ?>
 <?php
 //set base constant 
@@ -220,36 +215,80 @@ $page = strtolower($page);
                             <div class="info-box">
                                 <span class="info-box-icon bg-teal"><i class="fa fa-check"></i></span>
                                 <?php
-                                include('koneksi.php');
-                                //TIM A
-                                $sqldt = mysqli_query($con, "SELECT COUNT(*) AS jml_a FROM tbl_qcf WHERE sts_pbon='1' AND sts_aksi IS NULL AND 
-            (sales='Darien' OR sales='Gilang Kurnia' OR sales='Vany Leany' OR sales='Thania' OR sales='Viviani' OR sales='Heri' OR sales='Bunbun' OR sales='Frans' OR sales='Fransiska') AND 
-            DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '2021-01-01' AND NOW()
-            ");
-                                $row = mysqli_fetch_array($sqldt);
-                                //TIM B
-                                $sqldt1 = mysqli_query($con, "SELECT COUNT(*) AS jml_b FROM tbl_qcf WHERE sts_pbon='1' AND sts_aksi IS NULL AND 
-            (sales='Roni' OR sales='Deden' OR sales='Rangga Aditya' OR sales='Nia') AND 
-            DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '2021-01-01' AND NOW()
-            ");
-                                $row1 = mysqli_fetch_array($sqldt1);
-                                //TIM C
-                                $sqldt2 = mysqli_query($con, "SELECT COUNT(*) AS jml_c FROM tbl_qcf WHERE sts_pbon='1' AND sts_aksi IS NULL AND 
-            (sales='Ridwan' OR sales='Ikhsan Ikhwana' OR sales='Bambang' OR sales='Budiman' OR sales='Dennis' OR sales='Levia Zhuang' OR sales=' Kevin Noventin' OR sales='Fahrurrozi' OR sales='Richard' OR sales='Yohanes') AND 
-            DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '2021-01-01' AND NOW()
-            ");
-                                $row2 = mysqli_fetch_array($sqldt2);
+                                    include('koneksi.php');
+
+                                    //TIM A
+                                    $sqlTimA = "SELECT COUNT(*) AS jml
+                                        FROM tbl_qcf
+                                        WHERE sts_pbon = '1'
+                                        AND sts_aksi IS NULL
+                                        AND sales IN (
+                                            'Darien',
+                                            'Gilang Kurnia',
+                                            'Vany Leany',
+                                            'Thania',
+                                            'Viviani',
+                                            'Heri',
+                                            'Bunbun',
+                                            'Frans',
+                                            'Fransiska'
+                                        )
+                                        AND CAST(tgl_masuk AS DATE)
+                                            BETWEEN '2021-01-01' AND CAST(GETDATE() AS DATE)
+                                    ";
+                                    $stmtA = sqlsrv_query($con_db_qc_sqlsrv, $sqlTimA);
+                                    $rowA  = sqlsrv_fetch_array($stmtA, SQLSRV_FETCH_ASSOC);
+
+                                     //TIM B
+                                    $sqlTimB = "SELECT COUNT(*) AS jml_b
+                                        FROM db_qc.tbl_qcf
+                                        WHERE sts_pbon = '1'
+                                        AND sts_aksi IS NULL
+                                        AND sales IN (
+                                            'Roni',
+                                            'Deden',
+                                            'Rangga Aditya',
+                                            'Nia'
+                                        )
+                                        AND CAST(tgl_masuk AS DATE)
+                                            BETWEEN '2021-01-01' AND CAST(GETDATE() AS DATE)
+                                    ";
+                                    $stmtB = sqlsrv_query($con_db_qc_sqlsrv, $sqlTimB);
+                                    $rowB  = sqlsrv_fetch_array($stmtB, SQLSRV_FETCH_ASSOC);
+
+                                    //TIM C
+                                    $sqlTimC = "SELECT COUNT(*) AS jml_c
+                                        FROM db_qc.tbl_qcf
+                                        WHERE sts_pbon = '1'
+                                        AND sts_aksi IS NULL
+                                        AND sales IN (
+                                            'Ridwan',
+                                            'Ikhsan Ikhwana',
+                                            'Bambang',
+                                            'Budiman',
+                                            'Dennis',
+                                            'Levia Zhuang',
+                                            ' Kevin Noventin',
+                                            'Fahrurrozi',
+                                            'Richard',
+                                            'Yohanes'
+                                        )
+                                        AND CAST(tgl_masuk AS DATE)
+                                            BETWEEN '2021-01-01' AND CAST(GETDATE() AS DATE)
+                                    ";
+                                    $stmtC = sqlsrv_query($con_db_qc_sqlsrv, $sqlTimC);
+                                    $rowC  = sqlsrv_fetch_array($stmtC, SQLSRV_FETCH_ASSOC);
                                 ?>
                                 <div class="info-box-content">
                                     <span class="info-box-text">Bon Penghubung</span>
                                     <span class="label bg-red blink_me">Team A =
-                                        <?php echo $row['jml_a']; ?>
+                                        <?php echo $rowA['jml_a']; ?>
                                     </span><br>
                                     <span class="label bg-red blink_me">Team B =
-                                        <?php echo $row1['jml_b']; ?>
+                                        <?php echo $rowB['jml_b']; ?>
                                     </span><br>
                                     <span class="label bg-red blink_me">Team C =
-                                        <?php echo $row2['jml_c']; ?>
+                                        <?php echo $rowC['jml_c']; ?>
                                     </span>
                                 </div>
                                 <!-- /.info-box-content -->
@@ -419,10 +458,10 @@ $page = strtolower($page);
                             <div class="info-box-content">
                                 <span class="info-box-text">Approve Bon Penghubung</span>
                                 <span class="label bg-red blink_me">MARKETING =
-                                    <?php echo $row['jml_a']; ?>
+                                    <?php echo $rowA['jml_a']; ?>
                                 </span><br>
                                 <span class="label bg-red blink_me">PPC =
-                                    <?php echo $row1['jml_b']; ?>
+                                    <?php echo $rowB['jml_b']; ?>
                                 </span><br>
                             </div>
                             <!-- /.info-box-content -->
@@ -456,36 +495,80 @@ $page = strtolower($page);
                             <div class="info-box">
                                 <span class="info-box-icon bg-teal"><i class="fa fa-check"></i></span>
                                 <?php
-                                include('koneksi.php');
-                                //TIM A
-                                $sqldt = mysqli_query($con, "SELECT COUNT(*) AS jml_a FROM tbl_qcf WHERE sts_pbon='1' AND sts_aksi IS NULL AND 
-            (sales='Darien' OR sales='Gilang Kurnia' OR sales='Vany Leany' OR sales='Thania' OR sales='Viviani' OR sales='Heri' OR sales='Bunbun' OR sales='Frans' OR sales='Fransiska') AND 
-            DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '2021-01-01' AND NOW()
-            ");
-                                $row = mysqli_fetch_array($sqldt);
-                                //TIM B
-                                $sqldt1 = mysqli_query($con, "SELECT COUNT(*) AS jml_b FROM tbl_qcf WHERE sts_pbon='1' AND sts_aksi IS NULL AND 
-            (sales='Roni' OR sales='Deden' OR sales='Rangga Aditya' OR sales='Nia') AND 
-            DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '2021-01-01' AND NOW()
-            ");
-                                $row1 = mysqli_fetch_array($sqldt1);
-                                //TIM C
-                                $sqldt2 = mysqli_query($con, "SELECT COUNT(*) AS jml_c FROM tbl_qcf WHERE sts_pbon='1' AND sts_aksi IS NULL AND 
-            (sales='Ridwan' OR sales='Ikhsan Ikhwana' OR sales='Bambang' OR sales='Budiman' OR sales='Dennis' OR sales='Levia Zhuang' OR sales=' Kevin Noventin' OR sales='Fahrurrozi' OR sales='Richard' OR sales='Yohanes') AND 
-            DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '2021-01-01' AND NOW()
-            ");
-                                $row2 = mysqli_fetch_array($sqldt2);
-                                ?>
+                                    include('koneksi.php');
+
+                                    //TIM A
+                                    $sqlTimA = "SELECT COUNT(*) AS jml_a
+                                        FROM db_qc.tbl_qcf
+                                        WHERE sts_pbon = '1'
+                                        AND sts_aksi IS NULL
+                                        AND sales IN (
+                                            'Darien',
+                                            'Gilang Kurnia',
+                                            'Vany Leany',
+                                            'Thania',
+                                            'Viviani',
+                                            'Heri',
+                                            'Bunbun',
+                                            'Frans',
+                                            'Fransiska'
+                                        )
+                                        AND CAST(tgl_masuk AS DATE)
+                                            BETWEEN '2021-01-01' AND CAST(GETDATE() AS DATE)
+                                    ";
+                                    $stmtA = sqlsrv_query($con_db_qc_sqlsrv, $sqlTimA);
+                                    $rowA  = sqlsrv_fetch_array($stmtA, SQLSRV_FETCH_ASSOC);
+
+                                    //TIM B
+                                    $sqlTimB = "SELECT COUNT(*) AS jml_b
+                                        FROM db_qc.tbl_qcf
+                                        WHERE sts_pbon = '1'
+                                        AND sts_aksi IS NULL
+                                        AND sales IN (
+                                            'Roni',
+                                            'Deden',
+                                            'Rangga Aditya',
+                                            'Nia'
+                                        )
+                                        AND CAST(tgl_masuk AS DATE)
+                                            BETWEEN '2021-01-01' AND CAST(GETDATE() AS DATE)
+                                    ";
+                                    $stmtB = sqlsrv_query($con_db_qc_sqlsrv, $sqlTimB);
+                                    $rowB  = sqlsrv_fetch_array($stmtB, SQLSRV_FETCH_ASSOC);
+
+                                    //TIM C
+                                    $sqlTimC = "SELECT COUNT(*) AS jml_c
+                                        FROM db_qc.tbl_qcf
+                                        WHERE sts_pbon = '1'
+                                        AND sts_aksi IS NULL
+                                        AND sales IN (
+                                            'Ridwan',
+                                            'Ikhsan Ikhwana',
+                                            'Bambang',
+                                            'Budiman',
+                                            'Dennis',
+                                            'Levia Zhuang',
+                                            ' Kevin Noventin',
+                                            'Fahrurrozi',
+                                            'Richard',
+                                            'Yohanes'
+                                        )
+                                        AND CAST(tgl_masuk AS DATE)
+                                            BETWEEN '2021-01-01' AND CAST(GETDATE() AS DATE)
+                                    ";
+                                    $stmtC = sqlsrv_query($con_db_qc_sqlsrv, $sqlTimC);
+                                    $rowC  = sqlsrv_fetch_array($stmtC, SQLSRV_FETCH_ASSOC);
+                                ?>  
                                 <div class="info-box-content">
                                     <span class="info-box-text">Bon Penghubung</span>
                                     <span class="label bg-red blink_me">Team A =
-                                        <?php echo $row['jml_a']; ?>
+                                        <?php echo $rowA['jml_a']; ?>
                                     </span><br>
                                     <span class="label bg-red blink_me">Team B =
-                                        <?php echo $row1['jml_b']; ?>
+                                        <?php echo $rowB['jml_b']; ?>
                                     </span><br>
                                     <span class="label bg-red blink_me">Team C =
-                                        <?php echo $row2['jml_c']; ?>
+                                        <?php echo $rowC['jml_c']; ?>
                                     </span>
                                 </div>
                                 <!-- /.info-box-content -->
@@ -781,13 +864,22 @@ $page = strtolower($page);
                         <div class="info-box">
                             <span class="info-box-icon bg-red"><i class="fa fa-check-square-o"></i></span>
                             <?php
-                            include('koneksi.php');
-                            $delay = date('Y-m-d');
-                            $sqldt = mysqli_query($con, "SELECT COUNT(*) as cnt FROM tbl_tq_nokk a
-            LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk
-            WHERE (`status`='' or `status` IS NULL) AND DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN DATE_SUB(NOW(),INTERVAL 30 DAY) AND NOW() AND tgl_target < '$delay'
-            ");
-                            $row = mysqli_fetch_array($sqldt);
+                                include('koneksi.php');
+                                
+                                $delay = date('Y-m-d');
+                                $sqldt = "SELECT COUNT(*) AS cnt
+                                    FROM db_qc.tbl_tq_nokk a
+                                    LEFT JOIN db_qc.tbl_tq_test b ON a.id = b.id_nokk
+                                    WHERE (b.status = '' OR b.status IS NULL)
+                                    AND CAST(a.tgl_masuk AS DATE)
+                                        BETWEEN DATEADD(DAY, -30, CAST(GETDATE() AS DATE))
+                                            AND CAST(GETDATE() AS DATE)
+                                    AND a.tgl_target < ?
+                                ";
+                                $params = [$delay];
+                                $stmtdt = sqlsrv_query($con_db_qc_sqlsrv, $sqldt, $params);
+                                $row = sqlsrv_fetch_array($stmtdt, SQLSRV_FETCH_ASSOC);
+
                             ?>
                             <div class="info-box-content">
                                 <span class="info-box-text">Status Test Quality</span>
@@ -815,4 +907,3 @@ $page = strtolower($page);
 </body>
 
 </html>
-<?php mysqli_close($con); ?>
