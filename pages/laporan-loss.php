@@ -19,7 +19,7 @@ include "koneksi.php";
 
   $start_date = $Awal;
   $stop_date = $Akhir;
-  $Where = " DATE_FORMAT( tgl_update , '%Y-%m-%d') between '$start_date' and '$stop_date' and ";
+  $Where = " CAST(tgl_update AS DATE) BETWEEN '$start_date' AND '$stop_date' AND ";
   ?>
   <div class="row">
     <div class="col-xs-4">
@@ -120,21 +120,22 @@ include "koneksi.php";
               <?php
               $no = 1;
               if ($Awal != "" and $Akhir != "") {
-                $qry1 = mysqli_query($con, "SELECT * FROM tbl_lap_inspeksi WHERE $Where `dept`='PACKING' ORDER BY id ASC");
+                $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_lap_inspeksi WHERE $Where dept = 'PACKING' ORDER BY id ASC");
               } else {
-                $qry1 = mysqli_query($con, "SELECT * FROM tbl_lap_inspeksi WHERE $Where `dept`='PACKING' ORDER BY id ASC");
+                $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_lap_inspeksi WHERE $Where dept = 'PACKING' ORDER BY id ASC");
               }
-              while ($row1 = mysqli_fetch_array($qry1)) {
-                $qry2 = mysqli_query($con, "SELECT
+              while ($row1 = sqlsrv_fetch_array($qry1)) {
+                $qry2 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
                                             COUNT(DISTINCT a.personil) AS inspektor,
                                             SUM(a.qty) AS ACTUALINSPECT,
                                             SUM(b.qty_loss) AS QTY_LOSS
-                                            FROM tbl_inspection a
-                                            INNER JOIN tbl_schedule b ON a.id_schedule = b.id
-                                            INNER JOIN tbl_gerobak c ON c.id_schedule = b.id
+                                            FROM db_qc.tbl_inspection a
+                                            INNER JOIN db_qc.tbl_schedule b ON a.id_schedule = b.id
+                                            INNER JOIN db_qc.tbl_gerobak c ON c.id_schedule = b.id
                                             WHERE b.nodemand = '$row1[nodemand]' AND b.proses not LIKE '%Perbaikan%'
                                             GROUP BY  a.nokk, a.nodemand");
-                $row2 = mysqli_fetch_array($qry2);
+
+                $row2 = sqlsrv_fetch_array($qry2);
 
                 // $qry3 = db2_exec($conn1, "SELECT
                 //                               ORDERCODE AS DEMAND,
@@ -174,9 +175,9 @@ include "koneksi.php";
                   <!-- <td align="center"><?php echo $row['USEDBASEPRIMARYQUANTITY']; ?></td> QTY_BRUTO NOW -->
                   <td align="center"><?php echo $dt_qtyorder['QTY_ORDER']; ?></td> <!-- QTY_BRUTO NOW -->
                   <td align="center"><?= $row2['ACTUALINSPECT']; ?></td><!-- Qty Bruto dari inspect -->
-                  <td align="center"><?= $row2['QTY_LOSS']; ?></td> <!-- QTY LOS DARI tbl_schedule b  -->
+                  <td align="center"><?= number_format((float)($row2['QTY_LOSS'] ?? 0), 2, '.', ''); ?></td> <!-- QTY LOS DARI tbl_schedule b  -->
                   <td align="center"><?php echo $row1['netto']; ?></td> <!-- ACTUAL PACKING dari packing kolom “Netto” -->
-                  <td align="center"><?= $row1['qty_loss']; ?></td> <!-- LOSS PACKING dari packing kolom Loss(Kolom Kg) -->
+                  <td align="center"><?= number_format((float)($row1['qty_loss'] ?? 0), 2, '.', ''); ?></td> <!-- LOSS PACKING dari packing kolom Loss(Kolom Kg) -->
 
                 </tr>
               <?php $no++;

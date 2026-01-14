@@ -7,8 +7,10 @@ include_once "../bar128.php";
 //--
 $lotcode=$_GET['lotcode'];
 //-
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+    CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+    CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg;");
+$rTgl=sqlsrv_fetch_array($qTgl);
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
