@@ -195,22 +195,23 @@ if(strlen($jamAr)==5){
             //if($Item!=""){ $noitem=" AND `no_item` LIKE '%$Item%' ";}else{$noitem=" ";}
             //if($Hanger!=""){ $nohanger=" AND `no_hanger` LIKE '%$Hanger%' ";}else{$nohanger=" ";}
             //if($Warna!=""){ $wn=" AND `warna` LIKE '%$Warna%' ";}else{$wn=" ";}
-            if($Shift!="ALL"){ $shft=" AND `groupshift` LIKE '%$Shift%' ";}else{$shft=" ";}
-            if($PO!=""){ $nopo=" AND `no_po` LIKE '%$PO%' ";}else{$nopo=" ";}
-            if($Order!=""){ $noorder=" AND `no_order` LIKE '%$Order%' ";}else{$noorder=" ";}
+            if($Shift!="ALL"){ $shft=" AND groupshift LIKE '%$Shift%' ";}else{$shft=" ";}
+            if($PO!=""){ $nopo=" AND no_po LIKE '%$PO%' ";}else{$nopo=" ";}
+            if($Order!=""){ $noorder=" AND no_order LIKE '%$Order%' ";}else{$noorder=" ";}
             if($Awal!="" or $PO!="" or $Order!="" or $Shift!=""){
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_tempel_beda_roll WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' $nopo $noorder $shft ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_tempel_beda_roll WHERE CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' $nopo $noorder $shft ORDER BY id ASC");
             }else{
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_tempel_beda_roll WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' $nopo $noorder $shft ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_tempel_beda_roll WHERE CAST(tgl_update AS DATE) BETWEEN CAST('$Awal' AS DATE) AND CAST('$Akhir' AS DATE) $nopo $noorder $shft ORDER BY id ASC");
             }
-            while($row1=mysqli_fetch_array($qry1)){
+
+            while($row1=sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
           ?>
             <tr bgcolor="<?php echo $bgcolor; ?>">
               <td align="center"><?php echo $no; ?></td>
               <td align="center"><div class="btn-group">
               <a href="#" class="btn btn-danger btn-xs <?php if($_SESSION['akses']=='biasa' AND ($_SESSION['lvl_id']!='PACKING' OR $_SESSION['lvl_id']!='NCP')){ echo "disabled"; } ?>" onclick="confirm_delete('./HapusTempelBedaRoll-<?php echo $row1['id'] ?>');"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" title="Hapus"></i> </a>
               </div></td>
-              <td align="center"><?php echo substr($row1['tgl_update'],0,10);?></td>
+              <td align="center"><?php echo date_format($row1['tgl_update'], 'Y-m-d');?></td>
               <td align="center"><?php echo $row1['shift'];?></td>
               <td align="center"><?php echo $row1['groupshift'];?></td>
               <td align="center"><?php echo $row1['nokk'];?></td>
