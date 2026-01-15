@@ -357,13 +357,11 @@ $stmt1 = db2_exec($conn1, $sqlDB21, array('cursor' => DB2_SCROLLABLE));
 $rowdb21 = db2_fetch_assoc($stmt1);
 
 //Data sudah disimpan di database sqlserver
-$msql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_lap_jahit_shading WHERE demand = '$demand' and shift ='$_GET[shift]' 
+$msql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_jahit_shading WHERE demand = '$demand' and shift ='$_GET[shift]' 
     AND CAST(tgl_update AS DATE) = CAST('$today' AS DATE)");
 $row = sqlsrv_fetch_array($msql, SQLSRV_FETCH_ASSOC);
 
-$csql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) FROM db_qc.tbl_lap_jahit_shading WHERE demand = '$demand' and shift ='$_GET[shift]' 
-    AND CAST(tgl_update AS DATE) = CAST('$today' AS DATE)");
-$crow = sqlsrv_fetch_array($csql, SQLSRV_FETCH_ASSOC);
+$crow = $row['total_rows'];
 
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">

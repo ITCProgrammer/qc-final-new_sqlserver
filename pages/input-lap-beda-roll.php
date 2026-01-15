@@ -61,21 +61,22 @@
 if($_GET['nodemand']!=""){$nodemand=$_GET['nodemand'];}else{$nodemand=" ";}
 if($_GET['shift']!=""){$shift=$_GET['shift'];}else{$shift=" ";}
 if($_GET['gshift']!=""){$gshift=$_GET['gshift'];}else{$gshift=" ";}
+$today = date("Y-m-d");
 
-//Data sudah disimpan di database mysqli
-$msql=mysqli_query($con,"SELECT * FROM `tbl_lap_beda_roll` WHERE `nodemand`='$nodemand' and `shift`='$_GET[shift]' and `groupshift`='$_GET[gshift]' AND DATE_FORMAT(tgl_update, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d')");
-$row=mysqli_fetch_array($msql);
-$crow=mysqli_num_rows($msql);
+//Data sudah disimpan di database sqlserver
+$msql   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_beda_roll WHERE nodemand='$nodemand' and shift='$_GET[shift]' and groupshift='$_GET[gshift]' AND CAST(tgl_update AS DATE) = CAST('$today' AS DATE)");
+$row    = sqlsrv_fetch_array($msql);
+$crow   = $row['total_rows'];
 
-//Data sudah disimpan di database mysqli
-$msql1=mysqli_query($con,"SELECT * FROM `tbl_lap_beda_roll` WHERE `nodemand`='$nodemand' and `shift`='$_GET[shift]' and `groupshift`='$_GET[gshift]'");
-$row1=mysqli_fetch_array($msql1);
-$crow1=mysqli_num_rows($msql1);
+//Data sudah disimpan di database sqlserver
+$msql1  = sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_beda_roll WHERE nodemand='$nodemand' and shift='$_GET[shift]' and groupshift='$_GET[gshift]'");
+$row1   = sqlsrv_fetch_array($msql1);
+$crow1  = $row1['total_rows'];
 
-//Data sudah disimpan di database mysqli
-$qryfin=mysqli_query($con,"SELECT * FROM `tbl_lap_beda_roll` WHERE `nodemand`='$nodemand' ORDER BY id DESC");
-$rfin=mysqli_fetch_array($qryfin);
-$cekfin=mysqli_num_rows($qryfin);
+//Data sudah disimpan di database sqlserver
+$qryfin = sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_beda_roll WHERE nodemand='$nodemand' ORDER BY id DESC");
+$rfin   = sqlsrv_fetch_array($qryfin);
+$cekfin = $rfin['total_rows'];
 
 
 $sqlDB2="SELECT A.CODE AS DEMANDNO, TRIM(B.PRODUCTIONORDERCODE) AS PRODUCTIONORDERCODE, TRIM(E.LEGALNAME1) AS LEGALNAME1, TRIM(C.ORDERPARTNERBRANDCODE) AS ORDERPARTNERBRANDCODE, TRIM(C.BUYER) AS BUYER,
@@ -321,8 +322,8 @@ $rowr = db2_fetch_assoc($stmt1);
                                     <select class="form-control select2" name="operator" id="operator">
                                         <option value="">Pilih</option>
                                         <?php 
-                                        $qryo=mysqli_query($con,"SELECT nama FROM tbl_operator ORDER BY nama ASC");
-                                        while($ro=mysqli_fetch_array($qryo)){
+                                        $qryo = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_operator ORDER BY nama ASC");
+                                        while ($ro = sqlsrv_fetch_array($qryo)) {
                                         ?>
                                         <option value="<?php echo $ro['nama'];?>" <?php if($row['operator']==$ro['nama']){echo "SELECTED";}?>><?php echo $ro['nama'];?></option>	
                                         <?php }?>
@@ -417,85 +418,110 @@ include"koneksi.php";
 ini_set("error_reporting", 1);
 if(isset($_POST['simpan']))
 {
-	$ceksql=mysqli_query($con,"SELECT * FROM `tbl_lap_beda_roll` WHERE `nodemand`='$_GET[nodemand]' and `shift`='$_POST[shift]' and `groupshift`='$_POST[groupshift]' AND DATE_FORMAT(tgl_update, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d') LIMIT 1");
-    $cek=mysqli_num_rows($ceksql);
-	if($cek>0){
-    $pelanggan=str_replace("'","''",$_POST['pelanggan']);
-    $order=str_replace("'","''",$_POST['no_order']);
-    $jns=str_replace("'","''",$_POST['jenis_kain']);
-    $warna=str_replace("'","''",$_POST['warna']);
-    $no_warna=str_replace("'","''",$_POST['no_warna']);
-    $comment=str_replace("'","''",$_POST['comment']);
-	$sql1=mysqli_query($con,"UPDATE`tbl_lap_beda_roll` SET
-	`no_order`='$order',
-    `no_item`='$_POST[no_item]',
-    `no_hanger`='$_POST[no_hanger]',
-    `no_po`='$_POST[no_po]',
-	`pelanggan`='$pelanggan',
-	`jenis_kain`='$jns',
-	`warna`='$warna',
-    `no_warna`='$no_warna',
-	`lot`='$_POST[lot]',
-	`groupshift`='$_POST[groupshift]',
-	`bruto`='$_POST[bruto]',
-	`roll_inspek`='$_POST[roll_inspek]',
-    `operator`='$_POST[operator]',
-    `lebar`='$_POST[lebar]',
-    `gramasi`='$_POST[gramasi]',
-    `tgl_update`=now(),
-    `ip`='$_SERVER[REMOTE_ADDR]',
-    `comment`='$_POST[comment]',
-    `lot_legacy`='$_POST[lot_legacy]',
-    `kk_legacy`='$_POST[kk_legacy]'
-	WHERE `nodemand`='$_POST[nodemand]' and `shift`='$_POST[shift]' and groupshift='$_POST[groupshift]'");
-	if($sql1){
-        //echo " <script>alert('Data has been updated!');</script>";
-        echo "<script>swal({
-            title: 'Data has been updated!',   
-            text: 'Klik Ok untuk input data kembali',
-            type: 'success',
-            }).then((result) => {
-            if (result.value) {
-                window.location.href='InputLapBedaRoll&$_POST[nodemand]';
-               
-            }
-          });</script>";
-		}
-		}
+	$ceksql = sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM  db_qc.tbl_lap_beda_roll  WHERE  nodemand ='$_GET[nodemand]' and  shift ='$_POST[shift]' and  groupshift ='$_POST[groupshift]' AND CAST(tgl_update AS DATE) = CAST('$today' AS DATE)");
+    $cek    = sqlsrv_fetch_array($ceksql) ? 1 : 0;
+	if($cek > 0){
+        $pelanggan=str_replace("'","''",$_POST['pelanggan']);
+        $order=str_replace("'","''",$_POST['no_order']);
+        $jns=str_replace("'","''",$_POST['jenis_kain']);
+        $warna=str_replace("'","''",$_POST['warna']);
+        $no_warna=str_replace("'","''",$_POST['no_warna']);
+        $comment=str_replace("'","''",$_POST['comment']);
+        $sql1=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_lap_beda_roll SET
+            no_order        = '$order',
+            no_item         = '$_POST[no_item]',
+            no_hanger       = '$_POST[no_hanger]',
+            no_po           = '$_POST[no_po]',
+            pelanggan       = '$pelanggan',
+            jenis_kain      = '$jns',
+            warna           = '$warna',
+            no_warna        = '$no_warna',
+            lot             = '$_POST[lot]',
+            groupshift      = '$_POST[groupshift]',
+            bruto           = '$_POST[bruto]',
+            roll_inspek     = '$_POST[roll_inspek]',
+            operator        = '$_POST[operator]',
+            lebar           = '$_POST[lebar]',
+            gramasi         = '$_POST[gramasi]',
+            tgl_update      = GETDATE(),
+            ip              = '$_SERVER[REMOTE_ADDR]',
+            comment         = '$_POST[comment]',
+            lot_legacy      = '$_POST[lot_legacy]',
+            kk_legacy       = '$_POST[kk_legacy]'
+        WHERE nodemand = '$_POST[nodemand]' and shift = '$_POST[shift]' and groupshift = '$_POST[groupshift]'");
+        if($sql1){
+            //echo " <script>alert('Data has been updated!');</script>";
+            echo "<script>swal({
+                title: 'Data has been updated!',   
+                text: 'Klik Ok untuk input data kembali',
+                type: 'success',
+                }).then((result) => {
+                if (result.value) {
+                    window.location.href='InputLapBedaRoll&$_POST[nodemand]';
+                
+                }
+            });</script>";
+        }
+    }
     else{
-    $pelanggan=str_replace("'","''",$_POST['pelanggan']);
-    $order=str_replace("'","''",$_POST['no_order']);
-    $jns=str_replace("'","''",$_POST['jenis_kain']);
-    $po=str_replace("'","''",$_POST['no_po']);
-    $warna=str_replace("'","''",$_POST['warna']);
-    $no_warna=str_replace("'","''",$_POST['no_warna']);
-    $catatan=str_replace("'","''",$_POST['catatan']);
-	$sql=mysqli_query($con,"INSERT INTO `tbl_lap_beda_roll` SET
-	`nokk`='$_POST[nokk]',
-    `nodemand`='$_POST[nodemand]',
-	`no_order`='$order',
-    `no_item`='$_POST[no_item]',
-    `no_hanger`='$_POST[no_hanger]',
-    `no_po`='$po',
-	`pelanggan`='$pelanggan',
-	`jenis_kain`='$jns',
-	`warna`='$warna',
-    `no_warna`='$no_warna',
-	`lot`='$_POST[lot]',
-    `shift`='$_POST[shift]',
-	`groupshift`='$_POST[groupshift]',
-	`bruto`='$_POST[bruto]',
-	`roll_inspek`='$_POST[roll_inspek]',
-    `operator`='$_POST[operator]',
-    `lebar`='$_POST[lebar]',
-    `gramasi`='$_POST[gramasi]',
-    `comment`='$_POST[comment]',
-    `lot_legacy`='$_POST[lot_legacy]',
-    `kk_legacy`='$_POST[kk_legacy]',
-    `tgl_update`=now(),
-    `tgl_buat`=now(),
-    `ip`='$_SERVER[REMOTE_ADDR]'");
-
+        $pelanggan=str_replace("'","''",$_POST['pelanggan']);
+        $order=str_replace("'","''",$_POST['no_order']);
+        $jns=str_replace("'","''",$_POST['jenis_kain']);
+        $po=str_replace("'","''",$_POST['no_po']);
+        $warna=str_replace("'","''",$_POST['warna']);
+        $no_warna=str_replace("'","''",$_POST['no_warna']);
+        $catatan=str_replace("'","''",$_POST['catatan']);
+        $sql=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_lap_beda_roll (
+            nokk,
+            nodemand,
+            no_order,
+            no_item,
+            no_hanger,
+            no_po,
+            pelanggan,
+            jenis_kain,
+            warna,
+            no_warna,
+            lot,
+            shift,
+            groupshift,
+            bruto,
+            roll_inspek,
+            operator,
+            lebar,
+            gramasi,
+            comment,
+            lot_legacy,
+            kk_legacy,
+            tgl_update,
+            tgl_buat,
+            ip
+        ) VALUES (
+            '$_POST[nokk]',
+            '$_POST[nodemand]',
+            '$order',
+            '$_POST[no_item]',
+            '$_POST[no_hanger]',
+            '$po',
+            '$pelanggan',
+            '$jns',
+            '$warna',
+            '$no_warna',
+            '$_POST[lot]',
+            '$_POST[shift]',
+            '$_POST[groupshift]',
+            '$_POST[bruto]',
+            '$_POST[roll_inspek]',
+            '$_POST[operator]',
+            '$_POST[lebar]',
+            '$_POST[gramasi]',
+            '$_POST[comment]',
+            '$_POST[lot_legacy]',
+            '$_POST[kk_legacy]',
+            GETDATE(),
+            GETDATE(),
+            '$_SERVER[REMOTE_ADDR]'
+        )");
         $sqlIn="SELECT ELEMENTSINSPECTION.ELEMENTCODE
         FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
         WHERE ELEMENTSINSPECTION.DEMANDCODE = '$nodemand' AND LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))= 11 ORDER BY ELEMENTSINSPECTION.ELEMENTCODE ASC";
@@ -509,111 +535,202 @@ if(isset($_POST['simpan']))
             $idcek5	= $_POST['cek5'][$no];
             $idcek6	= $_POST['cek6'][$no];
             $idcek7	= $_POST['cek7'][$no];
-            if($idcek1!=""){	
+            if($idcek1!=""){
                 $element	= trim($rI['ELEMENTCODE']);
                 $nodemand	= $_POST['nodemand'];
-                $sqlInsert=mysqli_query($con,"INSERT INTO tbl_detail_beda_roll SET
-                `element`='$element',
-                `nodemand`='$nodemand',
-                `red`='1',
-                `green`='0',
-                `blue`='0',
-                `yellow`='0',
-                `beda_roll`='0',
-                `ujung_beda`='0',
-                `ok`='0',
-                `tgl_buat`=now()");
-                }
+                $sqlInsert=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_detail_beda_roll (
+                        element,
+                        nodemand,
+                        red,
+                        green,
+                        blue,
+                        yellow,
+                        beda_roll,
+                        ujung_beda,
+                        ok,
+                        tgl_buat
+                    ) VALUES (
+                        '$element',
+                        '$nodemand',
+                        '1',
+                        '0',
+                        '0',
+                        '0',
+                        '0',
+                        '0',
+                        '0',
+                        GETDATE()
+                    )
+                ");
+            }
             if($idcek2!=""){	
-                    $element	= trim($rI['ELEMENTCODE']);
-                    $nodemand	= $_POST['nodemand'];
-                    $sqlInsert=mysqli_query($con,"INSERT INTO tbl_detail_beda_roll SET
-                    `element`='$element',
-                    `nodemand`='$nodemand',
-                    `red`='0',
-                    `green`='1',
-                    `blue`='0',
-                    `yellow`='0',
-                    `beda_roll`='0',
-                    `ujung_beda`='0',
-                    `ok`='0',
-                    `tgl_buat`=now()");
-                }
+                $element	= trim($rI['ELEMENTCODE']);
+                $nodemand	= $_POST['nodemand'];
+                $sqlInsert=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_detail_beda_roll (
+                        element,
+                        nodemand,
+                        red,
+                        green,
+                        blue,
+                        yellow,
+                        beda_roll,
+                        ujung_beda,
+                        ok,
+                        tgl_buat
+                    ) VALUES (
+                        '$element',
+                        '$nodemand',
+                        '0',
+                        '1',
+                        '0',
+                        '0',
+                        '0',
+                        '0',
+                        '0',
+                        GETDATE()
+                    )
+                ");
+            }
             if($idcek3!=""){	
-                    $element	= trim($rI['ELEMENTCODE']);
-                    $nodemand	= $_POST['nodemand'];
-                    $sqlInsert=mysqli_query($con,"INSERT INTO tbl_detail_beda_roll SET
-                    `element`='$element',
-                    `nodemand`='$nodemand',
-                    `red`='0',
-                    `green`='0',
-                    `blue`='1',
-                    `yellow`='0',
-                    `beda_roll`='0',
-                    `ujung_beda`='0',
-                    `ok`='0',
-                    `tgl_buat`=now()");
-                }
+                $element	= trim($rI['ELEMENTCODE']);
+                $nodemand	= $_POST['nodemand'];
+                $sqlInsert=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_detail_beda_roll (
+                        element,
+                        nodemand,
+                        red,
+                        green,
+                        blue,
+                        yellow,
+                        beda_roll,
+                        ujung_beda,
+                        ok,
+                        tgl_buat
+                    ) VALUES (
+                        '$element',
+                        '$nodemand',
+                        '0',
+                        '0',
+                        '1',
+                        '0',
+                        '0',
+                        '0',
+                        '0',
+                        GETDATE()
+                    )
+                ");
+            }
             if($idcek4!=""){	
-                    $element	= trim($rI['ELEMENTCODE']);
-                    $nodemand	= $_POST['nodemand'];
-                    $sqlInsert=mysqli_query($con,"INSERT INTO tbl_detail_beda_roll SET
-                    `element`='$element',
-                    `nodemand`='$nodemand',
-                    `red`='0',
-                    `green`='0',
-                    `blue`='0',
-                    `yellow`='1',
-                    `beda_roll`='0',
-                    `ujung_beda`='0',
-                    `ok`='0',
-                    `tgl_buat`=now()");
-                }
+                $element	= trim($rI['ELEMENTCODE']);
+                $nodemand	= $_POST['nodemand'];
+                $sqlInsert=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_detail_beda_roll (
+                        element,
+                        nodemand,
+                        red,
+                        green,
+                        blue,
+                        yellow,
+                        beda_roll,
+                        ujung_beda,
+                        ok,
+                        tgl_buat
+                    ) VALUES (
+                        '$element',
+                        '$nodemand',
+                        '0',
+                        '0',
+                        '0',
+                        '1',
+                        '0',
+                        '0',
+                        '0',
+                        GETDATE()
+                    )
+                ");
+            }
             if($idcek5!=""){	
-                    $element	= trim($rI['ELEMENTCODE']);
-                    $nodemand	= $_POST['nodemand'];
-                    $sqlInsert=mysqli_query($con,"INSERT INTO tbl_detail_beda_roll SET
-                    `element`='$element',
-                    `nodemand`='$nodemand',
-                    `red`='0',
-                    `green`='0',
-                    `blue`='0',
-                    `yellow`='0',
-                    `beda_roll`='1',
-                    `ujung_beda`='0',
-                    `ok`='0',
-                    `tgl_buat`=now()");
-                }
+                $element	= trim($rI['ELEMENTCODE']);
+                $nodemand	= $_POST['nodemand'];
+                $sqlInsert=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_detail_beda_roll (
+                        element,
+                        nodemand,
+                        red,
+                        green,
+                        blue,
+                        yellow,
+                        beda_roll,
+                        ujung_beda,
+                        ok,
+                        tgl_buat
+                    ) VALUES (
+                        '$element',
+                        '$nodemand',
+                        '0',
+                        '0',
+                        '0',
+                        '0',
+                        '1',
+                        '0',
+                        '0',
+                        GETDATE()
+                    )
+                ");
+            }
             if($idcek6!=""){	
-                    $element	= trim($rI['ELEMENTCODE']);
-                    $nodemand	= $_POST['nodemand'];
-                    $sqlInsert=mysqli_query($con,"INSERT INTO tbl_detail_beda_roll SET
-                    `element`='$element',
-                    `nodemand`='$nodemand',
-                    `red`='0',
-                    `green`='0',
-                    `blue`='0',
-                    `yellow`='0',
-                    `beda_roll`='0',
-                    `ujung_beda`='1',
-                    `ok`='0',
-                    `tgl_buat`=now()");
-                }
+                $element	= trim($rI['ELEMENTCODE']);
+                $nodemand	= $_POST['nodemand'];
+                $sqlInsert=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_detail_beda_roll (
+                        element,
+                        nodemand,
+                        red,
+                        green,
+                        blue,
+                        yellow,
+                        beda_roll,
+                        ujung_beda,
+                        ok,
+                        tgl_buat
+                    ) VALUES (
+                        '$element',
+                        '$nodemand',
+                        '0',
+                        '0',
+                        '0',
+                        '0',
+                        '0',
+                        '1',
+                        '0',
+                        GETDATE()
+                    )
+                ");
+            }
             if($idcek7!=""){	
-                    $element	= trim($rI['ELEMENTCODE']);
-                    $nodemand	= $_POST['nodemand'];
-                    $sqlInsert=mysqli_query($con,"INSERT INTO tbl_detail_beda_roll SET
-                    `element`='$element',
-                    `nodemand`='$nodemand',
-                    `red`='0',
-                    `green`='0',
-                    `blue`='0',
-                    `yellow`='0',
-                    `beda_roll`='0',
-                    `ujung_beda`='0',
-                    `ok`='1',
-                    `tgl_buat`=now()");
-                }
+                $element	= trim($rI['ELEMENTCODE']);
+                $nodemand	= $_POST['nodemand'];
+                $sqlInsert=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_detail_beda_roll (
+                        element,
+                        nodemand,
+                        red,
+                        green,
+                        blue,
+                        yellow,
+                        beda_roll,
+                        ujung_beda,
+                        ok,
+                        tgl_buat
+                    ) VALUES (
+                        '$element',
+                        '$nodemand',
+                        '0',
+                        '0',
+                        '0',
+                        '0',
+                        '0',
+                        '0',
+                        '1',
+                        GETDATE()
+                    )
+                ");
+            }
             $no++;
         }
 	if($sql){
@@ -664,8 +781,7 @@ if(isset($_POST['simpan']))
 <?php 
 if($_POST['simpan_operator']=="Simpan"){
 	$nama=strtoupper($_POST['operator']);
-	$sqlData1=mysqli_query($con,"INSERT INTO tbl_operator SET 
-		  nama='$nama'");
+    $sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_operator (nama) VALUES ('$nama');");
 	if($sqlData1){	
 	echo "<script>swal({
   title: 'Data Telah Tersimpan',   

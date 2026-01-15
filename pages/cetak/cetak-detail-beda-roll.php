@@ -11,14 +11,16 @@ $act=$_GET['g'];
 $Demand=$_GET['demand'];
 $Tgl=$_GET['tgl'];
 $id=$_GET['id'];
-$qry1=mysqli_query($con,"SELECT * FROM tbl_lap_beda_roll WHERE id='$id'");
-$row1=mysqli_fetch_array($qry1);
+$qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_lap_beda_roll WHERE id='$id'");
+$row1=sqlsrv_fetch_array($qry1);
 
-$qryd=mysqli_query($con,"SELECT * FROM tbl_detail_beda_roll WHERE nodemand='$Demand' and DATE_FORMAT(tgl_buat,'%Y-%m-%d') ='$Tgl'");
-$rowd=mysqli_fetch_array($qryd);
+$qryd=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and CAST(tgl_buat AS DATE) = '$Tgl'");
+$rowd=sqlsrv_fetch_array($qryd);
 
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+            CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg;");
+$rTgl   = sqlsrv_fetch_array($qTgl);
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -147,38 +149,38 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
 <?php 
 
   //KOLOM 1
-  $sqldtl1=mysqli_query($con,"SELECT * FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and DATE_FORMAT(tgl_buat,'%Y-%m-%d') ='$Tgl' ORDER BY element ASC LIMIT 0,40");
+  $sqldtl1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and CAST(tgl_buat AS DATE) ='$Tgl' ORDER BY element ASC OFFSET 0 ROWS FETCH NEXT 40 ROWS ONLY");
 
   //KOLOM 2
-  $sqldtl2=mysqli_query($con,"SELECT * FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and DATE_FORMAT(tgl_buat,'%Y-%m-%d') ='$Tgl' ORDER BY element ASC LIMIT 40,40");
+  $sqldtl2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and CAST(tgl_buat AS DATE) ='$Tgl' ORDER BY element ASC OFFSET 40 ROWS FETCH NEXT 40 ROWS ONLY");
 
   //KOLOM 3
-  $sqldtl3=mysqli_query($con,"SELECT * FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and DATE_FORMAT(tgl_buat,'%Y-%m-%d') ='$Tgl' ORDER BY element ASC LIMIT 80,40");
+  $sqldtl3=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and CAST(tgl_buat AS DATE) ='$Tgl' ORDER BY element ASC OFFSET 80 ROWS FETCH NEXT 40 ROWS ONLY");
 
   //KOLOM 4
-  $sqldtl4=mysqli_query($con,"SELECT * FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and DATE_FORMAT(tgl_buat,'%Y-%m-%d') ='$Tgl' ORDER BY element ASC LIMIT 120,40");
+  $sqldtl4=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and CAST(tgl_buat AS DATE) ='$Tgl' ORDER BY element ASC OFFSET 120 ROWS FETCH NEXT 40 ROWS ONLY");
 
   //Red
-  $sqlred=mysqli_query($con,"SELECT count(*) as jml_red FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and DATE_FORMAT(tgl_buat,'%Y-%m-%d') ='$Tgl' AND red ='1'");
-  $rred= mysqli_fetch_array($sqlred);
+  $sqlred=sqlsrv_query($con_db_qc_sqlsrv,"SELECT count(*) as jml_red FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and CAST(tgl_buat AS DATE) ='$Tgl' AND red ='1'");
+  $rred= sqlsrv_fetch_array($sqlred);
   //Green
-  $sqlgreen=mysqli_query($con,"SELECT count(*) as jml_green FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and DATE_FORMAT(tgl_buat,'%Y-%m-%d') ='$Tgl' AND green ='1'");
-  $rgreen= mysqli_fetch_array($sqlgreen);
+  $sqlgreen=sqlsrv_query($con_db_qc_sqlsrv,"SELECT count(*) as jml_green FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and CAST(tgl_buat AS DATE) ='$Tgl' AND green ='1'");
+  $rgreen= sqlsrv_fetch_array($sqlgreen);
   //Blue
-  $sqlblue=mysqli_query($con,"SELECT count(*) as jml_blue FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and DATE_FORMAT(tgl_buat,'%Y-%m-%d') ='$Tgl' AND blue ='1'");
-  $rblue= mysqli_fetch_array($sqlblue);
+  $sqlblue=sqlsrv_query($con_db_qc_sqlsrv,"SELECT count(*) as jml_blue FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and CAST(tgl_buat AS DATE) ='$Tgl' AND blue ='1'");
+  $rblue= sqlsrv_fetch_array($sqlblue);
   //Yellow
-  $sqlyellow=mysqli_query($con,"SELECT count(*) as jml_yellow FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and DATE_FORMAT(tgl_buat,'%Y-%m-%d') ='$Tgl' AND yellow ='1'");
-  $ryellow= mysqli_fetch_array($sqlyellow);
+  $sqlyellow=sqlsrv_query($con_db_qc_sqlsrv,"SELECT count(*) as jml_yellow FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and CAST(tgl_buat AS DATE) ='$Tgl' AND yellow ='1'");
+  $ryellow= sqlsrv_fetch_array($sqlyellow);
   //Beda Roll
-  $sqlbr=mysqli_query($con,"SELECT count(*) as jml_br FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and DATE_FORMAT(tgl_buat,'%Y-%m-%d') ='$Tgl' AND beda_roll ='1'");
-  $rbr= mysqli_fetch_array($sqlbr);
+  $sqlbr=sqlsrv_query($con_db_qc_sqlsrv,"SELECT count(*) as jml_br FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and CAST(tgl_buat AS DATE) ='$Tgl' AND beda_roll ='1'");
+  $rbr= sqlsrv_fetch_array($sqlbr);
   //Ujung Beda
-  $sqlub=mysqli_query($con,"SELECT count(*) as jml_ub FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and DATE_FORMAT(tgl_buat,'%Y-%m-%d') ='$Tgl' AND ujung_beda ='1'");
-  $rub= mysqli_fetch_array($sqlub);
+  $sqlub=sqlsrv_query($con_db_qc_sqlsrv,"SELECT count(*) as jml_ub FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and CAST(tgl_buat AS DATE) ='$Tgl' AND ujung_beda ='1'");
+  $rub= sqlsrv_fetch_array($sqlub);
   //Ok
-  $sqlok=mysqli_query($con,"SELECT count(*) as jml_ok FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and DATE_FORMAT(tgl_buat,'%Y-%m-%d') ='$Tgl' AND ok ='1'");
-  $rok= mysqli_fetch_array($sqlok);
+  $sqlok=sqlsrv_query($con_db_qc_sqlsrv,"SELECT count(*) as jml_ok FROM db_qc.tbl_detail_beda_roll WHERE nodemand='$Demand' and CAST(tgl_buat AS DATE) ='$Tgl' AND ok ='1'");
+  $rok= sqlsrv_fetch_array($sqlok);
 ?>
 <table width="100%" border="0">
     <thead>
@@ -228,7 +230,7 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
                 </thead>
                 <tbody>
                     <?php 
-                    while($rdtl1= mysqli_fetch_array($sqldtl1)){
+                    while($rdtl1= sqlsrv_fetch_array($sqldtl1)){
                     ?>
                     <tr>
                         <td align="center" style="border-bottom:1px #000000 solid;
@@ -312,7 +314,7 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
                 </thead>
                 <tbody>
                     <?php 
-                    while($rdtl2= mysqli_fetch_array($sqldtl2)){
+                    while($rdtl2= sqlsrv_fetch_array($sqldtl2)){
                     ?>
                     <tr>
                         <td align="center" style="border-bottom:1px #000000 solid;
@@ -396,7 +398,7 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
                 </thead>
                 <tbody>
                     <?php 
-                    while($rdtl3= mysqli_fetch_array($sqldtl3)){
+                    while($rdtl3= sqlsrv_fetch_array($sqldtl3)){
                     ?>
                     <tr>
                         <td align="center" style="border-bottom:1px #000000 solid;
@@ -480,7 +482,7 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
                 </thead>
                 <tbody>
                     <?php 
-                    while($rdtl4= mysqli_fetch_array($sqldtl4)){
+                    while($rdtl4= sqlsrv_fetch_array($sqldtl4)){
                     ?>
                     <tr>
                         <td align="center" style="border-bottom:1px #000000 solid;
