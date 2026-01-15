@@ -195,9 +195,9 @@ $stop_date  = $Akhir." ".$jamAr;
             if($Order!=""){ $noorder=" AND no_order LIKE '%$Order%' ";}else{$noorder=" ";}
 			if($GShift1!="ALL"){ $shft=" AND groupshift='$GShift1' ";}else{$shft=" ";}  
             if($Awal!="" or $Langganan!="" or $Item!="" or $Hanger!="" or $Warna!="" or $PO!="" or $Order!=""){
-              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, FORMAT(tgl_update, 'yyyy-MM-dd') AS tglp FROM db_qc.tbl_lap_beda_roll WHERE CAST(tgl_update AS DATE) BETWEEN '$start_date' AND '$stop_date' $lgn $noitem $nohanger $wn $nopo $noorder $shft ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, FORMAT(tgl_update, 'yyyy-MM-dd') AS tglp FROM db_qc.tbl_lap_beda_roll WHERE FORMAT(tgl_update, 'yyyy-MM-dd HH:mm') BETWEEN '$start_date' AND '$stop_date' $lgn $noitem $nohanger $wn $nopo $noorder $shft ORDER BY id ASC");
             }else{
-              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, FORMAT(tgl_update, 'yyyy-MM-dd') AS tglp FROM db_qc.tbl_lap_beda_roll WHERE CAST(tgl_update AS DATE) BETWEEN '$start_date' AND '$stop_date' $lgn $noitem $nohanger $wn $nopo $noorder $shft ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, FORMAT(tgl_update, 'yyyy-MM-dd') AS tglp FROM db_qc.tbl_lap_beda_roll WHERE FORMAT(tgl_update, 'yyyy-MM-dd HH:mm') BETWEEN '$start_date' AND '$stop_date' $lgn $noitem $nohanger $wn $nopo $noorder $shft ORDER BY id ASC");
             }
             while($row1=sqlsrv_fetch_array($qry1)){
           ?>
@@ -210,7 +210,7 @@ $stop_date  = $Akhir." ".$jamAr;
               <td align="center"><div class="btn-group">
               <a href="EditDetailBedaRoll-<?php echo $row1['nodemand'];?>-<?php echo $row1['tglp'];?>" class="btn btn-primary btn-xs <?php if($_SESSION['akses']=='biasa' AND ($_SESSION['lvl_id']!='PACKING' OR $_SESSION['lvl_id']!='NCP')){ echo "disabled"; } ?>"><i class="fa fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i> </a>
               </div></td>
-              <td align="center"><?php echo date_format($row1['tgl_update'], 'Y-m-d');?></td>
+              <td align="center"><?php echo date_format($row1['tgl_update'], 'Y-m-d H:i:s');?></td>
               <td align="center"><?php echo $row1['shift'];?></td>
               <td align="center"><?php echo $row1['groupshift'];?></td>
               <td align="center"><?php echo $row1['nokk'];?></td>
