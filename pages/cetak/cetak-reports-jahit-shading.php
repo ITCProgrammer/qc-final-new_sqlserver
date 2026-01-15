@@ -6,8 +6,10 @@ include "../../koneksi.php";
   $Akhir=$_GET['akhir'];
   $jamA	= $_GET['jam_awal'];
   $jamAr	= $_GET['jam_akhir'];
-  $qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-  $rTgl=mysqli_fetch_array($qTgl);
+  $qTgl   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+              CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+              CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg;");
+  $rTgl   = sqlsrv_fetch_array($qTgl);
   if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
   if(strlen($jamA)==5){
     $start_date = $Awal.' '.$jamA;
@@ -174,18 +176,18 @@ border:hidden;
 		    <tbody>  
           <?php
             $no=1;
-            if($Langganan!=""){ $lgn=" AND `pelanggan` LIKE '%$Langganan%' ";}else{$lgn=" ";}
-            if($Item!=""){ $noitem=" AND `no_item` LIKE '%$Item%' ";}else{$noitem=" ";}
-            if($Hanger!=""){ $nohanger=" AND `no_hanger` LIKE '%$Hanger%' ";}else{$nohanger=" ";}
-            if($Warna!=""){ $wn=" AND `warna` LIKE '%$Warna%' ";}else{$wn=" ";}
-            if($PO!=""){ $nopo=" AND `no_po` LIKE '%$PO%' ";}else{$nopo=" ";}
-            if($Order!=""){ $noorder=" AND `no_order` LIKE '%$Order%' ";}else{$noorder=" ";}
+            if($Langganan!=""){ $lgn=" AND pelanggan LIKE '%$Langganan%' ";}else{$lgn=" ";}
+            if($Item!=""){ $noitem=" AND no_item LIKE '%$Item%' ";}else{$noitem=" ";}
+            if($Hanger!=""){ $nohanger=" AND no_hanger LIKE '%$Hanger%' ";}else{$nohanger=" ";}
+            if($Warna!=""){ $wn=" AND warna LIKE '%$Warna%' ";}else{$wn=" ";}
+            if($PO!=""){ $nopo=" AND no_po LIKE '%$PO%' ";}else{$nopo=" ";}
+            if($Order!=""){ $noorder=" AND no_order LIKE '%$Order%' ";}else{$noorder=" ";}
             if($Awal!="" or $Langganan!="" or $Item!="" or $Hanger!="" or $Warna!="" or $PO!="" or $Order!=""){
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_lap_jahit_shading WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' $lgn $noitem $nohanger $wn $nopo $noorder ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_lap_jahit_shading WHERE CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' $lgn $noitem $nohanger $wn $nopo $noorder ORDER BY id ASC");
             }else{
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_lap_jahit_shading WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' $lgn $noitem $nohanger $wn $nopo $noorder ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_lap_jahit_shading WHERE CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' $lgn $noitem $nohanger $wn $nopo $noorder ORDER BY id ASC");
             }
-            while($row1=mysqli_fetch_array($qry1)){
+            while($row1=sqlsrv_fetch_array($qry1)){
           ?>
           <tr valign="top">
             <td align="center"><font size="-2"><?php echo $no; ?></font></td>

@@ -34,10 +34,17 @@
 <?php
 include "koneksi.php";
 ini_set("error_reporting", 1);
+$today = date("Y-m-d");
 
 if ($_POST['simpan'] == "simpan") {
-    $ceksql = mysqli_query($con, "SELECT * FROM `tbl_lap_jahit_shading` WHERE `demand`='$_POST[demand]' and `shift`='$_POST[shift]' AND DATE_FORMAT(tgl_update, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d') LIMIT 1");
-    $cek = mysqli_num_rows($ceksql);
+    $ceksql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 *
+        FROM db_qc.tbl_lap_jahit_shading 
+        WHERE demand = ?
+        AND shift= ?
+        AND CAST(tgl_update AS DATE) = CAST(? AS DATE)
+    ", [$_POST['demand'], $_POST['shift'], $today]);
+    $cek = sqlsrv_fetch_array($ceksql) ? 1 : 0;
+
     if ($cek > 0) {
         $pelanggan = str_replace("'", "''", $_POST['pelanggan']);
         $order = str_replace("'", "''", $_POST['no_order']);
@@ -45,32 +52,33 @@ if ($_POST['simpan'] == "simpan") {
         $warna = str_replace("'", "''", $_POST['warna']);
         $no_warna = str_replace("'", "''", $_POST['no_warna']);
         $comment = str_replace("'", "''", $_POST['comment']);
-        $sql1 = mysqli_query($con, "UPDATE `tbl_lap_jahit_shading` SET
-        `nokk`='$_POST[demand]',
-        `no_order`='$order',
-        `no_item`='$_POST[no_item]',
-        `no_hanger`='$_POST[no_hanger]',
-        `no_po`='$_POST[no_po]',
-        `pelanggan`='$pelanggan',
-        `jenis_kain`='$jns',
-        `warna`='$warna',
-        `no_warna`='$no_warna',
-        `lot`='$_POST[lot]',
-        `groupshift`='$_POST[groupshift]',
-        `roll_bruto`='$_POST[roll_bruto]',
-        `bruto`='$_POST[bruto]',
-        `roll_reject`='$_POST[roll_reject]',
-        `roll_inspek`='$_POST[roll_inspek]',
-        `roll_ok`='$_POST[roll_ok]',
-        `ket_roll_reject`='$_POST[ket_roll_reject]',
-        `operator`='$_POST[operator]',
-        `lebar`='$_POST[lebar]',
-        `gramasi`='$_POST[gramasi]',
-        `tgl_update`=now(),
-        `ip`='$_SERVER[REMOTE_ADDR]',
-        `comment`='$_POST[comment]',
-        `prod_order`='$_POST[prod_order]'
-        WHERE `demand`='$_POST[demand]' and  `shift`='$_POST[shift]'");
+        $sql1 = sqlsrv_query($con_db_qc_sqlsrv, "UPDATE db_qc.tbl_lap_jahit_shading 
+        SET
+            nokk            = '$_POST[demand]',
+            no_order        = '$order',
+            no_item         = '$_POST[no_item]',
+            no_hanger       = '$_POST[no_hanger]',
+            no_po           = '$_POST[no_po]',
+            pelanggan       = '$pelanggan',
+            jenis_kain      = '$jns',
+            warna           = '$warna',
+            no_warna        = '$no_warna',
+            lot             = '$_POST[lot]',
+            groupshift      = '$_POST[groupshift]',
+            roll_bruto      = '$_POST[roll_bruto]',
+            bruto           = '$_POST[bruto]',
+            roll_reject     = '$_POST[roll_reject]',
+            roll_inspek     = '$_POST[roll_inspek]',
+            roll_ok         = '$_POST[roll_ok]',
+            ket_roll_reject = '$_POST[ket_roll_reject]',
+            operator        = '$_POST[operator]',
+            lebar           = '$_POST[lebar]',
+            gramasi         = '$_POST[gramasi]',
+            tgl_update      = GETDATE(),
+            ip              = '$_SERVER[REMOTE_ADDR]',
+            comment         = '$_POST[comment]',
+            prod_order      = '$_POST[prod_order]'
+        WHERE demand = '$_POST[demand]' and  shift = '$_POST[shift]'");
         if ($sql1) {
             //echo " <script>alert('Data has been updated!');</script>";
             echo "<script>swal({
@@ -91,34 +99,64 @@ if ($_POST['simpan'] == "simpan") {
         $warna = str_replace("'", "''", $_POST['warna']);
         $no_warna = str_replace("'", "''", $_POST['no_warna']);
         $catatan = str_replace("'", "''", $_POST['catatan']);
-        $sql = mysqli_query($con, "INSERT INTO `tbl_lap_jahit_shading` SET
-        `nokk`='$_POST[demand]',
-        `no_order`='$order',
-        `no_item`='$_POST[no_item]',
-        `no_hanger`='$_POST[no_hanger]',
-        `no_po`='$_POST[no_po]',
-        `pelanggan`='$pelanggan',
-        `jenis_kain`='$jns',
-        `warna`='$warna',
-        `no_warna`='$no_warna',
-        `lot`='$_POST[lot]',
-        `shift`='$_POST[shift]',
-        `groupshift`='$_POST[groupshift]',
-        `roll_bruto`='$_POST[roll_bruto]',
-        `bruto`='$_POST[bruto]',
-        `roll_reject`='$_POST[roll_reject]',
-        `roll_inspek`='$_POST[roll_inspek]',
-        `roll_ok`='$_POST[roll_ok]',
-        `ket_roll_reject`='$_POST[ket_roll_reject]',
-        `operator`='$_POST[operator]',
-        `lebar`='$_POST[lebar]',
-        `gramasi`='$_POST[gramasi]',
-        `comment`='$_POST[comment]',
-        `demand`='$_POST[demand]',
-        `prod_order`='$_POST[prod_order]',
-        `tgl_update`=now(),
-        `tgl_buat`=now(),
-        `ip`='$_SERVER[REMOTE_ADDR]'");
+        $sql = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_lap_jahit_shading (
+            nokk,
+            no_order,
+            no_item,
+            no_hanger,
+            no_po,
+            pelanggan,
+            jenis_kain,
+            warna,
+            no_warna,
+            lot,
+            shift,
+            groupshift,
+            roll_bruto,
+            bruto,
+            roll_reject,
+            roll_inspek,
+            roll_ok,
+            ket_roll_reject,
+            operator,
+            lebar,
+            gramasi,
+            comment,
+            demand,
+            prod_order,
+            tgl_update,
+            tgl_buat,
+            ip
+        ) VALUES (
+            '$_POST[demand]',
+            '$order',
+            '$_POST[no_item]',
+            '$_POST[no_hanger]',
+            '$_POST[no_po]',
+            '$pelanggan',
+            '$jns',
+            '$warna',
+            '$no_warna',
+            '$_POST[lot]',
+            '$_POST[shift]',
+            '$_POST[groupshift]',
+            '$_POST[roll_bruto]',
+            '$_POST[bruto]',
+            '$_POST[roll_reject]',
+            '$_POST[roll_inspek]',
+            '$_POST[roll_ok]',
+            '$_POST[ket_roll_reject]',
+            '$_POST[operator]',
+            '$_POST[lebar]',
+            '$_POST[gramasi]',
+            '$_POST[comment]',
+            '$_POST[demand]',
+            '$_POST[prod_order]',
+            GETDATE(),
+            GETDATE(),
+            '$_SERVER[REMOTE_ADDR]')
+        ");
+
         if ($sql) {
             //echo " <script>alert('Data has been saved!');</script>";
             echo "<script>swal({
@@ -146,7 +184,7 @@ if ($_GET['shift'] != "") {
     $shift = "";
 }
 
-//Data belum disimpan di database mysqli
+//Data belum disimpan di database sqlserver
 $sqlDB2 = "SELECT
                 p.SUBCODE01,
                 p.SUBCODE02,
@@ -318,13 +356,16 @@ $sqlDB21 = "SELECT
 $stmt1 = db2_exec($conn1, $sqlDB21, array('cursor' => DB2_SCROLLABLE));
 $rowdb21 = db2_fetch_assoc($stmt1);
 
-//Data sudah disimpan di database mysqli
-$msql = mysqli_query($con, "SELECT * FROM `tbl_lap_jahit_shading` WHERE `demand`='$demand' and `shift`='$_GET[shift]' AND DATE_FORMAT(tgl_update, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d')");
-$row = mysqli_fetch_array($msql);
-$crow = mysqli_num_rows($msql);
+//Data sudah disimpan di database sqlserver
+$msql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_lap_jahit_shading WHERE demand = '$demand' and shift ='$_GET[shift]' 
+    AND CAST(tgl_update AS DATE) = CAST('$today' AS DATE)");
+$row = sqlsrv_fetch_array($msql, SQLSRV_FETCH_ASSOC);
+
+$csql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) FROM db_qc.tbl_lap_jahit_shading WHERE demand = '$demand' and shift ='$_GET[shift]' 
+    AND CAST(tgl_update AS DATE) = CAST('$today' AS DATE)");
+$crow = sqlsrv_fetch_array($csql, SQLSRV_FETCH_ASSOC);
 
 ?>
-
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
     <div class="box box-info">
         <div class="box-header with-border">
@@ -576,8 +617,8 @@ $crow = mysqli_num_rows($msql);
                             <select class="form-control select2" name="operator" id="operator" required>
                                 <option value="">Pilih</option>
                                 <?php
-                                $qryo = mysqli_query($con, "SELECT nama FROM tbl_operator ORDER BY nama ASC");
-                                while ($ro = mysqli_fetch_array($qryo)) {
+                                $qryo = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_operator ORDER BY nama ASC");
+                                while ($ro = sqlsrv_fetch_array($qryo)) {
                                     ?>
                                     <option value="<?php echo $ro['nama']; ?>" <?php if ($row['operator'] == $ro['nama']) {
                                            echo "SELECTED";
@@ -666,8 +707,7 @@ $crow = mysqli_num_rows($msql);
 <?php
 if ($_POST['simpan_operator'] == "Simpan") {
     $nama = strtoupper($_POST['operator']);
-    $sqlData1 = mysqli_query($con, "INSERT INTO tbl_operator SET 
-		  nama='$nama'");
+    $sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_operator (nama) VALUES ('$nama');");
     if ($sqlData1) {
         echo "<script>swal({
   title: 'Data Telah Tersimpan',   
