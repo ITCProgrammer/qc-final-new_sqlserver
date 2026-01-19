@@ -45,10 +45,10 @@ include"koneksi.php";
           <tbody>
           <?php
             $no=1;
-            $qry1=mysqli_query($con,"SELECT a.*, b.id as id_b, b.cmt_internal FROM tbl_potong a
-            LEFT JOIN tbl_firstlot b ON a.nodemand=b.nodemand
+            $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.*, b.id as id_b, b.cmt_internal FROM db_qc.tbl_potong a
+            LEFT JOIN db_qc.tbl_firstlot b ON a.nodemand=b.nodemand
             WHERE a.sts_potong='Y' ORDER BY id ASC");
-                while($row1=mysqli_fetch_array($qry1)){
+                while($row1=sqlsrv_fetch_array($qry1)){
               ?>
           <tr bgcolor="<?php echo $bgcolor; ?>">
             <td align="center"><?php echo $no; ?></td>
