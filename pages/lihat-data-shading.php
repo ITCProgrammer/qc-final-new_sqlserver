@@ -193,32 +193,32 @@ $stop_date  = $Akhir." ".$jamAr;
           <tbody>
           <?php
             $no=1;
-            if($Langganan!=""){ $lgn=" AND `pelanggan` LIKE '%$Langganan%' ";}else{$lgn=" ";}
-            if($Item!=""){ $noitem=" AND `no_item` LIKE '%$Item%' ";}else{$noitem=" ";}
-            if($Hanger!=""){ $nohanger=" AND `no_hanger` LIKE '%$Hanger%' ";}else{$nohanger=" ";}
-            if($Warna!=""){ $wn=" AND `warna` LIKE '%$Warna%' ";}else{$wn=" ";}
-            if($PO!=""){ $nopo=" AND `no_po` LIKE '%$PO%' ";}else{$nopo=" ";}
-            if($Order!=""){ $noorder=" AND `no_order` LIKE '%$Order%' ";}else{$noorder=" ";}
-			if($GShift1!="ALL"){ $shft=" AND `groupshift`='$GShift1' ";}else{$shft=" ";}  
+            if($Langganan!=""){ $lgn=" AND pelanggan LIKE '%$Langganan%' ";}else{$lgn=" ";}
+            if($Item!=""){ $noitem=" AND no_item LIKE '%$Item%' ";}else{$noitem=" ";}
+            if($Hanger!=""){ $nohanger=" AND no_hanger LIKE '%$Hanger%' ";}else{$nohanger=" ";}
+            if($Warna!=""){ $wn=" AND warna LIKE '%$Warna%' ";}else{$wn=" ";}
+            if($PO!=""){ $nopo=" AND no_po LIKE '%$PO%' ";}else{$nopo=" ";}
+            if($Order!=""){ $noorder=" AND no_order LIKE '%$Order%' ";}else{$noorder=" ";}
+			if($GShift1!="ALL"){ $shft=" AND groupshift='$GShift1' ";}else{$shft=" ";}  
             if($Awal!="" or $Langganan!="" or $Item!="" or $Hanger!="" or $Warna!="" or $PO!="" or $Order!=""){
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_lap_shading WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' $lgn $noitem $nohanger $wn $nopo $noorder $shft ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_lap_shading WHERE FORMAT(tgl_update, 'yyyy-MM-dd HH:mm') BETWEEN '$start_date' AND '$stop_date' $lgn $noitem $nohanger $wn $nopo $noorder $shft ORDER BY id ASC");
             }else if($NoDemand != ""){
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_lap_shading WHERE nodemand = '$NoDemand' ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_lap_shading WHERE nodemand = '$NoDemand' ORDER BY id ASC");
             }else{
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_lap_shading WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' $lgn $noitem $nohanger $wn $nopo $noorder $shft ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_lap_shading WHERE FORMAT(tgl_update, 'yyyy-MM-dd HH:mm') BETWEEN '$start_date' AND '$stop_date' $lgn $noitem $nohanger $wn $nopo $noorder $shft ORDER BY id ASC");
             }
-            while($row1=mysqli_fetch_array($qry1)){
+            while($row1=sqlsrv_fetch_array($qry1)){
           ?>
             <tr bgcolor="<?php echo $bgcolor; ?>">
               <td align="center"><?php echo $no; ?></td>
               <td align="center"><div class="btn-group">
               <a href="#" class="btn btn-danger btn-xs <?php if($_SESSION['akses']=='biasa' AND ($_SESSION['lvl_id']!='PACKING' OR $_SESSION['lvl_id']!='NCP')){ echo "disabled"; } ?>" onclick="confirm_delete('./HapusDataShading-<?php echo $row1['id'] ?>');"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" title="Hapus"></i> </a> 
-              <a href="pages/cetak/cetak-detail-roll-shading.php?id=<?php echo $row1['id']; ?>&demand=<?php echo $row1['nodemand']; ?>&tgl=<?= date('Y-m-d', strtotime($row1['tgl_buat'])) ?>" class="btn btn-success btn-xs <?php if($row1['nodemand']=="") { echo "disabled"; }?>" target="_blank"><i class="fa fa-file-o"></i></a>
+              <a href="pages/cetak/cetak-detail-roll-shading.php?id=<?php echo $row1['id']; ?>&demand=<?php echo $row1['nodemand']; ?>&tgl=<?= date_format($row1['tgl_buat'], 'Y-m-d') ?>" class="btn btn-success btn-xs <?php if($row1['nodemand']=="") { echo "disabled"; }?>" target="_blank"><i class="fa fa-file-o"></i></a>
               </div></td>
               <td align="center"><div class="btn-group">
-              <a href="EditDetailRollShading-<?php echo $row1['nodemand'];?>-<?= date('Y-m-d', strtotime($row1['tgl_buat'])) ?>" class="btn btn-primary btn-xs <?php if($_SESSION['akses']=='biasa' AND ($_SESSION['lvl_id']!='PACKING' OR $_SESSION['lvl_id']!='NCP')){ echo "disabled"; } ?>"><i class="fa fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i> </a>
+              <a href="EditDetailRollShading-<?php echo $row1['nodemand'];?>-<?= date_format($row1['tgl_buat'], 'Y-m-d') ?>" class="btn btn-primary btn-xs <?php if($_SESSION['akses']=='biasa' AND ($_SESSION['lvl_id']!='PACKING' OR $_SESSION['lvl_id']!='NCP')){ echo "disabled"; } ?>"><i class="fa fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i> </a>
               </div></td>
-              <td align="center"><?php echo $row1['tgl_update'];?></td>
+              <td align="center"><?php echo date_format($row1['tgl_update'], 'Y-m-d H:i:s');?></td>
               <td align="center"><?php echo $row1['shift'];?></td>
               <td align="center"><?php echo $row1['groupshift'];?></td>
               <td align="center"><?php echo $row1['nokk'];?></td>

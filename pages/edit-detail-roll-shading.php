@@ -2,15 +2,16 @@
 if($_GET['nodemand']!=""){$nodemand=$_GET['nodemand'];}else{$nodemand=" ";}
 if($_GET['tgl']!=""){$tgl=$_GET['tgl'];}else{$tgl=" ";}
 
-//Data sudah disimpan di database mysqli
-$msql=mysqli_query($con,"SELECT * FROM `tbl_lap_shading` WHERE `nodemand`='$nodemand' ");
-$row=mysqli_fetch_array($msql);
-$crow=mysqli_num_rows($msql);
+//Data sudah disimpan di database sqlserver
+$msql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_shading WHERE nodemand='$nodemand' ");
+$row=sqlsrv_fetch_array($msql);
+$crow=$row['total_rows'];
 
-//Data sudah disimpan di database mysqli
-$msql1=mysqli_query($con,"SELECT * FROM `tbl_detail_roll_shading` WHERE `nodemand`='$nodemand' and DATE_FORMAT(tgl_buat, '%Y-%m-%d')='$tgl' ORDER BY element ASC ");
-$row1=mysqli_fetch_array($msql1);
-$crow1=mysqli_num_rows($msql1);
+//Data sudah disimpan di database sqlserver
+$msql1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_detail_roll_shading WHERE nodemand='$nodemand' and CAST(tgl_buat AS DATE) ='$tgl' ORDER BY element ASC ");
+$row1=$row=sqlsrv_fetch_array($msql);
+($msql1);
+$crow1=$row1['total_rows'];
 
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
@@ -37,9 +38,9 @@ $crow1=mysqli_num_rows($msql1);
                         </thead>
                         <tbody>
                             <?php 
-                                $msql2=mysqli_query($con,"SELECT * FROM `tbl_detail_roll_shading` WHERE `nodemand`='$nodemand' and DATE_FORMAT(tgl_buat, '%Y-%m-%d')='$tgl' ORDER BY element ASC ");
+                                $msql2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_detail_roll_shading WHERE nodemand='$nodemand' and CAST(tgl_buat AS DATE)='$tgl' ORDER BY element ASC ");
                                 $no=1;
-                                while($row2=mysqli_fetch_array($msql2)){
+                                while($row2=sqlsrv_fetch_array($msql2)){
                             ?>
                             <tr bgcolor="<?php echo $bgcolor; ?>">
                                 <td align="center"><?php echo $no; ?></td>
@@ -69,41 +70,41 @@ ini_set("error_reporting", 1);
 if(isset($_POST['ubah']))
 {
 	if($crow1>0){
-        $sqlIn=mysqli_query($con,"SELECT * FROM `tbl_detail_roll_shading` WHERE `nodemand`='$nodemand' and DATE_FORMAT(tgl_buat, '%Y-%m-%d')='$tgl' ORDER BY element ASC");
+        $sqlIn=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_detail_roll_shading WHERE nodemand='$nodemand' and CAST(tgl_buat AS DATE)='$tgl' ORDER BY element ASC");
         $no=1;
-        while($rI = mysqli_fetch_array($sqlIn)){
+        while($rI = sqlsrv_fetch_array($sqlIn)){
             $idcek1	= $_POST['cek1'][$no];
             $idcek2	= $_POST['cek2'][$no];
             $idcek3	= $_POST['cek3'][$no];
             $idcek4	= $_POST['cek4'][$no];
             if($idcek1!=""){	
-                $sqlUpdate=mysqli_query($con,"UPDATE tbl_detail_roll_shading SET
-                `grade_4_5`='1',
-                `grade_4`='0',
-                `grade_3_5`='0',
-                `disposisi`='0' WHERE element='$rI[element]' and DATE_FORMAT(tgl_buat, '%Y-%m-%d')='$tgl' ");
-                }
+                $sqlUpdate=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_detail_roll_shading SET
+                grade_4_5='1',
+                grade_4='0',
+                grade_3_5='0',
+                disposisi='0' WHERE element='$rI[element]' and CAST(tgl_buat AS DATE)='$tgl' ");
+            }
             if($idcek2!=""){	
-                $sqlUpdate=mysqli_query($con,"UPDATE tbl_detail_roll_shading SET
-                `grade_4_5`='0',
-                `grade_4`='1',
-                `grade_3_5`='0',
-                `disposisi`='0' WHERE element='$rI[element]' and DATE_FORMAT(tgl_buat, '%Y-%m-%d')='$tgl' ");
-                }
+                $sqlUpdate=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_detail_roll_shading SET
+                grade_4_5='0',
+                grade_4='1',
+                grade_3_5='0',
+                disposisi='0' WHERE element='$rI[element]' and CAST(tgl_buat AS DATE)='$tgl' ");
+            }
             if($idcek3!=""){	
-                $sqlUpdate=mysqli_query($con,"UPDATE tbl_detail_roll_shading SET
-                `grade_4_5`='0',
-                `grade_4`='0',
-                `grade_3_5`='1',
-                `disposisi`='0' WHERE element='$rI[element]' and DATE_FORMAT(tgl_buat, '%Y-%m-%d')='$tgl' ");
-                }
+                $sqlUpdate=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_detail_roll_shading SET
+                grade_4_5='0',
+                grade_4='0',
+                grade_3_5='1',
+                disposisi='0' WHERE element='$rI[element]' and CAST(tgl_buat AS DATE)='$tgl' ");
+            }
             if($idcek4!=""){	
-                    $sqlUpdate=mysqli_query($con,"UPDATE tbl_detail_roll_shading SET
-                    `grade_4_5`='0',
-                    `grade_4`='0',
-                    `grade_3_5`='0',
-                    `disposisi`='1' WHERE element='$rI[element]' and DATE_FORMAT(tgl_buat, '%Y-%m-%d')='$tgl' ");
-                    }
+                $sqlUpdate=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_detail_roll_shading SET
+                grade_4_5='0',
+                grade_4='0',
+                grade_3_5='0',
+                disposisi='1' WHERE element='$rI[element]' and CAST(tgl_buat AS DATE)='$tgl' ");
+            }
             $no++;
         }
         //echo " <script>alert('Data has been updated!');</script>";

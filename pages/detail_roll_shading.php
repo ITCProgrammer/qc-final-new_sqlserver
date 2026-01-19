@@ -29,8 +29,8 @@ include("../koneksi.php");
                         <tbody>
                             <?php
                                 $no=1;
-                            	$sqldtl=mysqli_query($con,"SELECT * FROM tbl_detail_roll_shading WHERE nodemand='$modal_id' ORDER BY element ASC");
-                            while($row1=mysqli_fetch_array($sqldtl)){
+                            	$sqldtl=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_detail_roll_shading WHERE nodemand='$modal_id' ORDER BY element ASC");
+                            while($row1=sqlsrv_fetch_array($sqldtl)){
                             ?>
                             <tr>
                                 <td align="center" width="5%"><?php echo $no;?></td>
