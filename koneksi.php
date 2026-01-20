@@ -17,6 +17,16 @@ $db_qc_option = array(
 );
 $con_db_qc_sqlsrv = sqlsrv_connect($db_qc_host, $db_qc_option);
 
+// SQL Server: database db_qc (migrated from MySQL)
+$db_laborat_host = "10.0.0.221";
+$db_laborat_option = array(
+    "Database" => "db_laborat",
+    "UID" => "sa",
+    "PWD" => "Ind@taichen2024",
+    "CharacterSet" => "UTF-8"
+);
+$con_db_laborat_sqlsrv = sqlsrv_connect($db_laborat_host, $db_laborat_option);
+
 
 
 $hostname="10.0.0.21";

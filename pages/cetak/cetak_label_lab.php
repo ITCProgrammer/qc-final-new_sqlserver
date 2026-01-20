@@ -4,8 +4,8 @@ session_start();
 include "../../koneksi.php";
 
 $nocounter = $_GET['nocounter'];
-$data = mysqli_query($conlab, "SELECT * FROM tbl_test_qc WHERE no_counter = '$nocounter' ");
-$r = mysqli_fetch_array($data);
+$data = sqlsrv_query($con_db_laborat_sqlsrv, "SELECT * FROM db_laborat.tbl_test_qc WHERE no_counter = '$nocounter' ");
+$r = sqlsrv_fetch_array($data);
 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

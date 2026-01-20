@@ -16,6 +16,7 @@ ini_set("error_reporting", 1);
 session_start();
 include "../../koneksi.php";
 
-mysqli_query($conlab, "UPDATE tbl_test_qc SET note_qc = '$_POST[value]' where id = '$_POST[pk]'");
+// mysqli_query($conlab, "UPDATE tbl_test_qc SET note_qc = '$_POST[value]' where id = '$_POST[pk]'");
+sqlsrv_query($con_db_laborat_sqlsrv, "UPDATE db_laborat.tbl_test_qc SET note_qc = '$_POST[value]' where id = '$_POST[pk]'");
 
 echo json_encode('success');
