@@ -43,7 +43,7 @@ else{
     exit("DB2 Connection failed");
 }
 
-$con=mysqli_connect("10.0.0.10","dit","4dm1n","db_qc");
+// $con=mysqli_connect("10.0.0.10","dit","4dm1n","db_qc");
 $cona=mysqli_connect("10.0.0.10","dit","4dm1n","db_adm");
 // $con=mysqli_connect("localhost","root","","db_qc");
 $condye=mysqli_connect("10.0.0.10","dit","4dm1n","db_dying");

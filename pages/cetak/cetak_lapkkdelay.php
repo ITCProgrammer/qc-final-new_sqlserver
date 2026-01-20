@@ -11,8 +11,8 @@ $Awal=$_GET['awal'];
 $Akhir=$_GET['akhir'];
 //$Dept=$_GET['dept'];
 //$Cancel=$_GET['cancel'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%d-%b-%y') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl=sqlsrv_query($con_db_qc_sqlsrv," SELECT CONVERT(varchar(9), GETDATE(), 6) AS tgl_skrg, CONVERT(varchar(8), GETDATE(), 108) AS jam_skrg ");
+$rTgl=sqlsrv_fetch_array($qTgl);
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -140,9 +140,14 @@ border:hidden;
 	$no=1;
 	$Awal=$_GET['awal'];
 	$Akhir=$_GET['akhir'];		
-  $qry1=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND DATEDIFF(tgl_pack, tglcwarna)>=3 AND sts_nodelay='0'");
-  //$qrygk=mysqli_query("");
-        while($row1=mysqli_fetch_array($qry1)){
+    $qry1 = sqlsrv_query(
+        $con_db_qc_sqlsrv, " SELECT *
+        FROM db_qc.tbl_qcf
+        WHERE CONVERT(varchar(10), tgl_masuk, 23) BETWEEN '$Awal' AND '$Akhir'
+        AND DATEDIFF(DAY, tglcwarna, tgl_pack) >= 3
+        AND sts_nodelay = '0'"
+    );
+    while ($row1 = sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)) {
 		 ?>
           <tr valign="top">
             <td align="center" valign="middle"><font size="-2"><?php echo $no; ?></font></td>
@@ -166,10 +171,12 @@ border:hidden;
             $tpersen=0; 
             $Awal=$_GET['awal'];
             $Akhir=$_GET['akhir'];
-            $qry2=mysqli_query($con,"SELECT COUNT(*) as jmlkk FROM tbl_qcf WHERE DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir'");
-            $row2=mysqli_fetch_array($qry2);
-            $qry3=mysqli_query($con,"SELECT COUNT(*) as jmlkkdelay FROM tbl_qcf WHERE DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND DATEDIFF(tgl_pack, tglcwarna)>=3 AND sts_nodelay='0'");
-            $row3=mysqli_fetch_array($qry3);
+            $qry2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jmlkk FROM db_qc.tbl_qcf WHERE CONVERT(varchar(10), tgl_masuk, 23) BETWEEN '$Awal' AND '$Akhir'");
+            $row2=sqlsrv_fetch_array($qry2);
+            $qry3=sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jmlkkdelay FROM db_qc.tbl_qcf WHERE CONVERT(varchar(10), tgl_masuk, 23) BETWEEN '$Awal' AND '$Akhir'
+                AND DATEDIFF(DAY, tglcwarna, tgl_pack) >= 3 AND sts_nodelay = '0'")
+            ;
+            $row3=sqlsrv_fetch_array($qry3);
             ?>
             <tr>
                 <td align="left" bgcolor="#FDDC18" width="50%"><strong>Total KK Bulan Berjalan</strong></td>

@@ -454,14 +454,14 @@ $Prodorder = isset($_POST['prodorder']) ? $_POST['prodorder'] : '';
 	  
 	  if (isset($_POST['update_qty_order'])) {
 		    $period = $_POST['now_tahun'].'-'.$_POST['now_bulan'];
-		    $code   = "select a.id, a.nodemand
-from tbl_qcf  a
-left join tbl_qcf_qty_order b on (a.id = b.id)
+		    $code   = " SELECT a.id, a.nodemand
+from db_qc.tbl_qcf  a
+left join db_qc.tbl_qcf_qty_order b on (a.id = b.id)
 where a.tgl_masuk like '%$period%' and b.id is null
 order by a.id desc";
-			$sql = mysqli_query($con,$code);
+			$sql = sqlsrv_query($con_db_qc_sqlsrv,$code);
 			$array_demand = [] ; 
-			while($r=mysqli_fetch_array($sql)){ 
+			while($r=sqlsrv_fetch_array($sql)){ 
 				$array_demand[$r['id']] = $r['nodemand'];
 			}
 			
@@ -489,7 +489,7 @@ order by a.id desc";
 					panjang_order_now ='$qty_order2'
 					WHERE id='$id'");	
 				*/		
-				$sqlData=mysqli_query($con,"insert into tbl_qcf_qty_order(id,nodemand,berat_order_now,panjang_order_now) values ('$id','$datas','$qty_order1','$qty_order2')");					
+				$sqlData=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_qcf_qty_order(id,nodemand,berat_order_now,panjang_order_now) values ('$id','$datas','$qty_order1','$qty_order2')");					
 					
 			}
 			
@@ -641,7 +641,7 @@ order by a.id desc";
   <?php
   function get_nodemand($sql) {
 	  $nodemand = array();
-	  while($r=mysqli_fetch_array($sql)){
+	  while($r=sqlsrv_fetch_array($sql)){
 		  $nodemand[]  =$r['nodemand'];
 	  }
 	  return $nodemand  ;
@@ -649,13 +649,23 @@ order by a.id desc";
   }
   
   $no=1;
-  if($Awal!=""){ $Where =" AND DATE_FORMAT( a.tgl_masuk, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
-  if($Delay=="1"){ $Dly =" AND DATEDIFF(a.tgl_pack, a.tglcwarna)>=3 AND a.sts_nodelay='0'"; }
+  if($Awal!=""){ $Where =" AND CONVERT(varchar(10), a.tgl_masuk, 23) BETWEEN '$Awal' AND '$Akhir' "; }
+if ($Delay == "1") {
+    $Dly = " AND a.tgl_pack IS NOT NULL
+             AND DATEDIFF(
+                day,
+                ISNULL(a.tglcwarna, a.tgl_pack),
+                a.tgl_pack
+             ) >= 3
+             AND a.sts_nodelay = '0'";
+}
+
+
   if($Awal!="" or $Delay=="1" or $Order!="" or $Warna!="" or $Item!="" or $PO!="" or $Langganan!="" or $Demand!="" or $Prodorder!=""){
-	  $code = "SELECT a.*, b.berat_order_now, b.panjang_order_now FROM tbl_qcf a
-	  left join tbl_qcf_qty_order b on (a.id = b.id)
+	  $code = "SELECT a.*, b.berat_order_now, b.panjang_order_now FROM db_qc.tbl_qcf a
+	  left join db_qc.tbl_qcf_qty_order b on (a.id = b.id)
     WHERE a.no_order LIKE '$Order%' AND a.no_po LIKE '$PO%' AND a.no_hanger LIKE '$Item%' AND a.warna LIKE '$Warna%' AND a.pelanggan LIKE '$Langganan%' AND a.nodemand LIKE '%$Demand%' AND a.lot LIKE '%$Prodorder%' $Where $Dly";
-  	$sql=mysqli_query($con,$code);
+  	$sql=sqlsrv_query($con_db_qc_sqlsrv,$code);
 	/*
 	$code2 = "SELECT * FROM tbl_qcf
     WHERE no_order LIKE '$Order%' AND no_po LIKE '$PO%' AND no_hanger LIKE '$Item%' AND warna LIKE '$Warna%' AND pelanggan LIKE '$Langganan%' AND nodemand LIKE '%$Demand%' AND lot LIKE '%$Prodorder%' $Where $Dly";
@@ -663,10 +673,10 @@ order by a.id desc";
 	
 	
 	}else{
-		$code = "SELECT a.*, b.berat_order_now, b.panjang_order_now FROM tbl_qcf a 
-		left join tbl_qcf_qty_order b on (a.id = b.id)
+		$code = "SELECT a.*, b.berat_order_now, b.panjang_order_now FROM db_qc.tbl_qcf a 
+		left join db_qc.tbl_qcf_qty_order b on (a.id = b.id)
     WHERE a.no_order LIKE '$Order' AND a.no_po LIKE '$PO' AND a.no_hanger LIKE '$Item' AND a.warna LIKE '$Warna' AND a.pelanggan LIKE '$Langganan' AND a.nodemand LIKE '$Demand' AND a.lot LIKE '$Prodorder' $Where $Dly";
-		$sql=mysqli_query($con,$code);
+		$sql=sqlsrv_query($con_db_qc_sqlsrv,$code);
 		/*
 		$code2 = "SELECT * FROM tbl_qcf 
     WHERE no_order LIKE '$Order' AND no_po LIKE '$PO' AND no_hanger LIKE '$Item' AND warna LIKE '$Warna' AND pelanggan LIKE '$Langganan' AND nodemand LIKE '$Demand' AND lot LIKE '$Prodorder' $Where $Dly";
@@ -674,19 +684,26 @@ order by a.id desc";
 	}
 	$col=0;
 	
-	
-	
 	//$get_nodemand = get_nodemand($sql2);
 	//$nodemand = ['00190922','00000560','00000562','00000951'];
 	//$qtyoutput = qty_order($get_nodemand );
 	
-	while($r=mysqli_fetch_array($sql)){
+	while($r=sqlsrv_fetch_array($sql)){
     $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
-    if($r['tglcwarna']==NULL){
-    $tgl_warna= new DateTime($r['tgl_pack']);}else{
-      $tgl_warna= new DateTime($r['tglcwarna']);
+    if ($r['tglcwarna'] == NULL) {
+        $tgl_warna = ($r['tgl_pack'] instanceof DateTime)
+            ? $r['tgl_pack']
+            : new DateTime($r['tgl_pack']);
+    } else {
+        $tgl_warna = ($r['tglcwarna'] instanceof DateTime)
+            ? $r['tglcwarna']
+            : new DateTime($r['tglcwarna']);
     }
-    $tgl_pack= new DateTime($r['tgl_pack']);
+
+    $tgl_pack = ($r['tgl_pack'] instanceof DateTime)
+        ? $r['tgl_pack']
+        : new DateTime($r['tgl_pack']);
+
     $delay = $tgl_pack->diff($tgl_warna);
 	?>
    <tr bgcolor="<?php echo $bgcolor; ?>">
@@ -733,7 +750,7 @@ order by a.id desc";
 	 }
 	 
 	 ?></td>
-     <td align="center"><?php echo $r['rol_bruto']."x".$r['berat_bruto'];?></td>
+     <td align="center"><?php echo $r['rol_bruto']."x". number_format((float)$r['berat_bruto'], 2, '.', '');?></td>
      <td align="center"><?php echo $r['no_hanger'];?></td>
      <td align="center"><?php echo $r['no_item'];?></td>
      <td align="center"><?php echo $r['no_warna'];?></td>
@@ -741,16 +758,15 @@ order by a.id desc";
      <td align="center"><?php echo $r['lot'];?></td>
      <td align="center"><?php echo $r['lebar'];?></td>
      <td align="center"><?php echo $r['gramasi'];?></td>
-	 <!--
-     <td align="center"><?php echo $r['tgl_fin'];?></td>
-     <td align="center"><?php echo $r['tgl_ins'];?></td>
-     <td align="center"><?php echo $r['tgl_pack'];?></td>
-	 -->
-     <td align="center"><?php echo $r['tgl_masuk'];?></td>
+     <td align="center">
+        <?php echo $r['tgl_masuk']->format('Y-m-d'); ?>
+     </td>
      <td align="right"><?php echo $r['rol'];?></td>
      <td align="right"><?php echo $r['netto'];?></td>
      <td align="center"><?php echo $r['panjang']." ".$r['satuan'];?></td>
-     <td align="right"><?php echo $r['sisa'];?></td>
+     <td align="right">
+        <?php echo number_format((float)($r['sisa'] ?? 0), 2, '.', ','); ?>
+     </td>
 	 <!--
      <td align="center"><?php echo $r['lebar_fin'];?></td>
      <td align="center"><?php echo $r['gramasi_fin'];?></td>
@@ -759,10 +775,18 @@ order by a.id desc";
 	 -->
      <td><?php echo $r['cek_warna'];?></td>
      <td align="left"><?php echo $r['masalah'];?></td>
-     <td align="right"><?php echo $r['berat_extra'];?></td>
-     <td align="right"><?php echo $r['panjang_extra'];?></td>
-     <td><?php echo $r['estimasi'];?></td>
-     <td><?php echo $r['panjang_estimasi'];?></td>
+     <td align="right">
+        <?php echo number_format((float)($r['berat_extra'] ?? 0), 2, '.', ','); ?>
+     </td>
+     <td align="right">
+        <?php echo number_format((float)($r['panjang_extra'] ?? 0), 2, '.', ','); ?>
+     </td>
+     <td>
+        <?php echo number_format((float)($r['estimasi'] ?? 0), 2, '.', ','); ?>
+     </td>
+     <td>
+        <?php echo number_format((float)($r['panjang_estimasi'] ?? 0), 2, '.', ','); ?>
+     </td>
      <td><?php echo $r['demand'];?></td>
      <td><?php echo $r['lot_erp_qcf'];?></td>
      <td><?php echo $r['ket'];?></td>

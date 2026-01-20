@@ -3,8 +3,8 @@ ini_set("error_reporting", 1);
 session_start();
 include("../koneksi.php");
     $modal_id=$_GET['id'];
-    $qryData=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE id='$modal_id'");
-    $rData=mysqli_fetch_array($qryData);
+    $qryData=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_qcf WHERE id='$modal_id'");
+    $rData=sqlsrv_fetch_array($qryData);
 
 ?>
 <div class="modal-dialog">
@@ -47,7 +47,7 @@ include("../koneksi.php");
           <label for="sisa" class="col-sm-3 control-label">Sisa</label>
           <div class="col-sm-3">
             <div class="input-group">
-            <input name="sisa" type="text" class="form-control" id="sisa" value="<?php echo $rData['sisa'];?>" placeholder="0.00" required style="text-align: right;"><span class="input-group-addon">KG</span>
+            <input name="sisa" type="text" class="form-control" id="sisa" value="<?php echo number_format((float)($rData['sisa'] ?? 0), 2, '.', ','); ?>" placeholder="0.00" required style="text-align: right;"><span class="input-group-addon">KG</span>
            </div>
           </div>
         </div>
@@ -56,13 +56,25 @@ include("../koneksi.php");
           <div class="col-sm-4">
             <div class="input-group date">
               <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-              <input name="tgl_fin" type="text" class="form-control pull-right" id="datepicker3" placeholder="0000-00-00" value="<?php echo $rData['tgl_fin'];?>" />
+              <input name="tgl_fin" type="text" class="form-control pull-right" id="datepicker3" placeholder="0000-00-00" 
+                value="<?php if (!empty($rData['tgl_fin'])) {
+                  echo ($rData['tgl_fin'] instanceof DateTime)
+                      ? $rData['tgl_fin']->format('Y-m-d')
+                      : date('Y-m-d', strtotime($rData['tgl_fin']));
+                }?>"
+              />
             </div>
           </div>
           <div class="col-sm-4">
             <div class="input-group date">
               <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-              <input name="tgl_inspek" type="text" class="form-control pull-right" id="datepicker1" placeholder="0000-00-00" value="<?php echo $rData['tgl_ins'];?>" />
+              <input name="tgl_inspek" type="text" class="form-control pull-right" id="datepicker1" placeholder="0000-00-00" 
+                value="<?php if (!empty($rData['tgl_ins'])) {
+                  echo ($rData['tgl_ins'] instanceof DateTime)
+                      ? $rData['tgl_ins']->format('Y-m-d')
+                      : date('Y-m-d', strtotime($rData['tgl_ins']));
+                }?>"
+              />
             </div>
           </div>
         </div>
@@ -75,13 +87,25 @@ include("../koneksi.php");
           <div class="col-sm-4">
             <div class="input-group date">
               <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-              <input name="tgl_packing" type="text" class="form-control pull-right" id="datepicker2" placeholder="0000-00-00" value="<?php echo $rData['tgl_pack'];?>" />
+              <input name="tgl_packing" type="text" class="form-control pull-right" id="datepicker2" placeholder="0000-00-00" 
+                value="<?php if (!empty($rData['tgl_pack'])) {
+                  echo ($rData['tgl_pack'] instanceof DateTime)
+                      ? $rData['tgl_pack']->format('Y-m-d')
+                      : date('Y-m-d', strtotime($rData['tgl_pack']));
+                }?>"
+              />
             </div>
           </div>
           <div class="col-sm-4">
             <div class="input-group date">
               <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-              <input name="tgl_masuk" type="text" class="form-control pull-right" id="datepicker" placeholder="0000-00-00" value="<?php echo $rData['tgl_masuk'];?>" />
+              <input name="tgl_masuk" type="text" class="form-control pull-right" id="datepicker" placeholder="0000-00-00"
+                value="<?php if (!empty($rData['tgl_masuk'])) {
+                  echo ($rData['tgl_masuk'] instanceof DateTime)
+                      ? $rData['tgl_masuk']->format('Y-m-d')
+                      : date('Y-m-d', strtotime($rData['tgl_masuk']));
+                }?>"
+              />
             </div>
           </div>
         </div>

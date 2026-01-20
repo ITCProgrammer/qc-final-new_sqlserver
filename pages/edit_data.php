@@ -2,25 +2,53 @@
 ini_set("error_reporting", 1);
 session_start();
 include("../koneksi.php");
+
 if ($_POST) {
-    extract($_POST);
-    $id = mysqli_real_escape_string($con,$_POST['id']);
-    $masalah =mysqli_real_escape_string($con,$_POST['masalah']);
-    if($_POST['sts_nodelay']=="1"){$sts_nodelay="1";}else{ $sts_nodelay="0";}
-    $sqlupdate=mysqli_query($con,"UPDATE `tbl_qcf` SET
-				`rol`='$_POST[rol]',
-        `netto`='$_POST[netto]',
-        `panjang`='$_POST[panjang]',
-        `satuan`='$_POST[satuan]',
-        `tgl_fin`='$_POST[tgl_fin]',
-        `tgl_ins`='$_POST[tgl_inspek]',
-        `tgl_pack`='$_POST[tgl_packing]',
-        `tgl_masuk`='$_POST[tgl_masuk]',
-        `ket`='$_POST[ket]',
-        `sts_nodelay`='$sts_nodelay',
-        `masalah`='$masalah'
-				WHERE `id`='$id' LIMIT 1");
-    //echo " <script>window.location='?p=Batas-Produksi';</script>";
+
+    $id          = $_POST['id'];
+    $masalah     = $_POST['masalah'];
+    $sts_nodelay = (isset($_POST['sts_nodelay']) && $_POST['sts_nodelay'] == "1") ? "1" : "0";
+
+    $sql = " UPDATE db_qc.tbl_qcf
+        SET
+            rol         = ?,
+            netto       = ?,
+            panjang     = ?,
+            satuan      = ?,
+            tgl_fin     = TRY_CONVERT(date, NULLIF(?, '')),
+            tgl_ins     = TRY_CONVERT(date, NULLIF(?, '')),
+            tgl_pack    = TRY_CONVERT(date, NULLIF(?, '')),
+            tgl_masuk   = TRY_CONVERT(date, NULLIF(?, '')),
+            ket         = ?,
+            sts_nodelay = ?,
+            masalah     = ?
+        WHERE id = ?
+    ";
+
+    $params = [
+        $_POST['rol'] ?? null,
+        $_POST['netto'] ?? null,
+        $_POST['panjang'] ?? null,
+        $_POST['satuan'] ?? null,
+        trim($_POST['tgl_fin'] ?? ''),
+        trim($_POST['tgl_inspek'] ?? ''),
+        trim($_POST['tgl_packing'] ?? ''),
+        trim($_POST['tgl_masuk'] ?? ''),
+        $_POST['ket'] ?? null,
+        $sts_nodelay,
+        $masalah,
+        $id
+    ];
+
+    $stmt = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+    if ($stmt === false) {
+        echo "<pre>";
+        print_r(sqlsrv_errors());
+        echo "</pre>";
+        exit;
+    }
+
     echo "<script>swal({
   title: 'Data Telah diUbah',
   text: 'Klik Ok untuk melanjutkan',
@@ -31,3 +59,4 @@ if ($_POST) {
   }
 });</script>";
 }
+?>
