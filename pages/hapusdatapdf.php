@@ -6,7 +6,7 @@
     $filename=$_GET['filename'];
     //$file=glob("dist/pdf/".$filename);
     $file=unlink("dist/pdf/".$filename);
-    $modal=mysqli_query($con,"UPDATE tbl_firstlot SET spectro=NULL WHERE id='$modal_id' ");
+    $modal=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_firstlot SET spectro=NULL WHERE id='$modal_id' ");
     if ($modal) {
         echo "<script>window.location='./LihatFirstLotNew';</script>";
     } else {

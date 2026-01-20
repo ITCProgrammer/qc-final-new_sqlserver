@@ -350,7 +350,7 @@ RewriteRule ^FirstLotNew-([a-zA-Z0-9_-]+)$ ./index1.php?p=Input-Lap-FirstLot-New
 RewriteRule ^LihatFirstLotNew$ ./index1.php?p=Lihat-Data-Lap-FirstLot-New [L]
 RewriteRule ^HapusDataFirstLotNew-([a-zA-Z0-9_-]+)$ ./index1.php?p=HapusDataFirstLotNew&id=$1 [L]
 RewriteRule ^Spectro_Update$ ./index1.php?p=Spectro_Update [L]
-RewriteRule ^HapusDataPDF-([a-zA-Z0-9_-]+)-([a-zA-Z0-9_.\ -]+)$ ./index1.php?p=HapusDataPDF&id=$1&filename=$2 [L]
+RewriteRule ^HapusDataPDF-([0-9]+)-([a-zA-Z0-9_.\ -]+)$ ./index1.php?p=HapusDataPDF&id=$1&filename=$2 [L]
 RewriteRule ^Lap-PotongNew$ ./index1.php?p=Lap-PotongNew [L]
 RewriteRule ^HapusDataPotongNew-([a-zA-Z0-9_-]+)$ ./index1.php?p=HapusDataPotongNew&id=$1 [L]
 RewriteRule ^DataFirstLotExpired$ ./index1.php?p=DataFirstLotExpired [L]

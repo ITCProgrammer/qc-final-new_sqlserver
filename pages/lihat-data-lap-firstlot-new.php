@@ -163,16 +163,16 @@ $Warna	        = isset($_POST['warna']) ? $_POST['warna'] : '';
           <tbody>
           <?php
             $no=1;
-            if($Awal!=""){ $Where =" AND DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
-            if($Approve_Awal!=""){ $appr=" AND DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Approve_Awal' AND '$Approve_Akhir' ";}else{$appr=" ";}
+            if($Awal!=""){ $Where =" AND CAST(tgl_buat AS DATE) BETWEEN '$Awal' AND '$Akhir' "; }
+            if($Approve_Awal!=""){ $appr=" AND CAST(tgl_approve AS DATE) BETWEEN '$Approve_Awal' AND '$Approve_Akhir' ";}else{$appr=" ";}
             if($Awal!="" or $Order!="" or $Item!="" or $Langganan!="" or $Nodemand!="" or $Warna!="" or $Approve_Awal!=""){
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_firstlot WHERE nodemand LIKE '%$Nodemand%' AND no_order LIKE '%$Order%' AND po LIKE '%$PO%' AND no_item LIKE '%$Item%' AND langganan LIKE '%$Langganan%' AND warna LIKE '%$Warna%' $Where $appr ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_firstlot WHERE nodemand LIKE '%$Nodemand%' AND no_order LIKE '%$Order%' AND po LIKE '%$PO%' AND no_item LIKE '%$Item%' AND langganan LIKE '%$Langganan%' AND warna LIKE '%$Warna%' $Where $appr ORDER BY id ASC");
             }else{
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_firstlot WHERE nodemand LIKE '%$Nodemand%' AND no_order LIKE '$Order' AND po LIKE '$PO' AND no_item LIKE '$Item' AND langganan LIKE '$Langganan' AND warna LIKE '$Warna' $Where $appr ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_firstlot WHERE nodemand LIKE '%$Nodemand%' AND no_order LIKE '$Order' AND po LIKE '$PO' AND no_item LIKE '$Item' AND langganan LIKE '$Langganan' AND warna LIKE '$Warna' $Where $appr ORDER BY id ASC");
             }
-                while($row1=mysqli_fetch_array($qry1)){
-                  $qry2=mysqli_query($con,"SELECT SUM(qty) AS jml_qty FROM tbl_allocation_firstlot WHERE id_firstlot='$row1[id]'");
-                  $row2=mysqli_fetch_array($qry2);
+                while($row1=sqlsrv_fetch_array($qry1)){
+                  $qry2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT SUM(qty) AS jml_qty FROM db_qc.tbl_allocation_firstlot WHERE id_firstlot='$row1[id]'");
+                  $row2=sqlsrv_fetch_array($qry2);
               ?>
           <tr bgcolor="<?php echo $bgcolor; ?>">
             <td align="center"><?php echo $no; ?></td>
@@ -196,8 +196,8 @@ $Warna	        = isset($_POST['warna']) ? $_POST['warna'] : '';
             <td align="center"><?php if($row1['first_stock']=="" or $row1['first_stock']==NULL){echo "0";}else{echo $row1['first_stock'];}?></td>
             <td align="center"><?php echo number_format((int)$row1['first_stock']-(int)$row2['jml_qty'],0);?></td>
             <td align="center"><?php echo $row1['cmt_internal'];?></td>
-            <td align="center"><?php if($row1['tgl_approve']!="0000-00-00"){echo $row1['tgl_approve'];}else{echo "&nbsp;";}?></td>
-            <td align="center"><?php if($row1['tgl_kirim']!="0000-00-00"){echo $row1['tgl_kirim'];}else{echo "&nbsp;";}?></td>
+            <td align="center"><?php if($row1['tgl_approve']){echo date_format($row1['tgl_approve'], 'Y-m-d');}else{echo "&nbsp;";}?></td>
+            <td align="center"><?php if($row1['tgl_kirim']){echo date_format($row1['tgl_kirim'], 'Y-m-d');}else{echo "&nbsp;";}?></td>
             <td align="center"><?php echo $row1['cmt_buyer'];?></td>
             <td align="center"><?php if($row1['spectro']==NULL OR $row1['spectro']==""){?><a href="#" id='<?php echo $row1['id']; ?>' class="update_spectro">Upload</a><?php }else{?><a href="dist/pdf/<?php echo $row1['spectro'];?>" target="_blank"><?php echo $row1['spectro'];}?></a></td>
             <td align="center"><a href="#" class="btn btn-danger btn-xs <?php if($_SESSION['akses']=='biasa' or $row1['spectro']==NULL or $row1['spectro']==""){ echo "disabled"; } ?>" onclick="confirm_delete('./HapusDataPDF-<?php echo $row1['id'] ?>-<?php echo $row1['spectro'] ?>');"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" title="Hapus File PDF"></i> Hapus PDF </a></td>

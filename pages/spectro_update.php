@@ -10,12 +10,12 @@ include("../koneksi.php");
 	$dirUpload = "dist/pdf/";
 	// pindahkan file
     $terupload = move_uploaded_file($namaSementara, $dirUpload.$namaFile);
-		$sqlupdate="UPDATE tbl_firstlot SET 
+		$sqlupdate="UPDATE db_qc.tbl_firstlot SET 
 		spectro='$file'
 		WHERE id='$id'";
-		$result = mysqli_query($con,$sqlupdate) or die (mysqli_error());
+		$result = sqlsrv_query($con_db_qc_sqlsrv,$sqlupdate) or die (mysqli_error());
 		if($result){
-			echo " <script>window.location='LihatFirstLot';</script>";
+			echo " <script>window.location='LihatFirstLotNew';</script>";
 		}else{
 			echo "Update Data Gagal";
 		}

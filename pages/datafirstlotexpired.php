@@ -49,8 +49,8 @@ date_default_timezone_set('Asia/Jakarta');
           <?php
             $no=1;
             $today=date("Y-m-d");
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_firstlot WHERE tgl_expired < '$today' AND tgl_expired!='0000-00-00' ORDER BY id ASC");
-                while($row1=mysqli_fetch_array($qry1)){
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_firstlot WHERE tgl_expired < '$today' AND tgl_expired IS NOT NULL ORDER BY id ASC");
+              while($row1=sqlsrv_fetch_array($qry1)){
               ?>
           <tr bgcolor="<?php echo $bgcolor; ?>">
             <td align="center"><?php echo $no; ?></td>
@@ -68,9 +68,9 @@ date_default_timezone_set('Asia/Jakarta');
             <td align="center"><?php echo $row1['season'];?></td>
             <td align="center"><?php echo $row1['validity'];?></td>
             <td align="center"><?php echo $row1['cmt_internal'];?></td>
-            <td align="center"><?php echo $row1['tgl_approve'];?></td>
-            <td align="center"><?php echo $row1['tgl_kirim'];?></td>
-            <td align="center"><?php echo $row1['tgl_expired'];?></td>
+            <td align="center"><?php if($row1['tgl_approve']){echo date_format($row1['tgl_approve'], 'Y-m-d');}else{echo "&nbsp;";}?></td>
+            <td align="center"><?php if($row1['tgl_kirim']){echo date_format($row1['tgl_kirim'], 'Y-m-d');}else{echo "&nbsp;";}?></td>
+            <td align="center"><?php if($row1['tgl_expired']){echo date_format($row1['tgl_expired'], 'Y-m-d');}else{echo "&nbsp;";}?></td>
             <td align="center"><?php echo $row1['cmt_buyer'];?></td>
             <td align="center"><?php echo $row1['spectro'];?></td>
             <td align="center"><?php echo $row1['ket'];?></td>

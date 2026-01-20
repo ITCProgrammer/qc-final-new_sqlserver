@@ -40,11 +40,11 @@ $Warna=$_GET['warna'];
     </tr>
 	<?php 
     $no=1;
-    if($Awal!=""){ $Where =" AND DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
+    if($Awal!=""){ $Where =" AND CAST(tgl_buat AS DATE) BETWEEN '$Awal' AND '$Akhir' "; }
     if($Awal!="" or $Order!="" or $Item!="" or $Warna!="" or $Langganan!=""){
-        $query=mysqli_query($con,"SELECT 
+        $query=sqlsrv_query($con_db_qc_sqlsrv,"SELECT 
                                                     * 
-                                                FROM tbl_firstlot 
+                                                FROM db_qc.tbl_firstlot 
                                                 WHERE 
                                                     no_order LIKE '%$Order%' AND 
                                                     no_item LIKE '%$Item%' AND 
@@ -52,9 +52,9 @@ $Warna=$_GET['warna'];
                                                     warna LIKE '%$Warna%' $Where 
                                                 ORDER BY id ASC ");
     }else{
-        $query=mysqli_query($con,"SELECT 
+        $query=sqlsrv_query($con_db_qc_sqlsrv,"SELECT 
                                                     * 
-                                                FROM tbl_firstlot 
+                                                FROM db_qc.tbl_firstlot 
                                                 WHERE 
                                                     no_order LIKE '$Order' AND 
                                                     no_item LIKE '$Item' AND 
@@ -62,7 +62,7 @@ $Warna=$_GET['warna'];
                                                     warna LIKE '$Warna' $Where 
                                                 ORDER BY id ASC");
     }
-	while($r=mysqli_fetch_array($query)){
+	while($r=sqlsrv_fetch_array($query)){
         $pos=strpos($r['langganan'], "/");
 	    $poscust=substr($r['langganan'],0,$pos);
         $cust=str_replace("'","''",$poscust);
@@ -80,8 +80,8 @@ $Warna=$_GET['warna'];
       <td><?php echo $r['no_warna'];?></td>
       <td><?php echo $r['warna'];?></td>
       <td>'<?php echo $r['lot'];?></td>
-      <td><?php if($r['tgl_kirim']!="0000-00-00"){echo date("j M Y", strtotime($r['tgl_kirim']));}else{echo "&nbsp;";}?></td>
-      <td><?php if($r['tgl_approve']!="0000-00-00"){echo date("j M Y", strtotime($r['tgl_approve']));}else{echo "&nbsp;";}?></td>
+      <td><?php if($r['tgl_kirim']){echo $r['tgl_kirim']->format('j M Y');;}else{echo "&nbsp;";}?></td>
+      <td><?php if($r['tgl_approve']){echo $r['tgl_approve']->format('j M Y');;}else{echo "&nbsp;";}?></td>
       <td><?php echo $r['cmt_internal'];?></td>
       <td><?php echo $r['cmt_buyer'];?></td>
   </tr>
