@@ -5,13 +5,13 @@ if($_GET['tgl']!=""){$tgl=$_GET['tgl'];}else{$tgl=" ";}
 //Data sudah disimpan di database sqlserver
 $msql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_shading WHERE nodemand='$nodemand' ");
 $row=sqlsrv_fetch_array($msql);
-$crow=$row['total_rows'];
+$crow=$row['total_rows'] ?? 0;
 
 //Data sudah disimpan di database sqlserver
 $msql1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_detail_roll_shading WHERE nodemand='$nodemand' and CAST(tgl_buat AS DATE) ='$tgl' ORDER BY element ASC ");
 $row1=$row=sqlsrv_fetch_array($msql);
 ($msql1);
-$crow1=$row1['total_rows'];
+$crow1=$row1['total_rows'] ?? 0;
 
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">

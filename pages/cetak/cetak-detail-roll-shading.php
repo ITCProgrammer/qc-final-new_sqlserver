@@ -149,7 +149,7 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
 <?php 
   $sqldtl= sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_detail_roll_shading WHERE nodemand='$Demand'");
   $rdtl= sqlsrv_fetch_array($sqldtl);
-  $jmldtl = $rdtl['total_rows'];
+  $jmldtl = $rdtl['total_rows'] ?? 0;
   $batas=ceil($jmldtl/2);
   $lawal=$batas*1-$batas;
   $lakhir=$batas*2-$batas;

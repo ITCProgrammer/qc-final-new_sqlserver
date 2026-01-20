@@ -66,17 +66,17 @@ $today = date("Y-m-d");
 //Data sudah disimpan di database sqlserver
 $msql   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_beda_roll WHERE nodemand='$nodemand' and shift='$_GET[shift]' and groupshift='$_GET[gshift]' AND CAST(tgl_update AS DATE) = CAST('$today' AS DATE)");
 $row    = sqlsrv_fetch_array($msql);
-$crow   = $row['total_rows'];
+$crow   = $row['total_rows'] ?? 0;
 
 //Data sudah disimpan di database sqlserver
 $msql1  = sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_beda_roll WHERE nodemand='$nodemand' and shift='$_GET[shift]' and groupshift='$_GET[gshift]'");
 $row1   = sqlsrv_fetch_array($msql1);
-$crow1  = $row1['total_rows'];
+$crow1  = $row1['total_rows'] ?? 0;
 
 //Data sudah disimpan di database sqlserver
 $qryfin = sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_beda_roll WHERE nodemand='$nodemand' ORDER BY id DESC");
 $rfin   = sqlsrv_fetch_array($qryfin);
-$cekfin = $rfin['total_rows'];
+$cekfin = $rfin['total_rows'] ?? 0;
 
 
 $sqlDB2="SELECT A.CODE AS DEMANDNO, TRIM(B.PRODUCTIONORDERCODE) AS PRODUCTIONORDERCODE, TRIM(E.LEGALNAME1) AS LEGALNAME1, TRIM(C.ORDERPARTNERBRANDCODE) AS ORDERPARTNERBRANDCODE, TRIM(C.BUYER) AS BUYER,
