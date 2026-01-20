@@ -58,12 +58,12 @@ ini_set("error_reporting", 1);
                     </thead>
                     <tbody>
                         <?php 
-                        $sql1=mysqli_query($con,"SELECT * FROM tbl_sisa_packing ORDER BY tgl_sisa ASC");
+                        $sql1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_sisa_packing ORDER BY tgl_sisa ASC");
                         
-                        while($row1=mysqli_fetch_array($sql1)){
+                        while($row1=sqlsrv_fetch_array($sql1)){
                         ?>
                          <tr>
-                            <td width="10%" align="center"><?php echo $row1['tgl_sisa'];?></td>
+                            <td width="10%" align="center"><?php echo date_format($row1['tgl_sisa'], 'Y-m-d');?></td>
                             <td width="14%" align="center"><a data-pk="<?php echo $row1['id'] ?>" data-value="<?php echo $row1['sisa_packing'] ?>" class="sisa_packing" href="javascipt:void(0)"><?php echo $row1['sisa_packing'] ?></a></td>
                         </tr>
                         <?php } ?>
@@ -74,15 +74,15 @@ ini_set("error_reporting", 1);
     </div>
 </div>
 <?php
-//Data sudah disimpan di database mysqli
-$qry=mysqli_query($con,"SELECT * FROM `tbl_sisa_packing` WHERE `tgl_sisa`='$_POST[tgl_sisa]' ORDER BY id DESC");
-$row=mysqli_fetch_array($qry);
-$cek=mysqli_num_rows($qry);
+//Data sudah disimpan di database sqlserver
+$qry=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_sisa_packing WHERE tgl_sisa='$_POST[tgl_sisa]' ORDER BY id DESC");
+$row=sqlsrv_fetch_array($qry);
+$cek=$row['total_rows'] ?? 0;
+
 
 if($_POST['simpan']=="simpan" AND $cek==0){
-    $sql=mysqli_query($con,"INSERT INTO tbl_sisa_packing SET
-    `tgl_sisa`='$_POST[tgl_sisa]',
-    `sisa_packing`='$_POST[sisa_packing]'");
+    $sql=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_sisa_packing 
+    ( tgl_sisa, sisa_packing ) VALUES ( '$_POST[tgl_sisa]', '$_POST[sisa_packing]')");
     if($sql){
         echo "<script>swal({
             title: 'Data has been saved!',   
