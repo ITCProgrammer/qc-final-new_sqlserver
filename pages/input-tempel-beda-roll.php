@@ -353,7 +353,7 @@ $msql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT *,  COUNT(*) OVER() AS total_row
     AND CAST(tgl_update AS DATE) = CAST('$today' AS DATE)");
 $row = sqlsrv_fetch_array($msql, SQLSRV_FETCH_ASSOC);
 
-$crow = $row['total_rows'];
+$crow = $row['total_rows'] ?? 0;
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
     <div class="box box-info">
