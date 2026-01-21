@@ -1,7 +1,7 @@
 <?PHP
 ini_set("error_reporting", 1);
 session_start();
-include"koneksi.php";
+include "koneksi.php";
 
 ?>
 

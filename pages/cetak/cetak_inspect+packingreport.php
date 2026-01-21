@@ -12,8 +12,8 @@ $act=$_GET['g'];
 $Demand=$_GET['demand'];
 $IsInspectpacking=$_GET['isinspectpacking'];
 //$Operator=$_GET['operator'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl = sqlsrv_query($con_db_qc_sqlsrv, "SELECT CONVERT(VARCHAR(10),CURRENT_TIMESTAMP,120) as tgl_skrg,CONVERT(VARCHAR(8),CURRENT_TIMESTAMP,108) as jam_skrg");
+$rTgl = sqlsrv_fetch_array($qTgl,SQLSRV_FETCH_ASSOC);
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 
 $sqldes="SELECT 
