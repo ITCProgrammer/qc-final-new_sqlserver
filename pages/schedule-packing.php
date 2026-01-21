@@ -12,15 +12,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_proses_gerobak
   $keterangan_pg = isset($_POST['keterangan_pg']) ? trim($_POST['keterangan_pg']) : '';
 
   if ($id_update > 0 && $proses_gerobak !== '') {
-    $proses_val = mysqli_real_escape_string($con, $proses_gerobak);
-    $ket_val = mysqli_real_escape_string($con, $keterangan_pg);
+    $params = [$proses_gerobak, $keterangan_pg, $id_update];
 
     // Simpan terpisah: proses_gerobak (pilihan), ket_gerobak (keterangan)
-    $q = mysqli_query($con, "UPDATE tbl_schedule_packing SET proses_gerobak='$proses_val', ket_gerobak='$ket_val' WHERE id='$id_update'");
+    $q = sqlsrv_query($con_db_qc_sqlsrv, "UPDATE db_qc.tbl_schedule_packing SET proses_gerobak=?, ket_gerobak=? WHERE id=?", $params);
     if ($q) {
       $pg_status = 'OK';
     } else {
-      $pg_status = 'ERR: ' . mysqli_error($con);
+      $pg_status = 'ERR: ' . sqlsrv_errors();
     }
   }
 }
@@ -38,41 +37,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_proses_gerobak
 
 <body>
   <?php
-  $data = mysqli_query($con, "SELECT
-   	id,
-	no_mesin,
-	buyer,
-	langganan,
-	no_order,
-	nokk,
-  nodemand,
-	jenis_kain,
-	warna,
-	no_warna,
-	lot,
-  proses_gerobak,
-  ket_gerobak,
-	sum(rol) as rol,
-	sum(bruto) as bruto,
-	proses,
-	catatan,
-	ket_status,
-  total_gerobak,
-	tgl_delivery,
-  tgl_masuk,
-  TIMESTAMPDIFF(HOUR, tgl_update, now()) as diff
-FROM
-	tbl_schedule_packing 
-WHERE
-	NOT `STATUS` = 'selesai' 
-GROUP BY
-	id
-ORDER BY
-	tgl_masuk ASC");
-  $no = 1;
-  $n = 1;
-  $c = 0;
-  $tglNow = date("Ymd");
+    $data = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
+        id,
+        no_mesin,
+        buyer,
+        langganan,
+        no_order,
+        nokk,
+        nodemand,
+        jenis_kain,
+        warna,
+        no_warna,
+        lot,
+        proses_gerobak,
+        ket_gerobak,
+        rol,
+        bruto,
+        proses,
+        catatan,
+        ket_status,
+        total_gerobak,
+        tgl_delivery,
+        tgl_masuk,
+        DATEDIFF(HOUR, tgl_update, GETDATE()) as diff
+      FROM
+        db_qc.tbl_schedule_packing 
+      WHERE
+        [status] <> 'selesai'
+      ORDER BY
+        tgl_masuk ASC"
+    );
+      $no = 1;
+      $n = 1;
+      $c = 0;
+      $tglNow = date("Ymd");
   ?>
   <div class="row">
     <div class="col-xs-12">
@@ -166,11 +164,11 @@ ORDER BY
                 <?php
                 $col = 0;
                 $no = 1;
-                while ($rowd = mysqli_fetch_array($data)) {
+                while ($rowd = sqlsrv_fetch_array($data)) {
                   date_default_timezone_set('Asia/Jakarta');
                   $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
-                  $qCek = mysqli_query($con, "SELECT `status`,`personil` FROM tbl_inspection WHERE id_schedule='$rowd[id]' LIMIT 1");
-                  $rCEk = mysqli_fetch_array($qCek);
+                  $qCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 [status], personil FROM db_qc.tbl_inspection WHERE id_schedule='$rowd[id]'");
+                  $rCEk = sqlsrv_fetch_array($qCek);
                   //$qLate=mysqli_query("SELECT TIMESTAMPDIFF(HOUR, '$rowd[tgl_update]', now()) as diff FROM tbl_schedule_packing WHERE nokk='$rowd[nokk]' AND NOT STATUS = 'selesai'");
                   //$rLate=mysqli_fetch_array($qLate);
                   //$tglupdate = new DateTime($rowd['tgl_update']);
@@ -367,22 +365,21 @@ ORDER BY
                     </td>
                     <td align="center">
                       <?php
-                      echo $rowd['tgl_masuk'];
+                      echo date_format($rowd['tgl_masuk'], 'Y-m-d'); 
                       // Cek jika lebih dari 2 hari (48 jam)
                       if ($rowd['diff'] > 48) {
                         echo '<br> <span class="badge bg-red blink_me">Harus Segera packing</span>';
                       }
-                      if($rowd['tgl_delivery']<$today){
-                        $date_delivery = new DateTime($rowd['tgl_delivery']);
-                        $date_today    = new DateTime($today);
-                        $interval = $date_today->diff($date_delivery);
+                      $dtToday    = new DateTime($today);
+                      if($rowd['tgl_delivery']<$dtToday){
+                        $interval = $dtToday->diff($rowd['tgl_delivery']);
                         $selisih  = $interval->days;
                         echo "<br> <span class='badge bg-orange blink_me'><i class='fa fa-exclamation-triangle'> </i> Delay $selisih Hari Dari Delivery!</span>";
                       }
                       ?>
                     </td>
                     <td align="center">
-                      <?php echo $rowd['tgl_delivery']; ?>
+                      <?php echo date_format($rowd['tgl_delivery'], 'Y-m-d'); ?>
                     </td>
                   </tr>
                 <?php

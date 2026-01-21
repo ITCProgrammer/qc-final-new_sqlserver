@@ -1,8 +1,9 @@
 <?php
 ini_set("error_reporting", 1);
 include("../koneksi.php");
-    $modal_id=$_GET['id'];
-    $modal1=mysqli_query($con,"DELETE FROM tbl_schedule_packing WHERE id='$modal_id' ");
+    $modal_id = $_GET['id'];
+    $params = [$modal_id];
+    $modal1=sqlsrv_query($con_db_qc_sqlsrv,"DELETE FROM db_qc.tbl_schedule_packing WHERE id=?", $params);
     if ($modal1) {
         echo "<script>window.location='SchedulePacking';</script>";
     } else {

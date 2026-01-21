@@ -64,34 +64,33 @@ include "../../tgl_indo.php";
 
 <body>
   <?php
-  $data = mysqli_query($con, "SELECT
-   	id,
-	no_mesin,
-	buyer,
-	langganan,
-	no_order,
-	nokk,
-  nodemand,
-	jenis_kain,
-	warna,
-	no_warna,
-	lot,
-	sum(rol) as rol,
-	sum(bruto) as bruto,
-	proses,
-	catatan,
-	ket_status,
-  total_gerobak,
-	tgl_delivery,
-  TIMESTAMPDIFF(HOUR, tgl_update, now()) as diff
-FROM
-	tbl_schedule_packing 
-WHERE
-	NOT `STATUS` = 'selesai' 
-GROUP BY
-	id
-ORDER BY
-	tgl_masuk ASC");
+    $data = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
+        id,
+        no_mesin,
+        buyer,
+        langganan,
+        no_order,
+        nokk,
+        nodemand,
+        jenis_kain,
+        warna,
+        no_warna,
+        lot,
+        rol,
+        bruto,
+        proses,
+        catatan,
+        ket_status,
+        total_gerobak,
+        tgl_delivery,
+        DATEDIFF(HOUR, tgl_update, GETDATE()) as diff
+      FROM
+        db_qc.tbl_schedule_packing 
+      WHERE
+        [status] <> 'selesai'
+      ORDER BY
+        tgl_masuk ASC
+    ");
   $no = 1;
   $n = 1;
   $c = 0;
@@ -177,7 +176,7 @@ ORDER BY
           <tbody>
             <?php
             // $col = 0;
-            while ($rowd = mysqli_fetch_array($data)) {
+            while ($rowd = sqlsrv_fetch_array($data)) {
               // $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
               ?>
               <!-- <tr bgcolor="<?php echo $bgcolor; ?>"> -->
@@ -207,7 +206,7 @@ ORDER BY
                   <?php echo $rowd['lot']; ?>
                 </td>
                 <td align="center">
-                  <?php echo $rowd['tgl_delivery']; ?>
+                  <?php echo date_format($rowd['tgl_delivery'], 'Y-m-d'); ?>
                 </td>
                 <td align="center">
                   <?php echo $rowd['rol']; ?>
