@@ -5,9 +5,10 @@ include("../koneksi.php");
 $nocounter	= isset($_GET['no_counter']) ? $_GET['no_counter'] : '';
 
 
-$sqlCek = mysqli_query($conlab, "SELECT * FROM tbl_test_qc WHERE no_counter='$nocounter' ORDER BY id DESC LIMIT 1");
-$cek = mysqli_num_rows($sqlCek);
-$rcek = mysqli_fetch_array($sqlCek);
+$sqlCek = sqlsrv_query($con_db_laborat_sqlsrv, "SELECT TOP 1 * FROM db_laborat.tbl_test_qc WHERE no_counter='$nocounter' ORDER BY id DESC");
+$cek = sqlsrv_num_rows($sqlCek);
+$rcek = sqlsrv_fetch_object($sqlCek);
+
 ?>
 
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form0" id="form0">
@@ -36,8 +37,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 					<div class="form-group">
 						<label for="no_hanger" class="col-sm-3 control-label">No Item</label>
 						<div class="col-sm-5">
-							<input name="no_item" type="text" class="form-control" id="no_item" placeholder="No Item" value="<?php if ($cek > 0) {
-								echo $rcek['no_item'];
+							<input name="no_item" type="text" class="form-control" id="no_item" placeholder="No Item" value="<?php if ($rcek) {
+								echo $rcek->no_item;
 							} ?>" <?php if ($_SESSION['akses'] == 'biasa' or $_SESSION['nama1'] != 'Janu Dwi Laksono') {
 								 echo "readonly";
 							 } ?>>
@@ -47,8 +48,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 					<div class="form-group">
 						<label for="jns_kain" class="col-sm-3 control-label">Jenis Kain</label>
 						<div class="col-sm-9">
-							<textarea name="jns_kain" class="form-control" id="jns_kain" placeholder="Jenis Kain"><?php if ($cek > 0) {
-								echo $rcek['jenis_kain'];
+							<textarea name="jns_kain" class="form-control" id="jns_kain" placeholder="Jenis Kain"><?php if ($rcek) {
+								echo $rcek->jenis_kain;
 							} else {
 								echo $r['ProductDesc'];
 							} ?></textarea>
@@ -63,8 +64,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 						<div class="col-sm-8">
 							<textarea name="warna" <?php if ($_SESSION['akses'] == 'biasa' or $_SESSION['nama1'] != 'Janu Dwi Laksono') {
 								echo "readonly";
-							} ?> class="form-control" id="warna" placeholder="Warna"><?php if ($cek > 0) {
-								  echo $rcek['warna'];
+							} ?> class="form-control" id="warna" placeholder="Warna"><?php if ($rcek) {
+								  echo $rcek->warna;
 							  } else {
 								  echo $r['Color'];
 							  } ?></textarea>
@@ -74,8 +75,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 						<label for="no_warna" class="col-sm-3 control-label">No Warna</label>
 						<div class="col-sm-8">
 							<textarea name="no_warna" readonly="readonly" class="form-control" id="no_warna"
-								placeholder="No Warna"><?php if ($cek > 0) {
-									echo $rcek['no_warna'];
+								placeholder="No Warna"><?php if ($rcek) {
+									echo $rcek->no_warna;
 								} else {
 									echo $r['ColorNo'];
 								} ?></textarea>
@@ -85,8 +86,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 					<div class="form-group">
 						<label for="buyer" class="col-sm-3 control-label">Buyer</label>
 						<div class="col-sm-5">
-							<input name="buyer" type="text" class="form-control" id="buyer" placeholder="Buyer" value="<?php if ($cek > 0) {
-								echo $rcek['buyer'];
+							<input name="buyer" type="text" class="form-control" id="buyer" placeholder="Buyer" value="<?php if ($rcek) {
+								echo $rcek->buyer;
 							} else {
 							} ?>" readonly="readonly">
 						</div>
@@ -114,12 +115,12 @@ $rcek = mysqli_fetch_array($sqlCek);
 
 					<?php
 
-					$permintaan_testing = $rcek['permintaan_testing'];
+					$permintaan_testing = $rcek->permintaan_testing;
 
 					if (!empty($permintaan_testing) && $permintaan_testing != null) {
 						$detail2 = explode(",", $permintaan_testing);
 
-						$id_test_qc_ = $rcek['id'];
+						$id_test_qc_ = $rcek->id;
 						?>
 
 						<form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1"
@@ -347,14 +348,14 @@ if ($_POST['save'] == "save") {
 		$chkc .= $chk3 . ",";
 	}
 
-	$sqlData = mysqli_query($conlab, "UPDATE tbl_test_qc SET 
+	$sqlData = sqlsrv_query($con_db_laborat_sqlsrv, "UPDATE db_laborat.tbl_test_qc SET 
 														buyer = '$buyer', 
 														no_warna = '$no_warna', 
 														warna = '$warna', 
 														jenis_kain = '$jns_kain', 
 														no_item = '$noitem', 
 														permintaan_testing = '$chkc', 
-														tgl_update = now()
+														tgl_update = GETDATE()
 													WHERE no_counter='$nocounter' ;
 	");
 	
