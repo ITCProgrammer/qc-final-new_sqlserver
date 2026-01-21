@@ -16,10 +16,9 @@ function nourut()
 {
 	include "koneksi.php";
 	$format = date("ymd");
-	$sql = mysqli_query($con, "SELECT nokk FROM tbl_schedule WHERE substr(nokk,1,6) like '%" . $format . "%' ORDER BY nokk DESC LIMIT 1 ") or die(mysqli_error($con));
-	$d = mysqli_num_rows($sql);
-	if ($d > 0) {
-		$r = mysqli_fetch_array($sql);
+	$sql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 nokk FROM db_qc.tbl_schedule WHERE SUBSTRING(nokk,1,6) like '%" . $format . "%' ORDER BY nokk DESC ");
+	$r = sqlsrv_fetch_array($sql,SQLSRV_FETCH_ASSOC);
+	if ($r) {	
 		$d = $r['nokk'];
 		$str = substr($d, 6, 2);
 		$Urut = (int) $str;
@@ -287,14 +286,20 @@ STOCKTRANSACTION.ORDERCODE";
 $stmt1r = db2_exec($conn1, $sqlroll, array('cursor' => DB2_SCROLLABLE));
 $rowr = db2_fetch_assoc($stmt1r);
 
-$sqlCek = mysqli_query($con, "SELECT * FROM tbl_schedule WHERE nodemand='$nodemand' ORDER BY id DESC LIMIT 1");
-$cek = mysqli_num_rows($sqlCek);
-$rcek = mysqli_fetch_array($sqlCek);
+$sqlCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 *,CONVERT(VARCHAR(10),tgl_delivery) tgl_delivery FROM db_qc.tbl_schedule WHERE nodemand='$nodemand' ORDER BY id DESC");
+$cek = 0;
+$rcek = sqlsrv_fetch_array($sqlCek,SQLSRV_FETCH_ASSOC);
+if($rcek){
+	$cek++;
+}
 // echo "SELECT * FROM tbl_schedule WHERE nokk='$nodemand' ORDER BY id DESC LIMIT 1 ||";
 
-$sqlCek1 = mysqli_query($con, "SELECT * FROM tbl_schedule WHERE nodemand='$nodemand' AND not status='selesai' ORDER BY id DESC LIMIT 1");
-$cek1 = mysqli_num_rows($sqlCek1);
-
+$sqlCek1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_schedule WHERE nodemand='$nodemand' AND not status='selesai' ORDER BY id DESC");
+$cek1 = 0;
+$rcek1 = sqlsrv_fetch_array($sqlCek1,SQLSRV_FETCH_ASSOC);
+if($rcek1){
+	$cek1++;
+}
 
 $sqlDB21  = " SELECT DISTINCT 
 				x.INITIALUSERPRIMARYQUANTITY AS KG_BAGIKAIN 
@@ -566,10 +571,10 @@ $Langganan = isset($_POST['langganan']) ? $_POST['langganan'] : '';
 						<select name="no_mc" class="form-control" id="no_mc" required>
 							<option value="">Pilih</option>
 							<?php
-							$sqlKap = mysqli_query($con, "SELECT no_mesin FROM tbl_mesin ORDER BY no_mesin ASC");
+							$sqlKap = sqlsrv_query($con_db_qc_sqlsrv, "SELECT no_mesin FROM db_qc.tbl_mesin ORDER BY no_mesin ASC");
 
 							$temporaries = [];
-							while ($rK = mysqli_fetch_array($sqlKap)) {
+							while ($rK = sqlsrv_fetch_array($sqlKap,SQLSRV_FETCH_ASSOC)) {
 								$temporaries[] = $rK['no_mesin'];
 							}
 
@@ -599,8 +604,8 @@ $Langganan = isset($_POST['langganan']) ? $_POST['langganan'] : '';
 						<select name="no_urut" class="form-control" id="no_urut" required>
 							<option value="">Pilih</option>
 							<?php
-							$sqlKap = mysqli_query($con, "SELECT no_urut FROM tbl_urut ORDER BY no_urut ASC");
-							while ($rK = mysqli_fetch_array($sqlKap)) {
+							$sqlKap = sqlsrv_query($con_db_qc_sqlsrv, "SELECT no_urut FROM db_qc.tbl_urut ORDER BY no_urut ASC");
+							while ($rK = sqlsrv_fetch_array($sqlKap,SQLSRV_FETCH_ASSOC)) {
 								?>
 								<option value="<?php echo $rK['no_urut']; ?>">
 									<?php echo $rK['no_urut']; ?>
@@ -648,8 +653,8 @@ $Langganan = isset($_POST['langganan']) ? $_POST['langganan'] : '';
 							onChange="cekpro(); cekpro1(); cekpro2(); aktif_staff();" required>
 							<option value="">Pilih</option>
 							<?php
-							$sqlKap = mysqli_query($con, "SELECT proses FROM tbl_proses ORDER BY proses ASC");
-							while ($rK = mysqli_fetch_array($sqlKap)) {
+							$sqlKap = sqlsrv_query($con_db_qc_sqlsrv, "SELECT proses FROM db_qc.tbl_proses ORDER BY proses ASC");
+							while ($rK = sqlsrv_fetch_array($sqlKap,SQLSRV_FETCH_ASSOC)) {
 								?>
 								<option value="<?php echo $rK['proses']; ?>">
 									<?php echo $rK['proses']; ?>
@@ -725,10 +730,13 @@ $Langganan = isset($_POST['langganan']) ? $_POST['langganan'] : '';
 				</div>
 				<?php
 				if (($cek > 0 || trim($rowdb2['CODE']) != NULL) && $nodemand != "") {
-					$stmt_cek_potong_tq = mysqli_query($con, "SELECT nodemand, tgl_masuk FROM tbl_tq_nokk WHERE nodemand = '$nodemand'");
-					$num_row_cek_potong_tq = mysqli_num_rows($stmt_cek_potong_tq);
+					$stmt_cek_potong_tq = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nodemand, CONVERT(VARCHAR(19),tgl_masuk) tgl_masuk FROM db_qc.tbl_tq_nokk WHERE nodemand = '$nodemand'");
+					$num_row_cek_potong_tq = 0;
 
-					$row_row_cek_potong_tq = mysqli_fetch_assoc($stmt_cek_potong_tq);
+					$row_row_cek_potong_tq = sqlsrv_fetch_array($stmt_cek_potong_tq,SQLSRV_FETCH_ASSOC);
+					if($row_row_cek_potong_tq){
+						$num_row_cek_potong_tq++;
+					}
 					?>
 					<div class="form-group">
 						<div class="col-sm-3">&nbsp;</div>
@@ -781,12 +789,24 @@ $Langganan = isset($_POST['langganan']) ? $_POST['langganan'] : '';
 
 <?php
 if ($_POST['save'] == "save") {
-	$qryCek = mysqli_query($con, "SELECT * from tbl_schedule WHERE `status`='sedang jalan' and  no_mesin='$_POST[no_mc]'");
-	$row = mysqli_num_rows($qryCek);
-	$qryCekN = mysqli_query($con, "SELECT * from tbl_schedule WHERE nodemand='$_POST[nodemand]' and  no_mesin='$_POST[no_mc]' and not `status`='selesai'");
-	$rowN = mysqli_num_rows($qryCekN);
-	$qryCekS = mysqli_query($con, "SELECT * from tbl_schedule WHERE no_urut='$_POST[no_urut]' and  no_mesin='$_POST[no_mc]' and not `status`='selesai'");
-	$rowS = mysqli_num_rows($qryCekS);
+	$qryCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * from db_qc.tbl_schedule WHERE status='sedang jalan' and  no_mesin='".$_POST['no_mc']."'");
+	$row = 0;
+	$result_qryCek=sqlsrv_fetch_array($qryCek,SQLSRV_FETCH_ASSOC);
+	if($result_qryCek){
+		$row++;						
+	}
+	$qryCekN = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * from db_qc.tbl_schedule WHERE nodemand='".$_POST['nodemand']."' and  no_mesin='".$_POST['no_mc']."' and not status='selesai'");
+	$rowN = 0;
+	$result_qryCekN=sqlsrv_fetch_array($qryCekN,SQLSRV_FETCH_ASSOC);
+	if($result_qryCekN){
+		$rowN++;						
+	}
+	$qryCekS = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * from db_qc.tbl_schedule WHERE no_urut='".$_POST['no_urut']."' and  no_mesin='".$_POST['no_mc']."' and not status='selesai'");
+	$rowS = 0;
+	$result_qryCekS=sqlsrv_fetch_array($qryCekS,SQLSRV_FETCH_ASSOC);
+	if($result_qryCekS){
+		$rowS++;						
+	}
 	if ($row > 0 and $_POST['no_urut'] == "1") {
 		echo "<script> swal({
             title: 'Tidak bisa input urutan ke-`1`, mesin masih jalan',
@@ -828,42 +848,9 @@ if ($_POST['save'] == "save") {
 		} else {
 			$lembur = "0";
 		}
-		$sqlData = mysqli_query($con, "INSERT INTO tbl_schedule SET
-		  nokk='$kartu',
-		  nodemand='$_POST[nodemand]',
-		  langganan='$_POST[langganan]',
-		  buyer='$_POST[buyer]',
-		  no_order='$_POST[no_order]',
-		  po='$po',
-		  no_hanger='$_POST[no_hanger]',
-		  no_item='$_POST[no_item]',
-		  jenis_kain='$jns',
-		  tgl_delivery='$_POST[tgl_delivery]',
-		  lebar='$_POST[lebar]',
-		  gramasi='$_POST[grms]',
-		  warna='$warna',
-		  no_warna='$nowarna',
-		  qty_order='$_POST[qty1]',
-		  pjng_order='$_POST[qty2]',
-		  satuan_order='$_POST[satuan1]',
-		  lot='$lot',
-		  rol='$_POST[qty3]',
-		  bruto='$_POST[qty4]',
-		  no_mesin='$_POST[no_mc]',
-		  no_urut='$_POST[no_urut]',
-		  no_sch='$_POST[no_urut]',
-		  proses='$_POST[proses]',
-		  revisi='$_POST[revisi]',
-		  ket_status='$_POST[ket]',
-		  ket_kain='$_POST[ket_kain]',
-		  tgl_masuk=now(),
-		  personil='$_POST[personil]',
-		  target='$_POST[target]',
-		  catatan='$catatan',
-		  t_jawab='$_POST[t_jawab]',
-		  lembur='$lembur',
-		  tgl_update=now(),
-		  total_gerobak='$_POST[total_gerobak]'");
+		$sqlData = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_schedule ([nokk],[nodemand],[langganan],[buyer],[no_order],[po],[no_hanger],[no_item],[jenis_kain],[tgl_delivery],[lebar],[gramasi],[warna],[no_warna],[qty_order],[pjng_order],[satuan_order],[lot],[rol],[bruto],[no_mesin],[no_urut],[no_sch],[proses],[revisi],[ket_status],[ket_kain],[tgl_masuk],[personil],[target],[catatan],[t_jawab],[lembur],[tgl_update],[total_gerobak])
+		  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,?,?,?,?,?,CURRENT_TIMESTAMP,?)",
+		  [$kartu,$_POST['nodemand'],$_POST['langganan'],$_POST['buyer'],$_POST['no_order'],$po,$_POST['no_hanger'],$_POST['no_item'],$jns,$_POST['tgl_delivery'],$_POST['lebar'],$_POST['grms'],$warna,$nowarna,$_POST['qty1'],$_POST['qty2'],$_POST['satuan1'],$lot,$_POST['qty3'],$_POST['qty4'],$_POST['no_mc'],$_POST['no_urut'],$_POST['no_urut'],$_POST['proses'],$_POST['revisi'],$_POST['ket'],$_POST['ket_kain'],$_POST['personil'],$_POST['target'],$catatan,$_POST['t_jawab'],$lembur,$_POST['total_gerobak']]);
 
 		if ($sqlData) {
 			// echo "<script>alert('Data Tersimpan');</script>";
@@ -878,6 +865,8 @@ if ($_POST['save'] == "save") {
 	 window.location.href='Schedule'; 
   }
 });</script>";
+		}else{
+			p(sqlsrv_errors());
 		}
 	}
 
@@ -889,19 +878,19 @@ if ($_POST['update'] == "update") {
 	$po = str_replace("'", "''", $_POST['no_po']);
 	$catatan = str_replace("'", "''", $_POST['catatan']);
 	$lot = trim($_POST['lot']);
-	$sqlData = mysqli_query($con, "UPDATE tbl_schedule SET 
-		no_mesin='$_POST[no_mc]',
-		no_urut='$_POST[no_urut]',
-		no_sch='$_POST[no_urut]',
-		proses='$_POST[proses]',
-		revisi='$_POST[revisi]',
-		ket_status='$_POST[ket]',
-		personil='$_POST[personil]',
-		target='$_POST[target]',
+	$sqlData = sqlsrv_query($con_db_qc_sqlsrv, "UPDATE db_qc.tbl_schedule SET 
+		no_mesin='".$_POST['no_mc']."',
+		no_urut='".$_POST['no_urut']."',
+		no_sch='".$_POST['no_urut']."',
+		proses='".$_POST['proses']."',
+		revisi='".$_POST['revisi']."',
+		ket_status='".$_POST['ket']."',
+		personil='".$_POST['personil']."',
+		target='".$_POST['target']."',
 		catatan='$catatan',
-		tgl_stop=now(),
-		tgl_update=now()
-		WHERE nokk='$_POST[nokk]'");
+		tgl_stop=CURRENT_TIMESTAMP,
+		tgl_update=CURRENT_TIMESTAMP
+		WHERE nokk='".$_POST['nokk']."'");
 
 	if ($sqlData) {
 		// echo "<script>alert('Data Telah Diubah');</script>";
@@ -916,6 +905,8 @@ if (result.value) {
 	window.location.href='Schedule'; 
 }
 });</script>";
+	}else{
+		p(sqlsrv_errors());
 	}
 
 

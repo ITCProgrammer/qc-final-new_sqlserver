@@ -10,8 +10,8 @@ $act = $_GET['g'];
 //-
 $Awal = $_GET['Awal'];
 $Akhir = $_GET['Akhir'];
-$qTgl = mysqli_query($con, "SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl = mysqli_fetch_array($qTgl);
+$qTgl = sqlsrv_query($con_db_qc_sqlsrv, "SELECT CONVERT(VARCHAR(10),CURRENT_TIMESTAMP,120) as tgl_skrg,CONVERT(VARCHAR(8),CURRENT_TIMESTAMP,108) as jam_skrg");
+$rTgl = sqlsrv_fetch_array($qTgl,SQLSRV_FETCH_ASSOC);
 if ($Awal != "") {
   $tgl = substr($Awal, 0, 10);
   $jam = $Awal;
@@ -166,7 +166,7 @@ if ($Awal != "") {
           /*function tampil($mc,$no,$awal,$akhir){		
              if($awal!=""){$where=" AND DATE_FORMAT( tgl_update, '%Y-%m-%d %H:%i:%s' ) BETWEEN '$awal' AND '$akhir' ";}
              else{$where=" ";}
-             $qCek=mysqli_query("SELECT
+             $qCek=sqlsrv_query("SELECT
               id,
            lot AS lot,
            no_mesin,
@@ -195,65 +195,65 @@ if ($Awal != "") {
            id
          ORDER BY
            id ASC");
-               $row=mysqli_fetch_array($qCek);
+               $row=sqlsrv_fetch_array($qCek);
              $dt[]=$row;
              return $dt;
                    
            }*/
-          /* $data=mysqli_query("SELECT b.* from tbl_schedule a
+          /* $data=sqlsrv_query("SELECT b.* from tbl_schedule a
        LEFT JOIN tbl_mesin b ON a.no_mesin=b.no_mesin WHERE not a.`status`='selesai' GROUP BY a.no_mesin ORDER BY a.kapasitas DESC,a.no_mesin ASC"); */
-          $data = mysqli_query($con, "SELECT b.* from tbl_mesin b WHERE ket='Inspection' ORDER BY b.no_mesin ASC");
+          $data = sqlsrv_query($con_db_qc_sqlsrv, "SELECT b.* from db_qc.tbl_mesin b WHERE ket='Inspection' ORDER BY b.no_mesin ASC");
           $no = 1;
           $n = 1;
           $c = 0;
           ?>
           <?php
           $col = 0;
-          while ($rowd = mysqli_fetch_array($data)) {
+          while ($rowd = sqlsrv_fetch_array($data,SQLSRV_FETCH_ASSOC)) {
             $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
-            $qryMC = mysqli_query($con, "SELECT
+            $qryMC = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
    	COUNT(*) as jml_mc
 FROM
-	tbl_schedule 
+	db_qc.tbl_schedule 
 WHERE
 	NOT STATUS = 'selesai'
-	AND no_mesin='$rowd[no_mesin]'
+	AND no_mesin='".$rowd['no_mesin']."'
 GROUP BY
 	no_mesin");
-            $rMC = mysqli_fetch_array($qryMC);
-            $qryUrt = mysqli_query($con, "SELECT
+            $rMC = sqlsrv_fetch_array($qryMC,SQLSRV_FETCH_ASSOC);
+            $qryUrt = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
    	id,
-	lot,
-	no_mesin,
-	no_urut,
-	buyer,
-	langganan,
-	no_order,
-	nokk,
-	jenis_kain,
-	warna,
-	no_warna,
-	rol,
-	bruto,
-	proses,
-	ket_status,
-	tgl_delivery,
-	ket_kain,
-	mc_from,
-	catatan,
-	personil,
-  total_gerobak
+	max(lot) lot,
+	max(no_mesin) no_mesin,
+	max(no_urut) no_urut,
+	max(buyer) buyer,
+	max(langganan) langganan,
+	max(no_order) no_order,
+	max(nokk) nokk,
+	max(jenis_kain) jenis_kain,
+	max(warna) warna,
+	max(no_warna) no_warna,
+	max(rol) rol,
+	max(bruto) bruto,
+	max(proses) proses,
+	max(ket_status) ket_status,
+	max(CONVERT(VARCHAR(10),tgl_delivery)) tgl_delivery,
+	max(ket_kain) ket_kain,
+	max(mc_from) mc_from,
+	max(catatan) catatan,
+	max(personil) personil,
+  max(total_gerobak) total_gerobak
 FROM
-	tbl_schedule 
+	db_qc.tbl_schedule 
 WHERE
 	NOT STATUS = 'selesai'
-	AND no_mesin='$rowd[no_mesin]'
+	AND no_mesin='".$rowd['no_mesin']."'
 	AND no_urut='1'
 GROUP BY
 	id
 ORDER BY
-	no_mesin,no_urut ASC");
-            $rU = mysqli_fetch_array($qryUrt);
+	max(no_mesin),max(no_urut) ASC");
+            $rU = sqlsrv_fetch_array($qryUrt,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
               <td rowspan="<?php echo $rMC['jml_mc']; ?>">
@@ -338,39 +338,39 @@ ORDER BY
             <?php if ($rMC['jml_mc'] > 1) { ?>
               <?php for ($x = 1; $x <= $rMC['jml_mc'] - 1; $x++) {
                 $noU = $x + 1;
-                $qryUrt1 = mysqli_query($con, "SELECT
-   	id,
-	lot,
-	no_mesin,
-	no_urut,
-	buyer,
-	langganan,
-	no_order,
-	nokk,
-	jenis_kain,
-	warna,
-	no_warna,
-	rol,
-	bruto,
-	proses,
-	ket_status,
-	tgl_delivery,
-	ket_kain,
-	mc_from,
-	catatan,
-	personil,
-  total_gerobak
+                $qryUrt1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
+  id,
+	max(lot) lot,
+	max(no_mesin) no_mesin,
+	max(no_urut) no_urut,
+	max(buyer) buyer,
+	max(langganan) langganan,
+	max(no_order) no_order,
+	max(nokk) nokk,
+	max(jenis_kain) jenis_kain,
+	max(warna) warna,
+	max(no_warna) no_warna,
+	max(rol) rol,
+	max(bruto) bruto,
+	max(proses) proses,
+	max(ket_status) ket_status,
+	max(CONVERT(VARCHAR(10),tgl_delivery)) tgl_delivery,
+	max(ket_kain) ket_kain,
+	max(mc_from) mc_from,
+	max(catatan) catatan,
+	max(personil) personil,
+  max(total_gerobak) total_gerobak
 FROM
-	tbl_schedule 
+	db_qc.tbl_schedule 
 WHERE
 	NOT STATUS = 'selesai'
-	AND no_mesin='$rowd[no_mesin]'
+	AND no_mesin='".$rowd['no_mesin']."'
 	AND no_urut='$noU'
 GROUP BY
 	id
 ORDER BY
-	no_mesin,no_urut ASC");
-                $rUt = mysqli_fetch_array($qryUrt1);
+	max(no_mesin),max(no_urut) ASC");
+                $rUt = sqlsrv_fetch_array($qryUrt1,SQLSRV_FETCH_ASSOC);
 
                 ?>
                 <tr>
@@ -461,13 +461,13 @@ ORDER BY
             $no++;
           }
           ?>
-          <?php $qryKk = mysqli_query($con, "SELECT
+          <?php $qryKk = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
    	COUNT(*) as jml_kk
 FROM
-	tbl_schedule 
+	db_qc.tbl_schedule 
 WHERE
 	NOT STATUS = 'selesai'");
-          $rKK = mysqli_fetch_array($qryKk); ?>
+          $rKK = sqlsrv_fetch_array($qryKk,SQLSRV_FETCH_ASSOC); ?>
           <tr>
             <td valign="top" style="height: 0.27in;">&nbsp;</td>
             <td align="center" valign="top">&nbsp;</td>
@@ -550,20 +550,20 @@ WHERE
   <tbody>
     <tr>
       <td width="73%" rowspan="4"><div style="font-size: 11px; font-family:sans-serif, Roman, serif;">
-        <?Php $dtKet = mysqli_query($con, "SELECT
-	sum( IF ( ket_status = 'Tolak Basah', 1, 0 ) ) AS tolak_basah,
-	sum( IF ( ket_status = 'Gagal Proses', 1, 0 ) ) AS gagal_proses,
-	sum( IF ( ket_status = 'Perbaikan', 1, 0 ) ) AS perbaikan,
-	sum( IF ( ket_status = 'Greige' OR ket_status = 'Salesmen Sample' OR ket_status = 'Development Sample' OR ket_status = 'Cuci Misty' OR ket_status = 'Cuci YD', 1, 0 ) ) AS greige,
-sum( IF ( ket_status = 'Tolak Basah',bruto, 0 ) ) AS tolak_basah_kg,
-sum( IF ( ket_status = 'Gagal Proses', bruto, 0 ) ) AS gagal_proses_kg,
-sum( IF ( ket_status = 'Perbaikan', bruto, 0 ) ) AS perbaikan_kg,
-sum( IF ( ket_status = 'Greige' OR ket_status = 'Salesmen Sample' OR ket_status = 'Development Sample' OR ket_status = 'Cuci Misty' OR ket_status = 'Cuci YD', bruto, 0 ) ) AS greige_kg
+        <?Php $dtKet = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
+	sum( CASE WHEN ket_status = 'Tolak Basah' THEN 1 ELSE 0 END  ) AS tolak_basah,
+	sum( CASE WHEN ket_status = 'Gagal Proses' THEN 1 ELSE 0 END  ) AS gagal_proses,
+	sum( CASE WHEN ket_status = 'Perbaikan' THEN 1 ELSE 0 END ) AS perbaikan,
+	sum( CASE WHEN ket_status = 'Greige' OR ket_status = 'Salesmen Sample' OR ket_status = 'Development Sample' OR ket_status = 'Cuci Misty' OR ket_status = 'Cuci YD' THEN 1 ELSE 0 END ) AS greige,
+	sum( CASE WHEN ket_status = 'Tolak Basah' THEN bruto ELSE 0 END ) AS tolak_basah_kg,
+	sum( CASE WHEN ket_status = 'Gagal Proses' THEN bruto ELSE 0 END ) AS gagal_proses_kg,
+	sum( CASE WHEN ket_status = 'Perbaikan' THEN bruto ELSE 0 END ) AS perbaikan_kg,
+	sum( CASE WHEN ket_status = 'Greige' OR ket_status = 'Salesmen Sample' OR ket_status = 'Development Sample' OR ket_status = 'Cuci Misty' OR ket_status = 'Cuci YD' THEN bruto ELSE 0 END  ) AS greige_kg
 FROM
-	tbl_schedule 
+	db_qc.tbl_schedule 
 WHERE
 	NOT STATUS = 'selesai'");
-        $rKet = mysqli_fetch_array($dtKet); ?>
+        $rKet = sqlsrv_fetch_array($dtKet,SQLSRV_FETCH_ASSOC); ?>
         Perbaikan: <?php echo $rKet['perbaikan']; ?> Lot &nbsp; <?php echo $rKet['perbaikan_kg']; ?> Kg<br />
         Gagal Proses : <?php echo $rKet['gagal_proses']; ?> Lot &nbsp; <?php echo $rKet['gagal_proses_kg']; ?> Kg<br />
     Greige : <?php echo $rKet['greige']; ?> Lot &nbsp; <?php echo $rKet['greige_kg']; ?> Kg<br />  

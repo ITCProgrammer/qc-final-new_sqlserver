@@ -7,8 +7,10 @@ $idkk=$_REQUEST['idkk'];
 $act=$_GET['g'];
 //-
 
-$qry=mysqli_query($con,"SELECT * FROM tbl_gerobak WHERE id_schedule=$idkk");
-$row=mysqli_fetch_array($qry);
+$qry=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *,
+CONVERT(VARCHAR(19),tgl_out1) tgl_out1,CONVERT(VARCHAR(19),tgl_out2) tgl_out2,CONVERT(VARCHAR(19),tgl_out3) tgl_out3,CONVERT(VARCHAR(19),tgl_out4) tgl_out4 ,CONVERT(VARCHAR(19),tgl_out5) tgl_out5 ,CONVERT(VARCHAR(19),tgl_out6) tgl_out6 
+FROM db_qc.tbl_gerobak WHERE id_schedule=?",[$idkk]);
+$row=sqlsrv_fetch_array($qry,SQLSRV_FETCH_ASSOC);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">

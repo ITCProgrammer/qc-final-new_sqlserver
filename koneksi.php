@@ -1,4 +1,28 @@
 <?php
+//fungsi untuk print rapih
+if (!function_exists('p')) {
+  function p($array,$exit=false){
+    echo "<pre>";
+    if(is_array($array) || is_object($array)){
+      print_r($array);
+    }
+    else{
+      if($array=="post"){
+        print_r($_POST);
+      }else if($array=="get"){
+        print_r($_GET);
+      }else {
+        echo $array;
+      }
+    }
+    echo "</pre>";
+    if($exit){
+      exit;
+    }
+  }
+}
+?>
+<?php
 date_default_timezone_set('Asia/Jakarta');
 $host="10.0.0.174";
 $username="ditprogram";

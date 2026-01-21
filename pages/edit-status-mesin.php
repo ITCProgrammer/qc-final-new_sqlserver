@@ -35,12 +35,19 @@ include("../koneksi.php");
         <tbody>			
           <?php
 
-        $qry=mysqli_query($con," SELECT *,IF(DATEDIFF(now(),tgl_delivery) > 0,'Urgent',
-IF(DATEDIFF(now(),tgl_delivery) > -4,'Potensi Delay','')) as `sts` FROM tbl_schedule a WHERE a.no_mesin='$_GET[id]' AND NOT `status` = 'selesai' AND NOT a.no_urut='1' ORDER BY a.no_urut ASC ");
+        $qry=sqlsrv_query($con_db_qc_sqlsrv," SELECT *,
+              CASE
+                WHEN DATEDIFF(Day,CURRENT_TIMESTAMP, tgl_delivery) > 0 THEN 'Urgent'
+                WHEN DATEDIFF(Day,CURRENT_TIMESTAMP, tgl_delivery) > -4 THEN 'Potensi Delay'
+                ELSE ''
+              END as sts,
+              CONVERT(VARCHAR(10),tgl_delivery) tgl_delivery
+            FROM db_qc.tbl_schedule a 
+            WHERE a.no_mesin=? AND [status] <> 'selesai' AND a.no_urut<>'1' ORDER BY a.no_urut ASC ",[$_GET['id']]);
    $no=1;
 
    $c=0;
-    while ($rowd=mysqli_fetch_array($qry)) {
+    while ($rowd=sqlsrv_fetch_array($qry,SQLSRV_FETCH_ASSOC)) {
         $bgcolor = ($c++ & 1) ? '#33CCFF' : '#FFCC99';
         
 			?>
@@ -49,8 +56,8 @@ IF(DATEDIFF(now(),tgl_delivery) > -4,'Potensi Delay','')) as `sts` FROM tbl_sche
 				<select name="no_urut[<?php echo $rowd['id']; ?>]" class="form-control">
 				  <option value="">Pilih</option>
 			  <?php 
-			  $sqlKap=mysqli_query($con,"SELECT no_urut FROM tbl_urut WHERE not no_urut='1' ORDER BY no_urut ASC");
-			  while($rK=mysqli_fetch_array($sqlKap)){
+			  $sqlKap=sqlsrv_query($con_db_qc_sqlsrv,"SELECT no_urut FROM db_qc.tbl_urut WHERE no_urut<>'1' ORDER BY no_urut ASC");
+			  while($rK=sqlsrv_fetch_array($sqlKap,SQLSRV_FETCH_ASSOC)){
 			  ?>
 				  <option value="<?php echo $rK['no_urut']; ?>" <?php if($rK['no_urut']==$rowd['no_urut']){ echo "SELECTED";}?>><?php echo $rK['no_urut']; ?></option>
 			 <?php } ?>	  

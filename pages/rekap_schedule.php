@@ -25,12 +25,12 @@ include "koneksi.php";
     bruto,
     proses
   FROM
-    tbl_schedule
+    db_qc.tbl_schedule
   WHERE
-    NOT STATUS = 'selesai'
+    NOT [STATUS] = 'selesai'
     AND NOT proses ='Perbaikan'";
-  $prepare_mysql_kiri = mysqli_query($con, $query_mysql_kiri);
-  while($data_mysql_kiri = mysqli_fetch_array($prepare_mysql_kiri)){
+  $prepare_mysql_kiri = sqlsrv_query($con_db_qc_sqlsrv, $query_mysql_kiri);
+  while($data_mysql_kiri = sqlsrv_fetch_array($prepare_mysql_kiri,SQLSRV_FETCH_ASSOC)){
     $data_kiri[] = $data_mysql_kiri;
   }
 
@@ -68,12 +68,12 @@ include "koneksi.php";
     bruto,
     proses
   FROM
-    tbl_schedule
+    db_qc.tbl_schedule
   WHERE
-    NOT STATUS = 'selesai'
+    NOT [STATUS] = 'selesai'
     AND proses ='Perbaikan'";
-  $prepare_mysql_kanan = mysqli_query($con, $query_mysql_kanan);
-  while($data_mysql_kanan = mysqli_fetch_array($prepare_mysql_kanan)){
+  $prepare_mysql_kanan = sqlsrv_query($con_db_qc_sqlsrv, $query_mysql_kanan);
+  while($data_mysql_kanan = sqlsrv_fetch_array($prepare_mysql_kanan,SQLSRV_FETCH_ASSOC)){
     $data_kanan[] = $data_mysql_kanan;
   }
 

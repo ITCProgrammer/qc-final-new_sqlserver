@@ -2,20 +2,20 @@
     $nokk                       = $_POST['nokk'];
     $tgl                        = $_POST['tgl'];
     $roll_no                    = $_POST['roll_no'];
-    $actual_fabric_weight       = $_POST['actual_fabric_weight'];
+    $actual_fabric_weight       = floatval($_POST['actual_fabric_weight']);
     $satuan_fabric_weight       = "gr/m2";
-    $actual_width               = $_POST['actual_width'];
+    $actual_width               = floatval($_POST['actual_width']);
     $satuan_width               = $_POST['satuan_width'];
-    $default_length             = $_POST['default_length'];
+    $default_length             = floatval($_POST['default_length']);
     $satuan_default_length      = $_POST['satuan_default_length'];
-    $total_point                = $_POST['total_point'];
+    $total_point                = floatval($_POST['total_point']);
     $grade_point                = $_POST['grade_point'];
-    $u_extra_point              = $_POST['u_extra_point'];
-    $extra_point                = $_POST['extra_point'];
-    $total_counts               = $_POST['total_counts'];
+    $u_extra_point              = floatval($_POST['u_extra_point']);
+    $extra_point                = floatval($_POST['extra_point']);
+    $total_counts               = floatval($_POST['total_counts']);
     $grade_counts               = $_POST['grade_counts'];
-    $u_extra_counts             = $_POST['u_extra_counts'];
-    $extra_counts               = $_POST['extra_counts'];
+    $u_extra_counts             = floatval($_POST['u_extra_counts']);
+    $extra_counts               = floatval($_POST['extra_counts']);
     $keterangan                 = $_POST['keterangan'];
     $ket_inspek                 = $_POST['ket_inspek'];
 
@@ -166,12 +166,12 @@
         $misc_pd4                    = $_POST['misc54'];
     // PRINT DEFECT
 
-    $sql_cek_noroll     = mysqli_query($con,"SELECT * FROM tbl_inspeksi_kain WHERE roll_no = '$roll_no' AND nokk = '$nokk'");
-    $dataRoll           = mysqli_fetch_assoc($sql_cek_noroll);
+    $sql_cek_noroll     = sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_inspeksi_kain WHERE roll_no =? AND nokk =? ", [$roll_no,$nokk]);
+    $dataRoll           = sqlsrv_fetch_array($sql_cek_noroll,SQLSRV_FETCH_ASSOC);
 
     if ($dataRoll['roll_no'] && $nokk) { 
         $id_inspek  = $_POST['id_inspek'];
-        $sql_inspeksi_kain = mysqli_query($con,"UPDATE tbl_inspeksi_kain 
+        $sql_inspeksi_kain = sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_inspeksi_kain 
                                             SET
                                                 tgl = '$tgl',
                                                 actual_fabric_weight = '$actual_fabric_weight',
@@ -190,8 +190,8 @@
                                                 extra_counts = '$extra_counts',
                                                 ket = '$keterangan',
                                                 ket_inspek = '$ket_inspek'
-                                            WHERE nokk = '$nokk' AND roll_no = '$roll_no'") or die (mysqli_error());
-        $sql_detail_inspeksi_kain = mysqli_query($con,"UPDATE tbl_defect_inspeksi_kain 
+                                            WHERE nokk = '$nokk' AND roll_no = '$roll_no'") or die (p(sqlsrv_errors()));
+        $sql_detail_inspeksi_kain = sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_defect_inspeksi_kain 
                                                     SET 
                                                 id_inspek_kain = '$id_inspek',
                                                 slub_yd1 = '$slub_yd1',
@@ -326,7 +326,7 @@
                                                 misc_pd2 = '$misc_pd2',
                                                 misc_pd3 = '$misc_pd3',
                                                 misc_pd4 = '$misc_pd4'
-                                            WHERE nokk = '$nokk' AND id_inspek_kain = '$id_inspek'") or die (mysqli_error());
+                                            WHERE nokk = '$nokk' AND id_inspek_kain = '$id_inspek'") or die (p(sqlsrv_errors()));
         if($sql_inspeksi_kain && $sql_detail_inspeksi_kain){
             echo    "<script>swal({
                         title: 'Data berhasil diubah',   
@@ -335,7 +335,7 @@
                                 }).then((result) => {
                                 if (result.value) {
                                 window.location.href='FormInspeksiKain-$nokk';
-                                document.getElementById('ket_inspek').value = $ket_inspek; 
+                                document.getElementById('ket_inspek').value = '$ket_inspek'; 
                                 }
                             });
                     </script>";
@@ -347,170 +347,55 @@
                                 }).then((result) => {
                                 if (result.value) {
                                 window.location.href='FormInspeksiKain-$nokk'; 
-                                document.getElementById('ket_inspek').value = $ket_inspek; 
+                                document.getElementById('ket_inspek').value = '$ket_inspek'; 
                                 }
                             });
                     </script>";
         }
     } else {
-        $sql_inspeksi_kain          = mysqli_query($con,"INSERT INTO tbl_inspeksi_kain SET
-                                                        nokk = '$nokk',
-                                                        tgl = '$tgl',
-                                                        roll_no = '$roll_no',
-                                                        actual_fabric_weight = '$actual_fabric_weight',
-                                                        satuan_fabric_weight = '$satuan_fabric_weight',
-                                                        actual_width = '$actual_width',
-                                                        satuan_width = '$satuan_width',
-                                                        default_length = '$default_length',
-                                                        satuan_default_length = '$satuan_default_length',
-                                                        total_point = '$total_point',
-                                                        grade_point = '$grade_point',
-                                                        u_extra_point = '$u_extra_point',
-                                                        extra_point = '$extra_point',
-                                                        total_counts = '$total_counts',
-                                                        grade_counts = '$grade_counts',
-                                                        u_extra_counts = '$u_extra_counts',
-                                                        extra_counts = '$extra_counts',
-                                                        ket = '$keterangan',
-                                                        ket_inspek = '$ket_inspek'",$con) or die (mysqli_error());
-                                                $id_inspek = mysqli_insert_id();
-        $sql_detail_inspeksi_kain   = mysqli_query($con,"INSERT INTO tbl_defect_inspeksi_kain SET
-                                                        id_inspek_kain = '$id_inspek',
-                                                        nokk = '$nokk',
-                                                        slub_yd1 = '$slub_yd1',
-                                                        slub_yd2 = '$slub_yd2',
-                                                        slub_yd3 = '$slub_yd3',
-                                                        slub_yd4 = '$slub_yd4',
-                                                        barre_yd1 = '$barre_yd1',
-                                                        barre_yd2 = '$barre_yd2',
-                                                        barre_yd3 = '$barre_yd3',
-                                                        barre_yd4 = '$barre_yd4',
-                                                        uneven_yarn_yd1 = '$uneven_yarn_yd1',
-                                                        uneven_yarn_yd2 = '$uneven_yarn_yd2',
-                                                        uneven_yarn_yd3 = '$uneven_yarn_yd3',
-                                                        uneven_yarn_yd4 = '$uneven_yarn_yd4',
-                                                        yarn_contamination_yd1 = '$yarn_contamination_yd1',
-                                                        yarn_contamination_yd2 = '$yarn_contamination_yd2',
-                                                        yarn_contamination_yd3 = '$yarn_contamination_yd3',
-                                                        yarn_contamination_yd4 = '$yarn_contamination_yd4',
-                                                        neps_dead_cotton_yd1 = '$neps_dead_cotton_yd1',
-                                                        neps_dead_cotton_yd2 = '$neps_dead_cotton_yd2',
-                                                        neps_dead_cotton_yd3 = '$neps_dead_cotton_yd3',
-                                                        neps_dead_cotton_yd4 = '$neps_dead_cotton_yd4',
-                                                        misc_yd1 = '$misc_yd1',
-                                                        misc_yd2 = '$misc_yd2',
-                                                        misc_yd3 = '$misc_yd3',
-                                                        misc_yd4 = '$misc_yd4',
-                                                        missing_line_cd1 = '$missing_line_cd1',
-                                                        missing_line_cd2 = '$missing_line_cd2',
-                                                        missing_line_cd3 = '$missing_line_cd3',
-                                                        missing_line_cd4 = '$missing_line_cd4',
-                                                        holes_cd1 = '$holes_cd1',
-                                                        holes_cd2 = '$holes_cd2',
-                                                        holes_cd3 = '$holes_cd3',
-                                                        holes_cd4 = '$holes_cd4',
-                                                        steaks_cd1 = '$steaks_cd1',
-                                                        steaks_cd2 = '$steaks_cd2',
-                                                        steaks_cd3 = '$steaks_cd3',
-                                                        steaks_cd4 = '$steaks_cd4',
-                                                        misknit_cd1 = '$misknit_cd1',
-                                                        misknit_cd2 = '$misknit_cd2',
-                                                        misknit_cd3 = '$misknit_cd3',
-                                                        misknit_cd4 = '$misknit_cd4',
-                                                        knot_cd1 = '$knot_cd1',
-                                                        knot_cd2 = '$knot_cd2',
-                                                        knot_cd3 = '$knot_cd3',
-                                                        knot_cd4 = '$knot_cd4',
-                                                        oil_mark_cd1 = '$oil_mark_cd1',
-                                                        oil_mark_cd2 = '$oil_mark_cd2',
-                                                        oil_mark_cd3 = '$oil_mark_cd3',
-                                                        oil_mark_cd4 = '$oil_mark_cd4',
-                                                        fly_cd1 = '$fly_cd1',
-                                                        fly_cd2 = '$fly_cd2',
-                                                        fly_cd3 = '$fly_cd3',
-                                                        fly_cd4 = '$fly_cd4',
-                                                        misc_cd1 = '$misc_cd1',
-                                                        misc_cd2 = '$misc_cd2',
-                                                        misc_cd3 = '$misc_cd3',
-                                                        misc_cd4 = '$misc_cd4',
-                                                        hairiness_dfd1 = '$hairiness_dfd1',
-                                                        hairiness_dfd2 = '$hairiness_dfd2',
-                                                        hairiness_dfd3 = '$hairiness_dfd3',
-                                                        hairiness_dfd4 = '$hairiness_dfd4',
-                                                        holes_dfd1 = '$holes_dfd1',
-                                                        holes_dfd2 = '$holes_dfd2',
-                                                        holes_dfd3 = '$holes_dfd3',
-                                                        holes_dfd4 = '$holes_dfd4',
-                                                        color_tone_dfd1 = '$color_tone_dfd1',
-                                                        color_tone_dfd2 = '$color_tone_dfd2',
-                                                        color_tone_dfd3 = '$color_tone_dfd3',
-                                                        color_tone_dfd4 = '$color_tone_dfd4',
-                                                        abrasion_dfd1 = '$abrasion_dfd1',
-                                                        abrasion_dfd2 = '$abrasion_dfd2',
-                                                        abrasion_dfd3 = '$abrasion_dfd3',
-                                                        abrasion_dfd4 = '$abrasion_dfd4',
-                                                        dye_spot_dfd1 = '$dye_spot_dfd1',
-                                                        dye_spot_dfd2 = '$dye_spot_dfd2',
-                                                        dye_spot_dfd3 = '$dye_spot_dfd3',
-                                                        dye_spot_dfd4 = '$dye_spot_dfd4',
-                                                        wrinkless_fold_dfd1 = '$wrinkless_fold_dfd1',
-                                                        wrinkless_fold_dfd2 = '$wrinkless_fold_dfd2',
-                                                        wrinkless_fold_dfd3 = '$wrinkless_fold_dfd3',
-                                                        wrinkless_fold_dfd4 = '$wrinkless_fold_dfd4',
-                                                        bowing_skewing_dfd1 = '$bowing_skewing_dfd1',
-                                                        bowing_skewing_dfd2 = '$bowing_skewing_dfd2',
-                                                        bowing_skewing_dfd3 = '$bowing_skewing_dfd3',
-                                                        bowing_skewing_dfd4 = '$bowing_skewing_dfd4',
-                                                        pin_holes_dfd1 = '$pin_holes_dfd1',
-                                                        pin_holes_dfd2 = '$pin_holes_dfd2',
-                                                        pin_holes_dfd3 = '$pin_holes_dfd3',
-                                                        pin_holes_dfd4 = '$pin_holes_dfd4',
-                                                        pick_dfd1 = '$pick_dfd1',
-                                                        pick_dfd2 = '$pick_dfd2',
-                                                        pick_dfd3 = '$pick_dfd3',
-                                                        pick_dfd4 = '$pick_dfd4',
-                                                        knot_dfd1 = '$knot_dfd1',
-                                                        knot_dfd2 = '$knot_dfd2',
-                                                        knot_dfd3 = '$knot_dfd3',
-                                                        knot_dfd4 = '$knot_dfd4',
-                                                        misc_dfd1 = '$misc_dfd1',
-                                                        misc_dfd2 = '$misc_dfd2',
-                                                        misc_dfd3 = '$misc_dfd3',
-                                                        misc_dfd4 = '$misc_dfd4',
-                                                        ueven_shearing_cld1 = '$ueven_shearing_cld1',
-                                                        ueven_shearing_cld2 = '$ueven_shearing_cld2',
-                                                        ueven_shearing_cld3 = '$ueven_shearing_cld3',
-                                                        ueven_shearing_cld4 = '$ueven_shearing_cld4',
-                                                        stans_cld1 = '$stans_cld1',
-                                                        stans_cld2 = '$stans_cld2',
-                                                        stans_cld3 = '$stans_cld3',
-                                                        stans_cld4 = '$stans_cld4',
-                                                        oil_grease_cld1 = '$oil_grease_cld1',
-                                                        oil_grease_cld2 = '$oil_grease_cld2',
-                                                        oil_grease_cld3 = '$oil_grease_cld3',
-                                                        oil_grease_cld4 = '$oil_grease_cld4',
-                                                        dirt_cld1 = '$dirt_cld1',
-                                                        dirt_cld2 = '$dirt_cld2',
-                                                        dirt_cld3 = '$dirt_cld3',
-                                                        dirt_cld4 = '$dirt_cld4',
-                                                        water_cld1 = '$water_cld1',
-                                                        water_cld2 = '$water_cld2',
-                                                        water_cld3 = '$water_cld3',
-                                                        water_cld4 = '$water_cld4',
-                                                        misc_cld1 = '$misc_cld1',
-                                                        misc_cld2 = '$misc_cld2',
-                                                        misc_cld3 = '$misc_cld3',
-                                                        misc_cld4 = '$misc_cld4',
-                                                        print_pd1 = '$print_pd1',
-                                                        print_pd2 = '$print_pd2',
-                                                        print_pd3 = '$print_pd3',
-                                                        print_pd4 = '$print_pd4',
-                                                        misc_pd1 = '$misc_pd1',
-                                                        misc_pd2 = '$misc_pd2',
-                                                        misc_pd3 = '$misc_pd3',
-                                                        misc_pd4 = '$misc_pd4'", $con);
-        
-    
+        $sql_inspeksi_kain          = sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_inspeksi_kain (nokk,tgl,roll_no,actual_fabric_weight,satuan_fabric_weight,
+                                                        actual_width,satuan_width,default_length,satuan_default_length,total_point,grade_point,u_extra_point,extra_point,
+                                                        total_counts,grade_counts,u_extra_counts,extra_counts,ket,ket_inspek)
+                                                        VALUES ('$nokk','$tgl','$roll_no','$actual_fabric_weight','$satuan_fabric_weight','$actual_width','$satuan_width',
+                                                        '$default_length','$satuan_default_length','$total_point','$grade_point','$u_extra_point','$extra_point','$total_counts',
+                                                        '$grade_counts','$u_extra_counts','$extra_counts','$keterangan','$ket_inspek'); SELECT @@IDENTITY as id; ") or 
+                                                        die (p(sqlsrv_errors()));
+        $next_result = sqlsrv_next_result($sql_inspeksi_kain);
+        $row = sqlsrv_fetch_array($sql_inspeksi_kain, SQLSRV_FETCH_ASSOC);
+        $id_inspek = $row["id"];
+        $sql_detail_inspeksi_kain   = sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_defect_inspeksi_kain (id_inspek_kain,nokk,slub_yd1,slub_yd2,slub_yd3,slub_yd4
+                                                        ,barre_yd1,barre_yd2,barre_yd3,barre_yd4,uneven_yarn_yd1,uneven_yarn_yd2,uneven_yarn_yd3,uneven_yarn_yd4,yarn_contamination_yd1
+                                                        ,yarn_contamination_yd2,yarn_contamination_yd3,yarn_contamination_yd4,neps_dead_cotton_yd1,neps_dead_cotton_yd2
+                                                        ,neps_dead_cotton_yd3,neps_dead_cotton_yd4,misc_yd1,misc_yd2,misc_yd3,misc_yd4,missing_line_cd1,missing_line_cd2,missing_line_cd3
+                                                        ,missing_line_cd4,holes_cd1,holes_cd2,holes_cd3,holes_cd4,steaks_cd1,steaks_cd2,steaks_cd3,steaks_cd4,misknit_cd1,misknit_cd2
+                                                        ,misknit_cd3,misknit_cd4,knot_cd1,knot_cd2,knot_cd3,knot_cd4,oil_mark_cd1,oil_mark_cd2,oil_mark_cd3,oil_mark_cd4,fly_cd1
+                                                        ,fly_cd2,fly_cd3,fly_cd4,misc_cd1,misc_cd2,misc_cd3,misc_cd4,hairiness_dfd1,hairiness_dfd2,hairiness_dfd3,hairiness_dfd4
+                                                        ,holes_dfd1,holes_dfd2,holes_dfd3,holes_dfd4,color_tone_dfd1,color_tone_dfd2,color_tone_dfd3,color_tone_dfd4,abrasion_dfd1
+                                                        ,abrasion_dfd2,abrasion_dfd3,abrasion_dfd4,dye_spot_dfd1,dye_spot_dfd2,dye_spot_dfd3,dye_spot_dfd4,wrinkless_fold_dfd1,
+                                                        wrinkless_fold_dfd2,wrinkless_fold_dfd3,wrinkless_fold_dfd4,bowing_skewing_dfd1,bowing_skewing_dfd2,bowing_skewing_dfd3
+                                                        ,bowing_skewing_dfd4,pin_holes_dfd1,pin_holes_dfd2,pin_holes_dfd3,pin_holes_dfd4,pick_dfd1,pick_dfd2,pick_dfd3,pick_dfd4
+                                                        ,knot_dfd1,knot_dfd2,knot_dfd3,knot_dfd4,misc_dfd1,misc_dfd2,misc_dfd3,misc_dfd4,ueven_shearing_cld1,ueven_shearing_cld2
+                                                        ,ueven_shearing_cld3,ueven_shearing_cld4,stans_cld1,stans_cld2,stans_cld3,stans_cld4,oil_grease_cld1,oil_grease_cld2,oil_grease_cld3
+                                                        ,oil_grease_cld4,dirt_cld1,dirt_cld2,dirt_cld3,dirt_cld4,water_cld1,water_cld2,water_cld3,water_cld4,misc_cld1,misc_cld2
+                                                        ,misc_cld3,misc_cld4,print_pd1,print_pd2,print_pd3,print_pd4,misc_pd1,misc_pd2,misc_pd3,misc_pd4)
+                                                        VALUES ('$id_inspek','$nokk','$slub_yd1','$slub_yd2','$slub_yd3','$slub_yd4','$barre_yd1','$barre_yd2','$barre_yd3','$barre_yd4',
+                                                        '$uneven_yarn_yd1','$uneven_yarn_yd2','$uneven_yarn_yd3','$uneven_yarn_yd4','$yarn_contamination_yd1','$yarn_contamination_yd2',
+                                                        '$yarn_contamination_yd3','$yarn_contamination_yd4','$neps_dead_cotton_yd1','$neps_dead_cotton_yd2','$neps_dead_cotton_yd3',
+                                                        '$neps_dead_cotton_yd4','$misc_yd1','$misc_yd2','$misc_yd3','$misc_yd4','$missing_line_cd1','$missing_line_cd2',
+                                                        '$missing_line_cd3','$missing_line_cd4','$holes_cd1','$holes_cd2','$holes_cd3','$holes_cd4','$steaks_cd1','$steaks_cd2',
+                                                        '$steaks_cd3','$steaks_cd4','$misknit_cd1','$misknit_cd2','$misknit_cd3','$misknit_cd4','$knot_cd1','$knot_cd2','$knot_cd3',
+                                                        '$knot_cd4','$oil_mark_cd1','$oil_mark_cd2','$oil_mark_cd3','$oil_mark_cd4','$fly_cd1','$fly_cd2','$fly_cd3','$fly_cd4',
+                                                        '$misc_cd1','$misc_cd2','$misc_cd3','$misc_cd4','$hairiness_dfd1','$hairiness_dfd2','$hairiness_dfd3','$hairiness_dfd4',
+                                                        '$holes_dfd1','$holes_dfd2','$holes_dfd3','$holes_dfd4','$color_tone_dfd1','$color_tone_dfd2','$color_tone_dfd3',
+                                                        '$color_tone_dfd4','$abrasion_dfd1','$abrasion_dfd2','$abrasion_dfd3','$abrasion_dfd4','$dye_spot_dfd1','$dye_spot_dfd2',
+                                                        '$dye_spot_dfd3','$dye_spot_dfd4','$wrinkless_fold_dfd1','$wrinkless_fold_dfd2','$wrinkless_fold_dfd3','$wrinkless_fold_dfd4',
+                                                        '$bowing_skewing_dfd1','$bowing_skewing_dfd2','$bowing_skewing_dfd3','$bowing_skewing_dfd4','$pin_holes_dfd1','$pin_holes_dfd2',
+                                                        '$pin_holes_dfd3','$pin_holes_dfd4','$pick_dfd1','$pick_dfd2','$pick_dfd3','$pick_dfd4','$knot_dfd1','$knot_dfd2','$knot_dfd3',
+                                                        '$knot_dfd4','$misc_dfd1','$misc_dfd2','$misc_dfd3','$misc_dfd4','$ueven_shearing_cld1','$ueven_shearing_cld2',
+                                                        '$ueven_shearing_cld3','$ueven_shearing_cld4','$stans_cld1','$stans_cld2','$stans_cld3','$stans_cld4','$oil_grease_cld1',
+                                                        '$oil_grease_cld2','$oil_grease_cld3','$oil_grease_cld4','$dirt_cld1','$dirt_cld2','$dirt_cld3','$dirt_cld4','$water_cld1',
+                                                        '$water_cld2','$water_cld3','$water_cld4','$misc_cld1','$misc_cld2','$misc_cld3','$misc_cld4','$print_pd1','$print_pd2',
+                                                        '$print_pd3','$print_pd4','$misc_pd1','$misc_pd2','$misc_pd3','$misc_pd4') ");
         if($sql_inspeksi_kain && $sql_detail_inspeksi_kain){
             echo    "<script>swal({
                         title: 'Data Tersimpan',   
@@ -519,7 +404,7 @@
                                 }).then((result) => {
                                 if (result.value) {
                                 window.location.href='FormInspeksiKain-$nokk';
-                                document.getElementById('ket_inspek').value = $ket_inspek; 
+                                document.getElementById('ket_inspek').value = '$ket_inspek'; 
                                 }
                             });
                     </script>";
@@ -531,7 +416,7 @@
                                 }).then((result) => {
                                 if (result.value) {
                                 window.location.href='FormInspeksiKain-$nokk'; 
-                                document.getElementById('ket_inspek').value = $ket_inspek; 
+                                document.getElementById('ket_inspek').value = '$ket_inspek'; 
                                 }
                             });
                     </script>";

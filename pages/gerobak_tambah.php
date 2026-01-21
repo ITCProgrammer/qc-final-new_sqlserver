@@ -3,10 +3,10 @@ ini_set("error_reporting", 1);
 session_start();
 include("../koneksi.php");
     $modal_id=$_GET['id'];
-	$modal=mysqli_query($con,"SELECT * FROM `tbl_schedule` WHERE id='$modal_id' ");
-while($r=mysqli_fetch_array($modal)){
-	$cek=mysqli_query($con,"SELECT * FROM `tbl_gerobak` WHERE id_schedule='$r[id]'");
-	$rcek=mysqli_fetch_array($cek);
+	$modal=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_schedule WHERE id=? ",[$modal_id]);
+while($r=sqlsrv_fetch_array($modal,SQLSRV_FETCH_ASSOC)){
+	$cek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_gerobak WHERE id_schedule=? ",[$r['id']]);
+	$rcek=sqlsrv_fetch_array($cek,SQLSRV_FETCH_ASSOC);
 ?>
          
 <div class="modal-dialog modal1">

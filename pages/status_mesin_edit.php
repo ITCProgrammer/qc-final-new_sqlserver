@@ -5,17 +5,17 @@ if($_POST){
 	extract($_POST);
 	//tangkap data array dari form
     $urut = $_POST['no_urut'];
-	$personil = mysqli_real_escape_string($con,$_POST['personil']);
+	$personil = $_POST['personil'];
     //foreach
     foreach ($urut as $urut_key => $urut_value) {
-    $query = "UPDATE `tbl_schedule` SET 
-	`no_urut` =  '$urut_value',
-	`personil`=  '$personil'
-    WHERE `id` = '$urut_key' LIMIT 1 ;";
-    $result = mysqli_query($con,$query);
+    $query = "UPDATE TOP (1) db_qc.tbl_schedule SET 
+	[no_urut] =  ?,
+	[personil]=  ?
+    WHERE [id] = ? ;";
+    $result = sqlsrv_query($con_db_qc_sqlsrv,$query,[$urut_value,$personil,$urut_key]);
     }
     if (!$result) {
-        die ('cant update:' .mysqli_error());
+        die ('cant update:' .sqlsrv_error());
     }else{
 		echo " <script>window.location='Schedule';</script>";
 	}

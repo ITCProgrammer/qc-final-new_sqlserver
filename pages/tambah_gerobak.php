@@ -3,48 +3,89 @@ ini_set("error_reporting", 1);
 include("../koneksi.php");
 if($_POST){ 
 	extract($_POST);
-	$id = mysqli_real_escape_string($con,$_POST['id']);
-	$id_schedule = mysqli_real_escape_string($con,$_POST['id_schedule']);
-	$no_order = mysqli_real_escape_string($con,$_POST['no_order']);
-	$jeniskain = mysqli_real_escape_string($con,$_POST['jenis_kain']);
-	$catatan = mysqli_real_escape_string($con,$_POST['catatan']);
-	$warna = mysqli_real_escape_string($con,$_POST['warna']);
-	$lot = mysqli_real_escape_string($con,$_POST['lot']);
-	$sts = mysqli_real_escape_string($con,$_POST['sts_pro']);
-	$kd_sts = mysqli_real_escape_string($con,$_POST['kd_sts']);
-	$gerobak1 = mysqli_real_escape_string($con,$_POST['gerobak1']);
-	$gerobak2 = mysqli_real_escape_string($con,$_POST['gerobak2']);
-	$gerobak3 = mysqli_real_escape_string($con,$_POST['gerobak3']);
-	$gerobak4 = mysqli_real_escape_string($con,$_POST['gerobak4']);
-	$gerobak5 = mysqli_real_escape_string($con,$_POST['gerobak5']);
-	$gerobak6 = mysqli_real_escape_string($con,$_POST['gerobak6']);
-	if($gerobak6!=""){ $tgl=" ,`no_gerobak1`='$gerobak1',`no_gerobak2`='$gerobak2',`no_gerobak3`='$gerobak3',`no_gerobak4`='$gerobak4',`no_gerobak5`='$gerobak5',`no_gerobak6`='$gerobak6',tgl_out6=now() ";}else
-	if($gerobak5!=""){ $tgl=" ,`no_gerobak1`='$gerobak1',`no_gerobak2`='$gerobak2',`no_gerobak3`='$gerobak3',`no_gerobak4`='$gerobak4',`no_gerobak5`='$gerobak5',tgl_out5=now() ";}else
-	if($gerobak4!=""){ $tgl=" ,`no_gerobak1`='$gerobak1',`no_gerobak2`='$gerobak2',`no_gerobak3`='$gerobak3',`no_gerobak4`='$gerobak4',tgl_out4=now() ";}else
-	if($gerobak3!=""){ $tgl=" ,`no_gerobak1`='$gerobak1',`no_gerobak2`='$gerobak2',`no_gerobak3`='$gerobak3',tgl_out3=now() ";}else
-	if($gerobak2!=""){ $tgl=" ,`no_gerobak1`='$gerobak1',`no_gerobak2`='$gerobak2',tgl_out2=now() ";}else
-	if($gerobak1!=""){ $tgl=" ,`no_gerobak1`='$gerobak1',tgl_out1=now() ";}	
+	$id = $_POST['id'];
+	$id_schedule = $_POST['id_schedule'];
+	$no_order = $_POST['no_order'];
+	$jeniskain = $_POST['jenis_kain'];
+	$catatan = $_POST['catatan'];
+	$warna = $_POST['warna'];
+	$lot = $_POST['lot'];
+	$sts = $_POST['sts_pro'];
+	$kd_sts = $_POST['kd_sts'];
+	$gerobak1 = $_POST['gerobak1'];
+	$gerobak2 = $_POST['gerobak2'];
+	$gerobak3 = $_POST['gerobak3'];
+	$gerobak4 = $_POST['gerobak4'];
+	$gerobak5 = $_POST['gerobak5'];
+	$gerobak6 = $_POST['gerobak6'];
+	$params=[];
+	$update="";
+	if($gerobak6!=""){ 
+		$update.=" ,[no_gerobak1]=?,[no_gerobak2]=?,[no_gerobak3]=?,[no_gerobak4]=?,[no_gerobak5]=?,[no_gerobak6]=?,[tgl_out6]= CURRENT_TIMESTAMP ";
+		$insKolom=" ,[no_gerobak1],[no_gerobak2],[no_gerobak3],[no_gerobak4],[no_gerobak5],[no_gerobak6],[tgl_out6] ";
+		$insParam=" ,?,?,?,?,?,?,CURRENT_TIMESTAMP ";
+		$params[]=$gerobak1;
+		$params[]=$gerobak2;
+		$params[]=$gerobak3;
+		$params[]=$gerobak4;
+		$params[]=$gerobak5;
+		$params[]=$gerobak6;
+	}
+	else if($gerobak5!=""){ 
+		$update.=" ,[no_gerobak1]=?,[no_gerobak2]=?,[no_gerobak3]=?,[no_gerobak4]=?,[no_gerobak5]=?,[tgl_out5]=CURRENT_TIMESTAMP ";
+		$insKolom=" ,[no_gerobak1],[no_gerobak2],[no_gerobak3],[no_gerobak4],[no_gerobak5],[tgl_out5] ";
+		$insParam=" ,?,?,?,?,?,CURRENT_TIMESTAMP ";
+		$params[]=$gerobak1;
+		$params[]=$gerobak2;
+		$params[]=$gerobak3;
+		$params[]=$gerobak4;
+		$params[]=$gerobak5;
+	}
+	else if($gerobak4!=""){ 
+		$update.=" ,[no_gerobak1]=?,[no_gerobak2]=?,[no_gerobak3]=?,[no_gerobak4]=?,[tgl_out4]=CURRENT_TIMESTAMP ";
+		$insKolom=" ,[no_gerobak1],[no_gerobak2],[no_gerobak3],[no_gerobak4],[tgl_out4] ";
+		$insParam=" ,?,?,?,?,CURRENT_TIMESTAMP ";
+		$params[]=$gerobak1;
+		$params[]=$gerobak2;
+		$params[]=$gerobak3;
+		$params[]=$gerobak4;
+	}
+	else if($gerobak3!=""){ 
+		$update.=" ,[no_gerobak1]=?,[no_gerobak2]=?,[no_gerobak3]=?,[tgl_out3]=CURRENT_TIMESTAMP ";
+		$insKolom=" ,[no_gerobak1],[no_gerobak2],[no_gerobak3],[tgl_out3] ";
+		$insParam=" ,?,?,?,CURRENT_TIMESTAMP ";
+		$params[]=$gerobak1;
+		$params[]=$gerobak2;
+		$params[]=$gerobak3;
+	}
+	else if($gerobak2!=""){ 
+		$update.=" ,[no_gerobak1]=?,[no_gerobak2]=?,[tgl_out2]=CURRENT_TIMESTAMP ";
+		$insKolom=" ,[no_gerobak1],[no_gerobak2],[tgl_out2] ";
+		$insParam=" ,?,?,CURRENT_TIMESTAMP ";
+		$params[]=$gerobak1;
+		$params[]=$gerobak2;
+	}
+	else if($gerobak1!=""){ 
+		$update.=" ,[no_gerobak1]=?,[tgl_out1]=CURRENT_TIMESTAMP ";
+		$insKolom=" ,[no_gerobak1],[tgl_out1] ";
+		$insParam=" ,?,CURRENT_TIMESTAMP ";
+		$params[]=$gerobak1;
+	}	
 	if($id_schedule==""){
-		$sqlupdate=mysqli_query($con,"INSERT INTO `tbl_gerobak` SET
-				`id_schedule`='$id',
-				`no_order`='$no_order',
-				`jenis_kain`='$jeniskain',
-				`warna`='$warna',
-				`lot`='$lot',
-				`kd_status`='$kd_sts',
-				`catatan`='$catatan',
-				`status_produk`='$sts'
-				$tgl
-				");
-				
+		$sqlInsert="INSERT INTO db_qc.tbl_gerobak ([id_schedule],[no_order],[jenis_kain],[warna],[lot],[kd_status],[catatan],[status_produk] ".$insKolom.")
+					VALUES (?,?,?,?,?,?,?,? ".$insParam.") ";
+		$paramInsert=[$id,$no_order,$jeniskain,$warna,$lot,$kd_sts,$catatan,$sts];
+		$ins=sqlsrv_query($con_db_qc_sqlsrv,$sqlInsert,array_merge($paramInsert,$params));
 	}else{
-		$sqlupdate=mysqli_query($con,"UPDATE `tbl_gerobak` SET		
-				`catatan`='$catatan',
-				`status_produk`='$sts'
-				$tgl
-				WHERE id='$id_schedule'
-				");		
-		
+		$sqlUpdate="UPDATE db_qc.tbl_gerobak SET		
+				[catatan]=?,
+				[status_produk]=?
+				$update
+				WHERE id=?
+				";	
+		$params[]=$id_schedule;	
+		$paramUpdate=[$catatan,$sts];
+		$upd=sqlsrv_query($con_db_qc_sqlsrv,$sqlUpdate,array_merge($paramUpdate,$params));	
 	}
 				echo " <script>window.location='Schedule';</script>";
 				

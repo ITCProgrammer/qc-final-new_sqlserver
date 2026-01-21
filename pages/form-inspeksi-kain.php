@@ -1,16 +1,17 @@
 <?php 
+ini_set("error_reporting", 1);
     $nokk   = $_GET['nokk'];
     $roll   = $_GET['roll'];
 
     if ($nokk && $roll){
-        $sql_nokk   = mysql_query("SELECT  * FROM tbl_inspeksi_kain WHERE nokk = '$nokk' AND roll_no ='$roll'", $con);
-        $dataNokk   = mysql_fetch_assoc($sql_nokk);
+        $sql_nokk   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT  *,CONVERT(VARCHAR(10),tgl) tgl FROM db_qc.tbl_inspeksi_kain WHERE nokk = ? AND roll_no =? ", [$nokk,$roll]);
+        $dataNokk   = sqlsrv_fetch_array($sql_nokk,SQLSRV_FETCH_ASSOC);
         
-        $ket_inspek   = mysql_query("SELECT  * FROM tbl_inspeksi_kain WHERE nokk = '$nokk'", $con);
-        $dataket_inspek   = mysql_fetch_assoc($ket_inspek);
+        $ket_inspek   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT  *,CONVERT(VARCHAR(10),tgl) tgl FROM db_qc.tbl_inspeksi_kain WHERE nokk =? ", [$nokk]);
+        $dataket_inspek= sqlsrv_fetch_array($ket_inspek,SQLSRV_FETCH_ASSOC);
 
-        $sql_defect   = mysql_query("SELECT * FROM tbl_defect_inspeksi_kain a LEFT JOIN ( SELECT * FROM tbl_inspeksi_kain b) b ON a.id_inspek_kain = b.id WHERE b.nokk = '$nokk' AND b.roll_no = '$roll'", $con);
-        $dataDefect   = mysql_fetch_assoc($sql_defect);
+        $sql_defect   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_defect_inspeksi_kain a LEFT JOIN ( SELECT * FROM db_qc.tbl_inspeksi_kain b) b ON a.id_inspek_kain = b.id WHERE b.nokk = ? AND b.roll_no = ? ", [$nokk,$roll]);
+        $dataDefect   = sqlsrv_fetch_array($sql_defect,SQLSRV_FETCH_ASSOC);
     }
 ?>
 
@@ -59,7 +60,7 @@
                 type: 'error'
                 });
         } else {
-            window.location.href='FormInspeksiKain&'+nokk+'&'+roll_no;
+            window.location.href='FormInspeksiKain&'+nokk.trim()+'&'+roll_no;
         }
     }
 
@@ -4000,8 +4001,8 @@
                         <select name="nokk" id="nokk" class="form-control chosen-select input-sm" onchange="proses_nokk()" required>
                             <option value="0">Pilih No KK</option>							 
                             <?php 
-                            $sqlKap=mysql_query("SELECT * FROM tbl_schedule WHERE NOT `status`='selesai' ORDER BY id ASC", $con);
-                            while($rK=mysql_fetch_array($sqlKap)){
+                            $sqlKap=sqlsrv_query( $con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_schedule WHERE [status] <> 'selesai' ORDER BY id ASC");
+                            while($rK=sqlsrv_fetch_array($sqlKap,SQLSRV_FETCH_ASSOC)){
                             ?>
                                 <option value="<?= $rK['nokk']; ?>" <?php if($nokk == $rK['nokk'] ){ echo 'SELECTED'; } ?>><?= $rK['nokk']; ?> - <?= $rK['langganan']; ?> - <?= $rK['no_order']; ?> - <?= $rK['po']; ?></option>
                             <?php } ?>	
@@ -4109,8 +4110,8 @@
                 </thead>
                 <tbody>
                 <?php 
-                    $sqlDetailKK    = mysql_query("SELECT * FROM tbl_inspeksi_kain WHERE nokk='$nokk' ORDER BY id ASC",$con);
-                    while($dataDetailNokk = mysql_fetch_array($sqlDetailKK)){
+                    $sqlDetailKK    = sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_inspeksi_kain WHERE nokk=? ORDER BY id ASC",[$nokk]);
+                    while($dataDetailNokk = sqlsrv_fetch_array($sqlDetailKK,SQLSRV_FETCH_ASSOC)){
                 ?>
                     <tr>
                         <td><?= $dataDetailNokk['roll_no'] ?></td>

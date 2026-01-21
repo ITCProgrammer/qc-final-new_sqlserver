@@ -16,34 +16,34 @@ include "koneksi.php";
 
 <body>
   <?php
-  $data = mysqli_query($con, "SELECT
+  $data = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
    	id,
-	no_mesin,
-	no_urut,
-	buyer,
-	langganan,
-	no_order,
-	nokk,
-  nodemand,
-	jenis_kain,
-	warna,
-	no_warna,
-	lot,
+	max(no_mesin) no_mesin,
+	max(no_urut) no_urut,
+	max(buyer) buyer,
+	max(langganan) langganan,
+	max(no_order) no_order,
+	max(nokk) nokk,
+  max(nodemand) nodemand,
+	max(jenis_kain) jenis_kain,
+	max(warna) warna,
+	max(no_warna) no_warna,
+	max(lot) lot,
 	sum(rol) as rol,
 	sum(bruto) as bruto,
-	proses,
-	catatan,
-	ket_status,
-	tgl_delivery,
-  TIMESTAMPDIFF(HOUR, tgl_update, now()) as diff
+	max(proses) proses,
+	max(catatan) catatan,
+	max(ket_status) ket_status,
+	max(CONVERT(VARCHAR(10),tgl_delivery)) tgl_delivery,
+  max(DATEDIFF(HOUR, tgl_update, CURRENT_TIMESTAMP)) as diff
 FROM
-	tbl_schedule 
+	db_qc.tbl_schedule 
 WHERE
 	NOT STATUS = 'selesai' 
 GROUP BY
 	id
 ORDER BY
-	no_mesin ASC,no_urut ASC");
+	max(no_mesin) ASC, max(no_urut) ASC");
   $no = 1;
   $n = 1;
   $c = 0;
@@ -118,13 +118,13 @@ ORDER BY
               <tbody>
                 <?php
                 $col = 0;
-                while ($rowd = mysqli_fetch_array($data)) {
+                while ($rowd = sqlsrv_fetch_array($data,SQLSRV_FETCH_ASSOC)) {
                   date_default_timezone_set('Asia/Jakarta');
                   $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
-                  $qCek = mysqli_query($con, "SELECT `status`,`personil` FROM tbl_inspection WHERE id_schedule='$rowd[id]' LIMIT 1");
-                  $rCEk = mysqli_fetch_array($qCek);
-                  //$qLate=mysqli_query("SELECT TIMESTAMPDIFF(HOUR, '$rowd[tgl_update]', now()) as diff FROM tbl_schedule WHERE nokk='$rowd[nokk]' AND NOT STATUS = 'selesai'");
-                  //$rLate=mysqli_fetch_array($qLate);
+                  $qCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 [status],[personil] FROM db_qc.tbl_inspection WHERE id_schedule=? ",[$rowd['id']]);
+                  $rCEk = sqlsrv_fetch_array($qCek,SQLSRV_FETCH_ASSOC);
+                  //$qLate=sqlsrv_query("SELECT TIMESTAMPDIFF(HOUR, '$rowd[tgl_update]', now()) as diff FROM tbl_schedule WHERE nokk='$rowd[nokk]' AND NOT STATUS = 'selesai'");
+                  //$rLate=sqlsrv_fetch_array($qLate,SQLSRV_FETCH_ASSOC);
                   //$tglupdate = new DateTime($rowd['tgl_update']);
                   //$now=new DateTime();
                   //$selisih = $tglupdate->diff($now);
@@ -199,7 +199,7 @@ ORDER BY
                       <a href="#" id='<?php echo $rowd['id']; ?>' class="btn btn-xs <?php if ($_SESSION['akses'] == "biasa" or $_SESSION['akses'] == "superadmin") {
                            echo "enabled";
                          } else {
-                           echo " disabled ";
+                           echo " disabled-cancel ";
                          }
                          if ($rowd['no_urut'] != "1") {
                            echo " hidden ";
