@@ -127,13 +127,13 @@ $Order	= isset($_POST['order']) ? $_POST['order'] : '';
           <?php
             $no=1;
             if($Awal!="" and $Akhir!=""){
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_schedule_krah WHERE `status`='selesai' and DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_schedule_krah WHERE status='selesai' and TRY_CAST(tgl_masuk AS DATE) BETWEEN '$Awal' AND '$Akhir' ORDER BY id ASC");
             }else{
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_schedule_krah WHERE `status`='selesai' and DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_schedule_krah WHERE status='selesai' and TRY_CAST(tgl_masuk AS DATE) BETWEEN '$Awal' AND '$Akhir' ORDER BY id ASC");
             }
-                while($row1=mysqli_fetch_array($qry1)){
-                  $tgltarget = new DateTime($row1['target']);
-                  $tglstop = new DateTime($row1['tgl_stop']);
+                while($row1=sqlsrv_fetch_array($qry1)){
+                  $tgltarget = $row1['target'];
+                  $tglstop = $row1['tgl_stop'];
                   $target = $tglstop->diff($tgltarget);
                   $delay = $tgltarget->diff($tglstop);
               ?>
@@ -142,7 +142,7 @@ $Order	= isset($_POST['order']) ? $_POST['order'] : '';
             <td align="center"><div class="btn-group">
             <a href="#" class="btn btn-danger btn-xs <?php if($_SESSION['akses']=='biasa' AND ($_SESSION['lvl_id']!='PACKING' OR $_SESSION['lvl_id']!='NCP')){ echo "disabled"; } ?>" onclick="confirm_delete('./HapusDataKrahNew-<?php echo $row1['id'] ?>');"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" title="Hapus"></i> </a>
             </div></td>
-            <td align="center"><?php echo date("Y-m-d", strtotime($row1['tgl_masuk']));?></td>
+            <td align="center"><?php echo date_format($row1['tgl_masuk'], 'Y-m-d');?></td>
             <td align="center"><?php echo $row1['nokk'];?></td>
             <td><?php echo $row1['langganan'];?></td>
             <td><?php echo $row1['buyer'];?></td>
@@ -159,8 +159,8 @@ $Order	= isset($_POST['order']) ? $_POST['order'] : '';
             <td align="center"><?php echo $row1['rol_sisa'];?></td>
             <td align="center"><?php echo $row1['qty_sisa'];?></td>
             <td align="center"><?php echo $row1['pcs_sisa'];?></td>
-            <td align="center"><?php echo date("Y-m-d", strtotime($row1['target']));?></td>
-            <td align="center"><?php echo date("Y-m-d", strtotime($row1['tgl_stop']));?></td>
+            <td align="center"><?php echo date_format($row1['target'], 'Y-m-d');?></td>
+            <td align="center"><?php echo date_format($row1['tgl_stop'], 'Y-m-d');?></td>
             <td align="center">
             <?php if($tgltarget>$tglstop){ ?><?php echo "Tercapai";?>
             <?php }elseif($delay->d>0){ ?><?php echo "Delay "; echo $delay->d; echo " Hari";?>
