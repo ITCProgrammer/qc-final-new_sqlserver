@@ -52,53 +52,81 @@ $no_warna = isset($_GET['no_warna']) ? $_GET['no_warna'] : '';
                     </thead>
                     <tbody>
                         <?php
-                        $no = 1;
-                         $sqldtl = "SELECT
-                            tq.*,
-                            GROUP_CONCAT(DISTINCT b.no_ncp_gabungan SEPARATOR ', ') AS no_ncp,
-                            GROUP_CONCAT(DISTINCT b.masalah_dominan SEPARATOR ', ') AS masalah_utama,
-                            GROUP_CONCAT(DISTINCT b.akar_masalah SEPARATOR ', ') AS akar_masalah,
-                            GROUP_CONCAT(DISTINCT b.solusi_panjang SEPARATOR ', ') AS solusi_panjang,
-                            tli.qty_loss AS qty_sisa,
-                            tli.satuan AS satuan_sisa,
-                            c.masalah_dominan,
-                            c.ket
-                        FROM
-                            tbl_qcf tq
-                            LEFT JOIN tbl_lap_inspeksi tli ON tq.nodemand = tli.nodemand AND tq.no_order = tli.no_order
-                            LEFT JOIN tbl_ncp_qcf_now b ON tq.nodemand = b.nodemand
-                            LEFT JOIN tbl_aftersales_now c ON c.nodemand = tq.nodemand AND c.nokk = tq.nokk
-                        WHERE
-                            tq.sts_pbon != '10'
-                            AND (
-                                tq.penghubung_masalah != ''
-                                OR tq.penghubung_keterangan != ''
-                                OR tq.penghubung_roll1 != ''
-                                OR tq.penghubung_roll2 != ''
-                                OR tq.penghubung_roll3 != ''
-                                OR tq.penghubung_dep != ''
-                                OR tq.penghubung_dep_persen != ''
-                            )
-                            AND tq.no_po = '" . mysqli_real_escape_string($con, $no_po) . "'
-                            AND tq.no_hanger = '" . mysqli_real_escape_string($con, $no_hanger) . "'
-                            AND tq.no_warna = '" . mysqli_real_escape_string($con, $no_warna) . "'
-                        GROUP BY
-                            tq.no_order,
-                            tq.no_po,
-                            tq.no_hanger,
-                            tq.no_item,
-                            tq.warna,
-                            tq.pelanggan,
-                            tq.tgl_masuk,
-                            tq.nodemand
-                        ";
-                        $stmt = mysqli_query($con, $sqldtl);
-                        while($r = mysqli_fetch_array($stmt)){
+                            $no = 1;
+
+                            $sqldtl = "SELECT
+                                tq.*,
+                                ncp.no_ncp,
+                                ncp.masalah_utama,
+                                ncp.akar_masalah,
+                                ncp.solusi_panjang,
+                                tli.qty_loss AS qty_sisa,
+                                tli.satuan AS satuan_sisa,
+                                c.masalah_dominan,
+                                c.ket
+                            FROM db_qc.tbl_qcf tq
+                            OUTER APPLY (
+                                SELECT TOP 1
+                                    x.qty_loss,
+                                    x.satuan
+                                FROM db_qc.tbl_lap_inspeksi x
+                                WHERE x.nodemand = tq.nodemand
+                                AND x.no_order = tq.no_order
+                                ORDER BY (SELECT NULL)
+                            ) tli
+                            OUTER APPLY (
+                                SELECT TOP 1
+                                    y.masalah_dominan,
+                                    y.ket
+                                FROM db_qc.tbl_aftersales_now y
+                                WHERE y.nodemand = tq.nodemand
+                                AND y.nokk     = tq.nokk
+                                ORDER BY (SELECT NULL)
+                            ) c
+                            OUTER APPLY (
+                                SELECT
+                                    STRING_AGG(x.no_ncp_gabungan, ', ') AS no_ncp,
+                                    STRING_AGG(x.masalah_dominan, ', ') AS masalah_utama,
+                                    STRING_AGG(x.akar_masalah, ', ') AS akar_masalah,
+                                    STRING_AGG(x.solusi_panjang, ', ') AS solusi_panjang
+                                FROM (
+                                    SELECT DISTINCT
+                                        b.no_ncp_gabungan,
+                                        b.masalah_dominan,
+                                        b.akar_masalah,
+                                        b.solusi_panjang
+                                    FROM db_qc.tbl_ncp_qcf_now b
+                                    WHERE b.nodemand = tq.nodemand
+                                ) x
+                            ) ncp
+                            WHERE
+                                tq.sts_pbon <> '10'
+                                AND (
+                                    ISNULL(tq.penghubung_masalah, '') <> ''
+                                    OR ISNULL(tq.penghubung_keterangan, '') <> ''
+                                    OR ISNULL(tq.penghubung_roll1, '') <> ''
+                                    OR ISNULL(tq.penghubung_roll2, '') <> ''
+                                    OR ISNULL(tq.penghubung_roll3, '') <> ''
+                                    OR ISNULL(tq.penghubung_dep, '') <> ''
+                                    OR ISNULL(tq.penghubung_dep_persen, '') <> ''
+                                )
+                                AND tq.no_po     = ?
+                                AND tq.no_hanger = ?
+                                AND tq.no_warna  = ?
+                            ";
+                            $paramsDtl = [$no_po, $no_hanger, $no_warna];
+
+                            $stmtDtl = sqlsrv_query($con_db_qc_sqlsrv, $sqldtl, $paramsDtl);
+                            if ($stmtDtl === false) {
+                                die("<pre>" . print_r(sqlsrv_errors(), true) . "</pre>");
+                            }
+
+                            while ($r = sqlsrv_fetch_array($stmtDtl, SQLSRV_FETCH_ASSOC)) {
                         ?>
                         <tr>
                             <td align="center"><?php echo $no;?></td>
-                            <td align="center"><?php $rsts= mysqli_query($con,"SELECT * FROM tbl_bonpenghubung_mail WHERE nodemand='$r[nodemand]'");
-                                $dtsts = mysqli_fetch_assoc($rsts);
+                            <td align="center"><?php $rsts= sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_bonpenghubung_mail WHERE nodemand='$r[nodemand]'");
+                                $dtsts = sqlsrv_fetch_array($rsts, SQLSRV_FETCH_ASSOC);
                                 if($dtsts['status_approve']==1){
                                 echo 'APPROVE OLEH : '.$dtsts['approve_mkt'];
                                 }else if($dtsts['status_approve']==99){
@@ -109,10 +137,10 @@ $no_warna = isset($_GET['no_warna']) ? $_GET['no_warna'] : '';
                                 echo '';
                                 }?></td>
                             <td align="center"><?php echo htmlspecialchars($r['no_order']); // Project ?></td>
-                            <td align="center"><?php echo $r['berat_extra'];?></td> <!-- Kg FOC -->
-                            <td align="center"><?php echo $r['panjang_extra'];?></td> <!-- Yard FOC -->
-                            <td align="center"><?php echo $r['estimasi'];?></td>
-                            <td align="center"><?php echo $r['panjang_estimasi'];?></td>
+                            <td align="center"><?php echo number_format((float)$r['berat_extra'], 2, '.', ''); ?></td>
+                            <td align="center"><?php echo number_format((float)$r['panjang_extra'], 2, '.', ''); ?></td>
+                            <td align="center"><?php echo number_format((float)$r['estimasi'], 2, '.', ''); ?></td>
+                            <td align="center"><?php echo number_format((float)$r['panjang_estimasi'], 2, '.', ''); ?></td>
                             <td align="center"><?php echo $r['lot_legacy']; // Lot-Legacy ?></td>
                             <td align="center"><?php echo $r['lot']; // Lot ?></td>
                             <td align="center"><?php echo $r['nodemand']; // Demand ?></td>

@@ -100,67 +100,88 @@ include "koneksi.php";
                         <tbody>
                                 <?php
                                     $no = 1;
-                                    // Build WHERE clause
-                                    $where = "";
-                                        if ($filter_no_order) {
-                                            $where .= " AND tq.no_po LIKE '%" . mysqli_real_escape_string($con, $filter_no_order) . "%' ";
-                                        }
-                                        if ($filter_warna) {
-                                            $where .= " AND tq.warna LIKE '%" . mysqli_real_escape_string($con, $filter_warna) . "%' ";
-                                        }
-                                        if ($filter_no_hanger) {
-                                            $where .= " AND tq.no_hanger LIKE '%" . mysqli_real_escape_string($con, $filter_no_hanger) . "%' ";
-                                        }
-                                        if ($filter_pelanggan) {
-                                            $where .= " AND tq.pelanggan LIKE '%" . mysqli_real_escape_string($con, $filter_pelanggan) . "%' ";
-                                        }
-                                        if ($filter_tgl_awal && $filter_tgl_akhir) {
-                                            $where .= " AND DATE(tq.tgl_masuk) BETWEEN '" . mysqli_real_escape_string($con, $filter_tgl_awal) . "' AND '" . mysqli_real_escape_string($con, $filter_tgl_akhir) . "' ";
-                                        } elseif ($filter_tgl_awal) {
-                                            $where .= " AND DATE(tq.tgl_masuk) = '" . mysqli_real_escape_string($con, $filter_tgl_awal) . "' ";
-                                        } elseif ($filter_tgl_akhir) {
-                                            $where .= " AND DATE(tq.tgl_masuk) = '" . mysqli_real_escape_string($con, $filter_tgl_akhir) . "' ";
-                                        }
+                                    $where  = "";
+                                    $params = [];
 
-                                        if (empty($where)) {
-                                            echo '<tr><td colspan="18" class="text-center text-info">Silakan isi minimal satu filter untuk menampilkan data.</td></tr>';
-                                        } else {
-                                    $queryMain = "SELECT
-                                        tq.no_po,
-                                        tq.no_hanger,
-                                        tq.pelanggan,
-                                        tq.warna,
-                                        tq.no_warna,
-                                        SUM(CASE WHEN m.status_approve = 2 THEN tq.estimasi ELSE 0 END) AS estimasi_approve,  
-                                        SUM(CASE WHEN m.status_approve = 2 THEN tq.panjang_estimasi ELSE 0 END) AS estimasi_panjang_approve,    
-                                        SUM(CASE WHEN m.status_approve = 99 THEN tq.estimasi ELSE 0 END) AS estimasi_reject,
-                                        SUM(CASE WHEN m.status_approve = 99 THEN tq.panjang_estimasi ELSE 0 END) AS estimasi_panjang_reject,
-                                        SUM(CASE WHEN m.status_approve = 0 THEN tq.estimasi ELSE 0 END) AS estimasi_pending,
-                                        SUM(CASE WHEN m.status_approve = 0 THEN tq.panjang_estimasi ELSE 0 END) AS estimasi_panjang_pending
-                                        FROM tbl_bonpenghubung_mail m
-                                        LEFT JOIN tbl_qcf tq ON m.nodemand = tq.nodemand 
-                                        WHERE tq.sts_pbon != '10'
-                                            AND m.team <> ''
-                                            AND (
-                                                tq.penghubung_masalah != '' OR
-                                                tq.penghubung_keterangan != '' OR
-                                                tq.penghubung_roll1 != '' OR
-                                                tq.penghubung_roll2 != '' OR
-                                                tq.penghubung_roll3 != '' OR
-                                                tq.penghubung_dep != '' OR
-                                                tq.penghubung_dep_persen != ''
+                                    // filter no order
+                                    if (!empty($filter_no_order)) {
+                                        $where   .= " AND tq.no_po LIKE ? ";
+                                        $params[] = "%{$filter_no_order}%";
+                                    }
+
+                                    // filter warna
+                                    if (!empty($filter_warna)) {
+                                        $where   .= " AND tq.warna LIKE ? ";
+                                        $params[] = "%{$filter_warna}%";
+                                    }
+
+                                    // filter no hanger
+                                    if (!empty($filter_no_hanger)) {
+                                        $where   .= " AND tq.no_hanger LIKE ? ";
+                                        $params[] = "%{$filter_no_hanger}%";
+                                    }
+
+                                    // filter pelanggan
+                                    if (!empty($filter_pelanggan)) {
+                                        $where   .= " AND tq.pelanggan LIKE ? ";
+                                        $params[] = "%{$filter_pelanggan}%";
+                                    }
+
+                                    // filter tanggal (SQL Server: CAST ke DATE)
+                                    if (!empty($filter_tgl_awal) && !empty($filter_tgl_akhir)) {
+                                        $where   .= " AND CAST(tq.tgl_masuk AS DATE) BETWEEN ? AND ? ";
+                                        $params[] = $filter_tgl_awal;
+                                        $params[] = $filter_tgl_akhir;
+                                    } elseif (!empty($filter_tgl_awal)) {
+                                        $where   .= " AND CAST(tq.tgl_masuk AS DATE) = ? ";
+                                        $params[] = $filter_tgl_awal;
+                                    } elseif (!empty($filter_tgl_akhir)) {
+                                        $where   .= " AND CAST(tq.tgl_masuk AS DATE) = ? ";
+                                        $params[] = $filter_tgl_akhir;
+                                    }
+
+                                    if (empty($where)) {
+                                        echo '<tr><td colspan="18" class="text-center text-info">Silakan isi minimal satu filter untuk menampilkan data.</td></tr>';
+                                    } else {
+
+                                        $queryMain = " SELECT
+                                            tq.no_po,
+                                            tq.no_hanger,
+                                            tq.pelanggan,
+                                            tq.warna,
+                                            tq.no_warna,
+                                            SUM(CASE WHEN m.status_approve = 2  THEN tq.estimasi         ELSE 0 END) AS estimasi_approve,
+                                            SUM(CASE WHEN m.status_approve = 2  THEN tq.panjang_estimasi ELSE 0 END) AS estimasi_panjang_approve,
+                                            SUM(CASE WHEN m.status_approve = 99 THEN tq.estimasi         ELSE 0 END) AS estimasi_reject,
+                                            SUM(CASE WHEN m.status_approve = 99 THEN tq.panjang_estimasi ELSE 0 END) AS estimasi_panjang_reject,
+                                            SUM(CASE WHEN m.status_approve = 0  THEN tq.estimasi         ELSE 0 END) AS estimasi_pending,
+                                            SUM(CASE WHEN m.status_approve = 0  THEN tq.panjang_estimasi ELSE 0 END) AS estimasi_panjang_pending
+                                        FROM db_qc.tbl_bonpenghubung_mail m
+                                        LEFT JOIN db_qc.tbl_qcf tq ON m.nodemand = tq.nodemand
+                                        WHERE tq.sts_pbon <> '10'
+                                        AND m.team <> ''
+                                        AND (
+                                                tq.penghubung_masalah <> '' OR
+                                                tq.penghubung_keterangan <> '' OR
+                                                tq.penghubung_roll1 <> '' OR
+                                                tq.penghubung_roll2 <> '' OR
+                                                tq.penghubung_roll3 <> '' OR
+                                                tq.penghubung_dep <> '' OR
+                                                tq.penghubung_dep_persen <> ''
                                             )
-                                            $where
-                                        GROUP BY tq.no_po, tq.no_warna, tq.no_hanger
-                                        ORDER BY tq.no_po";
+                                        $where
+                                        GROUP BY
+                                            tq.no_po, tq.no_hanger, tq.pelanggan, tq.warna, tq.no_warna
+                                        ORDER BY tq.no_po
+                                        ";
 
-                                    $resultMain = mysqli_query($con, $queryMain);
+                                        
+                                    $stmtMainSqlsrv = sqlsrv_query($con_db_qc_sqlsrv, $queryMain, $params);
+                                    if ($stmtMainSqlsrv === false) {
+                                        die("<pre>" . print_r(sqlsrv_errors(), true) . "</pre>");
+                                    }
 
-                                        if (!$resultMain) {
-                                            die("Query Error (MySQL): " . mysqli_error($con));
-                                        }
-
-                                        while ($row = mysqli_fetch_assoc($resultMain)) {
+                                    while (($row = sqlsrv_fetch_array($stmtMainSqlsrv, SQLSRV_FETCH_ASSOC)) !== null) {
                                             $nokk = $row['nokk'] ?? '';
                                             $no_order = $row['no_order'];
                                             $no_po = $row['no_po'];

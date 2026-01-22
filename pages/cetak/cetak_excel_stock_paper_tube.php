@@ -9,7 +9,6 @@ header("Expires: 0");
 ini_set("error_reporting", 1);
 session_start();
 include "../../koneksi.php";
-$coninvqc=mysqli_connect("10.0.0.10","dit","4dm1n","invqc");
 $Awal=$_GET['awal'];
 $Akhir=$_GET['akhir'];
 ?> 
@@ -26,8 +25,8 @@ $Akhir=$_GET['akhir'];
                 <th><div align="center">QTY(PCS)</div></th>
             </tr>
             <?php
-            $qry=mysqli_query($coninvqc,"SELECT * FROM tbl_barang WHERE nama='PAPER TUBE' ORDER BY id ASC");
-            while($row=mysqli_fetch_array($qry)){
+            $qry=sqlsrv_query($con_invqc_sqlsrv,"SELECT * FROM invqc.tbl_barang WHERE nama='PAPER TUBE' ORDER BY id ASC");
+            while($row=sqlsrv_fetch_array($qry)){
             ?>
             <tr>
                 <td align="center"><?php echo substr($row['jenis'],-2); ?></td>

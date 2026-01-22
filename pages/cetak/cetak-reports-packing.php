@@ -4,8 +4,10 @@ session_start();
 include "../../koneksi.php";
   $Awal=$_GET['awal'];
   $Akhir=$_GET['akhir'];
-  $qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-  $rTgl=mysqli_fetch_array($qTgl);
+  $qTgl   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+              CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+              CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg;");
+  $rTgl   = sqlsrv_fetch_array($qTgl);
   if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -182,12 +184,12 @@ border:hidden;
       $roll=0;$bruto=0;$netto=0;
       $Awal=$_GET['awal'];
       $Akhir=$_GET['akhir'];
-      if($_GET['shift']!="ALL"){$shft=" AND `shift`='$_GET[shift]' "; }else{$shft=" ";}
-      if($_GET['nomc']!="ALL"){ $nomc=" AND `no_mc` LIKE '%$_GET[nomc]' ";}else{$nomc=" ";}
-      if($_GET['group']!="ALL"){ $grp=" AND `inspektor` LIKE '%$_GET[group]' ";}else{$grp=" ";}		
-      $qry1=mysqli_query($con,"SELECT * FROM tbl_lap_inspeksi
-      WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' $shft $nomc $grp AND `dept`='PACKING' ORDER BY id ASC");
-          while($row=mysqli_fetch_array($qry1)){
+      if($_GET['shift']!="ALL"){$shft=" AND shift='$_GET[shift]' "; }else{$shft=" ";}
+      if($_GET['nomc']!="ALL"){ $nomc=" AND no_mc LIKE '%$_GET[nomc]' ";}else{$nomc=" ";}
+      if($_GET['group']!="ALL"){ $grp=" AND inspektor LIKE '%$_GET[group]' ";}else{$grp=" ";}		
+      $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_lap_inspeksi
+      WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' $shft $nomc $grp AND dept='PACKING' ORDER BY id ASC");
+          while($row=sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
         ?>
           <tr>
                 <td align="center"><?php echo $no;?></td>
@@ -195,7 +197,7 @@ border:hidden;
                 <td><?php echo substr($row['no_order'],0,6)." ".substr($row['no_order'],6,10);?></td>
                 <td><?php echo $row['jenis_kain'];?></td>
                 <td><?php echo substr($row['warna'],0,7)." ".substr($row['warna'],7,20);?></td>
-                <td align="center"><?php echo $row['tgl_pengiriman'];?></td>
+                <td align="center"><?php echo date_format($row['tgl_pengiriman'], 'Y-m-d');?></td>
                 <td align="center"><?php echo $row['lot'];?></td>
                 <td align="center"><?php echo $row['inspektor'];?></td>
                 <td align="center"><?php echo $row['no_mc'];?></td>
@@ -206,7 +208,7 @@ border:hidden;
                 <td align="right" valign="top"><?php echo $row['panjang']." ".$row['satuan'];?></td>
                 <td align="center"><?php echo $row['proses'];?></td>
                 <td align="center"><?php echo $row['status'];?></td>
-                <td align="center"><?php echo $row['jam_mutasi'];?></td>
+                <td align="center"><?php echo date_format($row['jam_mutasi'], 'H:i:s');?></td>
                 <td align="center"><?php echo $row['speed'];?></td>
                 <td><?php echo $row['catatan'];?></td>
             </tr>

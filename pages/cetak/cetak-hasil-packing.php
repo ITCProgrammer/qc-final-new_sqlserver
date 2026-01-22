@@ -11,8 +11,10 @@ $Awal=$_GET['awal'];
 $Akhir=$_GET['akhir'];
 $Shift=$_GET['shift'];
 $MC=$_GET['nomc'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%d-%b-%y') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+            CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg;");
+$rTgl   = sqlsrv_fetch_array($qTgl);
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -154,20 +156,20 @@ border:hidden;
             $t_panjangK=0;
             $Awal=$_GET['awal'];
             $Akhir=$_GET['akhir'];
-            if($_GET['shift']!="ALL"){$shft=" AND `shift`='$_GET[shift]' "; }else{$shft=" ";}
-            if($_GET['nomc']!="ALL"){ $nomc=" AND `no_mc` LIKE '%$_GET[nomc]' ";}else{$nomc=" ";}	
-            if($_GET['group']!="ALL"){ $grp=" AND `inspektor` LIKE '%$_GET[group]' ";}else{$grp=" ";}		
-            $qry1=mysqli_query($con,"SELECT operator,no_mc FROM tbl_lap_inspeksi
-            WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' $shft $nomc $grp AND `dept`='PACKING' GROUP BY operator,no_mc");
-                while($row=mysqli_fetch_array($qry1)){
+            if($_GET['shift']!="ALL"){$shft=" AND shift='$_GET[shift]' "; }else{$shft=" ";}
+            if($_GET['nomc']!="ALL"){ $nomc=" AND no_mc LIKE '%$_GET[nomc]' ";}else{$nomc=" ";}	
+            if($_GET['group']!="ALL"){ $grp=" AND inspektor LIKE '%$_GET[group]' ";}else{$grp=" ";}		
+            $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT operator,no_mc FROM db_qc.tbl_lap_inspeksi
+            WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' $shft $nomc $grp AND dept='PACKING' GROUP BY operator,no_mc");
+                while($row=sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
                     //QTY KECIL
-                    $qryKecil=mysqli_query($con,"SELECT SUM(jml_roll) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM tbl_lap_inspeksi
-                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' $shft $grp AND `dept`='PACKING' AND operator='$row[operator]' AND no_mc='$row[no_mc]' AND ket_qty='Quantity Kecil'");
-                    $rowKecil=mysqli_fetch_array($qryKecil);
+                    $qryKecil=sqlsrv_query($con_db_qc_sqlsrv,"SELECT SUM(jml_roll) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM db_qc.tbl_lap_inspeksi
+                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' $shft $grp AND dept='PACKING' AND operator='$row[operator]' AND no_mc='$row[no_mc]' AND ket_qty='Quantity Kecil'");
+                    $rowKecil=sqlsrv_fetch_array($qryKecil);
                     //QTY BESAR
-                    $qryBesar=mysqli_query($con,"SELECT SUM(jml_roll) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM tbl_lap_inspeksi
-                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' $shft $grp AND `dept`='PACKING' AND operator='$row[operator]' AND no_mc='$row[no_mc]' AND ket_qty='Quantity Besar'");
-                    $rowBesar=mysqli_fetch_array($qryBesar);
+                    $qryBesar=sqlsrv_query($con_db_qc_sqlsrv,"SELECT SUM(jml_roll) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM db_qc.tbl_lap_inspeksi
+                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' $shft $grp AND dept='PACKING' AND operator='$row[operator]' AND no_mc='$row[no_mc]' AND ket_qty='Quantity Besar'");
+                    $rowBesar=sqlsrv_fetch_array($qryBesar);
 					$sqlop="SELECT x.LONGDESCRIPTION FROM DB2ADMIN.INITIALS x
 							WHERE CODE ='".$row['operator']."'"; 
                     $stmt1=db2_exec($conn1,$sqlop, array('cursor'=>DB2_SCROLLABLE));

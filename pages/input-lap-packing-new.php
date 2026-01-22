@@ -65,9 +65,10 @@ include "koneksi.php";
 
 
 if ($_POST['simpan'] == "simpan") {
-    // $ceksql = mysqli_query($con, "SELECT * FROM `tbl_lap_inspeksi` WHERE `nodemand`='$_GET[nodemand]' and `shift`='$_POST[shift]' AND DATE_FORMAT(tgl_update, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d') AND `dept`='PACKING' LIMIT 1");
-    $ceksql = mysqli_query($con, "SELECT * FROM `tbl_lap_inspeksi` WHERE `nodemand`='$_GET[nodemand]' and `shift`='$_POST[shift]' AND `dept`='PACKING' AND`operator`='$_GET[operator]'LIMIT 1");
-    $cek = mysqli_num_rows($ceksql);
+    // $ceksql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_lap_inspeksi WHERE nodemand='$_GET[nodemand]' and shift='$_POST[shift]' AND CONVERT(date, tgl_update) = CONVERT(date, GETDATE()) AND dept='PACKING'");
+    $ceksql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_inspeksi WHERE nodemand='$_GET[nodemand]' and shift='$_POST[shift]' AND dept='PACKING' AND operator='$_GET[operator]'");
+    $rcek = sqlsrv_fetch_array($ceksql);
+    $cek = $rcek['total_rows'];
     if ($cek > 0) {
         $pelanggan = str_replace("'", "''", $_POST['pelanggan']);
         $order = str_replace("'", "''", $_POST['no_order']);
@@ -80,45 +81,45 @@ if ($_POST['simpan'] == "simpan") {
         } else {
             $stKG = "0";
         }
-        $sql1 = mysqli_query($con, "UPDATE `tbl_lap_inspeksi` SET
-	`no_order`='$order',
-	`pelanggan`='$pelanggan',
-	`jenis_kain`='$jns',
-	`warna`='$warna',
-	`tgl_pengiriman`='$_POST[awal]',
-	`lot`='$_POST[lot]',
-	`inspektor`='$_POST[inspektor]',
-	`no_mc`='$_POST[no_mc]',
-	`jml_roll`='$_POST[rol]',
-	`bruto`='$_POST[bruto]',
-	`jml_netto`='$_POST[rol_netto]',
-	`netto`='$_POST[netto]',
-    `mutasi`='$_POST[mutasi]',
-	`jml_mutasi`='$_POST[rol_mutasi]',
-	`kg_bs`='$_POST[kg_bs]',
-	`jml_bs`='$_POST[rol_bs]',
-	`kg_th`='$_POST[kg_th]',
-	`jml_th`='$_POST[rol_th]',
-	`panjang`='$_POST[panjang]',
-	`satuan`='$_POST[satuan]',
-	`proses`='$_POST[proses]',
-	`status`='$_POST[status]',
-	`no_grobak`='$_POST[no_grbk]',
-	`tgl_mulai`='$_POST[tgl_mulai]',
-	`tgl_selesai`='$_POST[tgl_selesai]',
-	`jam_mulai`='$_POST[mulai]',
-	`jam_selesai`='$_POST[selesai]',
-	`istirahat`='$_POST[istirahat]',
-	`catatan`='$catatan',
-	`jam_mutasi`='$_POST[jam]',
-	`sts_gkg`='$stKG',
-	`tgl_update`='$_POST[tgl]',
-    `operator`='$_POST[operator]',
-    `lebar`='$_POST[lebar]',
-    `gramasi`='$_POST[gramasi]',
-	`qty_loss`='$_POST[qty_loss]',
-	`note_loss`='$noteloss',
-    `ket_qty`='$_POST[ket_qty]',
+        $sql1 = sqlsrv_query($con_db_qc_sqlsrv, "UPDATE db_qc.tbl_lap_inspeksi SET
+	no_order='$order',
+	pelanggan='$pelanggan',
+	jenis_kain='$jns',
+	warna='$warna',
+	tgl_pengiriman='$_POST[awal]',
+	lot='$_POST[lot]',
+	inspektor='$_POST[inspektor]',
+	no_mc='$_POST[no_mc]',
+	jml_roll='$_POST[rol]',
+	bruto='$_POST[bruto]',
+	jml_netto='$_POST[rol_netto]',
+	netto='$_POST[netto]',
+    mutasi='$_POST[mutasi]',
+	jml_mutasi='$_POST[rol_mutasi]',
+	kg_bs='$_POST[kg_bs]',
+	jml_bs='$_POST[rol_bs]',
+	kg_th='$_POST[kg_th]',
+	jml_th='$_POST[rol_th]',
+	panjang='$_POST[panjang]',
+	satuan='$_POST[satuan]',
+	proses='$_POST[proses]',
+	status='$_POST[status]',
+	no_grobak='$_POST[no_grbk]',
+	tgl_mulai='$_POST[tgl_mulai]',
+	tgl_selesai='$_POST[tgl_selesai]',
+	jam_mulai='$_POST[mulai]',
+	jam_selesai='$_POST[selesai]',
+	istirahat='$_POST[istirahat]',
+	catatan='$catatan',
+	jam_mutasi='$_POST[jam]',
+	sts_gkg='$stKG',
+	tgl_update='$_POST[tgl]',
+    operator='$_POST[operator]',
+    lebar='$_POST[lebar]',
+    gramasi='$_POST[gramasi]',
+	qty_loss='$_POST[qty_loss]',
+	note_loss='$noteloss',
+    ket_qty='$_POST[ket_qty]',
     ket_bs = '$_POST[ket_bs]',
     ket_dept_penyebab = '$_POST[ket_dept_penyebab]',
     qty_kq = '$_POST[qty_kq]',
@@ -129,7 +130,7 @@ if ($_POST['simpan'] == "simpan") {
     note_kf = '$_POST[note_kf]',
     qty_bf = '$_POST[qty_bf]',
     note_bf = '$_POST[note_bf]'
-	WHERE `nodemand`='$_POST[nodemand]' and  `shift`='$_POST[shift]'");
+	WHERE nodemand='$_POST[nodemand]' and shift='$_POST[shift]'");
         if ($sql1) {
             //echo " <script>alert('Data has been updated!');</script>";
             echo "<script>
@@ -156,64 +157,121 @@ if ($_POST['simpan'] == "simpan") {
         } else {
             $stKG = "0";
         }
-        $sql = mysqli_query($con, "INSERT INTO `tbl_lap_inspeksi` SET
-	`nokk`='$_POST[nokk]',
-    `nodemand`='$_POST[nodemand]',
-	`no_order`='$order',
-	`pelanggan`='$pelanggan',
-	`jenis_kain`='$jns',
-	`no_item`='$_POST[no_item]',
-	`no_hanger`='$_POST[no_hanger]',
-	`warna`='$warna',
-	`tgl_pengiriman`='$_POST[awal]',
-	`lot`='$_POST[lot]',
-	`inspektor`='$_POST[inspektor]',
-	`shift`='$_POST[shift]',
-	`no_mc`='$_POST[no_mc]',
-	`jml_roll`='$_POST[rol]',
-	`bruto`='$_POST[bruto]',
-	`netto`='$_POST[netto]',
-	`jml_netto`='$_POST[rol_netto]',
-    `mutasi`='$_POST[mutasi]',
-	`jml_mutasi`='$_POST[rol_mutasi]',
-	`kg_bs`='$_POST[kg_bs]',
-	`jml_bs`='$_POST[rol_bs]',
-	`kg_th`='$_POST[kg_th]',
-	`jml_th`='$_POST[rol_th]',
-	`panjang`='$_POST[panjang]',
-	`satuan`='$_POST[satuan]',
-	`proses`='$_POST[proses]',
-	`status`='$_POST[status]',
-	`no_grobak`='$_POST[no_grbk]',
-	`tgl_mulai`='$_POST[tgl_mulai]',
-	`tgl_selesai`='$_POST[tgl_selesai]',
-	`jam_mulai`='$_POST[mulai]',
-	`jam_selesai`='$_POST[selesai]',
-	`istirahat`='$_POST[istirahat]',
-	`catatan`='$catatan',
-	`dept`='PACKING',
-	`jam_mutasi`='$_POST[jam]',
-	`sts_gkg`='$stKG',
-	`tgl_update`='$_POST[tgl]',
-	`jam_update`=now(),
-    `operator`='$_POST[operator]',
-    `lebar`='$_POST[lebar]',
-    `gramasi`='$_POST[gramasi]',
-	`qty_loss`='$_POST[qty_loss]',
-	`note_loss`='$noteloss',
-    `ket_qty`='$_POST[ket_qty]',
-    `ket_bs` = '$_POST[ket_bs]',
-    `ket_dept_penyebab` = '$_POST[ket_dept_penyebab]',
-    qty_kq = '$_POST[qty_kq]',
-    note_kq = '$_POST[note_kq]',
-    qty_bq = '$_POST[qty_bq]',
-    note_bq = '$_POST[note_bq]',
-    qty_kf = '$_POST[qty_kf]',
-    note_kf = '$_POST[note_kf]',
-    qty_bf = '$_POST[qty_bf]',
-    speed = '$_POST[speed]',
-    note_bf = '$_POST[note_bf]'
-    ");
+        $sql = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_lap_inspeksi (
+            nokk,
+            nodemand,
+            no_order,
+            pelanggan,
+            jenis_kain,
+            no_item,
+            no_hanger,
+            warna,
+            tgl_pengiriman,
+            lot,
+            inspektor,
+            shift,
+            no_mc,
+            jml_roll,
+            bruto,
+            netto,
+            jml_netto,
+            mutasi,
+            jml_mutasi,
+            kg_bs,
+            jml_bs,
+            kg_th,
+            jml_th,
+            panjang,
+            satuan,
+            proses,
+            status,
+            no_grobak,
+            tgl_mulai,
+            tgl_selesai,
+            jam_mulai,
+            jam_selesai,
+            istirahat,
+            catatan,
+            dept,
+            jam_mutasi,
+            sts_gkg,
+            tgl_update,
+            jam_update,
+            operator,
+            lebar,
+            gramasi,
+            qty_loss,
+            note_loss,
+            ket_qty,
+            ket_bs,
+            ket_dept_penyebab,
+            qty_kq,
+            note_kq,
+            qty_bq,
+            note_bq,
+            qty_kf,
+            note_kf,
+            qty_bf,
+            speed,
+            note_bf
+        ) VALUES (
+            '$_POST[nokk]',
+            '$_POST[nodemand]',
+            '$order',
+            '$pelanggan',
+            '$jns',
+            '$_POST[no_item]',
+            '$_POST[no_hanger]',
+            '$warna',
+            '$_POST[awal]',
+            '$_POST[lot]',
+            '$_POST[inspektor]',
+            '$_POST[shift]',
+            '$_POST[no_mc]',
+            '$_POST[rol]',
+            '$_POST[bruto]',
+            '$_POST[netto]',
+            '$_POST[rol_netto]',
+            '$_POST[mutasi]',
+            '$_POST[rol_mutasi]',
+            '$_POST[kg_bs]',
+            '$_POST[rol_bs]',
+            '$_POST[kg_th]',
+            '$_POST[rol_th]',
+            '$_POST[panjang]',
+            '$_POST[satuan]',
+            '$_POST[proses]',
+            '$_POST[status]',
+            '$_POST[no_grbk]',
+            '$_POST[tgl_mulai]',
+            '$_POST[tgl_selesai]',
+            '$_POST[mulai]',
+            '$_POST[selesai]',
+            '$_POST[istirahat]',
+            '$catatan',
+            'PACKING',
+            '$_POST[jam]',
+            '$stKG',
+            '$_POST[tgl]',
+            GETDATE(),
+            '$_POST[operator]',
+            '$_POST[lebar]',
+            '$_POST[gramasi]',
+            '$_POST[qty_loss]',
+            '$noteloss',
+            '$_POST[ket_qty]',
+            '$_POST[ket_bs]',
+            '$_POST[ket_dept_penyebab]',
+            '$_POST[qty_kq]',
+            '$_POST[note_kq]',
+            '$_POST[qty_bq]',
+            '$_POST[note_bq]',
+            '$_POST[qty_kf]',
+            '$_POST[note_kf]',
+            '$_POST[qty_bf]',
+            '$_POST[speed]',
+            '$_POST[note_bf]'
+        )");
         if ($sql) {
             //echo " <script>alert('Data has been saved!');</script>";
             echo "<script>
@@ -241,28 +299,28 @@ if ($_GET['shift'] != "") {
     $shift = " ";
 }
 
-//Data sudah disimpan di database mysqli
-$msql1 = mysqli_query($con, "SELECT * FROM `tbl_lap_inspeksi` WHERE `nodemand`='$nodemand' and `shift`='$_GET[shift]' AND DATE_FORMAT(tgl_update, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d') AND `dept`='PACKING'");
-$row1 = mysqli_fetch_array($msql1);
-$crow1 = mysqli_num_rows($msql1);
+//Data sudah disimpan di database sqlsrv
+$msql1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_inspeksi WHERE nodemand='$nodemand' and shift='$_GET[shift]' AND CONVERT(date, tgl_update) = CONVERT(date, GETDATE()) AND dept='PACKING'");
+$row1 = sqlsrv_fetch_array($msql1);
+$crow1 = $row1['total_rows'];
 
-//Data sudah disimpan di database mysqli
-$msql = mysqli_query($con, "SELECT * FROM `tbl_lap_inspeksi` WHERE `nodemand`='$nodemand' and `shift`='$_GET[shift]' AND `dept`='PACKING' AND `operator`='$_GET[operator]' ");
-$row = mysqli_fetch_array($msql);
-$crow = mysqli_num_rows($msql);
-//Data sudah disimpan di database mysqli
-$qryfin = mysqli_query($con, "SELECT * FROM `tbl_lap_inspeksi` WHERE `nodemand`='$nodemand' AND `dept`='PACKING' ORDER BY id DESC");
-$rfin = mysqli_fetch_array($qryfin);
-$cekfin = mysqli_num_rows($qryfin);
+//Data sudah disimpan di database sqlsrv
+$msql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_inspeksi WHERE nodemand='$nodemand' and shift='$_GET[shift]' AND dept='PACKING' AND operator='$_GET[operator]' ");
+$row = sqlsrv_fetch_array($msql);
+$crow = $row['total_rows'];
+//Data sudah disimpan di database sqlsrv
+$qryfin = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_inspeksi WHERE nodemand='$nodemand' AND dept='PACKING' ORDER BY id DESC");
+$rfin = sqlsrv_fetch_array($qryfin);
+$cekfin = $rfin['total_rows'];
 
 //Ambil data tgl mulai
-$qryM = mysqli_query($con, "SELECT * FROM `tmp_detail_kite` WHERE nokkKite='$nokk' ORDER BY id DESC LIMIT 1");
-$rM = mysqli_fetch_array($qryM);
+$qryM = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tmp_detail_kite WHERE nokkKite='$nokk' ORDER BY id DESC");
+$rM = sqlsrv_fetch_array($qryM);
 
 //Ambil data tgl selesai
-$qryS = mysqli_query($con, "SELECT a.*, b.* FROM detail_pergerakan_stok a LEFT JOIN pergerakan_stok b 
-ON a.id_stok=b.id WHERE a.nokk='$nokk' AND a.transtatus IS NULL ORDER BY a.id DESC LIMIT 1");
-$rS = mysqli_fetch_array($qryS);
+$qryS = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 a.*, b.* FROM db_qc.detail_pergerakan_stok a LEFT JOIN db_qc.pergerakan_stok b 
+ON a.id_stok=b.id WHERE a.nokk='$nokk' AND a.transtatus IS NULL ORDER BY a.id DESC");
+$rS = sqlsrv_fetch_array($qryS);
 
 //Data belum disimpan di database mysqli
 $sqlDB2 = " SELECT
@@ -1319,7 +1377,7 @@ $rowtoBS = db2_fetch_assoc($stmt2BS);
 <?php
 if ($_POST['simpan_operator'] == "Simpan") {
     $nama = strtoupper($_POST['operator']);
-    $sqlData1 = mysqli_query($con, "INSERT INTO tbl_operator SET nama='$nama'");
+    $sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_operator (nama) VALUES ('$nama')");
     if ($sqlData1) {
         echo "<script>
                 swal({

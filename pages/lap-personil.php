@@ -12,7 +12,7 @@ $yard_dikerjakan = trim($_POST['yard_dikerjakan']) ?? '';
 
 if($_POST['simpan'] == "simpan") {
 
-    $sql = mysqli_query($con, "INSERT INTO tbl_lap_personil (id_operator, id_jobdesk, roll, kg, yard, tanggal_input) 
+    $sql = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_lap_personil (id_operator, id_jobdesk, roll, kg, yard, tanggal_input) 
                                                         VALUES('$id_operator', '$id_jobdesk', '$roll_dikerjakan', '$kg_dikerjakan', '$yard_dikerjakan', '$tanggal_input');");
     if($sql) {
         ?>
@@ -53,8 +53,8 @@ if($_POST['simpan'] == "simpan") {
                             <select class="form-control select2" name="operator" id="operator" required>
                                 <option value="">Pilih</option>
                                 <?php
-                                $qryo = mysqli_query($con, "SELECT id, nama FROM tbl_operator_lap_personil ORDER BY nama ASC");
-                                while($ro = mysqli_fetch_array($qryo)) {
+                                $qryo = sqlsrv_query($con_db_qc_sqlsrv, "SELECT id, nama FROM db_qc.tbl_operator_lap_personil ORDER BY nama ASC");
+                                while($ro = sqlsrv_fetch_array($qryo)) {
                                     ?>
                                     <option value="<?php echo $ro['id']; ?>">
                                         <?php echo $ro['nama']; ?>
@@ -73,8 +73,8 @@ if($_POST['simpan'] == "simpan") {
                             <select class="form-control select2" name="jobdesk" id="jobdesk" required>
                                 <option value="">Pilih</option>
                                 <?php
-                                $qryo2 = mysqli_query($con, "SELECT id, nama FROM tbl_jobdesk ORDER BY nama ASC");
-                                while($ro2 = mysqli_fetch_array($qryo2)) {
+                                $qryo2 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT id, nama FROM db_qc.tbl_jobdesk ORDER BY nama ASC");
+                                while($ro2 = sqlsrv_fetch_array($qryo2)) {
                                     ?>
                                     <option value="<?php echo $ro2['id']; ?>">
                                         <?php echo $ro2['nama']; ?>
@@ -205,10 +205,8 @@ if($_POST['simpan'] == "simpan") {
 <?php
 if($_POST['simpan_operator'] == "Simpan") {
     $nama = strtoupper(trim($_POST['operator']));
-    $sqlDataCek = mysqli_query($con, "SELECT * FROM tbl_operator_lap_personil WHERE nama = '$nama'");
-    $sqlDataCekCount = mysqli_num_rows($sqlDataCek);
-
-    if($sqlDataCekCount > 0) {
+    $sqlDataCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_operator_lap_personil WHERE nama = '$nama'");
+    if(sqlsrv_has_rows($sqlDataCek)) {
         ?>
         <script>
             swal({
@@ -223,7 +221,7 @@ if($_POST['simpan_operator'] == "Simpan") {
         </script>
         <?php
     } else {
-        $sqlData1 = mysqli_query($con, "INSERT INTO tbl_operator_lap_personil (nama) VALUES('$nama');");
+        $sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_operator_lap_personil (nama) VALUES('$nama');");
         if($sqlData1) {
             ?>
             <script>
@@ -244,10 +242,8 @@ if($_POST['simpan_operator'] == "Simpan") {
 
 if($_POST['simpan_jobdesk'] == "Simpan") {
     $nama2 = trim($_POST['jobdesk']);
-    $sqlDataCek2 = mysqli_query($con, "SELECT * FROM tbl_jobdesk WHERE nama = '$nama2'");
-    $sqlDataCekCount2 = mysqli_num_rows($sqlDataCek2);
-
-    if($sqlDataCekCount2 > 0) {
+    $sqlDataCek2 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_jobdesk WHERE nama = '$nama2'");
+    if(sqlsrv_has_rows($sqlDataCek2)) {
         ?>
         <script>
             swal({
@@ -262,7 +258,7 @@ if($_POST['simpan_jobdesk'] == "Simpan") {
         </script>
         <?php
     } else {
-        $sqlData2 = mysqli_query($con, "INSERT INTO tbl_jobdesk (nama) VALUES('$nama2');");
+        $sqlData2 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_jobdesk (nama) VALUES('$nama2');");
         if($sqlData2) {
             ?>
             <script>

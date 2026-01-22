@@ -37,11 +37,11 @@ if (strlen($jamAr) == 5) {
   $stop_date = $tgl1 . " 0" . $jamAr;
 }
 if ($jamA != "" or $jamAr != "") {
-  $Where = " DATE_FORMAT( CONCAT(tgl_update,' ',jam_update), '%Y-%m-%d %H:%i') between '$start_date' and '$stop_date' and ";
+  $Where = " DATEADD(second, DATEDIFF(second, 0, TRY_CAST(jam_update AS TIME)), TRY_CAST(tgl_update AS DATETIME)) between '$start_date' and '$stop_date' and ";
 } else {
   $start_date = $tgl;
   $stop_date = $tgl1;
-  $Where = " DATE_FORMAT( tgl_update , '%Y-%m-%d') between '$start_date' and '$stop_date' and ";
+  $Where = " TRY_CAST(tgl_update AS DATE) between '$start_date' and '$stop_date' and ";
 }
 ?>
 Tanggal :
@@ -207,23 +207,23 @@ No MC :
   </tr>
   <?php
   if ($shift != "ALL") {
-    $shft = " AND `shift`='$shift' ";
+    $shft = " AND shift='$shift' ";
   } else {
     $shft = " ";
   }
   if ($_GET['nomc'] != "ALL") {
-    $nomc = " AND `no_mc` LIKE '%$_GET[nomc]' ";
+    $nomc = " AND no_mc LIKE '%$_GET[nomc]' ";
   } else {
     $nomc = " ";
   }
   if ($_GET['group'] != "ALL") {
-    $grp = " AND `inspektor` LIKE '%$_GET[group]' ";
+    $grp = " AND inspektor LIKE '%$_GET[group]' ";
   } else {
     $grp = " ";
   }
   $no = 1;
-  $sql = mysqli_query($con, "SELECT * FROM tbl_lap_inspeksi WHERE $Where `dept`='PACKING' $shft $nomc $grp ORDER BY id ASC");
-  while ($row = mysqli_fetch_array($sql)) {
+  $sql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_lap_inspeksi WHERE $Where dept='PACKING' $shft $nomc $grp ORDER BY id ASC");
+  while ($row = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
     $bgcolor = ($c++ & 1) ? '#33CCFF' : '#FFCC99';
     ?>
     <tr bgcolor="<?php echo $bgcolor; ?>">
@@ -255,7 +255,7 @@ No MC :
         <?php echo $row['warna']; ?>
       </td>
       <td>
-        <?php echo $row['tgl_pengiriman']; ?>
+        <?php echo date_format($row['tgl_pengiriman'], 'Y-m-d'); ?>
       </td>
       <td>'
         <?php echo $row['lot']; ?>
@@ -293,7 +293,7 @@ No MC :
         <?php echo $row['status']; ?>
       </td>
       <td>
-        <?= $row['jam_mutasi'] ?>
+        <?= date_format($row['jam_mutasi'], 'H:i:s') ?>
       </td>
       <td>
         <?php echo $row['catatan']; ?>
@@ -330,7 +330,7 @@ No MC :
       <td><?= $row['note_kf']; ?></td>
       <td><?= $row['qty_bf']; ?></td>
       <td><?= $row['note_bf']; ?></td>
-      <td><?= $row['tgl_update'] . ' ' . $row['jam_update']; ?></td>
+      <td><?= date_format($row['tgl_update'], 'Y-m-d') . ' ' . date_format($row['jam_update'], 'H:i:s'); ?></td>
     </tr>
     <?php $no++;
   }

@@ -38,22 +38,25 @@ include "koneksi.php";
   $MC = isset($_POST['nomc']) ? $_POST['nomc'] : '';
 
 
-  if (strlen($jamA) == 5) {
-    $start_date = $Awal . " " . $jamA;
-  } else {
-    $start_date = $Awal . " 0" . $jamA;
-  }
-  if (strlen($jamAr) == 5) {
-    $stop_date = $Akhir . " " . $jamAr;
-  } else {
-    $stop_date = $Akhir . " 0" . $jamAr;
-  }
-  if ($jamA != "" or $jamAr != "") {
-    $Where = " DATE_FORMAT( CONCAT(tgl_update,' ',jam_update), '%Y-%m-%d %H:%i') between '$start_date' and '$stop_date' and ";
-  } else {
-    $start_date = $Awal;
-    $stop_date = $Akhir;
-    $Where = " DATE_FORMAT( tgl_update , '%Y-%m-%d') between '$start_date' and '$stop_date' and ";
+  $Where = "1 = 0 AND ";
+  if ($Awal != "") {
+    if (strlen($jamA) == 5) {
+      $start_date = $Awal . " " . $jamA;
+    } else {
+      $start_date = $Awal . " 0" . $jamA;
+    }
+    if (strlen($jamAr) == 5) {
+      $stop_date = $Akhir . " " . $jamAr;
+    } else {
+      $stop_date = $Akhir . " 0" . $jamAr;
+    }
+    if ($jamA != "" or $jamAr != "") {
+      $Where = " FORMAT(CONCAT(tgl_update,' ',jam_update), 'yyyy-MM-dd HH:mm') between '$start_date' and '$stop_date' and ";
+    } else {
+      $start_date = $Awal;
+      $stop_date = $Akhir;
+      $Where = " FORMAT( tgl_update , 'yyyy-MM-dd') between '$start_date' and '$stop_date' and ";
+    }
   }
   //$start_date= $Awal." ".$jamA;
   //$stop_date= $Akhir." ".$jamAr;	
@@ -282,27 +285,27 @@ include "koneksi.php";
               $persen_kgluluR = $persen_yluluR = $persen_kgadiR = $persen_yadiR = $persen_kgdllR = $persen_ydllR = 0;
               ?>
               <?php
-              $qryPAR = mysqli_query($con, "SELECT
-                                            SUM(if(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
-                                            SUM(if(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-                                            SUM(if(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
-                                            SUM(if(pelanggan like '%LULU%',netto,0)) as lulu_kg,
-                                            SUM(if(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-                                            SUM(if(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
-                                            SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
-                                            SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-                                            SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
+              $qryPAR = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
+                                            SUM(IIF(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
+                                            SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
+                                            SUM(IIF(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
+                                            SUM(IIF(pelanggan like '%LULU%',netto,0)) as lulu_kg,
+                                            SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
+                                            SUM(IIF(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
+                                            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
+                                            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+                                            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
                                             SUM(netto) as tot_kg,
                                             SUM(panjang) as tot_yd,
                                             SUM(jml_netto) as tot_roll	
                                           from
-                                            tbl_lap_inspeksi
+                                            db_qc.tbl_lap_inspeksi
                                           where
                                             $Where
-                                            `dept` = 'PACKING' and
-                                            `sts_gkg` = '0' and
+                                            dept = 'PACKING' and
+                                            sts_gkg = '0' and
                                             inspektor = 'PACKING A'");
-              $rowPAR = mysqli_fetch_array($qryPAR);
+              $rowPAR = sqlsrv_fetch_array($qryPAR);
               ?>
               <tr>
                 <td align="center">PACKING A</td>
@@ -320,27 +323,27 @@ include "koneksi.php";
                 <td align="center"><?php echo number_format(round($rowPAR['tot_yd'], 2), 2); ?></td>
               </tr>
               <?php
-              $qryPBR = mysqli_query($con, "SELECT
-                                            SUM(if(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
-                                            SUM(if(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-                                            SUM(if(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
-                                            SUM(if(pelanggan like '%LULU%',netto,0)) as lulu_kg,
-                                            SUM(if(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-                                            SUM(if(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
-                                            SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
-                                            SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-                                            SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
+              $qryPBR = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
+                                            SUM(IIF(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
+                                            SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
+                                            SUM(IIF(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
+                                            SUM(IIF(pelanggan like '%LULU%',netto,0)) as lulu_kg,
+                                            SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
+                                            SUM(IIF(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
+                                            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
+                                            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+                                            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
                                             SUM(netto) as tot_kg,
                                             SUM(panjang) as tot_yd,
                                             SUM(jml_netto) as tot_roll	
                                           from
-                                            tbl_lap_inspeksi
+                                            db_qc.tbl_lap_inspeksi
                                           where
                                             $Where
-                                            `dept` = 'PACKING'
-                                            and `sts_gkg` = '0'
+                                            dept = 'PACKING'
+                                            and sts_gkg = '0'
                                             and inspektor = 'PACKING B'");
-              $rowPBR = mysqli_fetch_array($qryPBR);
+              $rowPBR = sqlsrv_fetch_array($qryPBR);
               ?>
               <tr>
                 <td align="center">PACKING B</td>
@@ -358,27 +361,27 @@ include "koneksi.php";
                 <td align="center"><?php echo number_format(round($rowPBR['tot_yd'], 2), 2); ?></td>
               </tr>
               <?php
-              $qryPCR = mysqli_query($con, "SELECT
-                                          SUM(if(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
-                                          SUM(if(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-                                          SUM(if(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
-                                          SUM(if(pelanggan like '%LULU%',netto,0)) as lulu_kg,
-                                          SUM(if(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-                                          SUM(if(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
-                                          SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
-                                          SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-                                          SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
+              $qryPCR = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
+                                          SUM(IIF(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
+                                          SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
+                                          SUM(IIF(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
+                                          SUM(IIF(pelanggan like '%LULU%',netto,0)) as lulu_kg,
+                                          SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
+                                          SUM(IIF(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
+                                          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
+                                          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+                                          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
                                           SUM(netto) as tot_kg,
                                           SUM(panjang) as tot_yd,
                                           SUM(jml_netto) as tot_roll	
                                         from
-                                          tbl_lap_inspeksi
+                                          db_qc.tbl_lap_inspeksi
                                         where
                                           $Where
-                                          `dept` = 'PACKING'
-                                          and `sts_gkg` = '0'
+                                          dept = 'PACKING'
+                                          and sts_gkg = '0'
                                           and inspektor = 'PACKING C'");
-              $rowPCR = mysqli_fetch_array($qryPCR);
+              $rowPCR = sqlsrv_fetch_array($qryPCR);
               ?>
               <tr>
                 <td align="center">PACKING C</td>
@@ -524,12 +527,12 @@ include "koneksi.php";
                                 SUM(CASE WHEN jenis_packing IN ('Normal','Development','BS','KKPreset','KainDragon','InspectMeja','QtyKecil','QtyBesar') THEN bruto ELSE 0 END), 
                                 ' Kg') as Total
                         FROM
-                            tbl_schedule_packing
+                            db_qc.tbl_schedule_packing
                         WHERE
                             -- tgl_masuk = '$Awal' AND
-                            NOT `STATUS` = 'selesai'";
-                        $qrysisa =  mysqli_query($con,$qrysisa);
-                        $rowsisa =  mysqli_fetch_array($qrysisa);
+                            NOT status = 'selesai'";
+                        $qrysisa =  sqlsrv_query($con_db_qc_sqlsrv,$qrysisa);
+                        $rowsisa =  sqlsrv_fetch_array($qrysisa);
               ?>
               <tr>
                 <td colspan="2" align="center" valign="middle">TOTAL SISA PACKING</td>
@@ -661,24 +664,24 @@ include "koneksi.php";
               $persen_kgluluR = $persen_yluluR = $persen_kgadiR = $persen_yadiR = $persen_kgdllR = $persen_ydllR = 0;
               ?>
               <?php
-              $qryPAR1 = mysqli_query($con, " 
+              $qryPAR1 = sqlsrv_query($con_db_qc_sqlsrv, " 
         select
-          SUM(if(pelanggan like '%ADIDAS%',mutasi,0)) as adidas_kg,
-          SUM(if(pelanggan like '%ADIDAS%',jml_mutasi,0)) as adidas_roll,
-          SUM(if(pelanggan like '%LULU%',mutasi,0)) as lulu_kg,
-          SUM(if(pelanggan like '%LULU%',jml_mutasi,0)) as lulu_roll,
-          SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',mutasi,0)) as lain_kg,
-          SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_mutasi,0)) as lain_roll,
+          SUM(IIF(pelanggan like '%ADIDAS%',mutasi,0)) as adidas_kg,
+          SUM(IIF(pelanggan like '%ADIDAS%',jml_mutasi,0)) as adidas_roll,
+          SUM(IIF(pelanggan like '%LULU%',mutasi,0)) as lulu_kg,
+          SUM(IIF(pelanggan like '%LULU%',jml_mutasi,0)) as lulu_roll,
+          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',mutasi,0)) as lain_kg,
+          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_mutasi,0)) as lain_roll,
           SUM(mutasi) as tot_kg,
           SUM(jml_mutasi) as tot_roll	
         from
-          tbl_lap_inspeksi
+          db_qc.tbl_lap_inspeksi
         where
           $Where
-          `dept` = 'PACKING'
-          and `sts_gkg` = '0'
+          dept = 'PACKING'
+          and sts_gkg = '0'
           and inspektor = 'PACKING A'");
-              $rowPAR1 = mysqli_fetch_array($qryPAR1);
+              $rowPAR1 = sqlsrv_fetch_array($qryPAR1);
               ?>
               <tr>
                 <td align="center">PACKING A</td>
@@ -692,24 +695,24 @@ include "koneksi.php";
                 <td align="center"><?php echo number_format(round($rowPAR1['tot_kg'], 2), 2); ?></td>
               </tr>
               <?php
-              $qryPBR1 = mysqli_query($con, " 
+              $qryPBR1 = sqlsrv_query($con_db_qc_sqlsrv, " 
             select
-              SUM(if(pelanggan like '%ADIDAS%',mutasi,0)) as adidas_kg,
-              SUM(if(pelanggan like '%ADIDAS%',jml_mutasi,0)) as adidas_roll,
-              SUM(if(pelanggan like '%LULU%',mutasi,0)) as lulu_kg,
-              SUM(if(pelanggan like '%LULU%',jml_mutasi,0)) as lulu_roll,
-              SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',mutasi,0)) as lain_kg,
-              SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_mutasi,0)) as lain_roll,
+              SUM(IIF(pelanggan like '%ADIDAS%',mutasi,0)) as adidas_kg,
+              SUM(IIF(pelanggan like '%ADIDAS%',jml_mutasi,0)) as adidas_roll,
+              SUM(IIF(pelanggan like '%LULU%',mutasi,0)) as lulu_kg,
+              SUM(IIF(pelanggan like '%LULU%',jml_mutasi,0)) as lulu_roll,
+              SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',mutasi,0)) as lain_kg,
+              SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_mutasi,0)) as lain_roll,
               SUM(mutasi) as tot_kg,
               SUM(jml_mutasi) as tot_roll	
             from
-              tbl_lap_inspeksi
+              db_qc.tbl_lap_inspeksi
             where
               $Where
-              `dept` = 'PACKING'
-              and `sts_gkg` = '0'
+              dept = 'PACKING'
+              and sts_gkg = '0'
               and inspektor = 'PACKING B'");
-              $rowPBR1 = mysqli_fetch_array($qryPBR1);
+              $rowPBR1 = sqlsrv_fetch_array($qryPBR1);
               ?>
               <tr>
                 <td align="center">PACKING B</td>
@@ -723,24 +726,24 @@ include "koneksi.php";
                 <td align="center"><?php echo number_format(round($rowPBR1['tot_kg'], 2), 2); ?></td>
               </tr>
               <?php
-              $qryPCR1 = mysqli_query($con, " 
+              $qryPCR1 = sqlsrv_query($con_db_qc_sqlsrv, " 
               select
-                SUM(if(pelanggan like '%ADIDAS%',mutasi,0)) as adidas_kg,
-                SUM(if(pelanggan like '%ADIDAS%',jml_mutasi,0)) as adidas_roll,
-                SUM(if(pelanggan like '%LULU%',mutasi,0)) as lulu_kg,
-                SUM(if(pelanggan like '%LULU%',jml_mutasi,0)) as lulu_roll,
-                SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',mutasi,0)) as lain_kg,
-                SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_mutasi,0)) as lain_roll,
+                SUM(IIF(pelanggan like '%ADIDAS%',mutasi,0)) as adidas_kg,
+                SUM(IIF(pelanggan like '%ADIDAS%',jml_mutasi,0)) as adidas_roll,
+                SUM(IIF(pelanggan like '%LULU%',mutasi,0)) as lulu_kg,
+                SUM(IIF(pelanggan like '%LULU%',jml_mutasi,0)) as lulu_roll,
+                SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',mutasi,0)) as lain_kg,
+                SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_mutasi,0)) as lain_roll,
                 SUM(mutasi) as tot_kg,
                 SUM(jml_mutasi) as tot_roll	
               from
-                tbl_lap_inspeksi
+                db_qc.tbl_lap_inspeksi
               where
                 $Where
-                `dept` = 'PACKING'
-                and `sts_gkg` = '0'
+                dept = 'PACKING'
+                and sts_gkg = '0'
                 and inspektor = 'PACKING C'");
-              $rowPCR1 = mysqli_fetch_array($qryPCR1);
+              $rowPCR1 = sqlsrv_fetch_array($qryPCR1);
               ?>
               <tr>
                 <td align="center">PACKING C</td>
@@ -814,8 +817,8 @@ include "koneksi.php";
                 <td align="center">&nbsp;</td>
               </tr>
               <?php
-              $qrysisa = mysqli_query($con, "SELECT * FROM tbl_sisa_packing WHERE tgl_sisa='$Awal'");
-              $rowsisa = mysqli_fetch_array($qrysisa);
+              $qrysisa = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_sisa_packing WHERE tgl_sisa='$Awal'");
+              $rowsisa = sqlsrv_fetch_array($qrysisa);
               ?>
               <tr>
                 <td colspan="2" align="center" valign="middle">SISA SIAP PACKING</td>
@@ -893,27 +896,27 @@ include "koneksi.php";
               $persen_kgluluB = $persen_yluluB = $persen_kgadiB = $persen_yadiB = $persen_kgdllB = $persen_ydllB = 0;
               ?>
               <?php
-              $qryPAB = mysqli_query($con, " 
+              $qryPAB = sqlsrv_query($con_db_qc_sqlsrv, " 
               select
-                SUM(if(pelanggan like '%ADIDAS%',kg_bs,0)) as adidas_kg,
-                SUM(if(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-                SUM(if(pelanggan like '%ADIDAS%',jml_bs,0)) as adidas_roll,
-                SUM(if(pelanggan like '%LULU%',kg_bs,0)) as lulu_kg,
-                SUM(if(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-                SUM(if(pelanggan like '%LULU%',jml_bs,0)) as lulu_roll,
-                SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',kg_bs,0)) as lain_kg,
-                SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-                SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_bs,0)) as lain_roll,
+                SUM(IIF(pelanggan like '%ADIDAS%',kg_bs,0)) as adidas_kg,
+                SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
+                SUM(IIF(pelanggan like '%ADIDAS%',jml_bs,0)) as adidas_roll,
+                SUM(IIF(pelanggan like '%LULU%',kg_bs,0)) as lulu_kg,
+                SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
+                SUM(IIF(pelanggan like '%LULU%',jml_bs,0)) as lulu_roll,
+                SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',kg_bs,0)) as lain_kg,
+                SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+                SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_bs,0)) as lain_roll,
                 SUM(kg_bs) as tot_kg,
                 SUM(panjang) as tot_yd,
                 SUM(jml_bs) as tot_roll		
               from
-                tbl_lap_inspeksi
+                db_qc.tbl_lap_inspeksi
               where
                 $Where
-                `dept` = 'PACKING'
+                dept = 'PACKING'
                 and inspektor = 'PACKING A'");
-              $rowPAB = mysqli_fetch_array($qryPAB);
+              $rowPAB = sqlsrv_fetch_array($qryPAB);
               ?>
               <tr>
                 <td align="center">PACKING A</td>
@@ -927,27 +930,27 @@ include "koneksi.php";
                 <td align="center"><?php echo number_format(round($rowPAB['tot_kg'], 2), 2); ?></td>
               </tr>
               <?php
-              $qryPBB = mysqli_query($con, " 
+              $qryPBB = sqlsrv_query($con_db_qc_sqlsrv, " 
           select
-            SUM(if(pelanggan like '%ADIDAS%',kg_bs,0)) as adidas_kg,
-            SUM(if(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-            SUM(if(pelanggan like '%ADIDAS%',jml_bs,0)) as adidas_roll,
-            SUM(if(pelanggan like '%LULU%',kg_bs,0)) as lulu_kg,
-            SUM(if(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-            SUM(if(pelanggan like '%LULU%',jml_bs,0)) as lulu_roll,
-            SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',kg_bs,0)) as lain_kg,
-            SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-            SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_bs,0)) as lain_roll,
+            SUM(IIF(pelanggan like '%ADIDAS%',kg_bs,0)) as adidas_kg,
+            SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
+            SUM(IIF(pelanggan like '%ADIDAS%',jml_bs,0)) as adidas_roll,
+            SUM(IIF(pelanggan like '%LULU%',kg_bs,0)) as lulu_kg,
+            SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
+            SUM(IIF(pelanggan like '%LULU%',jml_bs,0)) as lulu_roll,
+            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',kg_bs,0)) as lain_kg,
+            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_bs,0)) as lain_roll,
             SUM(kg_bs) as tot_kg,
             SUM(panjang) as tot_yd,
             SUM(jml_bs) as tot_roll		
           from
-            tbl_lap_inspeksi
+            db_qc.tbl_lap_inspeksi
           where
             $Where
-            `dept` = 'PACKING'
+            dept = 'PACKING'
             and inspektor = 'PACKING B'");
-              $rowPBB = mysqli_fetch_array($qryPBB);
+              $rowPBB = sqlsrv_fetch_array($qryPBB);
               ?>
               <tr>
                 <td align="center">PACKING B</td>
@@ -961,27 +964,27 @@ include "koneksi.php";
                 <td align="center"><?php echo number_format(round($rowPBB['tot_kg'], 2), 2); ?></td>
               </tr>
               <?php
-              $qryPCB = mysqli_query($con, " 
+              $qryPCB = sqlsrv_query($con_db_qc_sqlsrv, " 
           select
-            SUM(if(pelanggan like '%ADIDAS%',kg_bs,0)) as adidas_kg,
-            SUM(if(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-            SUM(if(pelanggan like '%ADIDAS%',jml_bs,0)) as adidas_roll,
-            SUM(if(pelanggan like '%LULU%',kg_bs,0)) as lulu_kg,
-            SUM(if(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-            SUM(if(pelanggan like '%LULU%',jml_bs,0)) as lulu_roll,
-            SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',kg_bs,0)) as lain_kg,
-            SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-            SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_bs,0)) as lain_roll,
+            SUM(IIF(pelanggan like '%ADIDAS%',kg_bs,0)) as adidas_kg,
+            SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
+            SUM(IIF(pelanggan like '%ADIDAS%',jml_bs,0)) as adidas_roll,
+            SUM(IIF(pelanggan like '%LULU%',kg_bs,0)) as lulu_kg,
+            SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
+            SUM(IIF(pelanggan like '%LULU%',jml_bs,0)) as lulu_roll,
+            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',kg_bs,0)) as lain_kg,
+            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_bs,0)) as lain_roll,
             SUM(kg_bs) as tot_kg,
             SUM(panjang) as tot_yd,
             SUM(jml_bs) as tot_roll		
           from
-            tbl_lap_inspeksi
+            db_qc.tbl_lap_inspeksi
           where
             $Where
-            `dept` = 'PACKING'
+            dept = 'PACKING'
             and inspektor = 'PACKING C'");
-              $rowPCB = mysqli_fetch_array($qryPCB);
+              $rowPCB = sqlsrv_fetch_array($qryPCB);
               ?>
               <tr>
                 <td align="center">PACKING C</td>
@@ -1064,8 +1067,8 @@ include "koneksi.php";
                 <td align="center">&nbsp;</td>
               </tr>
               <?php
-              $qrysisa = mysqli_query($con, "SELECT * FROM tbl_sisa_packing WHERE tgl_sisa='$Awal'");
-              $rowsisa = mysqli_fetch_array($qrysisa);
+              $qrysisa = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_sisa_packing WHERE tgl_sisa='$Awal'");
+              $rowsisa = sqlsrv_fetch_array($qrysisa);
               ?>
               <tr>
                 <td colspan="2" align="center" valign="middle">SISA SIAP PACKING</td>
@@ -1141,27 +1144,27 @@ include "koneksi.php";
               $persen_kgluluT = $persen_yluluT = $persen_kgadiT = $persen_yadiT = $persen_kgdllT = $persen_ydllT = 0;
               ?>
               <?php
-              $qryPAT = mysqli_query($con, " 
+              $qryPAT = sqlsrv_query($con_db_qc_sqlsrv, " 
             select
-              SUM(if(pelanggan like '%ADIDAS%',kg_th,0)) as adidas_kg,
-              SUM(if(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-              SUM(if(pelanggan like '%ADIDAS%',jml_th,0)) as adidas_roll,
-              SUM(if(pelanggan like '%LULU%',kg_th,0)) as lulu_kg,
-              SUM(if(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-              SUM(if(pelanggan like '%LULU%',jml_th,0)) as lulu_roll,
-              SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',kg_th,0)) as lain_kg,
-              SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-              SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_th,0)) as lain_roll,
+              SUM(IIF(pelanggan like '%ADIDAS%',kg_th,0)) as adidas_kg,
+              SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
+              SUM(IIF(pelanggan like '%ADIDAS%',jml_th,0)) as adidas_roll,
+              SUM(IIF(pelanggan like '%LULU%',kg_th,0)) as lulu_kg,
+              SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
+              SUM(IIF(pelanggan like '%LULU%',jml_th,0)) as lulu_roll,
+              SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',kg_th,0)) as lain_kg,
+              SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+              SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_th,0)) as lain_roll,
               SUM(kg_th) as tot_kg,
               SUM(panjang) as tot_yd,
               SUM(jml_th) as tot_roll		
             from
-              tbl_lap_inspeksi
+              db_qc.tbl_lap_inspeksi
             where
               $Where
-              `dept` = 'PACKING'
+              dept = 'PACKING'
               and inspektor = 'PACKING A'");
-              $rowPAT = mysqli_fetch_array($qryPAT);
+              $rowPAT = sqlsrv_fetch_array($qryPAT);
               ?>
               <tr>
                 <td align="center">PACKING A</td>
@@ -1175,27 +1178,26 @@ include "koneksi.php";
                 <td align="center"><?php echo number_format(round($rowPAT['tot_kg'], 2), 2); ?></td>
               </tr>
               <?php
-              $qryPBT = mysqli_query($con, " 
-        select
-          SUM(if(pelanggan like '%ADIDAS%',kg_th,0)) as adidas_kg,
-          SUM(if(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-          SUM(if(pelanggan like '%ADIDAS%',jml_th,0)) as adidas_roll,
-          SUM(if(pelanggan like '%LULU%',kg_th,0)) as lulu_kg,
-          SUM(if(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-          SUM(if(pelanggan like '%LULU%',jml_th,0)) as lulu_roll,
-          SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',kg_th,0)) as lain_kg,
-          SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-          SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_th,0)) as lain_roll,
+              $qryPBT = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
+          SUM(IIF(pelanggan like '%ADIDAS%',kg_th,0)) as adidas_kg,
+          SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
+          SUM(IIF(pelanggan like '%ADIDAS%',jml_th,0)) as adidas_roll,
+          SUM(IIF(pelanggan like '%LULU%',kg_th,0)) as lulu_kg,
+          SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
+          SUM(IIF(pelanggan like '%LULU%',jml_th,0)) as lulu_roll,
+          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',kg_th,0)) as lain_kg,
+          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_th,0)) as lain_roll,
           SUM(kg_th) as tot_kg,
           SUM(panjang) as tot_yd,
           SUM(jml_th) as tot_roll		
         from
-          tbl_lap_inspeksi
+          db_qc.tbl_lap_inspeksi
         where
-          DATE_FORMAT( CONCAT(tgl_update,' ',jam_update), '%Y-%m-%d %H:%i') between '$start_date' and '$stop_date'
-          and `dept` = 'PACKING'
+          $Where
+          dept = 'PACKING'
           and inspektor = 'PACKING B'");
-              $rowPBT = mysqli_fetch_array($qryPBT);
+              $rowPBT = sqlsrv_fetch_array($qryPBT);
               ?>
               <tr>
                 <td align="center">PACKING B</td>
@@ -1209,27 +1211,27 @@ include "koneksi.php";
                 <td align="center"><?php echo number_format(round($rowPBT['tot_kg'], 2), 2); ?></td>
               </tr>
               <?php
-              $qryPCT = mysqli_query($con, " 
+              $qryPCT = sqlsrv_query($con_db_qc_sqlsrv, " 
       select
-        SUM(if(pelanggan like '%ADIDAS%',kg_th,0)) as adidas_kg,
-        SUM(if(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-        SUM(if(pelanggan like '%ADIDAS%',jml_th,0)) as adidas_roll,
-        SUM(if(pelanggan like '%LULU%',kg_th,0)) as lulu_kg,
-        SUM(if(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-        SUM(if(pelanggan like '%LULU%',jml_th,0)) as lulu_roll,
-        SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',kg_th,0)) as lain_kg,
-        SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-        SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_th,0)) as lain_roll,
+        SUM(IIF(pelanggan like '%ADIDAS%',kg_th,0)) as adidas_kg,
+        SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
+        SUM(IIF(pelanggan like '%ADIDAS%',jml_th,0)) as adidas_roll,
+        SUM(IIF(pelanggan like '%LULU%',kg_th,0)) as lulu_kg,
+        SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
+        SUM(IIF(pelanggan like '%LULU%',jml_th,0)) as lulu_roll,
+        SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',kg_th,0)) as lain_kg,
+        SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+        SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_th,0)) as lain_roll,
         SUM(kg_th) as tot_kg,
         SUM(panjang) as tot_yd,
         SUM(jml_th) as tot_roll		
       from
-        tbl_lap_inspeksi
+        db_qc.tbl_lap_inspeksi
       where
         $Where
-        `dept` = 'PACKING'
+        dept = 'PACKING'
         and inspektor = 'PACKING C'");
-              $rowPCT = mysqli_fetch_array($qryPCT);
+              $rowPCT = sqlsrv_fetch_array($qryPCT);
               ?>
               <tr>
                 <td align="center">PACKING C</td>
@@ -1312,8 +1314,8 @@ include "koneksi.php";
                 <td align="center">&nbsp;</td>
               </tr>
               <?php
-              $qrysisa = mysqli_query($con, "SELECT * FROM tbl_sisa_packing WHERE tgl_sisa='$Awal'");
-              $rowsisa = mysqli_fetch_array($qrysisa);
+              $qrysisa = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_sisa_packing WHERE tgl_sisa='$Awal'");
+              $rowsisa = sqlsrv_fetch_array($qrysisa);
               ?>
               <tr>
                 <td colspan="2" align="center" valign="middle">SISA SIAP PACKING</td>
@@ -1407,28 +1409,28 @@ include "koneksi.php";
               $persen_kglulu = $persen_ylulu = $persen_kgadi = $persen_yadi = $persen_kgdll = $persen_ydll = 0;
               ?>
               <?php
-              $qryPAG = mysqli_query($con, " 
+              $qryPAG = sqlsrv_query($con_db_qc_sqlsrv, " 
                                     select
-                                      SUM(if(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
-                                      SUM(if(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-                                      SUM(if(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
-                                      SUM(if(pelanggan like '%LULU%',netto,0)) as lulu_kg,
-                                      SUM(if(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-                                      SUM(if(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
-                                      SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
-                                      SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-                                      SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
+                                      SUM(IIF(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
+                                      SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
+                                      SUM(IIF(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
+                                      SUM(IIF(pelanggan like '%LULU%',netto,0)) as lulu_kg,
+                                      SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
+                                      SUM(IIF(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
+                                      SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
+                                      SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+                                      SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
                                       SUM(netto) as tot_kg,
                                       SUM(panjang) as tot_yd,
                                       SUM(jml_netto) as tot_roll	
                                     from
-                                      tbl_lap_inspeksi
+                                      db_qc.tbl_lap_inspeksi
                                     where
                                       $Where
-                                      `dept` = 'PACKING'
-                                      and `sts_gkg` = '1'
+                                      dept = 'PACKING'
+                                      and sts_gkg = '1'
                                       and inspektor = 'PACKING A'");
-              $rowPAG = mysqli_fetch_array($qryPAG);
+              $rowPAG = sqlsrv_fetch_array($qryPAG);
               ?>
               <tr>
                 <td align="center">PACKING A</td>
@@ -1446,28 +1448,28 @@ include "koneksi.php";
                 <td align="center"><?php echo number_format(round($rowPAG['tot_yd'], 2), 2); ?></td>
               </tr>
               <?php
-              $qryPBG = mysqli_query($con, " 
+              $qryPBG = sqlsrv_query($con_db_qc_sqlsrv, " 
                         select
-                          SUM(if(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
-                          SUM(if(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-                          SUM(if(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
-                          SUM(if(pelanggan like '%LULU%',netto,0)) as lulu_kg,
-                          SUM(if(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-                          SUM(if(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
-                          SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
-                          SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-                          SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
+                          SUM(IIF(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
+                          SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
+                          SUM(IIF(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
+                          SUM(IIF(pelanggan like '%LULU%',netto,0)) as lulu_kg,
+                          SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
+                          SUM(IIF(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
+                          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
+                          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+                          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
                           SUM(netto) as tot_kg,
                           SUM(panjang) as tot_yd,
                           SUM(jml_netto) as tot_roll	
                         from
-                          tbl_lap_inspeksi
+                          db_qc.tbl_lap_inspeksi
                         where
                           $Where
-                          `dept` = 'PACKING'
-                          and `sts_gkg` = '1'
+                          dept = 'PACKING'
+                          and sts_gkg = '1'
                           and inspektor = 'PACKING B'");
-              $rowPBG = mysqli_fetch_array($qryPBG);
+              $rowPBG = sqlsrv_fetch_array($qryPBG);
               ?>
               <tr>
                 <td align="center">PACKING B</td>
@@ -1485,28 +1487,28 @@ include "koneksi.php";
                 <td align="center"><?php echo number_format(round($rowPBG['tot_yd'], 2), 2); ?></td>
               </tr>
               <?php
-              $qryPCG = mysqli_query($con, " 
+              $qryPCG = sqlsrv_query($con_db_qc_sqlsrv, " 
                                 select
-                                  SUM(if(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
-                                  SUM(if(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-                                  SUM(if(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
-                                  SUM(if(pelanggan like '%LULU%',netto,0)) as lulu_kg,
-                                  SUM(if(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-                                  SUM(if(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
-                                  SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
-                                  SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-                                  SUM(if(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
+                                  SUM(IIF(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
+                                  SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
+                                  SUM(IIF(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
+                                  SUM(IIF(pelanggan like '%LULU%',netto,0)) as lulu_kg,
+                                  SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
+                                  SUM(IIF(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
+                                  SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
+                                  SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+                                  SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
                                   SUM(netto) as tot_kg,
                                   SUM(panjang) as tot_yd,
                                   SUM(jml_netto) as tot_roll	
                                 from
-                                  tbl_lap_inspeksi
+                                  db_qc.tbl_lap_inspeksi
                                 where
                                   $Where
-                                  `dept` = 'PACKING'
-                                  and `sts_gkg` = '1'
+                                  dept = 'PACKING'
+                                  and sts_gkg = '1'
                                   and inspektor = 'PACKING C'");
-              $rowPCG = mysqli_fetch_array($qryPCG);
+              $rowPCG = sqlsrv_fetch_array($qryPCG);
               ?>
               <tr>
                 <td align="center">PACKING C</td>
@@ -1601,8 +1603,8 @@ include "koneksi.php";
                 <td align="center">&nbsp;</td>
               </tr>
               <?php
-              $qrysisa = mysqli_query($con, "SELECT * FROM tbl_sisa_packing WHERE tgl_sisa='$Awal'");
-              $rowsisa = mysqli_fetch_array($qrysisa);
+              $qrysisa = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_sisa_packing WHERE tgl_sisa='$Awal'");
+              $rowsisa = sqlsrv_fetch_array($qrysisa);
               ?>
               <tr>
                 <td colspan="2" align="center" valign="middle">SISA SIAP PACKING</td>
@@ -1650,18 +1652,18 @@ include "koneksi.php";
             </thead>
             <tbody>
               <?php
-              $qryOK = mysqli_query($con, " 
-        select round(sum(if(inspektor='PACKING A',netto,'0')),2) as PACKING_A,
-        round(sum(if(inspektor='PACKING B',netto,'0')),2) as PACKING_B,	
-        round(sum(if(inspektor='PACKING C',netto,'0')),2) as PACKING_C,
+              $qryOK = sqlsrv_query($con_db_qc_sqlsrv, " 
+        select round(sum(IIF(inspektor='PACKING A',netto,'0')),2) as PACKING_A,
+        round(sum(IIF(inspektor='PACKING B',netto,'0')),2) as PACKING_B,	
+        round(sum(IIF(inspektor='PACKING C',netto,'0')),2) as PACKING_C,
         round(sum(netto),2) as TOTAL
         from
-          tbl_lap_inspeksi
+          db_qc.tbl_lap_inspeksi
         where
           $Where
-          `dept` = 'PACKING'
-          and `sts_gkg` = '0'");
-              $rowOK = mysqli_fetch_array($qryOK);
+          dept = 'PACKING'
+          and sts_gkg = '0'");
+              $rowOK = sqlsrv_fetch_array($qryOK);
               ?>
               <tr>
                 <td>OK</td>
@@ -1671,16 +1673,16 @@ include "koneksi.php";
                 <td align="right"><strong><?php echo round($rowOK['TOTAL'], 2); ?></strong></td>
               </tr>
               <?php
-              $qryTH = mysqli_query($con, " 
-        select round(sum(if(inspektor='PACKING A',kg_th,'0')),2) as PACKING_A,
-        round(sum(if(inspektor='PACKING B',kg_th,'0')),2) as PACKING_B,	
-        round(sum(if(inspektor='PACKING C',kg_th,'0')),2) as PACKING_C,
+              $qryTH = sqlsrv_query($con_db_qc_sqlsrv, " 
+        select round(sum(IIF(inspektor='PACKING A',kg_th,'0')),2) as PACKING_A,
+        round(sum(IIF(inspektor='PACKING B',kg_th,'0')),2) as PACKING_B,	
+        round(sum(IIF(inspektor='PACKING C',kg_th,'0')),2) as PACKING_C,
         round(sum(kg_th),2) as TOTAL
         from
-          tbl_lap_inspeksi
+          db_qc.tbl_lap_inspeksi
         where
-          $Where `dept` = 'PACKING'");
-              $rowTH = mysqli_fetch_array($qryTH);
+          $Where dept = 'PACKING'");
+              $rowTH = sqlsrv_fetch_array($qryTH);
               ?>
               <tr>
                 <td>TH</td>
@@ -1690,16 +1692,16 @@ include "koneksi.php";
                 <td align="right"><strong><?php echo round($rowTH['TOTAL'], 2); ?></strong></td>
               </tr>
               <?php
-              $qryBS = mysqli_query($con, " 
-        select round(sum(if(inspektor='PACKING A',kg_bs,'0')),2) as PACKING_A,
-        round(sum(if(inspektor='PACKING B',kg_bs,'0')),2) as PACKING_B,	
-        round(sum(if(inspektor='PACKING C',kg_bs,'0')),2) as PACKING_C,
+              $qryBS = sqlsrv_query($con_db_qc_sqlsrv, " 
+        select round(sum(IIF(inspektor='PACKING A',kg_bs,'0')),2) as PACKING_A,
+        round(sum(IIF(inspektor='PACKING B',kg_bs,'0')),2) as PACKING_B,	
+        round(sum(IIF(inspektor='PACKING C',kg_bs,'0')),2) as PACKING_C,
         round(sum(kg_bs),2) as TOTAL
         from
-          tbl_lap_inspeksi
+          db_qc.tbl_lap_inspeksi
         where
-          $Where `dept` = 'PACKING'");
-              $rowBS = mysqli_fetch_array($qryBS);
+          $Where dept = 'PACKING'");
+              $rowBS = sqlsrv_fetch_array($qryBS);
               ?>
               <tr>
                 <td>BS</td>
@@ -1709,17 +1711,17 @@ include "koneksi.php";
                 <td align="right"><strong><?php echo round($rowBS['TOTAL'], 2); ?></strong></td>
               </tr>
               <?php
-              $qryPST = mysqli_query($con, " 
-                select round(sum(if(inspektor='PACKING A',netto,'0')),2) as PACKING_A,
-                round(sum(if(inspektor='PACKING B',netto,'0')),2) as PACKING_B,	
-                round(sum(if(inspektor='PACKING C',netto,'0')),2) as PACKING_C,
+              $qryPST = sqlsrv_query($con_db_qc_sqlsrv, " 
+                select round(sum(IIF(inspektor='PACKING A',netto,'0')),2) as PACKING_A,
+                round(sum(IIF(inspektor='PACKING B',netto,'0')),2) as PACKING_B,	
+                round(sum(IIF(inspektor='PACKING C',netto,'0')),2) as PACKING_C,
                 round(sum(netto),2) as TOTAL
                 from
-                  tbl_lap_inspeksi
+                  db_qc.tbl_lap_inspeksi
                 where
-                  $Where `dept` = 'PACKING'
-                  and `sts_gkg` = '1'");
-              $rowPST = mysqli_fetch_array($qryPST);
+                  $Where dept = 'PACKING'
+                  and sts_gkg = '1'");
+              $rowPST = sqlsrv_fetch_array($qryPST);
               ?>
               <tr>
                 <td>PRESET</td>
@@ -1907,26 +1909,26 @@ include "koneksi.php";
               <?php
               $no = 1;
               if ($GShift != "ALL") {
-                $shft = " AND `shift`='$GShift' ";
+                $shft = " AND shift='$GShift' ";
               } else {
                 $shft = " ";
               }
               if ($MC != "ALL") {
-                $nomc = " AND `no_mc` LIKE '%$MC' ";
+                $nomc = " AND no_mc LIKE '%$MC' ";
               } else {
                 $nomc = " ";
               }
               if ($Group != "ALL") {
-                $grp = " AND `inspektor`='$Group' ";
+                $grp = " AND inspektor='$Group' ";
               } else {
                 $grp = " ";
               }
               if ($Awal != "" and $Akhir != "") {
-                $qry1 = mysqli_query($con, "SELECT * FROM tbl_lap_inspeksi WHERE $Where `dept`='PACKING' $shft $nomc $grp ORDER BY id ASC");
+                $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_lap_inspeksi WHERE $Where dept='PACKING' $shft $nomc $grp ORDER BY id ASC");
               } else {
-                $qry1 = mysqli_query($con, "SELECT * FROM tbl_lap_inspeksi WHERE $Where `dept`='PACKING' $shft $nomc $grp ORDER BY id ASC");
+                $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_lap_inspeksi WHERE $Where dept='PACKING' $shft $nomc $grp ORDER BY id ASC");
               }
-              while ($row1 = mysqli_fetch_array($qry1)) {
+              while ($row1 = sqlsrv_fetch_array($qry1)) {
               ?>
                 <tr bgcolor="<?php echo $bgcolor; ?>">
                   <td align="center"><?php echo $no; ?></td>
@@ -1945,7 +1947,7 @@ include "koneksi.php";
                   <td align="left"><?php echo $row1['no_item']; ?></td>
                   <td align="left"><?php echo $row1['no_hanger']; ?></td>
                   <td align="left"><?php echo substr($row1['warna'], 0, 10) . "..."; ?></td>
-                  <td align="center"><?php echo $row1['tgl_pengiriman']; ?></td>
+                  <td align="center"><?php echo date_format($row1['tgl_pengiriman'], 'Y-m-d'); ?></td>
                   <td align="center"><?php echo $row1['lot']; ?></td>
                   <td align="center"><?php echo $row1['inspektor']; ?></td>
                   <td align="center"><?php echo $row1['no_mc']; ?></td>
@@ -1994,7 +1996,7 @@ include "koneksi.php";
                   <td><?= $row1['note_kf']; ?></td>
                   <td><?= $row1['qty_bf']; ?></td>
                   <td><?= $row1['note_bf']; ?></td>
-                  <td><?= $row1['tgl_update'] . ' ' . $row1['jam_update']; ?></td>
+                  <td><?= date_format($row1['tgl_update'], 'Y-m-d') . ' ' . date_format($row1['jam_update'], 'H:i:s'); ?></td>
                 </tr>
               <?php $no++;
               } ?>
@@ -2036,26 +2038,30 @@ include "koneksi.php";
                                           tgl_update,
                                           SUM(netto) as tot_kg
                                         FROM
-                                          tbl_lap_inspeksi 
+                                          db_qc.tbl_lap_inspeksi 
                                         WHERE
-                                          DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$start_date' AND '$stop_date' 
-                                          AND `dept` = 'PACKING' 
-                                          AND `sts_gkg` = '0' 
+                                          CAST(tgl_update AS DATE) BETWEEN '$start_date' AND '$stop_date' 
+                                          AND dept = 'PACKING' 
+                                          AND sts_gkg = '0' 
                                           AND inspektor IN ('PACKING A', 'PACKING B', 'PACKING C')
                                         GROUP BY
-                                          tgl_update 
-                                        ASC;";
-                $resultLapHarianPacking = mysqli_query($con, $qtyLapHarianPacking);
+                                          tgl_update;";
+                $resultLapHarianPacking = sqlsrv_query($con_db_qc_sqlsrv, $qtyLapHarianPacking);
                 $totalLapHarianPacking = 0;
               ?>
-              <?php while ($rowLapHarianPacking = mysqli_fetch_assoc($resultLapHarianPacking)) : ?>
+              <?php while ($rowLapHarianPacking = sqlsrv_fetch_array($resultLapHarianPacking)) : ?>
                 <?php
                   $tgl_update             = $rowLapHarianPacking['tgl_update'];
                   $tot_kg                 = $rowLapHarianPacking['tot_kg'];
                   $totalLapHarianPacking += $tot_kg;
 
-                  // Buat nama hari
-                  $day = date('l', strtotime($tgl_update)); // hasilnya: Monday, Tuesday, dst (bahasa Inggris)
+                  // Pastikan $tgl_update selalu jadi DateTime
+                  if (!($tgl_update instanceof DateTime)) {
+                      $tgl_update = new DateTime($tgl_update);
+                  }
+
+                  // Nama hari (EN)
+                  $day = $tgl_update->format('l');
 
                   // Kalau mau bahasa Indonesia:
                   $days = [
@@ -2071,7 +2077,7 @@ include "koneksi.php";
                 ?>
                 <tr>
                   <td align="center"><?= $day_indonesia; ?></td>
-                  <td align="center"><?= date('d-m-Y', strtotime($tgl_update)); ?></td>
+                  <td align="center"><?= $tgl_update->format('d-m-Y'); ?></td>
                   <td align="center"><?= number_format($tot_kg, 2); ?></td>
                 </tr>
               <?php endwhile; ?>

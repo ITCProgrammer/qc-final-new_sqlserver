@@ -25,9 +25,9 @@ include "../../koneksi.php";
                 <th align="center" bgcolor="#FFFF00">YDS</th>
             </tr>
             <?php 
-            $sql=mysqli_query($con,"SELECT pelanggan, netto, panjang FROM tbl_lap_inspeksi WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$_GET[awal]' AND '$_GET[akhir]'
+            $sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT pelanggan, netto, panjang FROM db_qc.tbl_lap_inspeksi WHERE TRY_CAST(tgl_update AS DATE) BETWEEN '$_GET[awal]' AND '$_GET[akhir]'
             AND dept='PACKING' AND pelanggan LIKE '%ADIDAS%'");
-            while($radi=mysqli_fetch_array($sql)){
+            while($radi=sqlsrv_fetch_array($sql)){
             ?>
             <tr>
                 <td align="left"><?php echo $radi['pelanggan'];?></td>
@@ -55,9 +55,9 @@ include "../../koneksi.php";
                 <th align="center" bgcolor="#FFFF00">YDS</th>
             </tr>
             <?php 
-            $sqllulu=mysqli_query($con,"SELECT pelanggan, netto, panjang FROM tbl_lap_inspeksi WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$_GET[awal]' AND '$_GET[akhir]'
+            $sqllulu=sqlsrv_query($con_db_qc_sqlsrv,"SELECT pelanggan, netto, panjang FROM db_qc.tbl_lap_inspeksi WHERE TRY_CAST(tgl_update AS DATE) BETWEEN '$_GET[awal]' AND '$_GET[akhir]'
             AND dept='PACKING' AND pelanggan LIKE '%LULU%'");
-            while($rlulu=mysqli_fetch_array($sqllulu)){
+            while($rlulu=sqlsrv_fetch_array($sqllulu)){
             ?>
             <tr>
                 <td align="left"><?php echo $rlulu['pelanggan'];?></td>
@@ -85,9 +85,9 @@ include "../../koneksi.php";
                 <th align="center" bgcolor="#FFFF00">YDS</th>
             </tr>
             <?php 
-            $sqldll=mysqli_query($con,"SELECT pelanggan, netto, panjang FROM tbl_lap_inspeksi WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$_GET[awal]' AND '$_GET[akhir]'
+            $sqldll=sqlsrv_query($con_db_qc_sqlsrv,"SELECT pelanggan, netto, panjang FROM db_qc.tbl_lap_inspeksi WHERE TRY_CAST(tgl_update AS DATE) BETWEEN '$_GET[awal]' AND '$_GET[akhir]'
             AND dept='PACKING' AND pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%'");
-            while($rdll=mysqli_fetch_array($sqldll)){
+            while($rdll=sqlsrv_fetch_array($sqldll)){
             ?>
             <tr>
                 <td align="left"><?php echo $rdll['pelanggan'];?></td>
@@ -143,18 +143,18 @@ include "../../koneksi.php";
     $t_yard=0;
     $total_rlulu=$total_kglulu=$total_ylulu=$total_radi=$total_kgadi=$total_yadi=$total_rdll=$total_kgdll=$total_ydll=0;
     $persen_kglulu=$persen_ylulu=$persen_kgadi=$persen_yadi+$persen_kgdll+$persen_ydll=0;
-    $qry=mysqli_query($con,"SELECT a.inspektor, a.roll AS roll_lulu, a.kg AS kg_lulu, a.yard AS yard_lulu, b.roll AS roll_adidas, b.kg AS kg_adidas, b.yard AS yard_adidas, c.roll AS roll_dll, c.kg AS kg_dll, c.yard AS yard_dll FROM 
-    (SELECT inspektor, COUNT(*) AS roll, SUM(netto) AS kg, SUM(panjang) AS yard FROM tbl_lap_inspeksi WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$_GET[awal]' AND '$_GET[akhir]' 
-    AND `dept`='PACKING' AND pelanggan LIKE '%LULU%' GROUP BY inspektor) A 
+    $qry=sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.inspektor, a.roll AS roll_lulu, a.kg AS kg_lulu, a.yard AS yard_lulu, b.roll AS roll_adidas, b.kg AS kg_adidas, b.yard AS yard_adidas, c.roll AS roll_dll, c.kg AS kg_dll, c.yard AS yard_dll FROM 
+    (SELECT inspektor, COUNT(*) AS roll, SUM(netto) AS kg, SUM(panjang) AS yard FROM db_qc.tbl_lap_inspeksi WHERE TRY_CAST(tgl_update AS DATE) BETWEEN '$_GET[awal]' AND '$_GET[akhir]' 
+    AND dept='PACKING' AND pelanggan LIKE '%LULU%' GROUP BY inspektor) A 
     LEFT JOIN
-    (SELECT inspektor, COUNT(*) AS roll, SUM(netto) AS kg, SUM(panjang) AS yard FROM tbl_lap_inspeksi WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$_GET[awal]' AND '$_GET[akhir]' 
-    AND `dept`='PACKING' AND pelanggan LIKE '%ADIDAS%' GROUP BY inspektor) B
+    (SELECT inspektor, COUNT(*) AS roll, SUM(netto) AS kg, SUM(panjang) AS yard FROM db_qc.tbl_lap_inspeksi WHERE TRY_CAST(tgl_update AS DATE) BETWEEN '$_GET[awal]' AND '$_GET[akhir]' 
+    AND dept='PACKING' AND pelanggan LIKE '%ADIDAS%' GROUP BY inspektor) B
     ON a.inspektor=b.inspektor
     LEFT JOIN
-    (SELECT inspektor, COUNT(*) AS roll, SUM(netto) AS kg, SUM(panjang) AS yard FROM tbl_lap_inspeksi WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$_GET[awal]' AND '$_GET[akhir]' 
-    AND `dept`='PACKING' AND pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%' GROUP BY inspektor) C
+    (SELECT inspektor, COUNT(*) AS roll, SUM(netto) AS kg, SUM(panjang) AS yard FROM db_qc.tbl_lap_inspeksi WHERE TRY_CAST(tgl_update AS DATE) BETWEEN '$_GET[awal]' AND '$_GET[akhir]' 
+    AND dept='PACKING' AND pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%' GROUP BY inspektor) C
     ON b.inspektor=c.inspektor");
-    while($row=mysqli_fetch_array($qry)){
+    while($row=sqlsrv_fetch_array($qry)){
     ?>
     <tr>
         <td align="center"><?php echo $row['inspektor']; ?></td>
