@@ -199,7 +199,7 @@ ORDER BY
                       <a href="#" id='<?php echo $rowd['id']; ?>' class="btn btn-xs <?php if ($_SESSION['akses'] == "biasa" or $_SESSION['akses'] == "superadmin") {
                            echo "enabled";
                          } else {
-                           echo " disabled-cancel ";
+                           echo " disabled ";
                          }
                          if ($rowd['no_urut'] != "1") {
                            echo " hidden ";
