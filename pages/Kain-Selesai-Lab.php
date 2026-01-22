@@ -38,11 +38,51 @@ $nocounter = $_GET['nocount'];
                         <tbody>
                             <?php
                             $no = 1;
-                            //   Update by ilham 21/06/2024 No Ticket BDIT240001517 
-
-                            //   Update by ilham 03/07/2024 FILTER JIKA LABORAT SUDAH APPROVE TIDAK DIMUNCULKAN DALAM TABEL dan JIKA YG SUDAH DI DELETE JGN MUNCUL
-                            $sql = mysqli_query($conlab, "SELECT * FROM tbl_test_qc WHERE sts_laborat != 'Cancel' AND sts_laborat = 'Approved Full' OR sts_laborat = 'Approved Parsial' AND deleted_at IS NULL AND sts_qc = 'Kain OK' ORDER BY tgl_buat DESC");
-                            while ($r = mysqli_fetch_array($sql)) {
+                            
+                            $sql = sqlsrv_query(
+                                    $con_db_laborat_sqlsrv,
+                                    "
+                                    SELECT
+                                        [id],
+                                        [no_counter],
+                                        [suffix],
+                                        [jenis_testing],
+                                        [treatment],
+                                        [buyer],
+                                        [no_warna],
+                                        [warna],
+                                        [no_item],
+                                        [jenis_kain],
+                                        [tgl_terimakain],
+                                        [tgl_approve_qc],
+                                        [nama_personil_test],
+                                        [permintaan_testing],
+                                        [created_by],
+                                        [sts],
+                                        [sts_laborat],
+                                        [note_laborat],
+                                        [sts_qc],
+                                        [diterima_oleh],
+                                        [nama_penerima],
+                                        [note_qc],
+                                        [tgl_buat]
+                                    FROM db_laborat.tbl_test_qc
+                                    WHERE
+                                        deleted_at IS NULL
+                                        AND sts_qc = 'Kain OK'
+                                        AND sts_laborat != 'Cancel'
+                                        AND (
+                                            sts_laborat = 'Approved Full'
+                                            OR sts_laborat = 'Approved Parsial'
+                                        )
+                                    ORDER BY tgl_buat DESC
+                                    "
+                                );
+                            if(!$sql){
+                                die(print_r(sqlsrv_errors(), true));
+                            }
+                                                    
+                            while ($r = sqlsrv_fetch_array($sql)) {
                                 $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
                                 $detail2 = explode(",", $r['permintaan_testing']);
                             ?>
@@ -61,8 +101,8 @@ $nocounter = $_GET['nocount'];
                                     <td valign="center"><?php echo $r['no_item']; ?></td>
                                     <td valign="center"><?php echo $r['jenis_kain']; ?></td>
                                     <!-- Update by ilham 21/06/2024 No Ticket BDIT240001517 -->
-                                    <td valign="center"><?php echo $r['tgl_terimakain']; ?></td>
-                                    <td valign="center"><?php echo $r['tgl_approve_qc']; ?></td>
+                                    <td valign="center"><?php echo $r['tgl_terimakain']->format('Y-m-d'); ?></td>
+                                    <td valign="center"><?php echo $r['tgl_approve_qc']->format('Y-m-d'); ?></td>
                                     <td valign="center"><?php echo $r['nama_personil_test']; ?></td>
                                     <td valign="center" align="left"><?php if ($r['permintaan_testing'] != "") {
                                                                             echo $r['permintaan_testing'];
