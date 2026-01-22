@@ -1,12 +1,7 @@
 <?php
 ini_set("error_reporting", 1);
 session_start();
-include"koneksi.php";
-if (mysqli_connect_errno()) {
-//printf("Connect failed: %s\n", mysqli_connect_error());
-	header("Refrash:3");
-exit();
-}
+include "koneksi.php";
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -48,8 +43,8 @@ exit();
 			<div class="col-xs-12">
     <div class="box box-solid">
 			<?php 
-			$qrySI=mysqli_query($con,"SELECT SUM(bruto) AS kg FROM tbl_schedule WHERE NOT `status` = 'selesai' AND `status`='antri mesin'") or die("Query error : " . mysqli_error($con)); 
-			$rSI=mysqli_fetch_array($qrySI); 
+			$qrySI=sqlsrv_query($con_db_qc_sqlsrv,"SELECT SUM(bruto) AS kg FROM db_qc.tbl_schedule WHERE NOT [status] = 'selesai' AND [status]='antri mesin'") or die("Query error : " . sqlsrv_errors()); 
+			$rSI=sqlsrv_fetch_array($qrySI,SQLSRV_FETCH_ASSOC); 
 		  	?>
             <div class="box-header with-border">
               <h3 class="box-title">Sisa Siap Inspect : <?php echo $rSI['kg']." Kg"; ?></h3>
@@ -62,13 +57,14 @@ exit();
               <div id="carousel-example-generic" class="carousel slide" data-ride="carousel" data-interval="10000">                
                 <div class="carousel-inner">
 				<?php 
-					$qryGmbr=mysqli_query($con,"SELECT ceil(count(*)/4) as jumlah	from(SELECT	* FROM tbl_schedule 
-WHERE
-	`status` = 'sedang jalan' or `status`='antri mesin'
-GROUP BY
-	no_mesin,
-	no_urut) a ") or die("Query error : " . mysqli_error($con));
-					$rG=mysqli_fetch_array($qryGmbr);
+					$qryGmbr=sqlsrv_query($con_db_qc_sqlsrv,"SELECT CEILING(count(*)/4) as jumlah	
+															FROM (SELECT no_mesin,no_urut FROM db_qc.tbl_schedule 
+																WHERE
+																	[status] = 'sedang jalan' or [status]='antri mesin'
+																GROUP BY
+																	no_mesin,
+																	no_urut) a ") or die("Query error : " . sqlsrv_errors());
+					$rG=sqlsrv_fetch_array($qryGmbr,SQLSRV_FETCH_ASSOC);
 					$pages=$rG['jumlah'];
 					for ($i=1; $i<=$pages ; $i++){
 				?>	
@@ -78,33 +74,35 @@ GROUP BY
 					  <?php
 						$j=$i-1;
 						$bts=$j*4;
-   $data=mysqli_query($con,"SELECT
-   	id,
-	no_mesin,
-	no_urut,
-	buyer,
-	langganan,
-	no_order,
-	nokk,
-	jenis_kain,
-	warna,
-	no_warna,
-	lot,
-	sum(rol) as rol,
-	sum(bruto) as bruto,
-	proses,
-	catatan,
-	ket_status,
-	tgl_delivery
-FROM
-	tbl_schedule 
-WHERE
-	`status` = 'sedang jalan' or `status`='antri mesin' 
-GROUP BY
-	no_mesin,
-	no_urut 
-ORDER BY
-	no_mesin ASC,no_urut ASC LIMIT ".$bts.",4") or die("Query error : " . mysqli_error($con));
+   $data=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+											MAX(id) id,
+											no_mesin,
+											no_urut,
+											MAX(buyer) buyer,
+											MAX(langganan) langganan,
+											MAX(no_order) no_order,
+											MAX(nokk) nokk,
+											MAX(jenis_kain) jenis_kain,
+											MAX(warna) warna,
+											MAX(no_warna) no_warna,
+											MAX(lot) lot,
+											sum(rol) as rol,
+											sum(bruto) as bruto,
+											MAX(proses) proses,
+											MAX(catatan) catatan,
+											MAX(ket_status) ket_status,
+											MAX(CONVERT(VARCHAR(10),tgl_delivery)) tgl_delivery
+										FROM
+											db_qc.tbl_schedule 
+										WHERE
+											[status] = 'sedang jalan' OR [status]='antri mesin' 
+										GROUP BY
+											no_mesin,
+											no_urut 
+										ORDER BY
+											no_mesin ASC,no_urut ASC 
+										OFFSET ".$bts." ROWS
+										FETCH NEXT 4 ROWS ONLY ") or die("Query error : " . sqlsrv_errors());
 	?>
       <div class="box-body table-responsive">
 <table id="tblr21" class="table table-bordered table-hover table-striped" width="100%">
@@ -128,10 +126,10 @@ ORDER BY
           <tbody>
             <?php
 	  $col=0;
-  while($rowd=mysqli_fetch_array($data)){
+  while($rowd=sqlsrv_fetch_array($data,SQLSRV_FETCH_ASSOC)){
 			$bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
-	  	$qCek=mysqli_query($con,"SELECT `status` FROM tbl_inspection WHERE id_schedule='".$rowd['id']."' LIMIT 1") or die("Query error : " . mysqli_error($con));
-	  	$rCEk=mysqli_fetch_array($qCek);
+	  	$qCek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 [status] FROM db_qc.tbl_inspection WHERE id_schedule='".$rowd['id']."' ") or die("Query error : " . sqlsrv_errors());
+	  	$rCEk=sqlsrv_fetch_array($qCek,SQLSRV_FETCH_ASSOC);
 		 ?>
 			
             <tr bgcolor="<?php echo $bgcolor; ?>">
@@ -199,16 +197,39 @@ ORDER BY
 <?php
 function NoMesin($mc)
 {
-	include"koneksi.php";
-	$qMC=mysqli_query($con,"SELECT *,IF(DATEDIFF(now(),a.tgl_delivery) > 0,'Urgent',
-IF(DATEDIFF(now(),a.tgl_delivery) > -4,'Potensi Delay','')) as `sts` FROM tbl_schedule a 
-LEFT JOIN tbl_inspection b ON a.id=b.id_schedule
-WHERE a.no_mesin='".$mc."' and (b.`status`='sedang jalan' or a.`status`='antri mesin') ORDER BY a.no_urut ASC LIMIT 1") or die("Query error : " . mysqli_error($con));
-	$dMC=mysqli_fetch_array($qMC);	
-	$qLama=mysqli_query($con,"SELECT round(TIME_FORMAT(timediff(b.tgl_target,now()),'%H')) as lama FROM tbl_schedule a
-LEFT JOIN tbl_inspection b ON a.id=b.id_schedule
-WHERE a.no_mesin='".$mc."' AND b.status='sedang jalan' ORDER BY a.no_urut ASC LIMIT 1") or die("Query error : " . mysqli_error($con));
-	$dLama=mysqli_fetch_array($qLama);
+	include "koneksi.php";
+	$qMC=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1
+											*,
+											CASE
+												WHEN DATEDIFF(Day,CURRENT_TIMESTAMP, a.tgl_delivery) > 0 THEN 'Urgent'
+												WHEN DATEDIFF(Day,CURRENT_TIMESTAMP, a.tgl_delivery) > -4 THEN 'Potensi Delay'
+												ELSE ''
+											END as sts
+										FROM
+											db_qc.tbl_schedule a
+										LEFT JOIN db_qc.tbl_inspection b ON
+											a.id = b.id_schedule
+										WHERE
+											a.no_mesin = '".$mc."'
+											and
+											(b.status= 'sedang jalan'
+												or a.status= 'antri mesin')
+										ORDER BY
+											a.no_urut ASC") or die("Query error : " . sqlsrv_errors());
+	$dMC=sqlsrv_fetch_array($qMC,SQLSRV_FETCH_ASSOC);	
+	$qLama=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1
+											round(DATEDIFF(Hour,CURRENT_TIMESTAMP, b.tgl_target),0) as lama
+										FROM
+											db_qc.tbl_schedule a
+										LEFT JOIN db_qc.tbl_inspection b ON
+											a.id = b.id_schedule
+										WHERE
+											a.no_mesin = '".$mc."'
+											AND 
+											b.status = 'sedang jalan'
+										ORDER BY
+											a.no_urut ASC") or die("Query error : " . sqlsrv_errors());
+	$dLama=sqlsrv_fetch_array($qLama,SQLSRV_FETCH_ASSOC);
 	
 		if($dMC['ket_status']=="Pisah Kain"){
 			if($dLama['lama']<"1" and $dLama['lama']!=""){ 
@@ -346,34 +367,43 @@ WHERE a.no_mesin='".$mc."' AND b.status='sedang jalan' ORDER BY a.no_urut ASC LI
 }
 function Rajut($mc)
 {
-	/*$qMC=mysqli_query("SELECT a.langganan,a.no_order,a.warna,a.proses FROM tbl_schedule a 
+	/*$qMC=sqlsrv_query("SELECT a.langganan,a.no_order,a.warna,a.proses FROM tbl_schedule a 
 	LEFT JOIN tbl_inspection b ON a.id=b.id_schedule
 	WHERE a.no_mesin='$mc' and b.`status`='sedang jalan' and a.`status`='sedang jalan'  ORDER BY a.no_urut ASC LIMIT 1");
-	$dMC=mysqli_fetch_array($qMC);
+	$dMC=sqlsrv_fetch_array($qMC,SQLSRV_FETCH_ASSOC);
     echo "<font size=+2><u>".$mc."</u></font> <br>".$dMC['no_order']."<br> ".$dMC['langganan']."<br>".$dMC['warna']."<br>".$dMC['proses'];*/	
 }
 		/*function Waktu($mc){
-			$qLama=mysqli_query("SELECT TIME_FORMAT(timediff(b.tgl_target,now()),'%H:%i') as lama FROM tbl_schedule a
+			$qLama=sqlsrv_query("SELECT TIME_FORMAT(timediff(b.tgl_target,now()),'%H:%i') as lama FROM tbl_schedule a
 LEFT JOIN tbl_inspection b ON a.id=b.id_schedule
 WHERE a.no_mesin='$mc' AND a.status='sedang jalan' AND (ISNULL(b.tgl_stop) or NOT ISNULL(b.tgl_mulai)) ORDER BY a.no_urut ASC");
-			$dLama=mysqli_fetch_array($qLama);
+			$dLama=sqlsrv_fetch_array($qLama,SQLSRV_FETCH_ASSOC);
 			if($dLama[lama]!=""){echo $dLama[lama];}else{echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ";}
 		}*/
 function Nama($mc){
-	include"koneksi.php";
-	$qNama=mysqli_query($con,"SELECT b.personil FROM tbl_schedule a 
-LEFT JOIN tbl_inspection b ON a.id=b.id_schedule
-WHERE a.no_mesin='".$mc."' and (b.`status`='sedang jalan' and a.`status`='sedang jalan') ORDER BY a.no_urut ASC LIMIT 1") or die("Query error : " . mysqli_error($con));	
-			$dNama=mysqli_fetch_array($qNama);
-	$qUser=mysqli_query($con,"SELECT `user` FROM user_login WHERE nama='".$dNama['personil']."' and dept='QC' LIMIT 1") or die("Query error : " . mysqli_error($con));
-			$dUser=mysqli_fetch_array($qUser);
+	include "koneksi.php";
+	$qNama=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1
+											b.personil
+										FROM
+											db_qc.tbl_schedule a
+										LEFT JOIN db_qc.tbl_inspection b ON
+											a.id = b.id_schedule
+										WHERE
+											a.no_mesin = '".$mc."'
+											and (b.status= 'sedang jalan'
+												and a.status= 'sedang jalan')
+										ORDER BY
+											a.no_urut ASC") or die("Query error : " . sqlsrv_errors());	
+			$dNama=sqlsrv_fetch_array($qNama,SQLSRV_FETCH_ASSOC);
+	$qUser=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 [user] FROM db_qc.user_login WHERE nama='".$dNama['personil']."' and dept='QC'") or die("Query error : " . sqlsrv_errors());
+			$dUser=sqlsrv_fetch_array($qUser,SQLSRV_FETCH_ASSOC);
 			if($dUser['user']!=""){echo $dUser['user']."<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";}else{echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";}
 }						
 
 /* Total Status Mesin */
     /*
-	$sqlStatus=mysqli_query("SELECT no_mesin FROM tbl_mesin");
-    while ($rM=mysqli_fetch_array($sqlStatus)) {
+	$sqlStatus=sqlsrv_query("SELECT no_mesin FROM tbl_mesin");
+    while ($rM=sqlsrv_fetch_array($sqlStatus,SQLSRV_FETCH_ASSOC)) {
         $sts=NoMesin($rM['no_mesin']);
         if ($sts=="bg-abu" or
            $sts=="bg-abu border-dashed" or
@@ -778,8 +808,8 @@ WHERE a.no_mesin='".$mc."' and (b.`status`='sedang jalan' and a.`status`='sedang
                 <div class="carousel-inner">
 				<?php 
 					$ut=1;
-					$qryGmbr1=mysqli_query($con,"SELECT * FROM tbl_gambar WHERE tampil='ya' ORDER BY id ASC") or die("Query error : " . mysqli_error($con));
-					while($rG1=mysqli_fetch_array($qryGmbr1)){
+					$qryGmbr1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_gambar WHERE tampil='ya' ORDER BY id ASC") or die("Query error : " . sqlsrv_errors());
+					while($rG1=sqlsrv_fetch_array($qryGmbr1,SQLSRV_FETCH_ASSOC)){
 				?>	
                   <div class="item <?php if($ut=="1"){echo "active";} ?>">
                     <img src="dist/img/gambar/<?php echo $rG1['gambar'];?>" alt="<?php echo $rG1['gambar'];?>" style="width: 100%; height:400px;">
@@ -806,8 +836,8 @@ WHERE a.no_mesin='".$mc."' and (b.`status`='sedang jalan' and a.`status`='sedang
 		</div>
 		<marquee class="teks-berjalan" behavior="scroll" direction="left" onmouseover="this.stop();" onmouseout="this.start();">
 											<?php
-$news=mysqli_query($con,"SELECT GROUP_CONCAT(news_line SEPARATOR ' :: ') as news_line FROM tbl_news_line WHERE gedung='LT 1' AND status='Tampil'") or die("Query error : " . mysqli_error($con));
-$rNews=mysqli_fetch_array($news);
+$news=sqlsrv_query($con_db_qc_sqlsrv,"SELECT STRING_AGG(news_line , ' :: ') as news_line FROM db_qc.tbl_news_line WHERE gedung='LT 1' AND status='Tampil'") or die("Query error : " . sqlsrv_errors());
+$rNews=sqlsrv_fetch_array($news,SQLSRV_FETCH_ASSOC);
 $totMesin='0';
 ?>
 											<?php echo "<font size='+8'>".$rNews['news_line']."</font>";?>
@@ -826,4 +856,4 @@ $totMesin='0';
 	</script>
 
 </html>
-<?php mysqli_close($con);?>
+<?php sqlsrv_close($con_db_qc_sqlsrv);?>
