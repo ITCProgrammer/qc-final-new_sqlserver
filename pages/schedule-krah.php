@@ -14,31 +14,30 @@ include"koneksi.php";
 
 <body>
 <?php
-   $data=mysqli_query($con,"SELECT
-   	id,
-	buyer,
-	langganan,
-	no_order,
-	nokk,
-  nodemand,
-	jenis_kain,
-	warna,
-	lot,
-  target,
-	sum(rol) as rol,
-	sum(bruto) as bruto,
-  sum(pcs_bruto) as pcs_bruto,
-	proses,
-	catatan,
-  `status`,
-  TIMESTAMPDIFF(HOUR, tgl_update, now()) as diff
-FROM
-	tbl_schedule_krah 
-WHERE
-	NOT STATUS = 'selesai' 
-GROUP BY
-	id
-ORDER BY no_urut ASC");
+   $data=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+      id,
+      buyer,
+      langganan,
+      no_order,
+      nokk,
+      nodemand,
+      jenis_kain,
+      warna,
+      lot,
+      [target],
+      rol,
+      bruto,
+      pcs_bruto,
+      proses,
+      catatan,
+      [status],
+      DATEDIFF(HOUR, tgl_update, GETDATE()) as diff
+    FROM
+      db_qc.tbl_schedule_krah 
+    WHERE
+      NOT [status] = 'selesai' 
+    ORDER BY no_urut ASC"
+  );
 	$no=1;
 	$n=1;
 	$c=0;
@@ -79,9 +78,9 @@ ORDER BY no_urut ASC");
           <tbody>
             <?php
 	  $col=0;
-  while($rowd=mysqli_fetch_array($data)){
+  while($rowd=sqlsrv_fetch_array($data)){
       date_default_timezone_set('Asia/Jakarta');
-      $tgltarget = new DateTime($rowd['target']);
+      $tgltarget = $rowd['target'];
       $now=new DateTime();
       $target = $now->diff($tgltarget);
       $delay = $tgltarget->diff($now);
@@ -141,10 +140,10 @@ ORDER BY no_urut ASC");
               <td align="center"><?php echo $rowd['warna'];?></td>
               <td align="center"><?php echo $rowd['lot'];?></td>
               <td align="center"><?php echo $rowd['order_legacy'];?></td>
-              <td align="center"><?php echo date("Y-m-d", strtotime($rowd['target']));?></td>
+              <td align="center"><?php echo date_format($rowd['target'], "Y-m-d");?></td>
               <td align="center"><?php echo $rowd['catatan'];?></td>
               <td align="center"><?php echo $rowd['rol'];?></td>
-              <td align="center"><?php echo $rowd['bruto'];?></td>
+              <td align="center"><?php echo number_format($rowd['bruto'], 2);?></td>
               <td align="center"><?php if($rowd['pcs_bruto']!=0){echo $rowd['pcs_bruto'];}else{}?></td>
               <td><?php echo $rowd['proses'];?></td>
             </tr>

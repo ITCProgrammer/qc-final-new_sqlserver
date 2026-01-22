@@ -3,8 +3,8 @@ ini_set("error_reporting", 1);
 session_start();
 include("../koneksi.php");
     $modal_id=$_GET['id'];
-	$modal=mysqli_query($con,"SELECT * FROM `tbl_schedule_krah` WHERE id='$modal_id' ");
-while($r=mysqli_fetch_array($modal)){
+	$modal=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_schedule_krah WHERE id='$modal_id' ");
+while($r=sqlsrv_fetch_array($modal)){
 ?>
          
 <div class="modal-dialog modal1">
@@ -24,8 +24,8 @@ while($r=mysqli_fetch_array($modal)){
                   <select name="no_urut" class="form-control">
 						<option value="">Pilih</option>
 						<?php 
-						$sqlKap=mysqli_query($con,"SELECT no_urut FROM tbl_urut ORDER BY no_urut ASC");
-						while($rK=mysqli_fetch_array($sqlKap)){
+						$sqlKap=sqlsrv_query($con_db_qc_sqlsrv,"SELECT no_urut FROM db_qc.tbl_urut ORDER BY no_urut ASC");
+						while($rK=sqlsrv_fetch_array($sqlKap)){
 						?>
 						<option value="<?php echo $rK['no_urut']; ?>" <?php if($rK['no_urut']==$r['no_urut']){ echo "SELECTED";}?>><?php echo $rK['no_urut']; ?></option>
 						<?php } ?>	  
