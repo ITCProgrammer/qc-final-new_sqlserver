@@ -2,9 +2,32 @@
 ini_set("error_reporting", 1);
 session_start();
 include "../../koneksi.php";
- 
-if (isset($_POST['sql'])) { 
-	$sql_code =  $_POST['sql'];
+
+if (isset($_POST['sql'])) {
+    $sql_code = $_POST['sql'];
+
+    $params = [];
+    if (isset($_POST['params']) && $_POST['params'] !== '') {
+        $params = json_decode($_POST['params'], true);
+        if (!is_array($params)) $params = [];
+    }
+
+    $now = date("YmdHis");
+    header("Content-type: application/octet-stream");
+    header("Content-Disposition: attachment; filename=reportbonpenghubung{$now}.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $sql = sqlsrv_query($con_db_qc_sqlsrv, $sql_code, $params);
+    if ($sql === false) {
+        echo "<pre>";
+        echo "Jumlah ? = " . substr_count($sql_code, '?') . "\n";
+        echo "Jumlah params = " . count($params) . "\n";
+        print_r($params);
+        print_r(sqlsrv_errors());
+        echo "</pre>";
+        exit;
+    }
 ?>
 
 <?php
@@ -15,8 +38,6 @@ header("Pragma: no-cache");
 header("Expires: 0");
 //disini script laporan anda
 ?>
-
-
 
  <table border=1>
           <thead class="bg-blue">
@@ -29,46 +50,41 @@ header("Expires: 0");
 			   <th  rowspan=2><div align="center" valign="middle">ITEM</div></th>
 			   <th  rowspan=2><div align="center" valign="middle">COLOR</div></th>
 			   <th  rowspan=2><div align="center" valign="middle">LOT</div></th>
-			   <th  rowspan=2><div align="center" valign="middle">DEMAND</div></th>
-			   
+			   <th  rowspan=2><div align="center" valign="middle">DEMAND</div></th>			   
 			   <th colspan=3 ><div align="center" valign="middle">QTY</div></th>
 			   <th colspan=2 ><div align="center" valign="middle">QTY FOC</div></th>
 			   <th colspan=2 ><div align="center" valign="middle">ESTIMASI FOC</div></th>
-
 			   <th  rowspan=2><div align="center" valign="middle">ISSUE</div></th>
 			   <th  rowspan=2><div align="center" valign="middle">NOTES</div></th>
 			   <th  rowspan=2><div align="center" valign="middle">ADVICE FROM PRODUCTION/QC</div></th>
-			   <th  rowspan=2><div align="center" valign="middle">RESPONSIBILITY</div></th>
-			 
-			   
-			   
+			   <th  rowspan=2><div align="center" valign="middle">RESPONSIBILITY</div></th>			 
             </tr>
-			<tr>  
-              
+			<tr>        
 			    <th><div align="center" valign="middle">ROLL</div></th>
 				<th><div align="center" valign="middle">KG</div></th>
 				<th><div align="center" valign="middle">YARD</div></th>
-				
 				<th><div align="center" valign="middle">KG</div></th>
 				<th><div align="center" valign="middle">YARD</div></th>
-
 				<!-- ESTIMASI -->
 				<th><div align="center" valign="middle">KG</div></th>
-				<th><div align="center" valign="middle">YARD</div></th>
-				
-            </tr>
-         
+				<th><div align="center" valign="middle">YARD</div></th>				
+            </tr>         
           </thead>
           <tbody>
-          <?php
+        <?php
             $no=1;
-           
-			 $sql=mysqli_query($con,$sql_code);
-			
-				  ?>
+			$sql = sqlsrv_query($con_db_qc_sqlsrv, $sql_code, $params);
+
+			if ($sql === false) {
+				echo "<pre>";
+				print_r(sqlsrv_errors());
+				echo "</pre>";
+				exit;
+			}
+		?>
 				 
 			<?php 
-                while($row1=mysqli_fetch_array($sql)){
+                while ($row1 = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
                   $dtArr=$row1['t_jawab'];
                   $data = explode(",",$dtArr);
                   $dtArr1=$row1['persen'];
@@ -82,17 +98,15 @@ header("Expires: 0");
 						}
 				  }
 				  
-				  
-				  
-				  
-				  
-				  
-				   
               ?>
-              
-		 
           <tr bgcolor="<?php echo $bgcolor; ?>">
-            <td align="center"><?php echo $row1['tgl_masuk'];?></td>
+            <td align="center">
+				<?php
+					echo ($row1['tgl_masuk'] instanceof DateTime)
+					? $row1['tgl_masuk']->format('Y-m-d')
+					: $row1['tgl_masuk'];
+				?>
+			</td>
 			<td align="center"><?php echo $row1['pelanggan'];?></td>
 			 <td align="center"><?php echo $row1['no_po'];?></td>
 			 <td align="center"><?php echo $row1['no_order'];?></td>
@@ -104,12 +118,9 @@ header("Expires: 0");
 			  <td align="center"><?php echo $row1['penghubung_roll1'];?></td>
 			  <td align="center"><?php echo $row1['penghubung_roll2'];?></td>
 			  <td align="center"><?php echo $row1['penghubung_roll3'];?></td>
-
-        	  
         	  <td align="center"><?php echo $row1['berat_extra'];?></td>
 			  <td align="center"><?php echo $row1['panjang_extra'];?></td>
 			  <!-- <td align="center"><?php echo $row1['penghubung_foc3'];?></td> -->
-
 			  <!-- ESTIMASI -->
         	  <td align="center"><?php echo $row1['estimasi'];?></td>
 			  <td align="center"><?php echo $row1['panjang_estimasi'];?></td>
@@ -130,10 +141,8 @@ header("Expires: 0");
 								
 								echo $element.' ' ;
 								echo $array_persen [$key];
-								
-								
+						
 								echo ' ';
-								
 							}
 						$no_depp++;
 						}
@@ -146,9 +155,14 @@ header("Expires: 0");
 		  {  
 		  ?>
 		  
-		  
 		  <tr bgcolor="<?php echo $bgcolor; ?>">
-            <td align="center"><?php echo $row1['tgl_masuk'];?></td>
+            <td align="center">
+				<?php
+					echo ($row1['tgl_masuk'] instanceof DateTime)
+					? $row1['tgl_masuk']->format('Y-m-d')
+					: $row1['tgl_masuk'];
+				?>
+			</td>
 			<td align="center"><?php echo $row1['pelanggan'];?></td>
 			 <td align="center"><?php echo $row1['no_po'];?></td>
 			 <td align="center"><?php echo $row1['no_order'];?></td>
@@ -196,18 +210,19 @@ header("Expires: 0");
 				  }   ?>
 				</td>	 										 
           </tr>
-		  
-		  
 		  <?php  } ?>
-		  
-		  
 		   <?php if($row1['penghubung3_roll1'] and  $row1['penghubung3_roll1'] !='')  
 		  {  
 		  ?>
 		  
-		  
-		   < bgcolor="<?php echo $bgcolor; ?>">
-            <td align="center"><?php echo $row1['tgl_masuk'];?></td>
+		   <tr bgcolor="<?php echo $bgcolor; ?>">
+            <td align="center">
+				<?php
+					echo ($row1['tgl_masuk'] instanceof DateTime)
+					? $row1['tgl_masuk']->format('Y-m-d')
+					: $row1['tgl_masuk'];
+				?>
+			</td>
 			<td align="center"><?php echo $row1['pelanggan'];?></td>
 			 <td align="center"><?php echo $row1['no_po'];?></td>
 			 <td align="center"><?php echo $row1['no_order'];?></td>
@@ -244,10 +259,7 @@ header("Expires: 0");
 								
 								echo $element.' ' ;
 								echo $array_persen [$key];
-								
-								
 								echo ' ';
-								
 							}
 						$no_depp++;
 						}
@@ -256,47 +268,8 @@ header("Expires: 0");
           </tr>
 		  
 		  <?php  } ?>
-		  
-		  
-		  
-		  
           <?php	$no++;  } ?>
         </tbody>
       </table>
-	  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <?php }
 ?>

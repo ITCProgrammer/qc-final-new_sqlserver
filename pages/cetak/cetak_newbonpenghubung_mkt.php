@@ -4,17 +4,31 @@ set_time_limit(0);
 session_start();
 include "../../koneksi.php";
  
-if (isset($_POST['sql'])) { 
-	$sql_code =  $_POST['sql'];
-?>
+if (isset($_POST['sql'])) {
+    $sql_code = $_POST['sql'];
 
-<?php
-$now = date("Ymdhis");
-header("Content-type: application/octet-stream");
-header("Content-Disposition: attachment; filename=reportbonpenghubung_mkt".$now.".xls");//ganti nama sesuai keperluan
-header("Pragma: no-cache");
-header("Expires: 0");
-//disini script laporan anda
+    $params = [];
+    if (isset($_POST['params']) && $_POST['params'] !== '') {
+        $params = json_decode($_POST['params'], true);
+        if (!is_array($params)) $params = [];
+    }
+
+    $now = date("YmdHis");
+    header("Content-type: application/octet-stream");
+    header("Content-Disposition: attachment; filename=reportbonpenghubung{$now}.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $sql = sqlsrv_query($con_db_qc_sqlsrv, $sql_code, $params);
+    if ($sql === false) {
+        echo "<pre>";
+        echo "Jumlah ? = " . substr_count($sql_code, '?') . "\n";
+        echo "Jumlah params = " . count($params) . "\n";
+        print_r($params);
+        print_r(sqlsrv_errors());
+        echo "</pre>";
+        exit;
+    }
 ?>
 
 <?php
@@ -125,9 +139,9 @@ function suratJalan($prodOrder, $po) {
     <tbody>
     <?php
         $no=1;
-        $sql=mysqli_query($con,$sql_code);	
+        $sql = sqlsrv_query($con_db_qc_sqlsrv, $sql_code, $params);
 
-        while($row1=mysqli_fetch_array($sql)){
+        while ($row1 = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
             $dtArr=$row1['t_jawab'];
             $data = explode(",",$dtArr);
             $dtArr1=$row1['persen'];
@@ -144,7 +158,13 @@ function suratJalan($prodOrder, $po) {
             // $sj = suratJalan($row1['lot'], $row1['no_po']);
     ?>
         <tr bgcolor="<?php echo $bgcolor; ?>">
-            <td align="center"><?php echo $row1['tgl_masuk'];?></td>
+            <td align="center">
+				<?php
+					echo ($row1['tgl_masuk'] instanceof DateTime)
+					? $row1['tgl_masuk']->format('Y-m-d')
+					: $row1['tgl_masuk'];
+				?>
+			</td>
             <td align="center"><?php echo explode('/', $row1['pelanggan'])[0];?></td>
 			<td align="center"><?php echo explode('/', $row1['pelanggan'])[1];?></td>
             <td align="center"><?php echo $row1['no_po'];?></td>
@@ -176,7 +196,13 @@ function suratJalan($prodOrder, $po) {
 
         <?php if($row1['penghubung2_roll1'] and  $row1['penghubung2_roll1'] !='') { ?>
         <tr bgcolor="<?php echo $bgcolor; ?>">
-            <td align="center"><?php echo $row1['tgl_masuk'];?></td>
+            <td align="center">
+				<?php
+					echo ($row1['tgl_masuk'] instanceof DateTime)
+					? $row1['tgl_masuk']->format('Y-m-d')
+					: $row1['tgl_masuk'];
+				?>
+			</td>
 			<td align="center"><?php echo explode('/', $row1['pelanggan'])[0];?></td>
 			<td align="center"><?php echo explode('/', $row1['pelanggan'])[1];?></td>
             <td align="center"><?php echo $row1['no_po'];?></td>
@@ -208,7 +234,13 @@ function suratJalan($prodOrder, $po) {
 
         <?php if($row1['penghubung3_roll1'] and  $row1['penghubung3_roll1'] !='') {  ?>
 		<tr bgcolor="<?php echo $bgcolor; ?>">
-            <td align="center"><?php echo $row1['tgl_masuk'];?></td>
+            <td align="center">
+				<?php
+					echo ($row1['tgl_masuk'] instanceof DateTime)
+					? $row1['tgl_masuk']->format('Y-m-d')
+					: $row1['tgl_masuk'];
+				?>
+			</td>
 			<td align="center"><?php echo explode('/', $row1['pelanggan'])[0];?></td>
 			<td align="center"><?php echo explode('/', $row1['pelanggan'])[1];?></td>
             <td align="center"><?php echo $row1['no_po'];?></td>

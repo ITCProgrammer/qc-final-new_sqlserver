@@ -177,88 +177,170 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
           </thead>
           <tbody>
           <?php
-          if(($Awal != "" && $Akhir != "") || $Order != "" || $PO != "" || $Hanger != "" || $Item != "" || $Warna != "" || $Pelanggan != "" || $ProdOrder != "" || $Demand != "" || $Proses != ""){
-            $no=1;
+            if (
+              ($Awal != "" && $Akhir != "") || $Order != "" || $PO != "" || $Hanger != "" ||
+              $Item != "" || $Warna != "" || $Pelanggan != "" || $ProdOrder != "" ||
+              $Demand != "" || $Proses != ""
+            ){
+              $no = 1;
 
-            $fields = [];
+              $conds  = [];
+              $params = [];
 
-            if($Awal != "" && $Akhir != ""){ 
-              $fields[] = " DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; 
-            }
-            if($Order != ""){ 
-              $fields[] = " tq.no_order LIKE '%$Order%' "; 
-            }
-            if($PO != ""){ 
-              $fields[] = " tq.no_po LIKE '%$PO%' "; 
-            }
-            if($Hanger != ""){ 
-              $fields[] = " tq.no_hanger LIKE '%$Hanger%' "; 
-            }
-            if($Item != ""){ 
-              $fields[] = " tq.no_item LIKE '%$Item%' "; 
-            }
-            if($Warna != ""){ 
-              $fields[] = " tq.warna LIKE '%$Warna%' "; 
-            }
-            if($Pelanggan != ""){ 
-              $fields[] = " tq.pelanggan LIKE '%$Pelanggan%' "; 
-            }
-            if($ProdOrder != ""){ 
-              $fields[] = " tq.nokk LIKE '%$ProdOrder%' "; 
-            }
-            if($Demand != ""){ 
-              $fields[] = " tq.nodemand LIKE '%$Demand%' "; 
-            }
-            if($Proses != ""){ 
-              $fields[] = " sts_aksi='$Proses' "; 
-            }
-            if($sts_tembakdok=="1"){ 
-              $fields[] = " sts_tembakdok='1' "; 
-            }
-            
-            $default_fields = " AND tq.sts_pbon!='10' AND (tq.penghubung_masalah !='' or tq.penghubung_keterangan !='' or tq.penghubung_roll1 !='' or tq.penghubung_roll2 !='' or tq.penghubung_roll3 !=''  or tq.penghubung_dep !='' or tq.penghubung_dep_persen !='') ";
-            $group_by_fields = " GROUP BY tq.no_order, tq.no_po, tq.no_hanger, tq.no_item, tq.warna, tq.pelanggan, tq.tgl_masuk, tq.nodemand; ";
+              if($Awal != "" && $Akhir != ""){
+                $conds[]  = "CONVERT(date, tq.tgl_masuk) BETWEEN ? AND ?";
+                $params[] = $Awal;
+                $params[] = $Akhir;
+              }
+              if($Order != ""){
+                $conds[]  = "tq.no_order LIKE ?";
+                $params[] = "%$Order%";
+              }
+              if($PO != ""){
+                $conds[]  = "tq.no_po LIKE ?";
+                $params[] = "%$PO%";
+              }
+              if($Hanger != ""){
+                $conds[]  = "tq.no_hanger LIKE ?";
+                $params[] = "%$Hanger%";
+              }
+              if($Item != ""){
+                $conds[]  = "tq.no_item LIKE ?";
+                $params[] = "%$Item%";
+              }
+              if($Warna != ""){
+                $conds[]  = "tq.warna LIKE ?";
+                $params[] = "%$Warna%";
+              }
+              if($Pelanggan != ""){
+                $conds[]  = "tq.pelanggan LIKE ?";
+                $params[] = "%$Pelanggan%";
+              }
+              if($ProdOrder != ""){
+                $conds[]  = "tq.nokk LIKE ?";
+                $params[] = "%$ProdOrder%";
+              }
+              if($Demand != ""){
+                $conds[]  = "tq.nodemand LIKE ?";
+                $params[] = "%$Demand%";
+              }
+              if($Proses != ""){
+                $conds[]  = "tq.sts_aksi = ?";
+                $params[] = $Proses;
+              }
+              if($sts_tembakdok == "1"){
+                $conds[] = "tq.sts_tembakdok = '1'";
+              }
 
-            $sql_code = "SELECT
-                          tq.*,
-                          GROUP_CONCAT( DISTINCT b.no_ncp_gabungan SEPARATOR ', ' ) AS no_ncp,
-                          GROUP_CONCAT( DISTINCT b.masalah_dominan SEPARATOR ', ' ) AS masalah_utama,
-                          GROUP_CONCAT( DISTINCT b.akar_masalah SEPARATOR ', ' ) AS akar_masalah,
-                          GROUP_CONCAT( DISTINCT b.solusi_panjang SEPARATOR ', ' ) AS solusi_panjang,
-                          tli.qty_loss AS qty_sisa,
-                          tli.satuan AS satuan_sisa 
-                        FROM
-                          tbl_qcf tq
-                          LEFT JOIN tbl_lap_inspeksi tli ON tq.nodemand = tli.nodemand 
-                          AND tq.no_order = tli.no_order
-                          LEFT JOIN tbl_ncp_qcf_now b ON tq.nodemand = b.nodemand ";
+              $conds[] = "tq.sts_pbon <> '10'";
+              $conds[] = "(
+                  ISNULL(tq.penghubung_masalah,'') <> ''
+                  OR ISNULL(tq.penghubung_keterangan,'') <> ''
+                  OR ISNULL(tq.penghubung_roll1,'') <> ''
+                  OR ISNULL(tq.penghubung_roll2,'') <> ''
+                  OR ISNULL(tq.penghubung_roll3,'') <> ''
+                  OR ISNULL(tq.penghubung_dep,'') <> ''
+                  OR ISNULL(tq.penghubung_dep_persen,'') <> ''
+                )";
 
-            if(count($fields) > 0) {
-              $sql_code .= "WHERE " . implode("AND", $fields) . $default_fields . $group_by_fields;
-            }
-            $sql=mysqli_query($con,$sql_code);
-            
-			/*
-			echo '<pre>';
-					print_r($sql_code);
-				  echo '</pre>'; */
-				  ?>
+              $whereSql = "WHERE " . implode(" AND ", $conds);
+
+              $group_by_fields = " GROUP BY tq.no_order, tq.no_po, tq.no_hanger, tq.no_item, tq.warna, tq.pelanggan, tq.tgl_masuk, tq.nodemand ";
+
+              $sql_code = " WITH filtered AS (
+                  SELECT tq.*
+                  FROM db_qc.tbl_qcf tq
+                  $whereSql
+                ),
+                base AS (
+                  SELECT
+                    f.*,
+                    tli.qty_loss AS qty_sisa,
+                    tli.satuan   AS satuan_sisa,
+                    ROW_NUMBER() OVER (
+                      PARTITION BY f.no_order, f.no_po, f.no_hanger, f.no_item,
+                                  f.warna, f.pelanggan, f.tgl_masuk, f.nodemand
+                      ORDER BY (SELECT NULL)
+                    ) AS rn
+                  FROM filtered f
+                  LEFT JOIN db_qc.tbl_lap_inspeksi tli
+                    ON f.nodemand = tli.nodemand
+                  AND f.no_order = tli.no_order
+                ),
+                ncp_dist AS (
+                  SELECT DISTINCT
+                    nodemand,
+                    no_ncp_gabungan,
+                    masalah_dominan,
+                    akar_masalah,
+                    solusi_panjang
+                  FROM db_qc.tbl_ncp_qcf_now
+                ),
+                agg AS (
+                  SELECT
+                    tq.no_order,
+                    tq.no_po,
+                    tq.no_hanger,
+                    tq.no_item,
+                    tq.warna,
+                    tq.pelanggan,
+                    tq.tgl_masuk,
+                    tq.nodemand,
+                    STRING_AGG(d.no_ncp_gabungan, ', ') AS no_ncp,
+                    STRING_AGG(d.masalah_dominan, ', ') AS masalah_utama,
+                    STRING_AGG(d.akar_masalah, ', ') AS akar_masalah,
+                    STRING_AGG(d.solusi_panjang, ', ') AS solusi_panjang
+                  FROM filtered tq
+                  LEFT JOIN ncp_dist d
+                    ON d.nodemand = tq.nodemand
+                  $group_by_fields
+                ) SELECT
+                  b.*,
+                  a.no_ncp,
+                  a.masalah_utama,
+                  a.akar_masalah,
+                  a.solusi_panjang
+                FROM base b
+                LEFT JOIN agg a
+                  ON a.no_order  = b.no_order
+                AND a.no_po     = b.no_po
+                AND a.no_hanger = b.no_hanger
+                AND a.no_item   = b.no_item
+                AND a.warna     = b.warna
+                AND a.pelanggan = b.pelanggan
+                AND a.tgl_masuk = b.tgl_masuk
+                AND a.nodemand  = b.nodemand
+                WHERE b.rn = 1
+              ";
+
+              $sql = sqlsrv_query($con_db_qc_sqlsrv, $sql_code, $params);
+
+              if ($sql === false) {
+                echo "<pre>";
+                print_r(sqlsrv_errors());
+                echo "</pre>";
+                exit;
+              }
+          ?>
+
           <div style="display: flex; justify-content: end">
               <?php if($_SESSION['usrid'] != 'ppc'): ?>
-              <form action="pages/cetak/cetak_newbonpenghubung_mkt.php" method="POST" target="_blank">
-                <input type="hidden" name="sql" value="<?= $sql_code ?>">
+               <form action="pages/cetak/cetak_newbonpenghubung_mkt.php" method="POST" target="_blank">
+                <input type="hidden" name="sql" value="<?= htmlspecialchars($sql_code, ENT_QUOTES) ?>">
+                <input type="hidden" name="params" value="<?= htmlspecialchars(json_encode($params), ENT_QUOTES) ?>">
                 <input type="submit" value="CETAK EXCEL TO MKT">
               </form>
               <?php endif; ?>
               &nbsp;&nbsp;&nbsp;
               <form action="pages/cetak/cetak_newbonpenghubung.php" method="POST" target="_blank">
-                <input type="hidden" name="sql" value="<?= $sql_code ?>">
+                <input type="hidden" name="sql" value="<?= htmlspecialchars($sql_code, ENT_QUOTES) ?>">
+                <input type="hidden" name="params" value="<?= htmlspecialchars(json_encode($params), ENT_QUOTES) ?>">
                 <input type="submit" value="CETAK EXCELL">
               </form>
             </div>
             <br>
 			<?php 
-                while($row1=mysqli_fetch_array($sql)){
+                while($row1=sqlsrv_fetch_array($sql)){
                   $dtArr=$row1['t_jawab'];
                   $data = explode(",",$dtArr);
                   $dtArr1=$row1['persen'];
@@ -274,12 +356,16 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
 
           // $sj = suratJalan($row1['lot'], $row1['no_po']);
 ?>
-              
-		 
           <tr bgcolor="<?php echo $bgcolor; ?>">
-            <td align="center"><?php echo $row1['tgl_masuk'];?></td>
-            <td align="center"><?php $rsts= mysqli_query($con,"SELECT * FROM tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
-            $dtsts = mysqli_fetch_assoc($rsts);
+            <td align="center">
+              <?php
+                echo (!empty($row1['tgl_masuk']) && $row1['tgl_masuk'] instanceof DateTime)
+                  ? $row1['tgl_masuk']->format('Y-m-d')
+                  : ($row1['tgl_masuk'] ?? '');
+              ?>
+            </td>
+            <td align="center"><?php $rsts= sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
+            $dtsts = sqlsrv_fetch_array($rsts);
             if($dtsts['status_approve']==1){
               echo 'APPROVE OLEH : '.$dtsts['approve_mkt'];
             }else if($dtsts['status_approve']==99){
@@ -385,9 +471,15 @@ echo $row_actual_delivery['ACTUAL_DELIVERY'];?></td>
 		  
 		  
 		  <tr bgcolor="<?php echo $bgcolor; ?>">
-        <td align="center"><?php echo $row1['tgl_masuk'];?></td>
-        <td align="center"><?php $rsts= mysqli_query($con,"SELECT * FROM tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
-            $dtsts = mysqli_fetch_assoc($rsts);
+        <td align="center">
+          <?php
+            echo (!empty($row1['tgl_masuk']) && $row1['tgl_masuk'] instanceof DateTime)
+              ? $row1['tgl_masuk']->format('Y-m-d')
+              : ($row1['tgl_masuk'] ?? '');
+          ?>
+        </td>
+        <td align="center"><?php $rsts= sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
+            $dtsts = sqlsrv_fetch_array($rsts);
             if($dtsts['status_approve']==1){
               echo 'APPROVE OLEH : '.$dtsts['approve_mkt'];
             }else if($dtsts['status_approve']==99){
@@ -407,13 +499,8 @@ echo $row_actual_delivery['ACTUAL_DELIVERY'];?></td>
 			  <td align="center"><?php echo $row1['lot_legacy'];?></td>
 			  <td align="center"><?php echo $row1['lot'];?></td>
         <td align="center"><?php echo $row1['nodemand'];?></td>
-
-
-
 			  <td align="center"><?php echo $row1['berat_order'];?></td>
 			  <td align="center"><?php echo $row1['panjang_order'];?></td>
-
-
 			  <td align="center"><?php echo $row1['rol'];?></td>
 			  <td align="center"><?php echo $row1['netto'];?></td>
 			  <td align="center"><?php echo $row1['panjang'];?></td>
@@ -499,12 +586,16 @@ echo $row_actual_delivery['ACTUAL_DELIVERY'];?></td>
 		   <?php if($row1['penghubung3_roll1'] and  $row1['penghubung3_roll1'] !='')  
 		  {  
 		  ?>
-		  
-		  
 		   <tr bgcolor="<?php echo $bgcolor; ?>">
-        <td align="center"><?php echo $row1['tgl_masuk'];?></td>
-        <td align="center"><?php $rsts= mysqli_query($con,"SELECT * FROM tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
-            $dtsts = mysqli_fetch_assoc($rsts);
+        <td align="center">
+          <?php
+            echo (!empty($row1['tgl_masuk']) && $row1['tgl_masuk'] instanceof DateTime)
+              ? $row1['tgl_masuk']->format('Y-m-d')
+              : ($row1['tgl_masuk'] ?? '');
+          ?>
+        </td>
+        <td align="center"><?php $rsts= sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_bonpenghubung_mail WHERE nodemand='$row1[nodemand]'");
+            $dtsts = sqlsrv_fetch_array($rsts);
             if($dtsts['status_approve']==1){
               echo 'APPROVE OLEH : '.$dtsts['approve_mkt'];
             }else if($dtsts['status_approve']==99){
@@ -605,18 +696,9 @@ echo $row_actual_delivery['ACTUAL_DELIVERY'];?></td>
           </tr>
 		  
 		  <?php  } ?>
-		  
-		  
-		  
-		  
           <?php	$no++;  } } ?>
         </tbody>
       </table>
-	  
-	  
-	  
-	  
-	  
       </div>
     </div>
   </div>
