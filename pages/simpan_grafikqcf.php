@@ -3,7 +3,7 @@ ini_set("error_reporting", 1);
 include("../koneksi.php");
 if ($_POST) {
     extract($_POST);        
-	   		$nama = mysqli_real_escape_string($con,strtoupper($_POST['nama']));
+	   		$nama = strtoupper($_POST['nama']);
 			$file = $_FILES['file']['name'];
 		   // ambil data file
 			$namaFile = $_FILES['file']['name'];
@@ -15,11 +15,8 @@ if ($_POST) {
 			// pindahkan file
 			$terupload = move_uploaded_file($namaSementara, $dirUpload.$namaFile);
 		   if ($terupload) { 
-			$sqlupdate=mysqli_query($con,"INSERT INTO `tbl_gambar` SET
-				`gambar`='$file',				
-				`desc`='$nama',
-				`tgl_update`=now()
-				");   
+			$sqlupdate=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_gambar ([gambar],[desc],[tgl_update])
+				VALUES(?,?,CURRENT_TIMESTAMP) ",[$file,$nama] );   
 			echo " <script>window.location='GrafikQCF';</script>";   
 		   } else {
     			echo "Upload Gagal!".$file;

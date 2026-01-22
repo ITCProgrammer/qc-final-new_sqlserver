@@ -1,7 +1,7 @@
 <?php
 ini_set("error_reporting", 1);
 session_start();
-include"koneksi.php";
+include "koneksi.php";
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -13,7 +13,7 @@ include"koneksi.php";
   </head>
 
   <body>
-    <?php 	$gambar=mysqli_query($con,"SELECT * FROM tbl_gambar"); ?>
+    <?php 	$gambar=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *,CONVERT(VARCHAR(10),tgl_update,120) tgl_update FROM db_qc.tbl_gambar"); ?>
     <div class="row">
       <div class="col-xs-12">
         <div class="box">
@@ -36,7 +36,7 @@ include"koneksi.php";
                 <?php
   $col=0;
   $no=1;
-  while ($rGbr=mysqli_fetch_array($gambar)) {
+  while ($rGbr=sqlsrv_fetch_array($gambar,SQLSRV_FETCH_ASSOC)) {
       $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite'; ?>
                 <tr align="center" bgcolor="<?php echo $bgcolor; ?>">
                   <td align="center">
@@ -50,7 +50,7 @@ include"koneksi.php";
                   <td align="center">
                     <?php echo $rGbr['tgl_update']; ?>
                   </td>
-                  <td align="center"><div class="btn-group"><a href="#" id='<?php echo $rGbr['id'] ?>' class="btn btn-xs btn-info news_edit <?php if($_SESSION['akses']=="biasa"){ echo "disabled";} ?>"><i class="fa fa-edit"></i> </a><a href="#" onclick="confirm_del('HapusGrafikQCF-<?php echo $rGbr['id'] ?>');" class="btn btn-xs btn-danger <?php if($_SESSION['akses']=="biasa"){ echo "disabled";} ?>"><i class="fa fa-trash"></i> </a></div></th>
+                  <td align="center"><div class="btn-group"><a href="#" id='<?php echo $rGbr['id'] ?>' class="btn btn-xs btn-info gambar_edit <?php if($_SESSION['akses']=="biasa"){ echo "disabled";} ?>"><i class="fa fa-edit"></i> </a><a href="#" onclick="confirm_del('HapusGrafikQCF-<?php echo $rGbr['id'] ?>');" class="btn btn-xs btn-danger <?php if($_SESSION['akses']=="biasa"){ echo "disabled";} ?>"><i class="fa fa-trash"></i> </a></div></th>
                 </tr>
                 <?php
   $no++;

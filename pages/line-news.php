@@ -13,7 +13,7 @@ include "koneksi.php";
   </head>
 
   <body>
-    <?php 	$news=mysqli_query($con,"SELECT * FROM tbl_news_line"); ?>
+    <?php 	$news=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *,CONVERT(VARCHAR(10),tgl_update,120) tgl_update  FROM db_qc.tbl_news_line"); ?>
     <div class="row">
       <div class="col-xs-12">
         <div class="box">
@@ -35,7 +35,7 @@ include "koneksi.php";
                 <?php
   $col=0;
   $no=1;
-  while ($rNews=mysqli_fetch_array($news)) {
+  while ($rNews=sqlsrv_fetch_array($news,SQLSRV_FETCH_ASSOC)) {
       $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite'; ?>
                 <tr align="center" bgcolor="<?php echo $bgcolor; ?>">
                   <td align="center">

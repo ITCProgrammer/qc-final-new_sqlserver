@@ -5,13 +5,13 @@ include("../koneksi.php");
 if ($_POST) {
     extract($_POST);
     $id = $_POST['id'];
-    $line = strtoupper($_POST['line_news']);
-	  $sts = $_POST['sts'];
-    $sqlupdate=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE TOP (1) db_qc.tbl_news_line SET
-				[news_line]=?,
-				[status]=?,
+    $desc = strtoupper($_POST['desc']);
+	  $tampil = $_POST['tampil'];
+    $sqlupdate=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE TOP (1) db_qc.tbl_gambar SET
+				[desc]=?,
+				[tampil]=?,
 				[tgl_update]=CURRENT_TIMESTAMP
-				WHERE [id]=? ",[$line,$sts,$id]);
+				WHERE [id]=? ",[$desc,$tampil,$id]);
     //echo " <script>window.location='?p=Line-News';</script>";
     echo "<script>swal({
   title: 'Data Tersimpan',
@@ -19,7 +19,7 @@ if ($_POST) {
   type: 'success',
   }).then((result) => {
   if (result.value) {
-    window.location='LineNews';
+    window.location='GrafikQCF';
   }
 });</script>";
 }

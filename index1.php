@@ -3448,6 +3448,22 @@ $page = strtolower($page);
                 }
             });
         });
+        $(document).on('click', '.gambar_edit', function (e) {
+            var m = $(this).attr("id");
+            $.ajax({
+                url: "pages/gambar_edit.php",
+                type: "GET",
+                data: {
+                    id: m,
+                },
+                success: function (ajaxData) {
+                    $("#NewsEdit").html(ajaxData);
+                    $("#NewsEdit").modal('show', {
+                        backdrop: 'true'
+                    });
+                }
+            });
+        });
         $(document).on('click', '.resep', function (e) {
             var m = $(this).attr("id");
             $.ajax({
