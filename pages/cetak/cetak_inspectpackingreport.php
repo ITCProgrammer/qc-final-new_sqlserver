@@ -12,8 +12,11 @@ $act=$_GET['g'];
 $Demand=$_GET['demand'];
 $Ispacking=$_GET['ispacking'];
 //$Operator=$_GET['operator'];
-$qTgl = sqlsrv_query($con_db_qc_sqlsrv, "SELECT CONVERT(VARCHAR(10),CURRENT_TIMESTAMP,120) as tgl_skrg,CONVERT(VARCHAR(8),CURRENT_TIMESTAMP,108) as jam_skrg");
-$rTgl = sqlsrv_fetch_array($qTgl,SQLSRV_FETCH_ASSOC);
+$qTgl = sqlsrv_query($con_db_qc_sqlsrv, " SELECT
+        CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+        CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg
+");
+$rTgl = sqlsrv_fetch_array($qTgl, SQLSRV_FETCH_ASSOC);
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 
 $sqldes="SELECT 
