@@ -6,29 +6,50 @@ include("../koneksi.php");
 $notest=$_GET['no_test'];
 
 
-$sqlCek=mysqli_query($con,"SELECT a.*,b.*, a.id as id_tq_nokk FROM tbl_tq_nokk a 
-LEFT JOIN tbl_master_test b ON a.no_test=b.no_testmaster
-WHERE no_test='$notest' order by a.id desc limit 1");
-$cek=mysqli_num_rows($sqlCek);
-$rcek=mysqli_fetch_array($sqlCek);
+$params = [$notest];
+
+$stmt = sqlsrv_query($con_db_qc_sqlsrv, "
+    SELECT TOP 1
+        a.*,
+        b.*,
+        a.id AS id_tq_nokk
+    FROM db_qc.tbl_tq_nokk a
+    LEFT JOIN db_qc.tbl_master_test b
+        ON a.no_test = b.no_testmaster
+    WHERE a.no_test = ?
+    ORDER BY a.id DESC
+", $params);
+
+$rcek = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+$cek  = $rcek ? 1 : 0;
+
 ?>	
 
 <?php
-//penambahan pengecekan ketabel nokk demand 
-$id_nokk = $rcek['id_tq_nokk'];
+//penambahan pengecekan ketabel nokk demand
 
-$nokk_demand_sql=mysqli_query($con,"SELECT * FROM tbl_tq_nokk_demand WHERE id_nokk = '$id_nokk' and id_nokk > 0   ORDER BY id DESC LIMIT 1");
-$nokk_demand_data=mysqli_num_rows($nokk_demand_sql);
+$id_nokk = (int) $rcek['id_tq_nokk'];
+
+$params = [$id_nokk];
+$nokk_demand_sql = sqlsrv_query($con_db_qc_sqlsrv, "
+    SELECT TOP 1 *
+    FROM db_qc.tbl_tq_nokk_demand
+    WHERE id_nokk = ?
+      AND id_nokk > 0
+    ORDER BY id DESC
+", $params);
+$row = sqlsrv_fetch_array($nokk_demand_sql, SQLSRV_FETCH_ASSOC);
+$nokk_demand_data = $row ? 1 : 0;
 
 $array_id_nodemand = [];
 
 if ($nokk_demand_data > 0) {
-	 $id_nokk = mysqli_fetch_array($nokk_demand_sql)['id_nokk'] ; 
-	 $demand_other=mysqli_query($con,"SELECT * FROM tbl_tq_nokk_demand WHERE id_nokk = '$id_nokk' ORDER BY id ");
-	 
-	 while ($datas = mysqli_fetch_assoc($demand_other) ) {
-		 $array_id_nodemand[$datas['sort_by']] =  $datas['id'].'/'.$datas['nodemand'];	
-	 }	
+	$id_nokk = $row['id_nokk']; 
+	$demand_other=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_tq_nokk_demand WHERE id_nokk = '$id_nokk' ORDER BY id ");
+
+	while ($datas = sqlsrv_fetch_array($demand_other, SQLSRV_FETCH_ASSOC) ) {
+		$array_id_nodemand[$datas['sort_by']] =  $datas['id'].'/'.$datas['nodemand'];	
+	}	
 }
 
 $array_list_not_found = ['2'=>'B','3'=>'C','4'=>'D','5'=>'E','6'=>'F'];
@@ -250,8 +271,8 @@ echo '</pre>';
 						<select class="form-control select2" name="season" id="season">
 							<option value="">Pilih</option>
 							<?php 
-							$qrys=mysqli_query($con,"SELECT nama FROM tbl_season_validity ORDER BY nama ASC");
-							while($rs=mysqli_fetch_array($qrys)){
+							$qrys=sqlsrv_query($con_db_qc_sqlsrv,"SELECT nama FROM db_qc.tbl_season_validity ORDER BY nama ASC");
+							while($rs=sqlsrv_fetch_array($qrys, SQLSRV_FETCH_ASSOC)){
 							?>
 							<option value="<?php echo $rs['nama'];?>" <?php if($rcek['season']==$rs['nama']){echo "SELECTED";}?>><?php echo $rs['nama'];?></option>	
 							<?php }?>
@@ -311,13 +332,14 @@ echo '</pre>';
 		<?php
 		//$buyer=$_GET[buyer];
 		//$buyer=$_GET[buyer];
-		$qMB=mysqli_query($con,"SELECT * FROM tbl_master_test WHERE no_testmaster='$_GET[no_test]' order by id desc ");
-		$cekMB=mysqli_num_rows($qMB);
-		
+		$qMB=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_master_test WHERE no_testmaster='$_GET[no_test]' order by id desc ");
+		// $cekMB=mysqli_num_rows($qMB);
+		$dMBs = sqlsrv_fetch_array($qMB, SQLSRV_FETCH_ASSOC);
+		$cekMB = $dMBs? 1: 0;
 		
 					
         if($cekMB>0){
-            while($dMB=mysqli_fetch_array($qMB)){
+            foreach($dMBs as $dMB){
             $detail=explode(",",$dMB['physical']);
             $detail1=explode(",",$dMB['functional']);
             $detail2=explode(",",$dMB['colorfastness']);
@@ -326,7 +348,6 @@ echo '</pre>';
 		?>
 		<form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
            <input type="hidden" name="id_master_test" value="<?=$id_master_test?>">
-			
 			<div class="form-group">
                 <span class='badge bg-blue'><label for="physical" class="col-sm-2">PHYSICAL</label></span>
             </div>
@@ -460,9 +481,8 @@ echo '</pre>';
 
 				<label><input type="checkbox" class="minimal" name="colorfastness[]" value="SWEAT CONCEAL" <?php if(in_array("SWEAT CONCEAL",$detail2)){echo "checked";} ?>> Sweat Conceal &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 				</label>
-            <?php } ?>
 		</form>
-                
+             <?php } ?>   
             <?php }else{ ?>
         <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
             <div class="form-group">
@@ -600,9 +620,7 @@ echo '</pre>';
 			<?php } ?>
 </div>
 </div>
- 	<?php if($_GET['no_test']!=""){ 
-	$qrytm=mysqli_query($con,"SELECT a.*, b.* FROM tbl_tq_nokk a LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk WHERE no_test='$_GET[no_test]' ");
-	$rtm=mysqli_fetch_array($qrytm);	 
+ 	<?php if($_GET['no_test']!=""){ 	 
 	?>
 		 
 	<div class="box-footer">
@@ -625,22 +643,39 @@ if($_POST['save']=="save"){
 		$id_nokk =  $_POST['id_tq_nokk'] ;
 		foreach ($nodemand_mulptiple as $key=>$multiple) {
 			if ( !in_array($key,$array_list_not_found) ) {
+				$sql = "";
+				$params = [];
 				//update
 				if ($multiple !='') { 
-					$sql_no_demand =mysqli_query($con,"update tbl_tq_nokk_demand 
-												  set nodemand = '$multiple' where id = '$key' ");
+					$sql = "
+						UPDATE db_qc.tbl_tq_nokk_demand
+						SET nodemand = ?
+						WHERE id = ?
+					";
+            		$params = [$multiple, $key];
 				} else {
-					
-					$sql_no_demand =mysqli_query($con,"update tbl_tq_nokk_demand  
-													set id_nokk  = 0, nodemand = concat('$id_nokk','/',nodemand,'/','del')	where id = '$key' ");
+					$sql = "
+						UPDATE db_qc.tbl_tq_nokk_demand
+						SET id_nokk = 0,
+							nodemand = CAST(? AS varchar) + '/' + nodemand + '/del'
+						WHERE id = ?
+					";
+					$params = [$id_nokk, $key];
 				}
+
+				sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 					
 			} else {
 				//insert
 				$urutan  = array_search($key, $array_list_not_found);
 				if ($multiple !='') {
-					$sql_no_demand =mysqli_query($con,"INSERT INTO tbl_tq_nokk_demand (id, id_nokk,nodemand, sort_by) 
-													VALUES (NULL, '$id_nokk','$multiple','$urutan')");
+					$sql = "
+						INSERT INTO db_qc.tbl_tq_nokk_demand (id_nokk, nodemand, sort_by)
+						VALUES (?, ?, ?)
+					";
+					$params = [$id_nokk, $multiple, $urutan];
+
+					sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 				}
 								
 		
@@ -650,7 +685,6 @@ if($_POST['save']=="save"){
 		
 		
 		$id_master_test = $_POST['id_master_test'];
-		
         $checkbox1=$_POST['physical'];
         $checkbox2=$_POST['functional'];
         $checkbox3=$_POST['colorfastness'];
@@ -681,36 +715,41 @@ if($_POST['save']=="save"){
    		{  
       		$chkc .= $chk3.",";  
    		}
-    $sqlData=mysqli_query($con,"UPDATE tbl_master_test SET
-          buyer='$buyer',
-			no_itemtest='$noitem',
-			
-			physical='$chkp',
-          functional='$chkf',
-          colorfastness='$chkc',
-			tgl_update=now()
-		WHERE id='$id_master_test'
+    $sqlData=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_master_test
+		SET
+			buyer         = '$buyer',
+			no_itemtest   = '$noitem',
+			physical      = '$chkp',
+			functional    = '$chkf',
+			colorfastness = '$chkc',
+			tgl_update    = GETDATE()
+		WHERE id = '$id_master_test'
 	");
-	$sqlData1=mysqli_query($con,"UPDATE tbl_tq_nokk SET
-	lebar='$lebar',
-	gramasi='$gramasi',
-	jenis_kain='$jns_kain',
-	pelanggan='$pelanggan',
-	no_item='$noitem',
-	no_hanger='$nohanger',
-	no_po='$nopo',
-	no_order='$no_order',
-	lot='$_POST[lot]',
-	warna='$_POST[warna]',
-	development='$_POST[development]',
-	season='$_POST[season]',
-	is_demand_new='$is_demand_new',
-	nodemand_new='$_POST[nodemand_new]',
-	lot_new='$_POST[lot_new]',
-	ip='$ip',
-	tgl_update=now()
-	WHERE id='$_POST[id_tq_nokk]'
-	");
+
+	$sqlData1=sqlsrv_query($con_db_qc_sqlsrv,"
+	UPDATE db_qc.tbl_tq_nokk
+	SET
+		lebar          = '$lebar',
+		gramasi        = '$gramasi',
+		jenis_kain     = '$jns_kain',
+		pelanggan      = '$pelanggan',
+		no_item        = '$noitem',
+		no_hanger      = '$nohanger',
+		no_po          = '$nopo',
+		no_order       = '$no_order',
+		lot            = '$_POST[lot]',
+		warna          = '$_POST[warna]',
+		development    = '$_POST[development]',
+		season         = '$_POST[season]',
+		is_demand_new  = '$is_demand_new',
+		nodemand_new   = '$_POST[nodemand_new]',
+		lot_new        = '$_POST[lot_new]',
+		ip             = '$ip',
+		tgl_update     = GETDATE()
+	WHERE id = '$_POST[id_tq_nokk]'
+");
+
+
     if($sqlData1){
 			
         echo "<script>swal({
