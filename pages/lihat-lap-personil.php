@@ -116,7 +116,7 @@ include "koneksi.php";
                             <?php
                             $no = 1;
 
-                            $qry1 = mysqli_query($con, "select 
+                            $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT 
                                                             l.id,
                                                             l.roll,
                                                             l.kg,
@@ -124,14 +124,14 @@ include "koneksi.php";
                                                             l.tanggal_input,
                                                             o.nama as nama_operator,
                                                             j.nama as nama_jobdesk
-                                                        from tbl_lap_personil l
-                                                        left join tbl_operator_lap_personil o
+                                                        from db_qc.tbl_lap_personil l
+                                                        left join db_qc.tbl_operator_lap_personil o
                                                             on l.id_operator = o.id
-                                                        left join tbl_jobdesk j
+                                                        left join db_qc.tbl_jobdesk j
                                                             on l.id_jobdesk = j.id
                                                         where tanggal_input between '$Awal' and '$Akhir'");
 
-                            while($row = mysqli_fetch_array($qry1)) {
+                            while($row = sqlsrv_fetch_array($qry1)) {
                                 ?>
                                 <tr bgcolor="<?php echo $bgcolor; ?>">
                                     <td align="center">
@@ -139,7 +139,7 @@ include "koneksi.php";
                                     </td>
 
                                     <td align="center">
-                                        <?php echo $row['tanggal_input']; ?>
+                                        <?php echo date_format($row['tanggal_input'], 'Y-m-d'); ?>
                                     </td>
                                     <td align="center">
                                         <?php echo $row['nama_jobdesk']; ?>
