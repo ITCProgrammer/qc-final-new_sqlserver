@@ -5,27 +5,29 @@ header('Content-Type: application/json');
 
 $data = [];
 
-$sql = mysqli_query(
-    $con,
-    "SELECT a.no_order,
-            a.no_test,
-            a.nodemand,
-            a.nokk,
-            a.jenis_kain,
-            a.lot,
-            a.no_hanger,
-            a.no_item,
-            a.warna
-     FROM tbl_tq_nokk a
-     INNER JOIN tbl_tq_test b ON a.id = b.id_nokk
-     WHERE DATE_FORMAT(a.tgl_masuk, '%Y') != '2019'
-       AND DATE_FORMAT(a.tgl_masuk, '%Y') != '2020'
-       AND DATE_FORMAT(a.tgl_masuk, '%Y') != '2021'
-       AND a.nodemand != ''"
+$sql = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "
+    SELECT
+        a.no_order,
+        a.no_test,
+        a.nodemand,
+        a.nokk,
+        a.jenis_kain,
+        a.lot,
+        a.no_hanger,
+        a.no_item,
+        a.warna
+    FROM tbl_tq_nokk a
+    INNER JOIN tbl_tq_test b
+        ON a.id = b.id_nokk
+    WHERE YEAR(a.tgl_masuk) NOT IN (2019, 2020, 2021)
+      AND a.nodemand <> ''
+"
 );
 
 if ($sql) {
-    while ($row = mysqli_fetch_assoc($sql)) {
+    while ($row = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
         $data[] = [
             'no_order'   => $row['no_order'],
             'no_test'    => $row['no_test'],

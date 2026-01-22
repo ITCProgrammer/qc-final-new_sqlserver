@@ -6,11 +6,17 @@ header('Content-Type: application/json');
 $draw = isset($_POST['draw']) ? intval($_POST['draw']) : 1;
 $start = isset($_POST['start']) ? intval($_POST['start']) : 0; // Offset
 $length = isset($_POST['length']) ? intval($_POST['length']) : 10; // Limit
-$searchValue = isset($_POST['search']['value']) ? mysqli_real_escape_string($con, $_POST['search']['value']) : '';
+// $searchValue = isset($_POST['search']['value']) ? mysqli_real_escape_string($con, $_POST['search']['value']) : '';
+$searchValue = isset($_POST['search']['value'])
+    ? str_replace("'", "''", $_POST['search']['value'])
+    : '';
+
 
 // Ordering
 $orderColumnIndex = isset($_POST['order'][0]['column']) ? intval($_POST['order'][0]['column']) : 0;
-$orderDirection = isset($_POST['order'][0]['dir']) ? mysqli_real_escape_string($con, $_POST['order'][0]['dir']) : 'asc';
+$orderDirection   = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'asc';
+$orderDirection   = strtolower($orderDirection) === 'desc' ? 'DESC' : 'ASC';
+
 
 $columns = [
     1 => 'a.no_order',
@@ -25,54 +31,71 @@ $columns = [
 ];
 
 $orderColumn = $columns[$orderColumnIndex] ?? $columns[1]; 
-$whereConditions = "DATE_FORMAT(a.tgl_masuk, '%Y') NOT IN ('2019', '2020', '2021') AND a.nodemand != ''";
+// $whereConditions = "DATE_FORMAT(a.tgl_masuk, '%Y') NOT IN ('2019', '2020', '2021') AND a.nodemand != ''";
+
+$whereConditions = "
+    YEAR(a.tgl_masuk) NOT IN (2019, 2020, 2021)
+    AND a.nodemand <> ''
+";
 
 
-// Untuk searchable nya
 if (!empty($searchValue)) {
     $searchFields = [];
     foreach ($columns as $index => $colName) {
-        if ($index > 0) { 
+        if ($index > 0) {
             $searchFields[] = "$colName LIKE '%$searchValue%'";
         }
     }
     if (!empty($searchFields)) {
-        
         $whereConditions .= " AND (" . implode(' OR ', $searchFields) . ")";
     }
 }
 
 
-$sqlTotal = "SELECT COUNT(a.id) as total FROM tbl_tq_nokk a INNER JOIN tbl_tq_test b ON a.id = b.id_nokk WHERE DATE_FORMAT(a.tgl_masuk, '%Y') NOT IN ('2019', '2020', '2021') AND a.nodemand != ''";
-$resTotal = mysqli_query($con, $sqlTotal);
-$rowTotal = mysqli_fetch_assoc($resTotal);
+// $sqlTotal = "SELECT COUNT(a.id) as total FROM tbl_tq_nokk a INNER JOIN tbl_tq_test b ON a.id = b.id_nokk WHERE DATE_FORMAT(a.tgl_masuk, '%Y') NOT IN ('2019', '2020', '2021') AND a.nodemand != ''";
+$sqlTotal = "
+    SELECT COUNT(a.id) AS total
+    FROM db_qc.tbl_tq_nokk a
+    INNER JOIN db_qc.tbl_tq_test b ON a.id = b.id_nokk
+    WHERE YEAR(a.tgl_masuk) NOT IN (2019, 2020, 2021)
+      AND a.nodemand <> ''
+";
+
+$stmtTotal = sqlsrv_query($con_db_qc_sqlsrv, $sqlTotal);
+$rowTotal  = sqlsrv_fetch_array($stmtTotal, SQLSRV_FETCH_ASSOC);
 $totalRecords = $rowTotal['total'] ?? 0;
 
 
 if (!empty($searchValue)) {
-    $sqlFiltered = "SELECT COUNT(a.id) as total_filtered FROM tbl_tq_nokk a INNER JOIN tbl_tq_test b ON a.id = b.id_nokk WHERE $whereConditions";
-    $resFiltered = mysqli_query($con, $sqlFiltered);
-    $rowFiltered = mysqli_fetch_assoc($resFiltered);
+    $sqlFiltered = "
+        SELECT COUNT(a.id) AS total_filtered
+        FROM db_qc.tbl_tq_nokk a
+        INNER JOIN db_qc.tbl_tq_test b ON a.id = b.id_nokk
+        WHERE $whereConditions
+    ";
+    $stmtFiltered = sqlsrv_query($con_db_qc_sqlsrv, $sqlFiltered);
+    $rowFiltered  = sqlsrv_fetch_array($stmtFiltered, SQLSRV_FETCH_ASSOC);
     $totalFiltered = $rowFiltered['total_filtered'] ?? 0;
 } else {
     $totalFiltered = $totalRecords;
 }
 
 
-$sql = "SELECT 
-              a.*
-       FROM tbl_tq_nokk a
-       INNER JOIN tbl_tq_test b ON a.id = b.id_nokk
-       WHERE $whereConditions
-       ORDER BY $orderColumn $orderDirection
-       LIMIT $length OFFSET $start";
+$sql = "
+    SELECT a.*
+    FROM db_qc.tbl_tq_nokk a
+    INNER JOIN db_qc.tbl_tq_test b ON a.id = b.id_nokk
+    WHERE $whereConditions
+    ORDER BY $orderColumn $orderDirection
+    OFFSET $start ROWS FETCH NEXT $length ROWS ONLY
+";
 
-$resData = mysqli_query($con, $sql);
+$stmtData = sqlsrv_query($con_db_qc_sqlsrv, $sql);
 $data = [];
 
-if ($resData) {
-    while ($row = mysqli_fetch_assoc($resData)) {
-        
+
+if ($stmtData) {
+    while ($row = sqlsrv_fetch_array($stmtData, SQLSRV_FETCH_ASSOC)) {
         $data[] = [
             'no_order'   => $row['no_order'],
             'no_test'    => $row['no_test'],
@@ -93,4 +116,3 @@ echo json_encode([
     'recordsFiltered' => $totalFiltered,   
     'data'            => $data,            
 ]);
-?>
