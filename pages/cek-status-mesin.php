@@ -34,12 +34,26 @@ include("../koneksi.php");
         <tbody>
           <?php
 
-        $qry=mysqli_query($con," SELECT *,IF(DATEDIFF(now(),tgl_delivery) > 0,'Urgent',
-IF(DATEDIFF(now(),tgl_delivery) > -4,'Potensi Delay','')) as `sts` FROM tbl_schedule a WHERE a.no_mesin='$_GET[id]' AND NOT `status` = 'selesai' ORDER BY a.no_urut ASC ");
+        $qry=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+                            *,
+                              CASE
+                                  WHEN DATEDIFF(Day,CURRENT_TIMESTAMP, tgl_delivery) > 0 THEN 'Urgent'
+                                  WHEN DATEDIFF(Day,CURRENT_TIMESTAMP, tgl_delivery) > -4 THEN 'Potensi Delay'
+                                  ELSE ''
+                              END as sts
+                              ,CONVERT(VARCHAR(10),tgl_delivery) tgl_delivery
+                          FROM
+                            db_qc.tbl_schedule a
+                          WHERE
+                            a.no_mesin = ?
+                            AND 
+                            NOT [status] = 'selesai'
+                          ORDER BY
+                            a.no_urut ASC ",[$_GET['id']]);
    $no=1;
 
    $c=0;
-    while ($rowd=mysqli_fetch_array($qry)) {
+    while ($rowd=sqlsrv_fetch_array($qry,SQLSRV_FETCH_ASSOC)) {
         $bgcolor = ($c++ & 1) ? '#33CCFF' : '#FFCC99';
         
 			?>

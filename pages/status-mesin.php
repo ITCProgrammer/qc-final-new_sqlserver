@@ -1,7 +1,7 @@
 <?php
 ini_set("error_reporting", 1);
 session_start();
-include"koneksi.php";
+include "koneksi.php";
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -48,16 +48,39 @@ include"koneksi.php";
 <?php
 function NoMesin($mc)
 {
-	include"koneksi.php";
-	$qMC=mysqli_query($con,"SELECT *,IF(DATEDIFF(now(),a.tgl_delivery) > 0,'Urgent',
-IF(DATEDIFF(now(),a.tgl_delivery) > -4,'Potensi Delay','')) as `sts` FROM tbl_schedule a 
-LEFT JOIN tbl_inspection b ON a.id=b.id_schedule
-WHERE a.no_mesin='$mc' and (b.`status`='sedang jalan' or a.`status`='antri mesin') ORDER BY a.no_urut ASC");
-	$dMC=mysqli_fetch_array($qMC);	
-	$qLama=mysqli_query($con,"SELECT round(TIME_FORMAT(timediff(b.tgl_target,now()),'%H')) as lama FROM tbl_schedule a
-LEFT JOIN tbl_inspection b ON a.id=b.id_schedule
-WHERE a.no_mesin='$mc' AND b.status='sedang jalan' ORDER BY a.no_urut ASC");
-	$dLama=mysqli_fetch_array($qLama);
+	include "koneksi.php";
+	$qMC=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+											*,
+											CASE
+												WHEN DATEDIFF(Day,CURRENT_TIMESTAMP, tgl_delivery) > 0 THEN 'Urgent'
+												WHEN DATEDIFF(Day,CURRENT_TIMESTAMP, tgl_delivery) > -4 THEN 'Potensi Delay'
+												ELSE ''
+											END as sts
+										FROM
+											db_qc.tbl_schedule a
+										LEFT JOIN db_qc.tbl_inspection b ON
+											a.id = b.id_schedule
+										WHERE
+											a.no_mesin = '$mc' 
+											AND
+											(b.status = 'sedang jalan' OR a.status = 'antri mesin')
+										ORDER BY
+											a.no_urut ASC");
+	$dMC=sqlsrv_fetch_array($qMC,SQLSRV_FETCH_ASSOC);	
+	$qLama=sqlsrv_query($con_db_qc_sqlsrv,"SELECT 
+											round(DATEDIFF(Hour,CURRENT_TIMESTAMP, b.tgl_target),0) as lama
+										FROM
+											db_qc.tbl_schedule a
+										LEFT JOIN db_qc.tbl_inspection b ON
+											a.id = b.id_schedule
+										WHERE
+											a.no_mesin = '$mc'
+											AND 
+											b.status = 'sedang jalan'
+										ORDER BY
+											a.no_urut ASC;");
+
+	$dLama=sqlsrv_fetch_array($qLama,SQLSRV_FETCH_ASSOC);
 	
 		if($dMC['ket_status']=="Pisah Kain"){
 			if($dLama['lama']<"1" and $dLama['lama']!=""){ 
@@ -213,25 +236,51 @@ WHERE a.no_mesin='$mc' AND b.status='sedang jalan' ORDER BY a.no_urut ASC");
 }
 function Rajut($mc)
 {
-	include"koneksi.php";
-	$qMC=mysqli_query($con,"SELECT a.langganan,a.no_order,a.warna,a.proses FROM tbl_schedule a 
-	LEFT JOIN tbl_inspection b ON a.id=b.id_schedule
-	WHERE a.no_mesin='$mc' and b.`status`='sedang jalan' and a.`status`='sedang jalan'  ORDER BY a.no_urut ASC LIMIT 1");
-	$dMC=mysqli_fetch_array($qMC);
+	include "koneksi.php";
+	$qMC=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1
+										a.langganan,a.no_order,a.warna,a.proses 
+									FROM 
+										db_qc.tbl_schedule a 
+									LEFT JOIN db_qc.tbl_inspection b ON 
+										a.id=b.id_schedule
+									WHERE 
+										a.no_mesin='$mc' 
+										and b.status='sedang jalan' 
+										and a.status='sedang jalan'  
+									ORDER BY 
+										a.no_urut ASC");
+	$dMC=sqlsrv_fetch_array($qMC,SQLSRV_FETCH_ASSOC);
     echo "<font size=+2><u>".$mc."</u></font> <br>".$dMC['no_order']."<br> ".$dMC['langganan']."<br>".$dMC['warna']."<br>".$dMC['proses'];	
 }
 		function Waktu($mc){
-			include"koneksi.php";
-			$qLama=mysqli_query($con,"SELECT TIME_FORMAT(timediff(b.tgl_target,now()),'%H:%i') as lama FROM tbl_schedule a
-LEFT JOIN tbl_inspection b ON a.id=b.id_schedule
-WHERE a.no_mesin='$mc' AND a.status='sedang jalan' AND (ISNULL(b.tgl_stop) or NOT ISNULL(b.tgl_mulai)) ORDER BY a.no_urut ASC");
-			$dLama=mysqli_fetch_array($qLama);
-			if($dLama['lama']!=""){echo $dLama['lama'];}else{echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ";}
+			include "koneksi.php";
+			$qLama=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+									DATEDIFF(Minute,CURRENT_TIMESTAMP, b.tgl_target) lama
+								FROM
+									db_qc.tbl_schedule a
+								LEFT JOIN db_qc.tbl_inspection b ON
+									a.id = b.id_schedule
+								WHERE
+									a.no_mesin = '$mc'
+									AND 
+									a.status = 'sedang jalan'
+									AND (b.tgl_stop IS NULL 
+										OR NOT b.tgl_mulai IS NULL )
+								ORDER BY
+									a.no_urut ASC");
+			$dLama=sqlsrv_fetch_array($qLama,SQLSRV_FETCH_ASSOC);
+			if($dLama){
+				$hours    = (int)($dLama['lama'] / 60);
+ 				$minutes  = $dLama['lama'] - ($hours * 60); 
+				echo $hours.":".abs($minutes);
+			}else{
+				echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ";
+			}
 		}
 
 /* Total Status Mesin */
-    $sqlStatus=mysqli_query($con,"SELECT no_mesin FROM tbl_mesin");
-    while ($rM=mysqli_fetch_array($sqlStatus)) {
+    $sqlStatus=sqlsrv_query($con_db_qc_sqlsrv,"SELECT no_mesin FROM db_qc.tbl_mesin");
+    while ($rM=sqlsrv_fetch_array($sqlStatus,SQLSRV_FETCH_ASSOC)) {
         $sts=NoMesin($rM['no_mesin']);
         if ($sts=="btn-primary" or
            $sts=="btn-primary border-dashed" or
@@ -798,8 +847,8 @@ WHERE a.no_mesin='$mc' AND a.status='sedang jalan' AND (ISNULL(b.tgl_stop) or NO
 									<td colspan="35" style="padding: 5px;">
 										<marquee class="teks-berjalan" behavior="scroll" direction="left" onmouseover="this.stop();" onmouseout="this.start();">
 											<?php
-$news=mysqli_query($con,"SELECT GROUP_CONCAT(news_line SEPARATOR ' :: ') as news_line FROM tbl_news_line WHERE gedung='LT 1' AND status='Tampil'");
-$rNews=mysqli_fetch_array($news);
+$news=sqlsrv_query($con_db_qc_sqlsrv,"SELECT STRING_AGG(news_line , ' :: ') as news_line FROM db_qc.tbl_news_line WHERE gedung='LT 1' AND status='Tampil'");
+$rNews=sqlsrv_fetch_array($news,SQLSRV_FETCH_ASSOC);
 $totMesin='0';
 ?>
 											<?php echo $rNews['news_line'];?>
