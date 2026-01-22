@@ -14,19 +14,20 @@ include"koneksi.php";
 
 <body>
 <?php
-   $data=mysqli_query($con,"
-   select
-	m.*,
-	sum(mb.rol) as rol,
-	sum(mb.qty) as qty
-from
-	mutasi_bs_krah m
-left join mutasi_bs_krah_detail mb on
-	mb.id_mutasi = m.id
-group by
-	m.no_mutasi
-order by
-	m.tgl_buat desc
+   $data=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+        m.*,
+        agg.rol,
+        agg.qty
+    FROM db_qc.mutasi_bs_krah m
+    LEFT JOIN (
+        SELECT
+            id_mutasi,
+            SUM(rol) AS rol,
+            SUM(qty) AS qty
+        FROM db_qc.mutasi_bs_krah_detail
+        GROUP BY id_mutasi
+    ) agg ON agg.id_mutasi = m.id
+    ORDER BY m.tgl_buat DESC;
    ");
 	$no=1;
 	$n=1;
@@ -66,7 +67,7 @@ order by
           <tbody>
             <?php
 	  $col=0;
-  while($rowd=mysqli_fetch_array($data)){
+  while($rowd=sqlsrv_fetch_array($data)){
       date_default_timezone_set('Asia/Jakarta');
       $tgltarget = new DateTime($rowd['target']);
       $now=new DateTime();
@@ -83,14 +84,14 @@ order by
               <td align="center"><?php echo $rowd['no_mutasi'];?></td>
               <td align="center"><a data-pk="<?php echo $rowd['id'] ?>" data-value="<?php echo $rowd['jns_limbah'] ?>" class="jns_limbah" href="javascipt:void(0)"><?php echo $rowd['jns_limbah'] ?></a></td>
               <td align="center"><?php echo $rowd['dept'];?></td>
-              <td align="center"><?php echo $rowd['tgl_buat'];?></td>
-              <td align="center"><?php echo $rowd['jam_penyerahan'];?></td>
+              <td align="center"><?php echo date_format($rowd['tgl_buat'], 'Y-m-d');?></td>
+              <td align="center"><?php echo date_format($rowd['jam_penyerahan'], 'H:i:s');?></td>
               <td align="center"><a data-pk="<?php echo $rowd['id'] ?>" data-value="<?php echo $rowd['serah'] ?>" class="diserah" href="javascipt:void(0)"><?php echo $rowd['serah'] ?></a></td>
               <td align="center"><a data-pk="<?php echo $rowd['id'] ?>" data-value="<?php echo $rowd['jabatan1'] ?>" class="jabatan1" href="javascipt:void(0)"><?php echo $rowd['jabatan1'] ?></a></td>
               <td align="center"><a data-pk="<?php echo $rowd['id'] ?>" data-value="<?php echo $rowd['terima'] ?>" class="diterima" href="javascipt:void(0)"><?php echo $rowd['terima'] ?></a></td>
               <td align="center"><a data-pk="<?php echo $rowd['id'] ?>" data-value="<?php echo $rowd['jabatan2'] ?>" class="jabatan2" href="javascipt:void(0)"><?php echo $rowd['jabatan2'] ?></a></td>
               <td align="center"><?php echo $rowd['rol'];?></td>
-              <td align="right"><?php echo $rowd['qty'];?></td>
+              <td align="right"><?php echo number_format($rowd['qty'], 2);?></td>
             </tr>
             <?php
 						$no++;

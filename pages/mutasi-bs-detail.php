@@ -14,8 +14,8 @@ include"koneksi.php";
 
 <body>
 <?php
-   $data=mysqli_query($con,"SELECT md.*,m.no_mutasi,m.jns_limbah FROM mutasi_bs_krah_detail md
-   INNER JOIN mutasi_bs_krah m ON md.id_mutasi=m.id 
+   $data=sqlsrv_query($con_db_qc_sqlsrv,"SELECT md.*,m.no_mutasi,m.jns_limbah FROM db_qc.mutasi_bs_krah_detail md
+   INNER JOIN db_qc.mutasi_bs_krah m ON md.id_mutasi=m.id 
    WHERE m.id='$_GET[idm]' 
    ORDER BY md.id ASC");
 	$no=1;
@@ -92,7 +92,7 @@ include"koneksi.php";
             <?php
     $col=0;
         $no=1;
-  while($rowd=mysqli_fetch_array($data)){
+  while($rowd=sqlsrv_fetch_array($data)){
       date_default_timezone_set('Asia/Jakarta');
       $tgltarget = new DateTime($rowd['target']);
       $now=new DateTime();
@@ -172,8 +172,8 @@ if (isset($_POST['update_all'])) {
     foreach ($ids as $index => $id) {
         $qty = $qtys[$index];
         $catatan = $_POST['catatan'][$index];
-        $updateQuery = "UPDATE mutasi_bs_krah_detail SET `qty` = '$qty', `catatan` = '$catatan' WHERE `id` = '$id'";
-        mysqli_query($con, $updateQuery);
+        $updateQuery = "UPDATE db_qc.mutasi_bs_krah_detail SET qty = '$qty', catatan = '$catatan' WHERE id = '$id'";
+        sqlsrv_query($con_db_qc_sqlsrv, $updateQuery);
     }
     echo "<script>alert('Semua data berhasil diperbarui!'); window.location.href='MutasiBSDetail-{$_GET['idm']}';</script>";
 }
@@ -184,8 +184,8 @@ if (isset($_POST['save_inputs'])) {
         if (!empty($qty)) {
             $id_mutasi = $_GET['idm'];
             $tgl_update = date("Y-m-d H:i:s");
-            $insertQuery = "INSERT INTO mutasi_bs_krah_detail (`id_mutasi`, `qty`, `tgl_update`) VALUES ('$id_mutasi', '$qty', '$tgl_update')";
-            mysqli_query($con, $insertQuery);
+            $insertQuery = "INSERT INTO db_qc.mutasi_bs_krah_detail (id_mutasi, qty, tgl_update) VALUES ('$id_mutasi', '$qty', '$tgl_update')";
+            sqlsrv_query($con_db_qc_sqlsrv, $insertQuery);
         }
     }
     echo "<script>alert('Data berhasil disimpan!'); window.location.href='MutasiBSDetail-{$_GET['idm']}';</script>";

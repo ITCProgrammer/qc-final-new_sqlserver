@@ -13,13 +13,12 @@ function no_urut(){
     $format_angka = "/QCF/MBL/".str_pad($bulan,2,'0',STR_PAD_LEFT)."/".$tahun;
 
     // Ambil data terakhir untuk bulan & tahun ini (baik format angka maupun romawi)
-    $sql = mysqli_query($con, "SELECT no_mutasi FROM mutasi_bs_krah 
+    $sql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 no_mutasi FROM db_qc.mutasi_bs_krah 
         WHERE no_mutasi LIKE '%/QCF/MBL/".str_pad($bulan,2,'0',STR_PAD_LEFT)."/".$tahun."' 
            OR no_mutasi LIKE '%/QCF/MBL/".$bulan_romawi[$bulan]."/".$tahun."' 
-        ORDER BY no_mutasi DESC LIMIT 1") or die (mysqli_error($con));
-    $d = mysqli_num_rows($sql);
-    if($d > 0){
-        $r = mysqli_fetch_array($sql);
+        ORDER BY no_mutasi DESC");
+    if(sqlsrv_has_rows($sql)){
+        $r = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC);
         $d = $r['no_mutasi'];
         // Ambil nomor urut sebelum /QCF/MBL/
         $parts = explode('/QCF/MBL/', $d);
@@ -35,8 +34,8 @@ function no_urut(){
 }
 
 $nou = no_urut();
-mysqli_query($con, "INSERT INTO mutasi_bs_krah (`no_mutasi`,`dept`,`tgl_buat`,`jam_penyerahan`) 
-                VALUES ('$nou','QCF',now(),now())");
+sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.mutasi_bs_krah (no_mutasi, dept, tgl_buat, jam_penyerahan) 
+                VALUES ('$nou','QCF', GETDATE(), GETDATE())");
 
 echo "<script type=\"text/javascript\">
             alert(\"Data Berhasil Ditambah\");

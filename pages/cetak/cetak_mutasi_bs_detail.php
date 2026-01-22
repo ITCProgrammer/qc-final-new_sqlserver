@@ -10,8 +10,10 @@ $act = $_GET['g'];
 //-
 $Awal = $_GET['Awal'];
 $Akhir = $_GET['Akhir'];
-$qTgl = mysqli_query($con, "SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl = mysqli_fetch_array($qTgl);
+$qTgl   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+            CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg;");
+$rTgl   = sqlsrv_fetch_array($qTgl);
 if ($Awal != "") {
   $tgl = substr($Awal, 0, 10);
   $jam = $Awal;
@@ -116,8 +118,8 @@ if ($Awal != "") {
             </tr>
           </table>
           <?php
-          $dt = mysqli_query($con, " SELECT * FROM mutasi_bs_krah WHERE id='$_GET[idm]'");
-          $r = mysqli_fetch_array($dt);
+          $dt = sqlsrv_query($con_db_qc_sqlsrv, " SELECT * FROM db_qc.mutasi_bs_krah WHERE id='$_GET[idm]'");
+          $r = sqlsrv_fetch_array($dt);
           ?>
           <table width="100%" border="0">
             <tbody>
@@ -135,7 +137,7 @@ if ($Awal != "") {
                 </td>
                 <td align="left">
                   <font size="-1">:
-                    <?php echo date('d F Y', strtotime($r['tgl_buat'])); ?>
+                    <?php echo $r['tgl_buat']->format('d F Y'); ?>
                   </font>
                 </td>
               </tr>
@@ -153,7 +155,7 @@ if ($Awal != "") {
                 </td>
                 <td align="left">
                   <font size="-1">:
-                    <?php echo $r['jam_penyerahan']; ?> wib
+                    <?php echo date_format($r['jam_penyerahan'], 'H:i:s'); ?> wib
                   </font>
                 </td>
               </tr>
@@ -184,12 +186,12 @@ if ($Awal != "") {
             </td>
           </tr>
           <?php
-          $data = mysqli_query($con, "SELECT md.*,m.no_mutasi,m.jns_limbah FROM mutasi_bs_krah_detail md
-   INNER JOIN mutasi_bs_krah m ON md.id_mutasi=m.id 
+          $data = sqlsrv_query($con_db_qc_sqlsrv, "SELECT md.*,m.no_mutasi,m.jns_limbah FROM db_qc.mutasi_bs_krah_detail md
+   INNER JOIN db_qc.mutasi_bs_krah m ON md.id_mutasi=m.id 
    WHERE m.id='$_GET[idm]' 
    ORDER BY md.id ASC");
           $no = 1;
-          while ($rowd = mysqli_fetch_array($data)) {
+          while ($rowd = sqlsrv_fetch_array($data)) {
             ?>
             <tr>
               <td align="center" valign="top">
@@ -301,20 +303,20 @@ if ($Awal != "") {
   <tbody>
     <tr>
       <td width="73%" rowspan="4"><div style="font-size: 11px; font-family:sans-serif, Roman, serif;">
-        <?Php $dtKet = mysqli_query($con, "SELECT
-	sum( IF ( ket_status = 'Tolak Basah', 1, 0 ) ) AS tolak_basah,
-	sum( IF ( ket_status = 'Gagal Proses', 1, 0 ) ) AS gagal_proses,
-	sum( IF ( ket_status = 'Perbaikan', 1, 0 ) ) AS perbaikan,
-	sum( IF ( ket_status = 'Greige' OR ket_status = 'Salesmen Sample' OR ket_status = 'Development Sample' OR ket_status = 'Cuci Misty' OR ket_status = 'Cuci YD', 1, 0 ) ) AS greige,
-sum( IF ( ket_status = 'Tolak Basah',bruto, 0 ) ) AS tolak_basah_kg,
-sum( IF ( ket_status = 'Gagal Proses', bruto, 0 ) ) AS gagal_proses_kg,
-sum( IF ( ket_status = 'Perbaikan', bruto, 0 ) ) AS perbaikan_kg,
-sum( IF ( ket_status = 'Greige' OR ket_status = 'Salesmen Sample' OR ket_status = 'Development Sample' OR ket_status = 'Cuci Misty' OR ket_status = 'Cuci YD', bruto, 0 ) ) AS greige_kg
-FROM
-	tbl_schedule 
-WHERE
-	NOT STATUS = 'selesai'");
-        $rKet = mysqli_fetch_array($dtKet); ?>
+        <?php $dtKet = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
+            SUM( IIF ( ket_status = 'Tolak Basah', 1, 0 ) ) AS tolak_basah,
+            SUM( IIF ( ket_status = 'Gagal Proses', 1, 0 ) ) AS gagal_proses,
+            SUM( IIF ( ket_status = 'Perbaikan', 1, 0 ) ) AS perbaikan,
+            SUM( IIF ( ket_status = 'Greige' OR ket_status = 'Salesmen Sample' OR ket_status = 'Development Sample' OR ket_status = 'Cuci Misty' OR ket_status = 'Cuci YD', 1, 0 ) ) AS greige,
+            SUM( IIF ( ket_status = 'Tolak Basah',bruto, 0 ) ) AS tolak_basah_kg,
+            SUM( IIF ( ket_status = 'Gagal Proses', bruto, 0 ) ) AS gagal_proses_kg,
+            SUM( IIF ( ket_status = 'Perbaikan', bruto, 0 ) ) AS perbaikan_kg,
+            SUM( IIF ( ket_status = 'Greige' OR ket_status = 'Salesmen Sample' OR ket_status = 'Development Sample' OR ket_status = 'Cuci Misty' OR ket_status = 'Cuci YD', bruto, 0 ) ) AS greige_kg
+          FROM
+            db_qc.tbl_schedule 
+          WHERE
+            NOT STATUS = 'selesai'");
+        $rKet = sqlsrv_fetch_array($dtKet); ?>
         Perbaikan: <?php echo $rKet['perbaikan']; ?> Lot &nbsp; <?php echo $rKet['perbaikan_kg']; ?> Kg<br />
         Gagal Proses : <?php echo $rKet['gagal_proses']; ?> Lot &nbsp; <?php echo $rKet['gagal_proses_kg']; ?> Kg<br />
     Greige : <?php echo $rKet['greige']; ?> Lot &nbsp; <?php echo $rKet['greige_kg']; ?> Kg<br />  
