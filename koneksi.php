@@ -51,7 +51,15 @@ $db_laborat_option = array(
 );
 $con_db_laborat_sqlsrv = sqlsrv_connect($db_laborat_host, $db_laborat_option);
 
-
+// SQL Server: database invqc (migrated from MySQL)
+$invqc_host = "10.0.0.221";
+$invqc_option = array(
+    "Database" => "invqc",
+    "UID" => "sa",
+    "PWD" => "Ind@taichen2024",
+    "CharacterSet" => "UTF-8"
+);
+$con_invqc_sqlsrv = sqlsrv_connect($invqc_host, $invqc_option);
 
 $hostname="10.0.0.21";
 $database = "NOWPRD";
