@@ -128,7 +128,6 @@ if (strlen($jamA) == 5) {
               <th><div align="center">Grouping</div></th>
               <th><div align="center">Hue</div></th>
               <th><div align="center">Disposisi</div></th>
-              <th><div align="center">Pemberi Instruksi</div></th>
               <th><div align="center">Colorist Qcf</div></th>
               <th><div align="center">Review</div></th>
               <th><div align="center">Remark</div></th>
@@ -140,26 +139,25 @@ if (strlen($jamA) == 5) {
           <?php
             $no=1;
             if($GShift!="ALL"){ $shft=" AND t.shift ='$GShift' ";}else{$shft=" ";}
-			      if($Awal!="" and $Akhir!=""){ $where=" AND DATE_FORMAT( t.tgl_celup, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' ";}else{ $where=" ";}  
+			      if($Awal!="" and $Akhir!=""){ $where=" AND TRY_CAST(t.tgl_celup AS DATE) BETWEEN '$Awal' AND '$Akhir' ";}else{ $where=" ";}
             if($Awal!="" and $Akhir!=""){
-              $qry1=mysqli_query($con,"SELECT 
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT 
                                               t.*,
                                               p.pemberi_instruksi
                                           FROM 
-                                              tbl_cocok_warna_dye t 
-                                          LEFT JOIN penyelesaian_tolakbasah p on p.id_cocok_warna = t.id
+                                              db_qc.tbl_cocok_warna_dye t 
+                                          LEFT JOIN db_qc.penyelesaian_tolakbasah p on p.id_cocok_warna = t.id
                                           WHERE t.dept='QCF' $where $shft ORDER BY t.id ASC");
             }else{
-              $qry1=mysqli_query($con,"SELECT 
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT 
                                               t.*,
                                               p.pemberi_instruksi
                                           FROM 
-                                              tbl_cocok_warna_dye t 
-                                          LEFT JOIN penyelesaian_tolakbasah p on p.id_cocok_warna = t.id
+                                              db_qc.tbl_cocok_warna_dye t 
+                                          LEFT JOIN db_qc.penyelesaian_tolakbasah p on p.id_cocok_warna = t.id
                                           WHERE t.dept='QCF' $where $shft ORDER BY t.id ASC");
             }
-            // echo "SELECT * FROM tbl_cocok_warna_dye WHERE `dept`='QCF' $where $shft ORDER BY id ASC";
-                while($row1=mysqli_fetch_array($qry1)){
+              while($row1=sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
               $pos=strpos($row1['pelanggan'],"/");
               if($pos>0) {
               $lgg1=substr($row1['pelanggan'],0,$pos);
@@ -168,8 +166,6 @@ if (strlen($jamA) == 5) {
                 $lgg1=$row1['pelanggan'];
                 $byr1=substr($row1['pelanggan'],$pos,100);
               }
-              $q_user = mysqli_query($cona,"SELECT * FROM tbl_user_tindaklanjut WHERE id = '$row1[pemberi_instruksi]'");
-              $row_user = mysqli_fetch_array($q_user);
               ?>
           <tr bgcolor="<?php echo $bgcolor; ?>">
             <td align="center"><?php echo $no; ?></td>
@@ -178,7 +174,7 @@ if (strlen($jamA) == 5) {
             <!--<a href="#" class="btn btn-info btn-xs cwarnadye_edit <?php if($_SESSION['akses']=='biasa' AND ($_SESSION['lvl_id']!='PACKING' OR $_SESSION['lvl_id']!='NCP')){ echo "disabled"; } ?>" id="<?php echo $row1['id']; ?>"><i class="fa fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i> </a>-->
             <a href="#" class="btn btn-danger btn-xs <?php if($_SESSION['akses']=='biasa' AND ($_SESSION['lvl_id']!='PACKING' OR $_SESSION['lvl_id']!='NCP')){ echo "disabled"; } ?>" onclick="confirm_delete('./HapusDataCWarnaDyeNew-<?php echo $row1['id'] ?>');"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" title="Hapus"></i> </a>
             </div></td>
-            <td align="center"><a data-type="date" data-pk="<?php echo $row1['id'] ?>" data-value="<?php echo $row1['tgl_celup'] ?>" class="tgl_celup" href="javascipt:void(0)"><?php echo $row1['tgl_celup'];?></a></td>
+            <td align="center"><a data-type="date" data-pk="<?php echo $row1['id'] ?>" data-value="<?php if(is_object($row1['tgl_celup'])){echo $row1['tgl_celup']->format('Y-m-d');}else{echo $row1['tgl_celup'];} ?>" class="tgl_celup" href="javascipt:void(0)"><?php if(is_object($row1['tgl_celup'])){echo $row1['tgl_celup']->format('Y-m-d');}else{echo $row1['tgl_celup'];} ?></a></td>
             <td align="center"><?php echo $row1['nokk'];?></td>
             <td align="center"><?php echo $row1['nodemand'];?></td>
             <td><?php echo $lgg1;?></td>
@@ -199,7 +195,6 @@ if (strlen($jamA) == 5) {
             <td align="center"><a data-pk="<?php echo $row1['id'] ?>" data-value="<?php echo $row1['grouping'] ?>" class="grouping_dye" href="javascipt:void(0)"><?php echo $row1['grouping'] ?></a></td>
             <td align="center"><a data-pk="<?php echo $row1['id'] ?>" data-value="<?php echo $row1['hue'] ?>" class="hue_dye" href="javascipt:void(0)"><?php echo $row1['hue'] ?></a></td>
             <td align="center"><a data-pk="<?php echo $row1['id'] ?>" data-value="<?php echo $row1['disposisi'] ?>" class="disposisi_cdye" href="javascipt:void(0)"><?php echo $row1['disposisi'] ?></a></td>
-            <td align="center"><?= $row_user['nama']; ?></td>
             <td align="center"><a data-pk="<?php echo $row1['id'] ?>" data-value="<?php echo $row1['colorist_qcf'] ?>" class="colorist_qcf" href="javascipt:void(0)"><?php echo $row1['colorist_qcf'] ?></a></td>
             <td align="center"><a data-pk="<?php echo $row1['id'] ?>" data-value="<?php echo $row1['review_qcf'] ?>" class="review_qcf_dye" href="javascipt:void(0)"><?php echo $row1['review_qcf'] ?></a></td>
             <td align="center"><a data-pk="<?php echo $row1['id'] ?>" data-value="<?php echo $row1['remark_qcf'] ?>" class="remark_qcf_dye" href="javascipt:void(0)"><?php echo $row1['remark_qcf'] ?></a></td>

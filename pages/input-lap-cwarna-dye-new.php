@@ -48,8 +48,8 @@
     include "koneksi.php";
     ini_set("error_reporting", 1);
     if ($_POST['simpan'] == "simpan") {
-        $ceksql = mysqli_query($con, "SELECT * FROM `tbl_cocok_warna_dye` WHERE `nodemand`='$_GET[nodemand]' and `shift`='$_POST[shift]' AND DATE_FORMAT(tgl_celup, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d') AND `dept`='QCF' LIMIT 1");
-        $cek = mysqli_num_rows($ceksql);
+        $ceksql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_cocok_warna_dye WHERE nodemand='$_GET[nodemand]' and shift='$_POST[shift]' AND TRY_CAST(tgl_celup AS DATE) = CAST(GETDATE() AS DATE) AND dept='QCF'");
+        $cek = sqlsrv_has_rows($ceksql) ? 1 : 0;
         if ($cek > 0) {
             $pelanggan = str_replace("'", "''", $_POST['pelanggan']);
             $order = str_replace("'", "''", $_POST['no_order']);
@@ -60,28 +60,28 @@
             $spectro = str_replace("'", "''", $_POST['spectro']);
             $colorist_dye = str_replace("'", "''", $_POST['colorist_dye']);
             $colorist_qcf = str_replace("'", "''", $_POST['colorist_qcf']);
-            $sql1 = mysqli_query($con, "UPDATE `tbl_cocok_warna_dye` SET
-                                                `no_order`='$order',
-                                                `no_po`='$po',
-                                                `pelanggan`='$pelanggan',
-                                                `jenis_kain`='$jns',
-                                                `no_item`='$_POST[no_item]',
-                                                `warna`='$warna',
-                                                `no_warna`='$_POST[no_warna]',
-                                                `no_mesin`='$_POST[no_mesin]',
-                                                `proses`='$_POST[proses_dye]',
-                                                `colorist_dye`='$colorist_dye',
-                                                `tgl_celup`='$_POST[tgl_celup]',
-                                                `lot`='$_POST[lot]',
-                                                `jml_roll`='$_POST[rol]',
-                                                `bruto`='$_POST[bruto]',
-                                                `status_warna`='$_POST[status_warna]',
-                                                `disposisi`='$_POST[disposisi]',
-                                                `colorist_qcf`='$colorist_qcf',
-                                                `ket`='$ket',
-                                                `spectro`='$spectro',
-                                                `tgl_update`=now()
-                                                WHERE `nodemand`='$_POST[nodemand]'");
+            $sql1 = sqlsrv_query($con_db_qc_sqlsrv, "UPDATE db_qc.tbl_cocok_warna_dye SET
+                                                no_order='$order',
+                                                no_po='$po',
+                                                pelanggan='$pelanggan',
+                                                jenis_kain='$jns',
+                                                no_item='$_POST[no_item]',
+                                                warna='$warna',
+                                                no_warna='$_POST[no_warna]',
+                                                no_mesin='$_POST[no_mesin]',
+                                                proses='$_POST[proses_dye]',
+                                                colorist_dye='$colorist_dye',
+                                                tgl_celup='$_POST[tgl_celup]',
+                                                lot='$_POST[lot]',
+                                                jml_roll='$_POST[rol]',
+                                                bruto='$_POST[bruto]',
+                                                status_warna='$_POST[status_warna]',
+                                                disposisi='$_POST[disposisi]',
+                                                colorist_qcf='$colorist_qcf',
+                                                ket='$ket',
+                                                spectro='$spectro',
+                                                tgl_update=GETDATE()
+                                                WHERE nodemand='$_POST[nodemand]'");
             if ($sql1) {
                 //echo " <script>alert('Data has been updated!');</script>";
                 echo "<script>swal({
@@ -105,31 +105,7 @@
             $spectro = str_replace("'", "''", $_POST['spectro']);
             $colorist_dye = str_replace("'", "''", $_POST['colorist_dye']);
             $colorist_qcf = str_replace("'", "''", $_POST['colorist_qcf']);
-            $sql = mysqli_query($con, "INSERT INTO `tbl_cocok_warna_dye` SET
-            `nokk`='$_POST[nokk]',
-            `nodemand`='$_POST[nodemand]',
-            `no_order`='$order',
-            `no_po`='$po',
-            `pelanggan`='$pelanggan',
-            `jenis_kain`='$jns',
-            `no_item`='$_POST[no_item]',
-            `warna`='$warna',
-            `no_warna`='$_POST[no_warna]',
-            `no_mesin`='$_POST[no_mesin]',
-            `proses`='$_POST[proses_dye]',
-            `colorist_dye`='$colorist_dye',
-            `tgl_celup`='$_POST[tgl_celup]',
-            `lot`='$_POST[lot]',
-            `shift`='$_POST[shift]',
-            `dept`='QCF',
-            `jml_roll`='$_POST[rol]',
-            `bruto`='$_POST[bruto]',
-            `status_warna`='$_POST[status_warna]',
-            `disposisi`='$_POST[disposisi]',
-            `colorist_qcf`='$colorist_qcf',
-            `ket`='$ket',
-            `spectro`='$spectro',
-            `tgl_update`=now()");
+            $sql = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_cocok_warna_dye (nokk, nodemand, no_order, no_po, pelanggan, jenis_kain, no_item, warna, no_warna, no_mesin, proses, colorist_dye, tgl_celup, lot, shift, dept, jml_roll, bruto, status_warna, disposisi, colorist_qcf, ket, spectro, tgl_update) VALUES ('$_POST[nokk]', '$_POST[nodemand]', '$order', '$po', '$pelanggan', '$jns', '$_POST[no_item]', '$warna', '$_POST[no_warna]', '$_POST[no_mesin]', '$_POST[proses_dye]', '$colorist_dye', '$_POST[tgl_celup]', '$_POST[lot]', '$_POST[shift]', 'QCF', '$_POST[rol]', '$_POST[bruto]', '$_POST[status_warna]', '$_POST[disposisi]', '$colorist_qcf', '$ket', '$spectro', GETDATE())");
             if ($sql) {
                 //echo " <script>alert('Data has been saved!');</script>";
                 echo "<script>swal({
@@ -153,10 +129,10 @@
         // $nodemand = " ";
     // }
 
-//Data sudah disimpan di database mysqli
-$msql = mysqli_query($con, "SELECT * FROM `tbl_cocok_warna_dye` WHERE `nodemand` LIKE'%$nodemand%' and `shift`='$_GET[shift]' AND DATE_FORMAT(tgl_celup, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d') AND `dept`='QCF' LIMIT 1");
-$row = mysqli_fetch_array($msql);
-$crow = mysqli_num_rows($msql);
+//Data sudah disimpan di database sql server
+$msql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_cocok_warna_dye WHERE nodemand LIKE '%$nodemand%' and shift='$_GET[shift]' AND TRY_CAST(tgl_celup AS DATE) = CAST(GETDATE() AS DATE) AND dept='QCF'");
+$row = sqlsrv_fetch_array($msql, SQLSRV_FETCH_ASSOC);
+$crow = sqlsrv_has_rows($msql) ? 1 : 0;
 
 // NOW
     // $sql_ITXVIEWKK  = db2_exec($conn1, "SELECT
@@ -260,9 +236,8 @@ $crow = mysqli_num_rows($msql);
     // $d_netto		= db2_fetch_assoc($sql_netto);
 // NOW
 
-$con1 = mysqli_connect("10.0.0.10", "dit", "4dm1n", "db_dying");
 if(!empty($nodemand)){
-    $qryDye1 = mysqli_query($con1, "SELECT 
+    $qryDye1 = sqlsrv_query($con_db_dying_sqlsrv, "SELECT 
                                         b.langganan,
                                         b.po,
                                         b.no_order,
@@ -281,14 +256,14 @@ if(!empty($nodemand)){
                                         b.rol,
                                         b.bruto
                                     FROM
-                                        tbl_hasilcelup a
-                                        LEFT JOIN tbl_montemp c ON a.id_montemp = c.id
-                                        LEFT JOIN tbl_schedule b ON c.id_schedule = b.id
+                                        db_dying.tbl_hasilcelup a
+                                        LEFT JOIN db_dying.tbl_montemp c ON a.id_montemp = c.id
+                                        LEFT JOIN db_dying.tbl_schedule b ON c.id_schedule = b.id
                                     WHERE
                                         a.nodemand LIKE '%$nodemand%'
                                     ORDER BY 
-	                                    a.id DESC LIMIT 1");
-    $dtDyeing = mysqli_fetch_array($qryDye1);
+	                                    a.id DESC");
+    $dtDyeing = sqlsrv_fetch_array($qryDye1, SQLSRV_FETCH_ASSOC);
 
     if (empty($dtDyeing)) {
         echo "<script>swal({
@@ -302,7 +277,7 @@ if(!empty($nodemand)){
         });</script>";
     }
 
-    $qryDye2 = mysqli_query($con1, "SELECT
+    $qryDye2 = sqlsrv_query($con_db_dying_sqlsrv, "SELECT
                                         sum( a.rol ) AS jml_roll,
                                         sum( a.bruto ) AS jml_kg,
                                         a.no_mesin,
@@ -313,8 +288,9 @@ if(!empty($nodemand)){
                                     LEFT JOIN db_dying.tbl_montemp b ON a.id = b.id_schedule 
                                     WHERE
                                         a.nokk = '$dtDyeing[nokk]' 
-                                        AND a.STATUS = 'selesai'");
-    $dtSch = mysqli_fetch_array($qryDye2);
+                                        AND a.STATUS = 'selesai'
+                                    GROUP BY a.id, a.no_mesin, a.proses, b.colorist");
+    $dtSch = sqlsrv_fetch_array($qryDye2, SQLSRV_FETCH_ASSOC);
 }
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">

@@ -4,8 +4,10 @@ session_start();
 include "../../koneksi.php";
   $Awal=$_GET['awal'];
   $Akhir=$_GET['akhir'];
-  $qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-  $rTgl=mysqli_fetch_array($qTgl);
+  $qTgl   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+              CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+              CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg;");
+  $rTgl   = sqlsrv_fetch_array($qTgl);
   if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -164,15 +166,15 @@ border:hidden;
       $roll=0;$bruto=0;$lot=0;
       $Awal=$_GET['awal'];
       $Akhir=$_GET['akhir'];
-      if($_GET['shift']!="ALL"){$shft=" AND `shift`='$_GET[shift]' "; }else{$shft=" ";}		
-      $qry1=mysqli_query($con,"SELECT * FROM tbl_cocok_warna_dye
-      WHERE tgl_celup BETWEEN '$Awal' AND '$Akhir' $shft AND `dept`='QCF' ORDER BY id ASC");
+      if($_GET['shift']!="ALL"){$shft=" AND shift='$_GET[shift]' "; }else{$shft=" ";}		
+      $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_cocok_warna_dye
+      WHERE tgl_celup BETWEEN '$Awal' AND '$Akhir' $shft AND dept='QCF' ORDER BY id ASC");
       $lotOK=0;$lotTBA=0;$lotTBB=0;$lotTBC=0;$lot=0;     
-          while($row=mysqli_fetch_array($qry1)){
+          while($row=sqlsrv_fetch_array($qry1)){
         ?>
           <tr valign="top">
           <td align="center"><font size="-2"><?php echo $no;?></font></td>
-          <td align="center"><font size="-2"><?php echo $row['tgl_celup'];?></font></td>
+          <td align="center"><font size="-2"><?php echo date_format($row['tgl_celup'], 'Y-m-d') ;?></font></td>
           <td align="center"><font size="-2"><?php echo $row['nodemand'];?></font></td>
           <td><font size="-2"><?php echo substr($row['pelanggan'],0,7)." ".substr($row['pelanggan'],7,40);?></font></td>
           <td><font size="-2"><?php echo substr($row['no_po'],0,10)." ".substr($row['no_po'],10,20)." ".substr($row['no_po'],20,40);?></font></td>

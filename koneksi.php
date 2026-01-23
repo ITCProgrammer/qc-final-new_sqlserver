@@ -41,7 +41,7 @@ $db_qc_option = array(
 );
 $con_db_qc_sqlsrv = sqlsrv_connect($db_qc_host, $db_qc_option);
 
-// SQL Server: database db_qc (migrated from MySQL)
+// SQL Server: database db_laborat (migrated from MySQL)
 $db_laborat_host = "10.0.0.221";
 $db_laborat_option = array(
     "Database" => "db_laborat",
@@ -50,6 +50,26 @@ $db_laborat_option = array(
     "CharacterSet" => "UTF-8"
 );
 $con_db_laborat_sqlsrv = sqlsrv_connect($db_laborat_host, $db_laborat_option);
+
+// SQL Server: database db_dying (migrated from MySQL)
+$db_dying_host = "10.0.0.221";
+$db_dying_option = array(
+    "Database" => "db_dying",
+    "UID" => "sa",
+    "PWD" => "Ind@taichen2024",
+    "CharacterSet" => "UTF-8"
+);
+$con_db_dying_sqlsrv = sqlsrv_connect($db_dying_host, $db_dying_option);
+
+// SQL Server: database db_adm (migrated from MySQL)
+$db_adm_host = "10.0.0.221";
+$db_adm_option = array(
+    "Database" => "db_adm",
+    "UID" => "sa",
+    "PWD" => "Ind@taichen2024",
+    "CharacterSet" => "UTF-8"
+);
+$con_db_adm_sqlsrv = sqlsrv_connect($db_adm_host, $db_adm_option);
 
 // SQL Server: database invqc (migrated from MySQL)
 $invqc_host = "10.0.0.221";
@@ -75,7 +95,7 @@ else{
     exit("DB2 Connection failed");
 }
 
-// $con=mysqli_connect("10.0.0.10","dit","4dm1n","db_qc");
+// $con=mysqli_connect("localhost","root","password","db_qc");
 $cona=mysqli_connect("10.0.0.10","dit","4dm1n","db_adm");
 // $con=mysqli_connect("localhost","root","","db_qc");
 $condye=mysqli_connect("10.0.0.10","dit","4dm1n","db_dying");

@@ -48,15 +48,14 @@ Shift 	: <?php echo $shift;?>
   $rollTBB=0;$brutoTBB=0;$rollTBC=0;$brutoTBC=0;$roll=0;$bruto=0;
 
  if($_GET['shift']!="ALL"){
- $shft=" AND `shift`='$_GET[shift]' "; }else{$shft=" ";}
+ $shft=" AND shift='$_GET[shift]' "; }else{$shft=" ";}
  
-  $sql=mysqli_query($con,"SELECT * FROM tbl_cocok_warna_dye WHERE `tgl_celup` BETWEEN '$tgl' AND '$tgl1' ".$shft." AND `dept`='QCF' ORDER BY id ASC");
-  while($row=mysqli_fetch_array($sql)){
-	  
+  $sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_cocok_warna_dye WHERE tgl_celup BETWEEN '$tgl' AND '$tgl1' ".$shft." AND dept='QCF' ORDER BY id ASC");
+  while($row=sqlsrv_fetch_array($sql)){
   ?>
   <tr>
     <td><?php echo $no;?></td>
-    <td><?php echo $row['tgl_celup'];?></td>
+    <td><?php echo date_format($row['tgl_celup'], 'Y-m-d') ;?></td>
     <td>'<?php echo $row['nodemand'];?></td>
     <td><?php echo $row['pelanggan'];?></td>
     <td><?php echo $row['buyer'];?></td>
