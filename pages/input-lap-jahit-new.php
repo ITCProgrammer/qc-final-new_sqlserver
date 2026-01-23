@@ -48,8 +48,8 @@ include"koneksi.php";
 ini_set("error_reporting", 1);
 if($_POST['simpan']=="simpan")
 {
-		$ceksql=mysqli_query($con,"SELECT * FROM `tbl_jahit` WHERE `nodemand`='$_GET[nodemand]' and `shift`='$_POST[shift]' AND DATE_FORMAT(tgl_jahit, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d') LIMIT 1");
-    $cek=mysqli_num_rows($ceksql);
+    $ceksql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_jahit WHERE nodemand='$_GET[nodemand]' and shift='$_POST[shift]' AND TRY_CAST(tgl_jahit AS DATE) = CAST(GETDATE() AS DATE)");
+    $cek=sqlsrv_has_rows($ceksql) ? 1 : 0;
 	if($cek>0){
 	$langganan=str_replace("'","''",$_POST['langganan']);
 	$order=str_replace("'","''",$_POST['no_order']);
@@ -60,26 +60,26 @@ if($_POST['simpan']=="simpan")
 	$warna=str_replace("'","''",$_POST['warna']);
     $ket=str_replace("'","''",$_POST['ket']);
     $colorist_qcf=str_replace("'","''",$_POST['colorist_qcf']);
-	$sql1=mysqli_query($con,"UPDATE `tbl_jahit` SET
-	`no_order`='$order',
-	`no_po`='$po',
-	`langganan`='$langganan',
-	`jenis_kain`='$jns',
-    `jenis_kain_body`='$jns_body',
-	`warna`='$warna',
-	`lot`='$_POST[lot]',
-    `lot_body`='$_POST[lot_body]',
-	`roll`='$_POST[roll]',
-	`bruto`='$_POST[bruto]',
-	`status`='$_POST[status]',
-    `operator`='$_POST[operator]',
-    `tgl_fin`='$_POST[tgl_fin]',
-    `tgl_jahit`='$_POST[tgl_jahit]',
-	`ket`='$ket',
-    `disposisi`='$_POST[disposisi]',
-    `colorist_qcf`='$colorist_qcf',
-    `tgl_update`=now()
-	WHERE `nodemand`='$_POST[nodemand]'");
+	$sql1=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_jahit SET
+	no_order='$order',
+	no_po='$po',
+	langganan='$langganan',
+	jenis_kain='$jns',
+    jenis_kain_body='$jns_body',
+	warna='$warna',
+	lot='$_POST[lot]',
+    lot_body='$_POST[lot_body]',
+	roll='$_POST[roll]',
+	bruto='$_POST[bruto]',
+	status='$_POST[status]',
+    operator='$_POST[operator]',
+    tgl_fin='$_POST[tgl_fin]',
+    tgl_jahit='$_POST[tgl_jahit]',
+	ket='$ket',
+    disposisi='$_POST[disposisi]',
+    colorist_qcf='$colorist_qcf',
+    tgl_update=GETDATE()
+	WHERE nodemand='$_POST[nodemand]'");
 	if($sql1){
         //echo " <script>alert('Data has been updated!');</script>";
         echo "<script>swal({
@@ -104,29 +104,9 @@ if($_POST['simpan']=="simpan")
     $warna=str_replace("'","''",$_POST['warna']);
     $ket=str_replace("'","''",$_POST['ket']);
     $colorist_qcf=str_replace("'","''",$_POST['colorist_qcf']);
-	$sql=mysqli_query($con,"INSERT INTO `tbl_jahit` SET
-	`nokk`='$_POST[nokk]',
-    `nodemand`='$_POST[nodemand]',
-	`no_order`='$order',
-	`no_po`='$po',
-	`langganan`='$langganan',
-	`jenis_kain`='$jns',
-    `jenis_kain_body`='$jns_body',
-	`warna`='$warna',
-	`lot`='$_POST[lot]',
-    `lot_body`='$_POST[lot_body]',
-	`roll`='$_POST[roll]',
-	`bruto`='$_POST[bruto]',
-	`status`='$_POST[status]',
-    `operator`='$_POST[operator]',
-    `tgl_fin`='$_POST[tgl_fin]',
-    `tgl_jahit`='$_POST[tgl_jahit]',
-    `shift`='$_POST[shift]',
-	`ket`='$ket',
-    `disposisi`='$_POST[disposisi]',
-    `colorist_qcf`='$colorist_qcf',
-    `tgl_buat`=now(),
-    `tgl_update`=now()");
+	$sql=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_jahit 
+        (nokk, nodemand, no_order, no_po, langganan, jenis_kain, jenis_kain_body, warna, lot, lot_body, roll, bruto, status, operator, tgl_fin, tgl_jahit, shift, ket, disposisi, colorist_qcf, tgl_buat, tgl_update) 
+        VALUES ('$_POST[nokk]', '$_POST[nodemand]', '$order', '$po', '$langganan', '$jns', '$jns_body', '$warna', '$_POST[lot]', '$_POST[lot_body]', '$_POST[roll]', '$_POST[bruto]', '$_POST[status]', '$_POST[operator]', '$_POST[tgl_fin]', '$_POST[tgl_jahit]', '$_POST[shift]', '$ket', '$_POST[disposisi]', '$colorist_qcf', GETDATE(), GETDATE())");
 	if($sql){
         //echo " <script>alert('Data has been saved!');</script>";
         echo "<script>swal({
@@ -147,10 +127,10 @@ if($_POST['simpan']=="simpan")
 <?Php
 if($_GET['nodemand']!=""){$nodemand=$_GET['nodemand'];}else{$nodemand=" ";}
 
-//Data sudah disimpan di database mysqli
-$msql=mysqli_query($con,"SELECT * FROM `tbl_jahit` WHERE `nodemand`='$nodemand' and `shift`='$_GET[shift]' AND DATE_FORMAT(tgl_jahit, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d') LIMIT 1");
-$row=mysqli_fetch_array($msql);
-$crow=mysqli_num_rows($msql);
+//Data sudah disimpan di database sqlserver
+$msql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_jahit WHERE nodemand='$nodemand' and shift='$_GET[shift]' AND TRY_CAST(tgl_jahit AS DATE) = CAST(GETDATE() AS DATE)");
+$row=sqlsrv_fetch_array($msql, SQLSRV_FETCH_ASSOC);
+$crow=sqlsrv_has_rows($msql) ? 1 : 0;
 
 $sqlDB2="SELECT A.CODE AS DEMANDNO, TRIM(B.PRODUCTIONORDERCODE) AS PRODUCTIONORDERCODE, 
 CASE
@@ -357,8 +337,8 @@ $vallebar=substr($lebar,0,$posl);
 							<select class="form-control select2" name="operator" id="operator" required>
 								<option value="">Pilih</option>
 								<?php 
-								$qryp=mysqli_query($con,"SELECT nama FROM tbl_operator_jahit ORDER BY nama ASC");
-								while($rp=mysqli_fetch_array($qryp)){
+								$qryp=sqlsrv_query($con_db_qc_sqlsrv,"SELECT nama FROM db_qc.tbl_operator_jahit ORDER BY nama ASC");
+								while($rp=sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)){
 								?>
 								<option value="<?php echo $rp['nama'];?>" <?php if($row['operator']==$rp['nama']){echo "SELECTED";}?>><?php echo $rp['nama'];?></option>	
 								<?php }?>
@@ -441,8 +421,7 @@ $vallebar=substr($lebar,0,$posl);
 <?php 
 if($_POST['simpan_operator']=="Simpan"){
 	$nama=strtoupper($_POST['nama']);
-	$sqlData1=mysqli_query($con,"INSERT INTO tbl_operator_jahit SET 
-		  nama='$nama'");
+	$sqlData1=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_operator_jahit (nama) VALUES ('$nama')");
 	if($sqlData1){	
 	echo "<script>swal({
   title: 'Data Telah Tersimpan',   

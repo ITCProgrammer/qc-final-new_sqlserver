@@ -6,8 +6,10 @@ include "../../koneksi.php";
   $Akhir=$_GET['akhir'];
   $Order=$_GET['order'];
   $GShift=$_GET['shift'];
-  $qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-  $rTgl=mysqli_fetch_array($qTgl);
+  $qTgl   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+              CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+              CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg;");
+  $rTgl   = sqlsrv_fetch_array($qTgl);
   if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -165,11 +167,11 @@ border:hidden;
       $roll=0;$bruto=0;
       $Awal=$_GET['awal'];
       $Akhir=$_GET['akhir'];
-      if($GShift!="ALL"){$shft=" AND `shift`='$_GET[shift]' "; }else{$shft=" ";}
-      if($Order!=""){$ord=" AND `no_order` LIKE '%$Order%' "; }else{$ord=" ";}
-      $qry1=mysqli_query($con,"SELECT * FROM tbl_jahit
-      WHERE DATE_FORMAT( tgl_jahit, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' $shft $ord ORDER BY id ASC");
-          while($row=mysqli_fetch_array($qry1)){
+      if($GShift!="ALL"){$shft=" AND shift='$_GET[shift]' "; }else{$shft=" ";}
+      if($Order!=""){$ord=" AND no_order LIKE '%$Order%' "; }else{$ord=" ";}
+      $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_jahit
+      WHERE TRY_CAST(tgl_jahit AS DATE) BETWEEN '$Awal' AND '$Akhir' $shft $ord ORDER BY id ASC");
+          while($row=sqlsrv_fetch_array($qry1)){
         ?>
           <tr>
                 <td align="center"><?php echo $no;?></td>

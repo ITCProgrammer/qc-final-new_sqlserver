@@ -1,7 +1,7 @@
 <?PHP
 ini_set("error_reporting", 1);
 session_start();
-include"koneksi.php";
+include "koneksi.php";
 
 ?>
 
@@ -120,14 +120,14 @@ $Order	= isset($_POST['order']) ? $_POST['order'] : '';
           <tbody>
           <?php
             $no=1;
-            if($GShift!="ALL"){ $shft=" AND `shift`='$GShift' ";}else{$shft=" ";}
-            if($Order!=""){$ord=" AND `no_order` LIKE '%$Order%' "; }else{$ord=" ";}
+            if($GShift!="ALL"){ $shft=" AND shift='$GShift' ";}else{$shft=" ";}
+            if($Order!=""){$ord=" AND no_order LIKE '%$Order%' "; }else{$ord=" ";}
             if($Awal!="" and $Akhir!=""){
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_jahit WHERE DATE_FORMAT( tgl_jahit, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' $shft $ord ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_jahit WHERE TRY_CAST(tgl_jahit AS DATE) BETWEEN '$Awal' AND '$Akhir' $shft $ord ORDER BY id ASC");
             }else{
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_jahit WHERE DATE_FORMAT( tgl_jahit, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' $shft $ord ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_jahit WHERE TRY_CAST(tgl_jahit AS DATE) BETWEEN '$Awal' AND '$Akhir' $shft $ord ORDER BY id ASC");
             }
-                while($row1=mysqli_fetch_array($qry1)){
+                while($row1=sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
               ?>
           <tr bgcolor="<?php echo $bgcolor; ?>">
             <td align="center"><?php echo $no; ?></td>
@@ -135,7 +135,7 @@ $Order	= isset($_POST['order']) ? $_POST['order'] : '';
             <td align="center"><div class="btn-group">
             <a href="#" class="btn btn-danger btn-xs <?php if($_SESSION['akses']=='biasa' AND ($_SESSION['lvl_id']!='PACKING' OR $_SESSION['lvl_id']!='NCP')){ echo "disabled"; } ?>" onclick="confirm_delete('./HapusDataJahitNew-<?php echo $row1['id'] ?>');"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" title="Hapus"></i> </a>
             </div></td>
-            <td align="center"><?php echo date("Y-m-d", strtotime($row1['tgl_jahit']));?></td>
+            <td align="center"><?php if(is_object($row1['tgl_jahit'])){echo $row1['tgl_jahit']->format('Y-m-d');}else{echo date("Y-m-d", strtotime($row1['tgl_jahit']));}?></td>
             <td align="center"><?php echo $row1['nodemand'];?></td>
             <td><?php echo $row1['langganan'];?></td>
             <td align="center"><?php echo $row1['no_po'];?></td>
