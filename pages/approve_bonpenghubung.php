@@ -206,62 +206,132 @@ include "koneksi.php";
 
                         </thead>
                         <tbody>
-                            <?php
-                                if ($Demand != "") {
-                                    $no     = 1;
-                                    $fields = [];
-                                    if ($Demand != "") {
-                                        $fields[] = "m.nodemand = '$Demand' ";
-                                    } else {
-                                        $fields[] = '';
-                                    }
+                        <?php
+                            $params = [];
+                            $no = 1;
 
-                                    $default_fields  = " AND tq.sts_pbon!='10' AND (tq.penghubung_masalah !='' or tq.penghubung_keterangan !='' or tq.penghubung_roll1 !='' or tq.penghubung_roll2 !='' or tq.penghubung_roll3 !=''  or tq.penghubung_dep !='' or tq.penghubung_dep_persen !='') ";
-                                    $group_by_fields = "GROUP BY tq.no_order, tq.no_po, tq.no_hanger, tq.no_item, tq.warna, tq.pelanggan, tq.tgl_masuk";
-                                    $sql_code = "SELECT 
-                                                DISTINCT 
-                                                    m.*, 
-                                                    tq.* 
-                                                FROM 
-                                                    tbl_bonpenghubung_mail m 
-                                                LEFT JOIN 
-                                                    tbl_qcf tq ON m.nodemand = tq.nodemand";
+                            $cond_penghubung = "
+                                (
+                                    NULLIF(LTRIM(RTRIM(ISNULL(tq.penghubung_masalah,''))), '') IS NOT NULL OR
+                                    NULLIF(LTRIM(RTRIM(ISNULL(tq.penghubung_keterangan,''))), '') IS NOT NULL OR
+                                    NULLIF(LTRIM(RTRIM(ISNULL(tq.penghubung_roll1,''))), '') IS NOT NULL OR
+                                    NULLIF(LTRIM(RTRIM(ISNULL(tq.penghubung_roll2,''))), '') IS NOT NULL OR
+                                    NULLIF(LTRIM(RTRIM(ISNULL(tq.penghubung_roll3,''))), '') IS NOT NULL OR
+                                    NULLIF(LTRIM(RTRIM(ISNULL(tq.penghubung_dep,''))), '') IS NOT NULL OR
+                                    NULLIF(LTRIM(RTRIM(ISNULL(tq.penghubung_dep_persen,''))), '') IS NOT NULL
+                                )
+                            ";
 
-                                    if (count($fields) > 0) {
-                                        $sql_code .= " WHERE " . implode("AND", $fields) . $default_fields . $group_by_fields;
-                                    }
-                                } else {
-                                    $sql_code        = "SELECT 
-                                                        DISTINCT 
-                                                            m.*, 
-                                                            tq.*,
-                                                            tli.qty_loss as qty_sisa,
-                                                            tli.satuan as satuan_sisa 
-                                                        FROM tbl_bonpenghubung_mail m 
-                                                        LEFT JOIN 
-                                                            tbl_qcf tq ON m.nodemand = tq.nodemand
-                                                        LEFT JOIN 
-                                                            tbl_lap_inspeksi tli ON tq.nodemand = tli.nodemand 
-                                                            and tq.no_order = tli.no_order 
-                                                        WHERE
-                                                            tq.sts_pbon!='10'
-                                                            AND team <> '' 
-                                                            AND (tq.penghubung_masalah !='' 
-                                                                    or tq.penghubung_keterangan !='' 
-                                                                    or tq.penghubung_roll1 !='' 
-                                                                    or tq.penghubung_roll2 !='' 
-                                                                    or tq.penghubung_roll3 !=''  
-                                                                    or tq.penghubung_dep !='' 
-                                                                    or tq.penghubung_dep_persen !='') 
-                                                        GROUP BY tq.no_order, tq.no_po, tq.no_hanger, tq.no_item, tq.warna, tq.pelanggan, tq.tgl_masuk";
-                                }
-                                $sql = mysqli_query($con, $sql_code); 
-                            ?>
+                            if ($Demand != "") {
+
+                            $sql_code = " ;WITH m_pick AS ( SELECT
+                                    m.*,
+                                    ROW_NUMBER() OVER (PARTITION BY m.nodemand ORDER BY (SELECT 1)) AS rn
+                                FROM db_qc.tbl_bonpenghubung_mail m
+                                WHERE m.nodemand = ?
+                                ),
+                                m1 AS (
+                                SELECT * FROM m_pick WHERE rn = 1
+                                ),
+                                tq_pick AS (
+                                SELECT
+                                    tq.*,
+                                    ROW_NUMBER() OVER (
+                                    PARTITION BY tq.no_order, tq.no_po, tq.no_hanger, tq.no_item, tq.warna, tq.pelanggan, tq.tgl_masuk
+                                    ORDER BY (SELECT 1)
+                                    ) AS rn
+                                FROM db_qc.tbl_qcf tq
+                                WHERE
+                                    tq.sts_pbon <> '10'
+                                    AND $cond_penghubung
+                                    AND tq.nodemand = ?
+                                ),
+                                tq1 AS (
+                                SELECT * FROM tq_pick WHERE rn = 1
+                                )
+                                SELECT DISTINCT
+                                m1.*,
+                                tq1.*
+                                FROM m1
+                                LEFT JOIN tq1
+                                ON m1.nodemand = tq1.nodemand
+                                WHERE tq1.nodemand IS NOT NULL;
+                            ";
+                            $params = [$Demand, $Demand];
+                            } else {
+                            $sql_code = "
+                                ;WITH m_pick AS (
+                                SELECT
+                                    m.*,
+                                    ROW_NUMBER() OVER (PARTITION BY m.nodemand ORDER BY (SELECT 1)) AS rn
+                                FROM db_qc.tbl_bonpenghubung_mail m
+                                WHERE NULLIF(LTRIM(RTRIM(ISNULL(m.team,''))), '') IS NOT NULL
+                                ),
+                                m1 AS (
+                                SELECT * FROM m_pick WHERE rn = 1
+                                ),
+                                tq_pick AS (
+                                SELECT
+                                    tq.*,
+                                    ROW_NUMBER() OVER (
+                                    PARTITION BY tq.no_order, tq.no_po, tq.no_hanger, tq.no_item, tq.warna, tq.pelanggan, tq.tgl_masuk
+                                    ORDER BY (SELECT 1)
+                                    ) AS rn
+                                FROM db_qc.tbl_qcf tq
+                                WHERE
+                                    tq.sts_pbon <> '10'
+                                    AND $cond_penghubung
+                                ),
+                                tq1 AS (
+                                SELECT * FROM tq_pick WHERE rn = 1
+                                ),
+                                tli_pick AS (
+                                SELECT
+                                    tli.*,
+                                    ROW_NUMBER() OVER (
+                                    PARTITION BY tli.nodemand, tli.no_order
+                                    ORDER BY (SELECT 1)
+                                    ) AS rn
+                                FROM db_qc.tbl_lap_inspeksi tli
+                                ),
+                                tli1 AS (
+                                SELECT * FROM tli_pick WHERE rn = 1
+                                )
+                                SELECT DISTINCT
+                                m1.*,
+                                tq1.*,
+                                tli1.qty_loss AS qty_sisa,
+                                tli1.satuan   AS satuan_sisa
+                                FROM m1
+                                LEFT JOIN tq1
+                                ON m1.nodemand = tq1.nodemand
+                                LEFT JOIN tli1
+                                ON tq1.nodemand = tli1.nodemand
+                                AND tq1.no_order = tli1.no_order
+                                WHERE tq1.nodemand IS NOT NULL
+                            ";
+
+                            $params = [];
+                            }
+
+                            $sql = sqlsrv_query($con_db_qc_sqlsrv, $sql_code, $params);
+
+                            // echo '<pre>';
+                            // print_r($sql_code);
+                            // echo '</pre>';
+
+                            if ($sql === false) {
+                                echo '<pre>';
+                                    print_r(sqlsrv_errors());
+                                echo '</pre>';
+                                exit;
+                            }
+                        ?>
                             <div style="display: flex; justify-content: end">
                                 &nbsp;&nbsp;&nbsp;
                             </div>
                             <br>
-                            <?php while ($row1 = mysqli_fetch_array($sql)) { ?>
+                            <?php while ($row1 = sqlsrv_fetch_array($sql)){ ?>
                                 <?php 
                                     $dtArr  = $row1['t_jawab'];
                                     $data   = explode(",", $dtArr);
@@ -276,7 +346,17 @@ include "koneksi.php";
                                     } 
                                 ?>
                                 <tr bgcolor="<?php echo $bgcolor; ?>">
-                                    <td align="center"><?php echo $row1['tgl_masuk']; ?></td>
+                                    <td align="center">
+                                        <?php
+                                            if (empty($row1['tgl_masuk'])) {
+                                                echo '0000-00-00';
+                                            } elseif ($row1['tgl_masuk'] instanceof DateTime) {
+                                                echo $row1['tgl_masuk']->format('Y-m-d');
+                                            } else {
+                                                echo date('Y-m-d', strtotime($row1['tgl_masuk']));
+                                            }
+                                        ?>
+                                    </td>
                                     <td align="center"><?php if ($row1['status_approve'] == 0) {
                                                             echo "NOT YET APPROVE";
                                                         } else if ($row1['status_approve'] == 1) {
@@ -330,8 +410,8 @@ include "koneksi.php";
                                     <td align="center"><?php echo $row1['panjang']; ?></td>
 
                                     <!-- Tambahan -->
-                                    <td align="center"><?php echo $row1['berat_extra']; ?></td>
-                                    <td align="center"><?php echo $row1['panjang_extra']; ?></td>
+                                    <td align="center"><?php echo number_format((float)$row1['berat_extra'], 2, '.', ''); ?></td>
+                                    <td align="center"><?php echo number_format((float)$row1['panjang_extra'], 2, '.', ''); ?></td>
                                     <!-- <td align="center"><?php echo $row1['penghubung_foc3']; ?></td> -->
 
                                     <!-- ESTIMASI -->
@@ -485,7 +565,7 @@ include "koneksi.php";
                     </button>
                 </div>
                 <div class="modal-body">
-                    Apakah Anda yakin ingin Reject Bon Penghubung QC ini?
+                    Apakah Anda yakin ingin Reject Bon Penghubung QC ini here?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="confirmReject">REJECT</button>
@@ -523,7 +603,7 @@ include "koneksi.php";
                     </button>
                 </div>
                 <div class="modal-body">
-                    Apakah Anda yakin ingin mengapprove Bon Penghubung QC ini?
+                    Apakah Anda yakin ingin mengapprove Bon Penghubung QC ini here?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="confirmApprove">APPROVE</button>
