@@ -46,50 +46,61 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
-                                $no = 1;
-                                $queryMain = "SELECT
-                                                tq.no_order,
-                                                tq.no_item,
-                                                tq.no_warna,
-                                                SUM(tq.netto) AS netto,
-                                                SUM(CASE WHEN m.status_approve = 1 THEN tq.estimasi ELSE 0 END) AS estimasi_approve,
-                                                SUM(CASE WHEN m.status_approve = 99 THEN tq.estimasi ELSE 0 END) AS estimasi_reject
-                                            FROM
-                                                tbl_bonpenghubung_mail m
-                                            LEFT JOIN tbl_qcf tq ON m.nodemand = tq.nodemand
-                                            WHERE
-                                                tq.sts_pbon != '10'
-                                                AND team <> ''
-                                                AND (
-                                                    tq.penghubung_masalah != '' OR
-                                                    tq.penghubung_keterangan != '' OR
-                                                    tq.penghubung_roll1 != '' OR
-                                                    tq.penghubung_roll2 != '' OR
-                                                    tq.penghubung_roll3 != '' OR
-                                                    tq.penghubung_dep != '' OR
-                                                    tq.penghubung_dep_persen != ''
-                                                )
-                                                AND m.status_approve IN ('1', '99') -- Only approved or reject
-                                            --     AND tq.no_order = 'DOM2500004'
-                                            GROUP BY
-                                                tq.no_order,
-                                                tq.no_item,
-                                                tq.no_warna
-                                            ORDER BY
-                                                tq.no_order";
-                                $resultMain = mysqli_query($con, $queryMain); 
-                            ?>
-                            <?php while($row = mysqli_fetch_assoc($resultMain)) { ?>
+                        <?php
+                        $no = 1;
+
+                        $queryMain = " SELECT
+                                tq.no_order,
+                                tq.no_item,
+                                tq.no_warna,
+                                SUM(tq.netto) AS netto,
+                                SUM(CASE WHEN m.status_approve = 1  THEN tq.estimasi ELSE 0 END) AS estimasi_approve,
+                                SUM(CASE WHEN m.status_approve = 99 THEN tq.estimasi ELSE 0 END) AS estimasi_reject
+                            FROM db_qc.tbl_bonpenghubung_mail m
+                            LEFT JOIN db_qc.tbl_qcf tq ON m.nodemand = tq.nodemand
+                            WHERE
+                                tq.sts_pbon <> '10'
+                                AND ISNULL(m.team, '') <> ''
+                                AND (
+                                    ISNULL(tq.penghubung_masalah, '') <> '' OR
+                                    ISNULL(tq.penghubung_keterangan, '') <> '' OR
+                                    ISNULL(tq.penghubung_roll1, '') <> '' OR
+                                    ISNULL(tq.penghubung_roll2, '') <> '' OR
+                                    ISNULL(tq.penghubung_roll3, '') <> '' OR
+                                    ISNULL(tq.penghubung_dep, '') <> '' OR
+                                    ISNULL(tq.penghubung_dep_persen, '') <> ''
+                                )
+                                AND m.status_approve IN (1, 99)
+                            GROUP BY
+                                tq.no_order,
+                                tq.no_item,
+                                tq.no_warna
+                            ORDER BY
+                                tq.no_order;
+                        ";
+
+                        $resultMain = sqlsrv_query($con_db_qc_sqlsrv, $queryMain);
+                        if ($resultMain === false) {
+                            echo "<tr><td colspan='6'><pre>" . print_r(sqlsrv_errors(), true) . "</pre></td></tr>";
+                        } else {
+                            while ($row = sqlsrv_fetch_array($resultMain, SQLSRV_FETCH_ASSOC)) {
+                                $netto = (float)($row['netto'] ?? 0);
+                                $app   = (float)($row['estimasi_approve'] ?? 0);
+                                $rej   = (float)($row['estimasi_reject'] ?? 0);
+                                ?>
                                 <tr>
                                     <td><?php echo $no++; ?></td>
-                                    <td><?php echo $row['no_order']; ?></td>
-                                    <td><?php echo $row['no_item']; ?>-<?php echo $row['no_warna']; ?></td>
-                                    <td><?php echo number_format($row['netto'], 2); ?></td>
-                                    <td><?php echo number_format($row['estimasi_approve'], 2); ?></td>
-                                    <td><?php echo number_format($row['estimasi_reject'], 2); ?></td>
+                                    <td><?php echo htmlspecialchars($row['no_order'] ?? ''); ?></td>
+                                    <td><?php echo htmlspecialchars(($row['no_item'] ?? '') . '-' . ($row['no_warna'] ?? '')); ?></td>
+                                    <td><?php echo number_format($netto, 2); ?></td>
+                                    <td><?php echo number_format($app, 2); ?></td>
+                                    <td><?php echo number_format($rej, 2); ?></td>
                                 </tr>
-                            <?php } ?>
+                                <?php
+                            }
+                            sqlsrv_free_stmt($resultMain);
+                        }
+                        ?>
                         </tbody>
                     </table>
                 </div>
