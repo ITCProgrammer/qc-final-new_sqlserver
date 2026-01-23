@@ -4,8 +4,10 @@ session_start();
 include "../../koneksi.php";
   $Awal=$_GET['awal'];
   $Akhir=$_GET['akhir'];
-  $qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-  $rTgl=mysqli_fetch_array($qTgl);
+$qTgl   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+            CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg;");
+$rTgl   = sqlsrv_fetch_array($qTgl);
   if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -188,10 +190,10 @@ border:hidden;
       $rolsisa=0;$sisa=0;$pcssisa=0;$totalbs=0;$brutobs=0;$nettobs=0;
       $Awal=$_GET['awal'];
       $Akhir=$_GET['akhir'];
-      if($_GET['shift']!="ALL"){$shft=" AND `shift`='$_GET[shift]' "; }else{$shft=" ";}		
-      $qry1=mysqli_query($con,"SELECT * FROM tbl_lap_inspeksi
-      WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' $shft AND `dept`='KRAH' ORDER BY id ASC");
-          while($row=mysqli_fetch_array($qry1)){
+      if($_GET['shift']!="ALL"){$shft=" AND shift='$_GET[shift]' "; }else{$shft=" ";}		
+      $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_lap_inspeksi
+      WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' $shft AND dept='KRAH' ORDER BY id ASC");
+          while($row=sqlsrv_fetch_array($qry1)){
         ?>
           <tr>
                 <td align="center"><?php echo $no;?></td>

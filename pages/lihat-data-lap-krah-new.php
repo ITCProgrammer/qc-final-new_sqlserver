@@ -122,13 +122,13 @@ $GShift	= isset($_POST['gshift']) ? $_POST['gshift'] : '';
           <tbody>
           <?php
             $no=1;
-            if($GShift=="ALL"){$shft=" ";}else{ $shft=" AND `shift`='$GShift' ";}
+            if($GShift=="ALL"){$shft=" ";}else{ $shft=" AND shift='$GShift' ";}
             if($Awal!=""){
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_lap_inspeksi WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND `dept`='KRAH' $shft ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_lap_inspeksi WHERE TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' AND dept='KRAH' $shft ORDER BY id ASC");
             }else{
-              $qry1=mysqli_query($con,"SELECT * FROM tbl_lap_inspeksi WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND `dept`='KRAH' $shft ORDER BY id ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_lap_inspeksi WHERE TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' AND dept='KRAH' $shft ORDER BY id ASC");
             }
-                while($row1=mysqli_fetch_array($qry1)){
+                while($row1=sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
               ?>
           <tr bgcolor="<?php echo $bgcolor; ?>">
             <td align="center"><?php echo $no; ?></td>
@@ -151,8 +151,8 @@ $GShift	= isset($_POST['gshift']) ? $_POST['gshift'] : '';
             <td align="center"><?php echo $row1['jml_sisa'];?></td>
             <td align="center"><?php echo $row1['sisa'];?></td>
             <td align="center"><?php echo $row1['tot_bs'];?></td>
-            <td align="center"><?php if($row['tot_bs']!=""){echo round(($row['tot_bs']/$row['pcs_bruto'])*100,'2');}else{echo "0.00";}?></td>
-            <td align="center"><?php if($row['tot_bs']!=""){echo round((($row['tot_bs']/$row['pcs_bruto'])/$row['netto'])*100,'2');}else{echo "0.00";}?></td>
+            <td align="center"><?php if($row1['tot_bs']!=""){echo round(($row1['tot_bs']/$row1['pcs_bruto'])*100,'2');}else{echo "0.00";}?></td>
+            <td align="center"><?php if($row1['tot_bs']!=""){echo round((($row1['tot_bs']/$row1['pcs_bruto'])/$row1['netto'])*100,'2');}else{echo "0.00";}?></td>
             <td align="center"><?php echo $row1['no_order_legacy'];?></td>
             <td align="center"><?php echo $row1['proses'];?></td>
             <td align="center"><?php echo $row1['status'];?></td>

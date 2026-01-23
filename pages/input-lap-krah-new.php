@@ -3,10 +3,10 @@ include"koneksi.php";
 ini_set("error_reporting", 1);
 if($_POST['simpan']=="Simpan")
 {
-		$ceksql=mysqli_query($con,"SELECT * FROM `tbl_lap_inspeksi` WHERE `noprodorder`='$_GET[noprodorder]' and `shift`='$_POST[shift]' AND tgl_update ='$_POST[tgl]' AND `dept`='KRAH' LIMIT 1");
-    $cek=mysqli_num_rows($ceksql);
-    $sqlkite=mysqli_query($con,"SELECT * FROM `tbl_kite` WHERE `nokk`='$_GET[nokk]' AND `user_packing`='KRAH' LIMIT 1");
-	$cekkite=mysqli_num_rows($sqlkite);
+		$ceksql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_lap_inspeksi WHERE noprodorder='$_GET[noprodorder]' and shift='$_POST[shift]' AND TRY_CAST(tgl_update AS DATE) ='$_POST[tgl]' AND dept='KRAH'");
+    $cek=sqlsrv_has_rows($ceksql) ? 1 : 0;
+    $sqlkite=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_kite WHERE nokk='$_GET[nokk]' AND user_packing='KRAH'");
+	$cekkite=sqlsrv_has_rows($sqlkite) ? 1 : 0;
 	if($cek>0){
 	$pelanggan=str_replace("'","''",$_POST['pelanggan']);
 	$order=str_replace("'","''",$_POST['no_order']);
@@ -14,31 +14,31 @@ if($_POST['simpan']=="Simpan")
 	$jns=str_replace("'","''",$_POST['jenis_kain']);
 	$warna=str_replace("'","''",$_POST['warna']);
 	$catatan=str_replace("'","''",$_POST['catatan']);
-	$sql=mysqli_query($con,"UPDATE `tbl_lap_inspeksi` SET
-	`no_order`='$order',
-	`no_po`='$po',
-	`pelanggan`='$pelanggan',
-	`jenis_kain`='$jns',
-	`warna`='$warna',
-	`lot`='$_POST[lot]',
-	`inspektor`='$_POST[inspektor]',
-	`jml_roll`='$_POST[rol]',
-	`bruto`='$_POST[bruto]',
-	`jml_netto`='$_POST[rol_netto]',
-	`netto`='$_POST[netto]',
-	`sisa`='$_POST[sisa]',
-	`jml_sisa`='$_POST[pcs_sisa]',
-	`rol_sisa`='$_POST[rol_sisa]',
-	`tot_bs`='$_POST[totbs]',
-	`proses`='$_POST[proses]',
-	`status`='$_POST[status]',
-    `no_order_legacy`='$_POST[no_order_legacy]',
-	`catatan`='$catatan'
-    WHERE `noprodorder`='$_POST[noprodorder]' and  `shift`='$_POST[shift]' and `tgl_update`='$_POST[tgl]' ");
+	$sql=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_lap_inspeksi SET
+	no_order='$order',
+	no_po='$po',
+	pelanggan='$pelanggan',
+	jenis_kain='$jns',
+	warna='$warna',
+	lot='$_POST[lot]',
+	inspektor='$_POST[inspektor]',
+	jml_roll='$_POST[rol]',
+	bruto='$_POST[bruto]',
+	jml_netto='$_POST[rol_netto]',
+	netto='$_POST[netto]',
+	sisa='$_POST[sisa]',
+	jml_sisa='$_POST[pcs_sisa]',
+	rol_sisa='$_POST[rol_sisa]',
+	tot_bs='$_POST[totbs]',
+	proses='$_POST[proses]',
+	status='$_POST[status]',
+    no_order_legacy='$_POST[no_order_legacy]',
+	catatan='$catatan'
+    WHERE noprodorder='$_POST[noprodorder]' and  shift='$_POST[shift]' and TRY_CAST(tgl_update AS DATE)='$_POST[tgl]' ");
     if($cekkite>0){
-        $qry=mysqli_query($con,"UPDATE `tbl_kite` SET
-        `tgl_delv`='$_POST[tgl_deliv]'
-        WHERE `nokk`='$_POST[nokk]'
+        $qry=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_kite SET
+        tgl_delv='$_POST[tgl_deliv]'
+        WHERE nokk='$_POST[nokk]'
         ");
     }
 	if($sql){
@@ -62,37 +62,65 @@ if($_POST['simpan']=="Simpan")
 	$jns=str_replace("'","''",$_POST['jenis_kain']);
 	$warna=str_replace("'","''",$_POST['warna']);
 	$catatan=str_replace("'","''",$_POST['catatan']);
-	$sql=mysqli_query($con,"INSERT INTO `tbl_lap_inspeksi` SET
-	`nokk`='$_POST[nokk]',
-    `noprodorder`='$_POST[noprodorder]',
-	`no_po`='$po',
-	`no_order`='$order',
-	`pelanggan`='$pelanggan',
-	`jenis_kain`='$jns',
-	`warna`='$warna',
-	`lot`='$_POST[lot]',
-	`inspektor`='$_POST[inspektor]',
-	`jml_roll`='$_POST[rol]',
-	`bruto`='$_POST[bruto]',
-	`pcs_bruto`='$_POST[pcs_bruto]',
-	`jml_netto`='$_POST[rol_netto]',
-	`netto`='$_POST[netto]',
-	`panjang`='$_POST[pcs_netto]',
-	`sisa`='$_POST[sisa]',
-	`jml_sisa`='$_POST[pcs_sisa]',
-	`rol_sisa`='$_POST[rol_sisa]',
-	`tot_bs`='$_POST[totbs]',
-	`proses`='$_POST[proses]',
-	`status`='$_POST[status]',
-	`catatan`='$catatan',
-	`dept`='KRAH',
-    `no_order_legacy`='$_POST[no_order_legacy]',
-	`jam_update`=now(),
-    `tgl_update`=now()");
+	$sql=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_lap_inspeksi (
+	nokk,
+    noprodorder,
+	no_po,
+	no_order,
+	pelanggan,
+	jenis_kain,
+	warna,
+	lot,
+	inspektor,
+	jml_roll,
+	bruto,
+	pcs_bruto,
+	jml_netto,
+	netto,
+	panjang,
+	sisa,
+	jml_sisa,
+	rol_sisa,
+	tot_bs,
+	proses,
+	status,
+	catatan,
+	dept,
+    no_order_legacy,
+	jam_update,
+    tgl_update
+	) VALUES (
+	'$_POST[nokk]',
+    '$_POST[noprodorder]',
+	'$po',
+	'$order',
+	'$pelanggan',
+	'$jns',
+	'$warna',
+	'$_POST[lot]',
+	'$_POST[inspektor]',
+	'$_POST[rol]',
+	'$_POST[bruto]',
+	'$_POST[pcs_bruto]',
+	'$_POST[rol_netto]',
+	'$_POST[netto]',
+	'$_POST[pcs_netto]',
+	'$_POST[sisa]',
+	'$_POST[pcs_sisa]',
+	'$_POST[rol_sisa]',
+	'$_POST[totbs]',
+	'$_POST[proses]',
+	'$_POST[status]',
+	'$catatan',
+	'KRAH',
+    '$_POST[no_order_legacy]',
+	GETDATE(),
+    GETDATE()
+	)");
     if($cekkite>0){
-        $qry=mysqli_query($con,"UPDATE `tbl_kite` SET
-        `tgl_delv`='$_POST[tgl_deliv]'
-        WHERE `nokk`='$_POST[nokk]'
+        $qry=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_kite SET
+        tgl_delv='$_POST[tgl_deliv]'
+        WHERE nokk='$_POST[nokk]'
         ");
     }
 	if($sql){
@@ -190,30 +218,29 @@ B.USERSECONDARYUOMCODE";
 $stmt=db2_exec($conn1,$sqlDB2, array('cursor'=>DB2_SCROLLABLE));
 $rowdb2 = db2_fetch_assoc($stmt);
 
-//Data sudah disimpan di database mysqli
-$msql=mysqli_query($con,"SELECT * FROM `tbl_lap_inspeksi` WHERE `noprodorder`='$noprodorder' and `shift`='$_GET[shift]' AND DATE_FORMAT(tgl_update, '%Y-%m-%d') = DATE_FORMAT(now(), '%Y-%m-%d') AND `dept`='KRAH' LIMIT 1");
-$row=mysqli_fetch_array($msql);
-$crow=mysqli_num_rows($msql);
+//Data sudah disimpan di database sqlserver
+$msql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_lap_inspeksi WHERE noprodorder='$noprodorder' and shift='$_GET[shift]' AND TRY_CAST(tgl_update AS DATE) = CAST(GETDATE() AS DATE) AND dept='KRAH'");
+$row=sqlsrv_fetch_array($msql, SQLSRV_FETCH_ASSOC);
+$crow=sqlsrv_has_rows($msql) ? 1 : 0;
 
-//Data belum disimpan di database mysqli
-$sql=mysqli_query($con,"SELECT a.*,sum(b.netto)as neto,COUNT(b.netto) as rol,sum(b.brutto) as brutto,sum(b.net_wight) as kg FROM tbl_kite a 
-INNER JOIN tmp_detail_kite b ON a.nokk=b.nokkkite
+//Data belum disimpan di database sqlserver
+$sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.nokk, a.user_packing, sum(b.netto)as neto, COUNT(b.netto) as rol, sum(b.brutto) as brutto, sum(b.net_wight) as kg FROM db_qc.tbl_kite a 
+INNER JOIN db_qc.tmp_detail_kite b ON a.nokk=b.nokkkite
 WHERE nokk='$nokk' AND user_packing='KRAH' and b.sisa=''
-GROUP BY a.id");
-$r=mysqli_fetch_array($sql);
+GROUP BY a.nokk, a.user_packing");
+$r=sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC);
 
-//Data belum disimpan di database mysqli
-$sqls=mysqli_query($con,"SELECT a.*,sum(b.netto)as neto,COUNT(b.netto) as rol,sum(b.brutto) as brutto,sum(b.net_wight) as kg FROM tbl_kite a 
-INNER JOIN tmp_detail_kite b ON a.nokk=b.nokkkite
+//Data belum disimpan di database sqlserver
+$sqls=sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.nokk, a.user_packing, sum(b.netto)as neto, COUNT(b.netto) as rol, sum(b.brutto) as brutto, sum(b.net_wight) as kg FROM db_qc.tbl_kite a 
+INNER JOIN db_qc.tmp_detail_kite b ON a.nokk=b.nokkkite
 WHERE nokk='$nokk' AND user_packing='KRAH' and b.sisa='SISA'
-GROUP BY a.id");
-$rs=mysqli_fetch_array($sqls);
-//Data belum disimpan di database mysqli
-$sqlm=mysqli_query($con,"SELECT a.no_mutasi from pergerakan_stok a
-INNER JOIN  detail_pergerakan_stok b ON a.id=b.id_stok 
-WHERE b.nokk='$nokk'
-GROUP BY a.id");
-$rm=mysqli_fetch_array($sqlm);
+GROUP BY a.nokk, a.user_packing");
+$rs=sqlsrv_fetch_array($sqls, SQLSRV_FETCH_ASSOC);
+//Data belum disimpan di database sqlserver
+$sqlm=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT a.no_mutasi FROM db_qc.pergerakan_stok a
+INNER JOIN db_qc.detail_pergerakan_stok b ON a.id=b.id_stok 
+WHERE b.nokk='$nokk'");
+$rm=sqlsrv_fetch_array($sqlm, SQLSRV_FETCH_ASSOC);
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
 <div class="box box-info">

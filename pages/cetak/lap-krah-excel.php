@@ -51,11 +51,11 @@ Shift 	: <?php echo $shift;?>
     <th valign="middle" bgcolor="#006699"><font color="#FFFFFF" >Netto</font></th>
   </tr>
   <?php
-  if($shift!="ALL"){$shft=" AND `shift`='$shift' ";}else{$shft=" ";}
+  if($shift!="ALL"){$shft=" AND shift='$shift' ";}else{$shft=" ";}
   $no=1;
   $c=0;
-  $sql=mysqli_query($con,"SELECT * FROM tbl_lap_inspeksi WHERE `tgl_update` BETWEEN '$tgl' and '$tgl1' ".$shft." AND `dept`='KRAH' ORDER BY id ASC");
-  while($row=mysqli_fetch_array($sql)){
+  $sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_lap_inspeksi WHERE tgl_update BETWEEN '$tgl' and '$tgl1' ".$shft." AND dept='KRAH' ORDER BY id ASC");
+  while($row=sqlsrv_fetch_array($sql)){
 	  $bgcolor = ($c++ & 1) ? '#33CCFF' : '#FFCC99';
   ?>
   <tr bgcolor="<?php echo $bgcolor;?>">
