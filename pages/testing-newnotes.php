@@ -1869,9 +1869,11 @@ session_start();
 include "koneksi.php";
 $nodemand = $_GET['nodemand'];
 $notes = $_GET['notest'];
-$sqlCek = mysqli_query($con, "SELECT * FROM tbl_tq_nokk WHERE no_test='$notes' ORDER BY id DESC LIMIT 1");
-$cek = mysqli_num_rows($sqlCek);
-$rcek = mysqli_fetch_array($sqlCek);
+$sqlCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_tq_nokk WHERE no_test=? ORDER BY id DESC", [$notes]);
+// $cek = mysqli_num_rows($sqlCek);
+$rcek = sqlsrv_fetch_array($sqlCek, SQLSRV_FETCH_ASSOC);
+$cek = $rcek? 1:0;
+
 $pos = strpos($rcek['pelanggan'], "/");
 $posbuyer = substr($rcek['pelanggan'], $pos + 1, 50);
 $buyer = str_replace("'", "''", $posbuyer);
@@ -1879,17 +1881,20 @@ $buyer = str_replace("'", "''", $posbuyer);
 //penambahan pengecekan ketabel nokk demand 
 $id_nokk = $rcek['id'];
 $nodemand = $rcek['nodemand'];
-$nokk_demand_sql = mysqli_query($con, "SELECT * FROM tbl_tq_nokk_demand WHERE id_nokk = '$id_nokk' ORDER BY id DESC LIMIT 1");
-$nokk_demand_data = mysqli_num_rows($nokk_demand_sql);
+$nokk_demand_sql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_tq_nokk_demand WHERE id_nokk = ? ORDER BY id DESC", [$id_nokk]);
+// $nokk_demand_data = mysqli_num_rows($nokk_demand_sql);
+$nokk_demand_result = sqlsrv_fetch_array($nokk_demand_sql, SQLSRV_FETCH_ASSOC);
+$nokk_demand_data = $nokk_demand_result ? 1:0;
+
 $array_no_demand_other2 = [];
 $array_no_demand_other3_4 = [];
 $array_no_demand_other5_6 = [];
 $array_no_demand_other_no = 2;
 if ($nokk_demand_data > 0) {
-	$id_nokk = mysqli_fetch_array($nokk_demand_sql)['id_nokk'];
-	$demand_other = mysqli_query($con, "SELECT * FROM tbl_tq_nokk_demand WHERE id_nokk = '$id_nokk' and id_nokk > 0  ORDER BY id ");
+	$id_nokk = $nokk_demand_result['id_nokk'];
+	$demand_other = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM tbl_tq_nokk_demand WHERE id_nokk = ? and id_nokk > 0  ORDER BY id ", [$id_nokk]);
 
-	while ($datas = mysqli_fetch_assoc($demand_other)) {
+	while ($datas = sqlsrv_fetch_array($demand_other, SQLSRV_FETCH_ASSOC)) {
 
 		if ($array_no_demand_other_no <= 2) {
 			$array_no_demand_other2['main'] = $nodemand;
@@ -2156,40 +2161,201 @@ if ($nokk_demand_data > 0) {
 	</div>
 </form>
 <?php
-$sqlCek1 = mysqli_query($con, "SELECT a.*, b.*, c.*,
-CONCAT_WS(' ',a.fc_note, a.ph_note, a.abr_note, a.bas_note, a.dry_note, a.fla_note, a.fwe_note, a.fwi_note, a.burs_note, a.repp_note, a.wick_note, a.wick_note, a.absor_note, a.apper_note, a.fiber_note, a.pillb_note, a.pillm_note, a.pillr_note, a.thick_note, a.growth_note, a.recover_note, a.stretch_note, a.sns_note, a.snab_note, a.snam_note, a.snap_note, a.wash_note, a.water_note, a.acid_note, a.alkaline_note, a.crock_note, a.phenolic_note, a.cm_printing_note, a.cm_dye_note, a.light_note, a.light_pers_note, a.saliva_note, a.h_shrinkage_note, a.fibre_note, a.pilll_note, a.soil_note, a.bleeding_note, a.chlorin_note, a.dye_tf_note, a.humidity_note, a.odour_note, a.curling_note, a.nedle_note, b.wrinkle_note) AS note_g 
-FROM tbl_tq_test a 
-LEFT JOIN tbl_tq_test_2 b ON a.id_nokk = b.id_nokk
-LEFT JOIN tbl_user_update_tq c ON a.id_nokk = c.id_nokk
-WHERE a.id_nokk='$rcek[id]' 
-ORDER BY a.id DESC 
-LIMIT 1");
-$cek1 = mysqli_num_rows($sqlCek1);
-$rcek1 = mysqli_fetch_array($sqlCek1);
-$sqlCekR = mysqli_query($con, "SELECT *,
-	CONCAT_WS(' ',rfc_note,rph_note, rabr_note, rbas_note, rdry_note, rfla_note, rfwe_note, rfwi_note, rburs_note,rrepp_note,rwick_note,rabsor_note,rapper_note,rfiber_note,rpillb_note,rpillm_note,rpillr_note,rthick_note,rgrowth_note,rrecover_note,rstretch_note,rsns_note,rsnab_note,rsnam_note,rsnap_note,rwash_note,rwater_note,racid_note,ralkaline_note,rcrock_note,rphenolic_note,rcm_printing_note,rcm_dye_note,rlight_note,rlight_pers_note,rsaliva_note,rh_shrinkage_note,rfibre_note,rpilll_note,rsoil_note,rapperss_note,rbleeding_note,rchlorin_note,rdye_tf_note,rhumidity_note,rodour_note,rcurling_note,rnedle_note) AS rnote_g FROM tbl_tq_randomtest WHERE no_item='$rcek[no_item]' OR no_hanger='$rcek[no_hanger]'");
-$cekR = mysqli_num_rows($sqlCekR);
-$rcekR = mysqli_fetch_array($sqlCekR);
-$sqlCekD = mysqli_query($con, "SELECT b.dbleeding_root, a.*, b.drec_tight_growth_l3, b.drec_tight_growth_w3, b.drec_tight_growth_w2, b.drec_tight_growth_l2, b.drec_tight_growth_w1, b.drec_tight_growth_l1, b.drec_growth_w3, b.drec_growth_l3, b.dtight_growth_w3, b.dtight_growth_l3, b.dtight_growth_w2, b.dtight_growth_l2, b.dtight_growth_w1, b.dtight_growth_l1, b.dgrowth_w3, b.dgrowth_l3,
-	CONCAT_WS(' ',a.dfc_note,a.dph_note, a.dabr_note, a.dbas_note, a.ddry_note, a.dfla_note, a.dfwe_note, a.dfwi_note, a.dburs_note,a.drepp_note,a.dwick_note,a.dabsor_note,a.dapper_note,a.dfiber_note,a.dpillb_note,a.dpillm_note,a.dpillr_note,a.dthick_note,a.dgrowth_note,a.drecover_note,a.dstretch_note,a.dsns_note,a.dsnab_note,a.dsnam_note,a.dsnap_note,a.dwash_note,a.dwater_note,a.dacid_note,a.dalkaline_note,a.dcrock_note,a.dphenolic_note,a.dcm_printing_note,a.dcm_dye_note,a.dlight_note,a.dlight_pers_note,a.dsaliva_note,a.dh_shrinkage_note,a.dfibre_note,a.dpilll_note,a.dsoil_note,a.dapperss_note,a.dbleeding_note,a.dchlorin_note,a.ddye_tf_note,a.dhumidity_note,a.dodour_note,a.dcurling_note,a.dnedle_note) AS dnote_g 
-	FROM tbl_tq_disptest a 
-	LEFT JOIN tbl_tq_disptest_2 b on (a.id_nokk = b.id_nokk)
-	WHERE a.id_nokk='$rcek[id]' ORDER BY a.id DESC LIMIT 1");
-$cekD = mysqli_num_rows($sqlCekD);
-$rcekD = mysqli_fetch_array($sqlCekD);
+$sqlCek1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1
+        a.*,
+        b.*,
+        c.*,
+        CONCAT(
+            a.fc_note, ' ', a.ph_note, ' ', a.abr_note, ' ', a.bas_note, ' ',
+            a.dry_note, ' ', a.fla_note, ' ', a.fwe_note, ' ',
+            a.fwi_note, ' ', a.burs_note, ' ', a.repp_note, ' ',
+            a.wick_note, ' ', a.wick_note, ' ', a.absor_note, ' ',
+            a.apper_note, ' ', a.fiber_note, ' ', a.pillb_note, ' ',
+            a.pillm_note, ' ', a.pillr_note, ' ', a.thick_note, ' ',
+            a.growth_note, ' ', a.recover_note, ' ', a.stretch_note, ' ',
+            a.sns_note, ' ', a.snab_note, ' ', a.snam_note, ' ',
+            a.snap_note, ' ', a.wash_note, ' ', a.water_note, ' ',
+            a.acid_note, ' ', a.alkaline_note, ' ', a.crock_note, ' ',
+            a.phenolic_note, ' ', a.cm_printing_note, ' ',
+            a.cm_dye_note, ' ', a.light_note, ' ',
+            a.light_pers_note, ' ', a.saliva_note, ' ',
+            a.h_shrinkage_note, ' ', a.fibre_note, ' ',
+            a.pilll_note, ' ', a.soil_note, ' ',
+            a.bleeding_note, ' ', a.chlorin_note, ' ',
+            a.dye_tf_note, ' ', a.humidity_note, ' ',
+            a.odour_note, ' ', a.curling_note, ' ',
+            a.nedle_note, ' ', b.wrinkle_note
+        ) AS note_g
+    FROM db_qc.tbl_tq_test a
+    LEFT JOIN db_qc.tbl_tq_test_2 b
+        ON a.id_nokk = TRY_CAST(b.id_nokk AS BIGINT)
+    LEFT JOIN db_qc.tbl_user_update_tq c
+        ON a.id_nokk = c.id_nokk
+    WHERE a.id_nokk = ?
+    ORDER BY a.id DESC", [(int) $rcek['id']]);
 
-$sqlCekM = mysqli_query($con, "SELECT *,
-	CONCAT_WS(' ',mfc_note,mph_note, mabr_note, mbas_note, mdry_note, mfla_note, mfwe_note, mfwi_note, mburs_note,mrepp_note,mwick_note,mabsor_note,mapper_note,mfiber_note,mpillb_note,mpillm_note,mpillr_note,mthick_note,mgrowth_note,mrecover_note,mstretch_note,msns_note,msnab_note,msnam_note,msnap_note,mwash_note,mwater_note,macid_note,malkaline_note,mcrock_note,mphenolic_note,mcm_printing_note,mcm_dye_note,mlight_note,mlight_pers_note,msaliva_note,mh_shrinkage_note,mfibre_note,mpilll_note,msoil_note,mapperss_note,mbleeding_note,mchlorin_note,mdye_tf_note,mhumidity_note,modour_note,mnedle_note) AS mnote_g FROM tbl_tq_marginal WHERE id_nokk='$rcek[id]' ORDER BY id DESC LIMIT 1");
-$cekM = mysqli_num_rows($sqlCekM);
-$rcekM = mysqli_fetch_array($sqlCekM);
-$sqlCmt = mysqli_query($con, "SELECT *,
-	CONCAT_WS(' ',apperss_note) AS note_apperss FROM tbl_tq_test WHERE id_nokk='$rcek[id]' ORDER BY id DESC LIMIT 1");
-$rcekcmt = mysqli_fetch_array($sqlCmt);
+$rcek1 = sqlsrv_fetch_array($sqlCek1, SQLSRV_FETCH_ASSOC);
+$cek1 = $rcek1 ? 1:0;
 
-$id_tq_test_2 = $rcek['id'];
 
-$tq_test_2_sql = mysqli_query($con, "SELECT id_nokk, spirality_status, bleeding_root, wrinkle, wrinkle1, wrinkle2, stat_wrinkle, stat_wrinkle1, wrinkle_note from tbl_tq_test_2 where id_nokk = '$id_tq_test_2'");
-$tq_test_2_array = mysqli_fetch_array($tq_test_2_sql);
+$sqlCekR = sqlsrv_query($con_db_qc_sqlsrv, "
+    SELECT *,
+        CONCAT(
+            rfc_note, ' ', rph_note, ' ', rabr_note, ' ', rbas_note, ' ',
+            rdry_note, ' ', rfla_note, ' ', rfwe_note, ' ', rfwi_note, ' ',
+            rburs_note, ' ', rrepp_note, ' ', rwick_note, ' ', rabsor_note, ' ',
+            rapper_note, ' ', rfiber_note, ' ', rpillb_note, ' ',
+            rpillm_note, ' ', rpillr_note, ' ', rthick_note, ' ',
+            rgrowth_note, ' ', rrecover_note, ' ', rstretch_note, ' ',
+            rsns_note, ' ', rsnab_note, ' ', rsnam_note, ' ',
+            rsnap_note, ' ', rwash_note, ' ', rwater_note, ' ',
+            racid_note, ' ', ralkaline_note, ' ', rcrock_note, ' ',
+            rphenolic_note, ' ', rcm_printing_note, ' ',
+            rcm_dye_note, ' ', rlight_note, ' ',
+            rlight_pers_note, ' ', rsaliva_note, ' ',
+            rh_shrinkage_note, ' ', rfibre_note, ' ',
+            rpilll_note, ' ', rsoil_note, ' ',
+            rapperss_note, ' ', rbleeding_note, ' ',
+            rchlorin_note, ' ', rdye_tf_note, ' ',
+            rhumidity_note, ' ', rodour_note, ' ',
+            rcurling_note, ' ', rnedle_note
+        ) AS rnote_g
+    FROM db_qc.tbl_tq_randomtest
+    WHERE no_item = ?
+       OR no_hanger = ?
+", [$rcek['no_item'], $rcek['no_hanger']]);
+
+$rcekR = sqlsrv_fetch_array($sqlCekR, SQLSRV_FETCH_ASSOC);
+$cekR = $rcekR? 1:0;
+
+
+$sql = "
+    SELECT TOP 1
+        b.dbleeding_root,
+        a.*,
+        b.drec_tight_growth_l3,
+        b.drec_tight_growth_w3,
+        b.drec_tight_growth_w2,
+        b.drec_tight_growth_l2,
+        b.drec_tight_growth_w1,
+        b.drec_tight_growth_l1,
+        b.drec_growth_w3,
+        b.drec_growth_l3,
+        b.dtight_growth_w3,
+        b.dtight_growth_l3,
+        b.dtight_growth_w2,
+        b.dtight_growth_l2,
+        b.dtight_growth_w1,
+        b.dtight_growth_l1,
+        b.dgrowth_w3,
+        b.dgrowth_l3,
+        CONCAT(
+            a.dfc_note, ' ', a.dph_note, ' ', a.dabr_note, ' ', a.dbas_note, ' ',
+            a.ddry_note, ' ', a.dfla_note, ' ', a.dfwe_note, ' ', a.dfwi_note, ' ',
+            a.dburs_note, ' ', a.drepp_note, ' ', a.dwick_note, ' ', a.dabsor_note, ' ',
+            a.dapper_note, ' ', a.dfiber_note, ' ', a.dpillb_note, ' ',
+            a.dpillm_note, ' ', a.dpillr_note, ' ', a.dthick_note, ' ',
+            a.dgrowth_note, ' ', a.drecover_note, ' ', a.dstretch_note, ' ',
+            a.dsns_note, ' ', a.dsnab_note, ' ', a.dsnam_note, ' ',
+            a.dsnap_note, ' ', a.dwash_note, ' ', a.dwater_note, ' ',
+            a.dacid_note, ' ', a.dalkaline_note, ' ', a.dcrock_note, ' ',
+            a.dphenolic_note, ' ', a.dcm_printing_note, ' ',
+            a.dcm_dye_note, ' ', a.dlight_note, ' ',
+            a.dlight_pers_note, ' ', a.dsaliva_note, ' ',
+            a.dh_shrinkage_note, ' ', a.dfibre_note, ' ',
+            a.dpilll_note, ' ', a.dsoil_note, ' ',
+            a.dapperss_note, ' ', a.dbleeding_note, ' ',
+            a.dchlorin_note, ' ', a.ddye_tf_note, ' ',
+            a.dhumidity_note, ' ', a.dodour_note, ' ',
+            a.dcurling_note, ' ', a.dnedle_note
+        ) AS dnote_g
+    FROM db_qc.tbl_tq_disptest a
+    LEFT JOIN db_qc.tbl_tq_disptest_2 b
+        ON a.id_nokk = TRY_CAST(b.id_nokk AS BIGINT)
+    WHERE a.id_nokk = ?
+    ORDER BY a.id DESC
+";
+
+$stmt = sqlsrv_query($con_db_qc_sqlsrv, $sql,  [(int) $rcek['id']]);
+$rcekD = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+$cekD  = $rcekD ? 1 : 0;
+
+
+$params = [(int) $rcek['id']];
+
+$sql = "
+    SELECT TOP 1 *,
+        CONCAT(
+            mfc_note, ' ', mph_note, ' ', mabr_note, ' ', mbas_note, ' ',
+            mdry_note, ' ', mfla_note, ' ', mfwe_note, ' ', mfwi_note, ' ',
+            mburs_note, ' ', mrepp_note, ' ', mwick_note, ' ', mabsor_note, ' ',
+            mapper_note, ' ', mfiber_note, ' ', mpillb_note, ' ',
+            mpillm_note, ' ', mpillr_note, ' ', mthick_note, ' ',
+            mgrowth_note, ' ', mrecover_note, ' ', mstretch_note, ' ',
+            msns_note, ' ', msnab_note, ' ', msnam_note, ' ',
+            msnap_note, ' ', mwash_note, ' ', mwater_note, ' ',
+            macid_note, ' ', malkaline_note, ' ', mcrock_note, ' ',
+            mphenolic_note, ' ', mcm_printing_note, ' ',
+            mcm_dye_note, ' ', mlight_note, ' ',
+            mlight_pers_note, ' ', msaliva_note, ' ',
+            mh_shrinkage_note, ' ', mfibre_note, ' ',
+            mpilll_note, ' ', msoil_note, ' ',
+            mapperss_note, ' ', mbleeding_note, ' ',
+            mchlorin_note, ' ', mdye_tf_note, ' ',
+            mhumidity_note, ' ', modour_note, ' ', mnedle_note
+        ) AS mnote_g
+    FROM db_qc.tbl_tq_marginal
+    WHERE id_nokk = ?
+    ORDER BY id DESC
+";
+
+$stmt = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+$rcekM = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+
+$cekM = $rcekM ? 1 : 0;
+
+
+$params = [(int) $rcek['id']];
+
+$sql = "
+    SELECT TOP 1
+        *,
+        apperss_note AS note_apperss
+    FROM db_qc.tbl_tq_test
+    WHERE id_nokk = ?
+    ORDER BY id DESC
+";
+
+$stmt = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+$rcekcmt = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+
+
+$id_tq_test_2 = (int) $rcek['id'];
+
+$sql = "
+    SELECT
+        id_nokk,
+        spirality_status,
+        bleeding_root,
+        wrinkle,
+        wrinkle1,
+        wrinkle2,
+        stat_wrinkle,
+        stat_wrinkle1,
+        wrinkle_note
+    FROM db_qc.tbl_tq_test_2
+    WHERE id_nokk = CAST(? AS VARCHAR(20))
+";
+
+$params = [$id_tq_test_2];
+
+$stmt = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+$tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+
+
 ?>
 <?php if (($_SESSION['lvl_id'] == "TQ"|| $_SESSION['lvl_id'] == "OPERATORTQ") and $cek > 0) { ?>
 	<div class="row">
@@ -2197,7 +2363,7 @@ $tq_test_2_array = mysqli_fetch_array($tq_test_2_sql);
 			<div class="box">
 				<div class="box-header">
 					<small class="pull-right">Date:
-						<?php echo $rcek1['tgl_buat']; ?>
+						<?php echo $rcek1['tgl_buat']->format('Y-m-d'); ?>
 					</small>
 					<div class="box-body">
 						<table id="example1" class="table table-bordered table-hover table-striped" width="100%">
@@ -2217,14 +2383,27 @@ $tq_test_2_array = mysqli_fetch_array($tq_test_2_sql);
 							<tbody>
 								<?php
 								//$no_test=$_GET[no_test];
-								$sql = "SELECT a.*, b.*, c.*, c2.* From tbl_tq_nokk a
-                                INNER JOIN tbl_master_test b ON a.no_test=b.no_testmaster
-                                INNER JOIN tbl_tq_test c ON a.id=c.id_nokk
-                                INNER JOIN tbl_tq_test_2 c2 ON a.id=c2.id_nokk
-                                WHERE no_test='$notes'";
-								$result = mysqli_query($con, $sql);
-								$no = "1";
-								while ($row = mysqli_fetch_array($result)) {
+								$sql = "
+									SELECT
+										a.*,
+										b.*,
+										c.*,
+										c2.*
+									FROM db_qc.tbl_tq_nokk a
+									INNER JOIN db_qc.tbl_master_test b
+										ON a.no_test = b.no_testmaster
+									INNER JOIN db_qc.tbl_tq_test c
+										ON a.id = c.id_nokk
+									INNER JOIN db_qc.tbl_tq_test_2 c2
+										ON a.id = TRY_CAST(c2.id_nokk AS BIGINT)
+									WHERE a.no_test = ?
+								";
+
+								$params = [$notes];
+
+								$result = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+								while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
 									$detail = explode(",", $row['physical']);
 									$detail2 = explode(",", $row['functional']);
 									$detail3 = explode(",", $row['colorfastness']);
@@ -4100,9 +4279,21 @@ $tq_test_2_array = mysqli_fetch_array($tq_test_2_sql);
 											onChange="tampil();" style="width: 100%;">
 											<option selected="selected" value="">Pilih</option>
 											<?php
-											$sql = "SELECT a.*, b.* From tbl_tq_nokk a INNER JOIN tbl_master_test b ON a.no_test=b.no_testmaster WHERE no_test='$rcek[no_test]'";
-											$result = mysqli_query($con, $sql);
-											while ($row = mysqli_fetch_array($result)) {
+											
+											$sql = "
+												SELECT
+													a.*,
+													b.*
+												FROM db_qc.tbl_tq_nokk a
+												INNER JOIN db_qc.tbl_master_test b
+													ON a.no_test = b.no_testmaster
+												WHERE a.no_test = ?
+											";
+
+											$params = [$rcek['no_test']];
+											$result = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+											while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
 												$detail = explode(",", $row['physical']); ?>
 												<?php foreach ($detail as $key => $value):
 													if($value == 'GROWTH'){
@@ -8899,9 +9090,19 @@ $tq_test_2_array = mysqli_fetch_array($tq_test_2_sql);
 										onChange="tampil2();" style="width: 100%;">
 										<option value="">Pilih</option>
 										<?php
-										$sql = "SELECT a.*, b.* From tbl_tq_nokk a INNER JOIN tbl_master_test b ON a.no_test=b.no_testmaster WHERE no_test='$rcek[no_test]'";
-										$result = mysqli_query($con, $sql);
-										while ($row = mysqli_fetch_array($result)) {
+										$sql = "
+											SELECT
+												a.*,
+												b.*
+											FROM db_qc.tbl_tq_nokk a
+											INNER JOIN db_qc.tbl_master_test b
+												ON a.no_test = b.no_testmaster
+											WHERE a.no_test = ?
+										";
+
+										$params = [$rcek['no_test']];
+										$result = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+										while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
 											$detail = explode(",", $row['colorfastness']); ?>
 											<?php foreach ($detail as $key => $value):
 												echo '<option value="' . $value . '">' . $value . '</option>';
@@ -10982,9 +11183,21 @@ $tq_test_2_array = mysqli_fetch_array($tq_test_2_sql);
 										onChange="tampil1();" style="width: 100%;">
 										<option value="">Pilih</option>
 										<?php
-										$sql = "SELECT a.*, b.* From tbl_tq_nokk a INNER JOIN tbl_master_test b ON a.no_test=b.no_testmaster WHERE no_test='$rcek[no_test]'";
-										$result = mysqli_query($con, $sql);
-										while ($row = mysqli_fetch_array($result)) {
+										$sql = "
+											SELECT
+												a.*,
+												b.*
+											FROM db_qc.tbl_tq_nokk a
+											INNER JOIN db_qc.tbl_master_test b
+												ON a.no_test = b.no_testmaster
+											WHERE a.no_test = ?
+										";
+
+										$params = [$rcek['no_test']];
+
+										$result = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+										while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
 											$detail = explode(",", $row['functional']); ?>
 											<?php foreach ($detail as $key => $value):
 												echo '<option value="' . $value . '">' . $value . '</option>';
@@ -12193,7 +12406,7 @@ $tq_test_2_array = mysqli_fetch_array($tq_test_2_sql);
 				<h2 class="page-header">
 					<i class="fa fa-globe"></i> Result.
 					<small class="pull-right">Date:
-						<?php echo $rcek1['tgl_buat']; ?>
+						<?php echo $rcek1['tgl_buat']->format('Y-m-d'); ?>
 					</small>
 				</h2>
 			</div>
@@ -15401,16 +15614,48 @@ if ($_POST['physical_save'] == "save") {  // spirality_status_save
 	if ($tq_test_2_array) {
 		if ($_POST['spirality_status'] == '0') { //update
 			//$second = '/deleted'.date('is');
-			//$sqlPHY=mysqli_query($con,"UPDATE tbl_tq_test_2 SET id_nokk = concat($id_tq_test_2,'$second') WHERE id_nokk='$id_tq_test_2'");
-			$sqlPHY = mysqli_query($con, "UPDATE tbl_tq_test_2 SET spirality_status = null  WHERE id_nokk='$id_tq_test_2'");
 
+			$sql = "
+				UPDATE db_qc.tbl_tq_test_2
+				SET spirality_status = NULL
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$params = [$id_tq_test_2];
+
+			$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 		} else {
-			$sqlPHY = mysqli_query($con, "UPDATE tbl_tq_test_2 SET spirality_status='$spirality_status' WHERE id_nokk='$id_tq_test_2'");
+
+			$sql = "
+				UPDATE db_qc.tbl_tq_test_2
+				SET spirality_status = ?
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$params = [
+				$spirality_status,
+				$id_tq_test_2
+			];
+
+			$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
 		}
 	} else {
 		if ($_POST['spirality_status'] != '0') { //insert 
 			$array_insert[] = 1;
-			$sql_no_demand = mysqli_query($con, "INSERT INTO tbl_tq_test_2 (id_nokk,spirality_status) VALUES ('$id_tq_test_2','$spirality_status')");
+
+			$sql = "
+				INSERT INTO db_qc.tbl_tq_test_2 (id_nokk, spirality_status)
+				VALUES (CAST(? AS VARCHAR(20)), ?)
+			";
+
+			$params = [
+				$id_tq_test_2,
+				$spirality_status
+			];
+
+			$sql_no_demand = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
 		}
 	}
 }
@@ -15421,23 +15666,84 @@ if ($_POST['colorfastness_save'] == "save") {  // bleeding_root save
 
 	if ($tq_test_2_array or count($array_insert) > 0) {
 		if ($bleeding_root == '') {
-			$sqlPHY = mysqli_query($con, "UPDATE tbl_tq_test_2 SET bleeding_root = null  WHERE id_nokk='$id_tq_test_2'");
+			$sql = "
+				UPDATE db_qc.tbl_tq_test_2
+				SET bleeding_root = NULL
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$params = [$id_tq_test_2];
+
+			$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 		} else {
-			$sqlPHY = mysqli_query($con, "UPDATE tbl_tq_test_2 SET bleeding_root = '$bleeding_root'  WHERE id_nokk='$id_tq_test_2'");
+
+			$sql = "
+				UPDATE db_qc.tbl_tq_test_2
+				SET bleeding_root = ?
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$params = [
+				$bleeding_root,
+				$id_tq_test_2
+			];
+
+			$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 		}
 	} else {
 		if ($_POST['bleeding_root'] != '0') { //insert 
-			$sql_no_demand = mysqli_query($con, "INSERT INTO tbl_tq_test_2 (id_nokk,bleeding_root) VALUES ('$id_tq_test_2','$bleeding_root')");
+
+			$sql = "
+				INSERT INTO db_qc.tbl_tq_test_2 (id_nokk, bleeding_root)
+				VALUES (CAST(? AS VARCHAR(20)), ?)
+			";
+
+			$params = [
+				$id_tq_test_2,
+				$bleeding_root
+			];
+
+			$sql_no_demand = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 		}
 	}
 	// $dbleeding_root 
 	if ($dbleeding_root != '') {
-		$sqlPHY = mysqli_query($con, "UPDATE tbl_tq_disptest_2 SET dbleeding_root = '$dbleeding_root'  WHERE id_nokk='$id_tq_test_2'");
+		$sql = "
+			UPDATE db_qc.tbl_tq_disptest_2
+			SET dbleeding_root = ?
+			WHERE id_nokk = CAST(? AS VARCHAR(20))
+		";
+
+		$params = [
+			$dbleeding_root,
+			$id_tq_test_2
+		];
+
+		$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
 	} else {
 		if ($_POST['dbleeding_root'] != '') { 
-			$sql_no_demand = mysqli_query($con, "INSERT INTO tbl_tq_disptest_2 (id_nokk,dbleeding_root) VALUES ('$id_tq_test_2','$dbleeding_root')");
+			$sql = "
+				INSERT INTO db_qc.tbl_tq_disptest_2 (id_nokk, dbleeding_root)
+				VALUES (CAST(? AS VARCHAR(20)), ?)
+			";
+
+			$params = [
+				$id_tq_test_2,
+				$dbleeding_root
+			];
+
+			$sql_no_demand = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 		}else{
-			$sqlPHY = mysqli_query($con, "UPDATE tbl_tq_disptest_2 SET dbleeding_root = null  WHERE id_nokk='$id_tq_test_2'");
+			$sql = "
+				UPDATE db_qc.tbl_tq_disptest_2
+				SET dbleeding_root = NULL
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$params = [$id_tq_test_2];
+
+			$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 		}
 	}
 }
@@ -15453,18 +15759,45 @@ if ($_POST['physical_save'] == "save") {
         $value = trim($_POST[$field]);
         
         if ($value != "0" && $value != "") {
-            $selectSql = "SELECT * FROM tbl_tq_test_2 WHERE id_nokk = '$id_tq_test_2'";
-            $result = mysqli_query($con, $selectSql);
 
-            if (mysqli_num_rows($result) > 0) {
-                $updateSql = "UPDATE tbl_tq_test_2 SET $field = '$value' WHERE id_nokk = '$id_tq_test_2'";
-                $sqlPHY = mysqli_query($con, $updateSql);
+			$selectSql = "
+				SELECT 1
+				FROM db_qc.tbl_tq_test_2
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$params = [$id_tq_test_2];
+			$result = sqlsrv_query($con_db_qc_sqlsrv, $selectSql, $params);
+
+
+            if (sqlsrv_has_rows($result)) {
+				 $updateSql = "
+					UPDATE db_qc.tbl_tq_test_2
+					SET $field = ?
+					WHERE id_nokk = CAST(? AS VARCHAR(20))
+				";
+
+				$paramsUpdate = [$value, $id_tq_test_2];
+				$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $updateSql, $paramsUpdate);
             } else {
-                $insertSql = "INSERT INTO tbl_tq_test_2 (id_nokk, $field) VALUES ('$id_tq_test_2','$value')";
-                $sqlPHY = mysqli_query($con, $insertSql);
+				$insertSql = "
+					INSERT INTO db_qc.tbl_tq_test_2 (id_nokk, $field)
+					VALUES (CAST(? AS VARCHAR(20)), ?)
+				";
+
+				$paramsInsert = [$id_tq_test_2, $value];
+				$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $insertSql, $paramsInsert);
             }
         } else {
-            $sqlPHY = mysqli_query($con, "UPDATE tbl_tq_test_2 SET $field = null WHERE id_nokk = '$id_tq_test_2'");
+			$sql = "
+				UPDATE db_qc.tbl_tq_test_2
+				SET $field = NULL
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$params = [$id_tq_test_2];
+
+			$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
         }
     }
 
@@ -15473,20 +15806,52 @@ if ($_POST['physical_save'] == "save") {
         $value_disp = trim($_POST[$fieldDisp]);
         
         if ($value_disp != "0" && $value_disp != "") {
-            $selectSql_disp = "SELECT * FROM tbl_tq_disptest_2 WHERE id_nokk = '$id_tq_test_2'";
-            $result_disp = mysqli_query($con, $selectSql_disp);
+            // $selectSql_disp = "SELECT * FROM tbl_tq_disptest_2 WHERE id_nokk = '$id_tq_test_2'";
 
-            if (mysqli_num_rows($result_disp) > 0) {
+			$selectSql_disp = "
+				SELECT 1
+				FROM db_qc.tbl_tq_disptest_2
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$paramsCheck = [$id_tq_test_2];
+			$result_disp = sqlsrv_query($con_db_qc_sqlsrv, $selectSql_disp, $paramsCheck);
+
+            if (sqlsrv_has_rows($result_disp)) {
                 // Data sudah ada, lakukan UPDATE
-                $updateSql_disp = "UPDATE tbl_tq_disptest_2 SET $fieldDisp = '$value_disp' WHERE id_nokk = '$id_tq_test_2'";
-                $sqlPHY_disp = mysqli_query($con, $updateSql_disp);
+        
+				$updateSql_disp = "
+					UPDATE db_qc.tbl_tq_disptest_2
+					SET $fieldDisp = ?
+					WHERE id_nokk = CAST(? AS VARCHAR(20))
+				";
+
+				$paramsUpdate = [$value_disp, $id_tq_test_2];
+				$sqlPHY_disp = sqlsrv_query($con_db_qc_sqlsrv, $updateSql_disp, $paramsUpdate);
+
             } else {
                 // Data belum ada, lakukan INSERT
-                $insertSql_disp = "INSERT INTO tbl_tq_disptest_2 (id_nokk, $fieldDisp) VALUES ('$id_tq_test_2','$value_disp')";
-                $sqlPHY_disp = mysqli_query($con, $insertSql_disp);
+             
+				$insertSql_disp = "
+					INSERT INTO db_qc.tbl_tq_disptest_2 (id_nokk, $fieldDisp)
+					VALUES (CAST(? AS VARCHAR(20)), ?)
+				";
+
+				$paramsInsert = [$id_tq_test_2, $value_disp];
+				$sqlPHY_disp = sqlsrv_query($con_db_qc_sqlsrv, $insertSql_disp, $paramsInsert);
+
             }
         } else {
-            $sqlPHY_disp = mysqli_query($con, "UPDATE tbl_tq_disptest_2 SET $fieldDisp = null WHERE id_nokk = '$id_tq_test_2'");
+
+			$sql = "
+				UPDATE db_qc.tbl_tq_disptest_2
+				SET $fieldDisp = NULL
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$params = [$id_tq_test_2];
+
+			$result = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
         }
     }
 
@@ -15497,22 +15862,55 @@ if ($_POST['physical_save'] == "save") {
     foreach ($fields_nama as $field_nama) {
         $value_nama = trim($_POST[$field_nama]);
         
-        if ($value_nama != "0" && $value_nama != "") {
-            $selectSql_nama = "SELECT * FROM tbl_user_update_tq WHERE id_nokk = '$id_tq_test_2'";
-            $result_nama = mysqli_query($con, $selectSql_nama);
+		if ($value_nama != "0" && $value_nama != "") {
 
-            if (mysqli_num_rows($result_nama) > 0) {
-                // Data sudah ada, lakukan UPDATE
-                $updateSql_nama = "UPDATE tbl_user_update_tq SET $field_nama = '$value_nama' WHERE id_nokk = '$id_tq_test_2'";
-                $sqlPHY_nama = mysqli_query($con, $updateSql_nama);
-            } else {
-                // Data belum ada, lakukan INSERT
-                $insertSql_nama = "INSERT INTO tbl_user_update_tq (id_nokk, $field_nama) VALUES ('$id_tq_test_2','$value_nama')";
-                $sqlPHY_nama = mysqli_query($con, $insertSql_nama);
-            }
-        } else {
-            $sqlPHY_nama = mysqli_query($con, "UPDATE tbl_user_update_tq SET $field_nama = null WHERE id_nokk = '$id_tq_test_2'");
-        }
+			$selectSql_nama = "
+				SELECT 1
+				FROM db_qc.tbl_user_update_tq
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$paramsCheck = [$id_tq_test_2];
+			$result_nama = sqlsrv_query($con_db_qc_sqlsrv, $selectSql_nama, $paramsCheck);
+
+			if (sqlsrv_has_rows($result_nama)) {
+
+				// UPDATE
+				$updateSql_nama = "
+					UPDATE db_qc.tbl_user_update_tq
+					SET $field_nama = ?
+					WHERE id_nokk = CAST(? AS VARCHAR(20))
+				";
+
+				$paramsUpdate = [$value_nama, $id_tq_test_2];
+				$sqlPHY_nama = sqlsrv_query($con_db_qc_sqlsrv, $updateSql_nama, $paramsUpdate);
+
+			} else {
+
+				// INSERT
+				$insertSql_nama = "
+					INSERT INTO db_qc.tbl_user_update_tq (id_nokk, $field_nama)
+					VALUES (CAST(? AS VARCHAR(20)), ?)
+				";
+
+				$paramsInsert = [$id_tq_test_2, $value_nama];
+				$sqlPHY_nama = sqlsrv_query($con_db_qc_sqlsrv, $insertSql_nama, $paramsInsert);
+
+			}
+
+		} else {
+
+			// SET NULL
+			$sqlNullNama = "
+				UPDATE db_qc.tbl_user_update_tq
+				SET $field_nama = NULL
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$paramsNull = [$id_tq_test_2];
+			$sqlPHY_nama = sqlsrv_query($con_db_qc_sqlsrv, $sqlNullNama, $paramsNull);
+		}
+
     }
 }
 
@@ -15535,22 +15933,56 @@ if ($_POST['functional_save'] == "save") {
     foreach ($fields_nama as $field_nama) {
         $value_nama = trim($_POST[$field_nama]);
         
-        if ($value_nama != "0" && $value_nama != "") {
-            $selectSql_nama = "SELECT * FROM tbl_user_update_tq WHERE id_nokk = '$id_tq_test_2'";
-            $result_nama = mysqli_query($con, $selectSql_nama);
+		if ($value_nama != "0" && $value_nama != "") {
 
-            if (mysqli_num_rows($result_nama) > 0) {
-                // Data sudah ada, lakukan UPDATE
-                $updateSql_nama = "UPDATE tbl_user_update_tq SET $field_nama = '$value_nama' WHERE id_nokk = '$id_tq_test_2'";
-                $sqlPHY_nama = mysqli_query($con, $updateSql_nama);
-            } else {
-                // Data belum ada, lakukan INSERT
-                $insertSql_nama = "INSERT INTO tbl_user_update_tq (id_nokk, $field_nama) VALUES ('$id_tq_test_2','$value_nama')";
-                $sqlPHY_nama = mysqli_query($con, $insertSql_nama);
-            }
-        } else {
-            $sqlPHY_nama = mysqli_query($con, "UPDATE tbl_user_update_tq SET $field_nama = null WHERE id_nokk = '$id_tq_test_2'");
-        }
+			$selectSql_nama = "
+				SELECT 1
+				FROM db_qc.tbl_user_update_tq
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$paramsCheck = [$id_tq_test_2];
+			$result_nama = sqlsrv_query($con_db_qc_sqlsrv, $selectSql_nama, $paramsCheck);
+
+			if (sqlsrv_has_rows($result_nama)) {
+
+				// UPDATE
+				$updateSql_nama = "
+					UPDATE db_qc.tbl_user_update_tq
+					SET $field_nama = ?
+					WHERE id_nokk = CAST(? AS VARCHAR(20))
+				";
+
+				$paramsUpdate = [$value_nama, $id_tq_test_2];
+				$sqlPHY_nama = sqlsrv_query($con_db_qc_sqlsrv, $updateSql_nama, $paramsUpdate);
+
+			} else {
+
+				// INSERT
+				$insertSql_nama = "
+					INSERT INTO db_qc.tbl_user_update_tq (id_nokk, $field_nama)
+					VALUES (CAST(? AS VARCHAR(20)), ?)
+				";
+
+				$paramsInsert = [$id_tq_test_2, $value_nama];
+				$sqlPHY_nama = sqlsrv_query($con_db_qc_sqlsrv, $insertSql_nama, $paramsInsert);
+
+			}
+
+		} else {
+
+			// SET NULL
+			$sqlNullNama = "
+				UPDATE db_qc.tbl_user_update_tq
+				SET $field_nama = NULL
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$paramsNull = [$id_tq_test_2];
+			$sqlPHY_nama = sqlsrv_query($con_db_qc_sqlsrv, $sqlNullNama, $paramsNull);
+
+		}
+
     }
 }
 
@@ -15559,45 +15991,121 @@ if ($_POST['colorfastness_save'] == "save") {
 	$fields = array('classification_shedding', 'syringe_shedding', 'observation_shedding', 'avg_gr_shedding', 'avg_per_shedding', 'nama_rub', 'status_rub', 'bleeding_root');
     foreach ($fields as $field) {
         $value = trim($_POST[$field]);
-        
-        if ($value != "0" && $value != "") {
-            $selectSql = "SELECT * FROM tbl_tq_test_2 WHERE id_nokk = '$id_tq_test_2'";
-            $result = mysqli_query($con, $selectSql);
 
-            if (mysqli_num_rows($result) > 0) {
-                // Data sudah ada, lakukan UPDATE
-                $updateSql = "UPDATE tbl_tq_test_2 SET $field = '$value' WHERE id_nokk = '$id_tq_test_2'";
-                $sqlPHY = mysqli_query($con, $updateSql);
-            } else {
-                // Data belum ada, lakukan INSERT
-                $insertSql = "INSERT INTO tbl_tq_test_2 (id_nokk, $field) VALUES ('$id_tq_test_2','$value')";
-                $sqlPHY = mysqli_query($con, $insertSql);
-            }
-        } else {
-            $sqlPHY = mysqli_query($con, "UPDATE tbl_tq_test_2 SET $field = null WHERE id_nokk = '$id_tq_test_2'");
-        }
+		if ($value != "0" && $value != "") {
+
+			$selectSql = "
+				SELECT 1
+				FROM db_qc.tbl_tq_test_2
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$paramsCheck = [$id_tq_test_2];
+			$result = sqlsrv_query($con_db_qc_sqlsrv, $selectSql, $paramsCheck);
+
+
+			if (sqlsrv_has_rows($result)) {
+
+				// UPDATE
+				$updateSql = "
+					UPDATE db_qc.tbl_tq_test_2
+					SET $field = ?
+					WHERE id_nokk = CAST(? AS VARCHAR(20))
+				";
+
+				$paramsUpdate = [$value, $id_tq_test_2];
+				$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $updateSql, $paramsUpdate);
+
+				
+			} else {
+
+				// INSERT
+				$insertSql = "
+					INSERT INTO db_qc.tbl_tq_test_2 (id_nokk, $field)
+					VALUES (CAST(? AS VARCHAR(20)), ?)
+				";
+
+				$paramsInsert = [$id_tq_test_2, $value];
+				$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $insertSql, $paramsInsert);
+
+				
+			}
+
+		} else {
+
+			// SET NULL
+			$sqlNull = "
+				UPDATE db_qc.tbl_tq_test_2
+				SET $field = NULL
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$paramsNull = [$id_tq_test_2];
+			$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $sqlNull, $paramsNull);
+
+			
+		}
     }
 
 	$fields_disp = array('dbleeding_root');
     foreach ($fields_disp as $fieldDisp) {
         $value_disp = trim($_POST[$fieldDisp]);
-        
-        if ($value_disp != "0" && $value_disp != "") {
-            $selectSql_disp = "SELECT * FROM tbl_tq_disptest_2 WHERE id_nokk = '$id_tq_test_2'";
-            $result_disp = mysqli_query($con, $selectSql_disp);
 
-            if (mysqli_num_rows($result_disp) > 0) {
-                // Data sudah ada, lakukan UPDATE
-                $updateSql_disp = "UPDATE tbl_tq_disptest_2 SET $fieldDisp = '$value_disp' WHERE id_nokk = '$id_tq_test_2'";
-                $sqlPHY_disp = mysqli_query($con, $updateSql_disp);
-            } else {
-                // Data belum ada, lakukan INSERT
-                $insertSql_disp = "INSERT INTO tbl_tq_disptest_2 (id_nokk, $fieldDisp) VALUES ('$id_tq_test_2','$value_disp')";
-                $sqlPHY_disp = mysqli_query($con, $insertSql_disp);
-            }
-        } else {
-            $sqlPHY_disp = mysqli_query($con, "UPDATE tbl_tq_disptest_2 SET $fieldDisp = null WHERE id_nokk = '$id_tq_test_2'");
-        }
+		if ($value_disp != "0" && $value_disp != "") {
+
+			$selectSql_disp = "
+				SELECT 1
+				FROM db_qc.tbl_tq_disptest_2
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$paramsCheck = [$id_tq_test_2];
+			$result_disp = sqlsrv_query($con_db_qc_sqlsrv, $selectSql_disp, $paramsCheck);
+
+			
+
+			if (sqlsrv_has_rows($result_disp)) {
+
+				// UPDATE
+				$updateSql_disp = "
+					UPDATE db_qc.tbl_tq_disptest_2
+					SET $fieldDisp = ?
+					WHERE id_nokk = CAST(? AS VARCHAR(20))
+				";
+
+				$paramsUpdate = [$value_disp, $id_tq_test_2];
+				$sqlPHY_disp = sqlsrv_query($con_db_qc_sqlsrv, $updateSql_disp, $paramsUpdate);
+
+				
+
+			} else {
+
+				// INSERT
+				$insertSql_disp = "
+					INSERT INTO db_qc.tbl_tq_disptest_2 (id_nokk, $fieldDisp)
+					VALUES (CAST(? AS VARCHAR(20)), ?)
+				";
+
+				$paramsInsert = [$id_tq_test_2, $value_disp];
+				$sqlPHY_disp = sqlsrv_query($con_db_qc_sqlsrv, $insertSql_disp, $paramsInsert);
+
+				
+			}
+
+		} else {
+
+			// SET NULL
+			$sqlNullDisp = "
+				UPDATE db_qc.tbl_tq_disptest_2
+				SET $fieldDisp = NULL
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$paramsNull = [$id_tq_test_2];
+			$sqlPHY_disp = sqlsrv_query($con_db_qc_sqlsrv, $sqlNullDisp, $paramsNull);
+
+		}
+
     }
 
 	$fields_nama = array('nama_washing','nama_water','nama_acid','nama_alkaline','nama_crocking','nama_phenolic','nama_cmo','nama_cm','nama_light',
@@ -15605,809 +16113,616 @@ if ($_POST['colorfastness_save'] == "save") {
 
     foreach ($fields_nama as $field_nama) {
         $value_nama = trim($_POST[$field_nama]);
-        
-        if ($value_nama != "0" && $value_nama != "") {
-            $selectSql_nama = "SELECT * FROM tbl_user_update_tq WHERE id_nokk = '$id_tq_test_2'";
-            $result_nama = mysqli_query($con, $selectSql_nama);
 
-            if (mysqli_num_rows($result_nama) > 0) {
-                // Data sudah ada, lakukan UPDATE
-                $updateSql_nama = "UPDATE tbl_user_update_tq SET $field_nama = '$value_nama' WHERE id_nokk = '$id_tq_test_2'";
-                $sqlPHY_nama = mysqli_query($con, $updateSql_nama);
-            } else {
-                // Data belum ada, lakukan INSERT
-                $insertSql_nama = "INSERT INTO tbl_user_update_tq (id_nokk, $field_nama) VALUES ('$id_tq_test_2','$value_nama')";
-                $sqlPHY_nama = mysqli_query($con, $insertSql_nama);
-            }
-        } else {
-            $sqlPHY_nama = mysqli_query($con, "UPDATE tbl_user_update_tq SET $field_nama = null WHERE id_nokk = '$id_tq_test_2'");
-        }
+		if ($value_nama != "0" && $value_nama != "") {
+
+			$selectSql_nama = "
+				SELECT 1
+				FROM db_qc.tbl_user_update_tq
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$paramsCheck = [$id_tq_test_2];
+			$result_nama = sqlsrv_query($con_db_qc_sqlsrv, $selectSql_nama, $paramsCheck);
+
+			if ($result_nama === false) {
+				die(print_r(sqlsrv_errors(), true));
+			}
+
+			if (sqlsrv_has_rows($result_nama)) {
+
+				// UPDATE
+				$updateSql_nama = "
+					UPDATE db_qc.tbl_user_update_tq
+					SET $field_nama = ?
+					WHERE id_nokk = CAST(? AS VARCHAR(20))
+				";
+
+				$paramsUpdate = [$value_nama, $id_tq_test_2];
+				$sqlPHY_nama = sqlsrv_query($con_db_qc_sqlsrv, $updateSql_nama, $paramsUpdate);
+
+				if ($sqlPHY_nama === false) {
+					die(print_r(sqlsrv_errors(), true));
+				}
+
+			} else {
+
+				// INSERT
+				$insertSql_nama = "
+					INSERT INTO db_qc.tbl_user_update_tq (id_nokk, $field_nama)
+					VALUES (CAST(? AS VARCHAR(20)), ?)
+				";
+
+				$paramsInsert = [$id_tq_test_2, $value_nama];
+				$sqlPHY_nama = sqlsrv_query($con_db_qc_sqlsrv, $insertSql_nama, $paramsInsert);
+
+				if ($sqlPHY_nama === false) {
+					die(print_r(sqlsrv_errors(), true));
+				}
+			}
+
+		} else {
+
+			// SET NULL
+			$sqlNullNama = "
+				UPDATE db_qc.tbl_user_update_tq
+				SET $field_nama = NULL
+				WHERE id_nokk = CAST(? AS VARCHAR(20))
+			";
+
+			$paramsNull = [$id_tq_test_2];
+			$sqlPHY_nama = sqlsrv_query($con_db_qc_sqlsrv, $sqlNullNama, $paramsNull);
+
+			if ($sqlPHY_nama === false) {
+				die(print_r(sqlsrv_errors(), true));
+			}
+		}
+
     }
 }
 ?>
 
 <?php
 if ($_POST['physical_save'] == "save" and $cek1 > 0) {
-	$sqlPHY = mysqli_query($con, "UPDATE tbl_tq_test SET
-		  `flamability`='$_POST[flamability]',
-		  `fla_note`='$_POST[fla_note]',
-		  `fc_cott`='$_POST[fc_cott]',
-		  `fc_poly`='$_POST[fc_poly]',
-		  `fc_elastane`='$_POST[fc_ela]',
-		  `fc_cott1`='$_POST[fc_cott1]',
-		  `fc_poly1`='$_POST[fc_poly1]',
-		  `fc_elastane1`='$_POST[fc_ela1]',
-		  `std_fc_cott1`='$_POST[std_fc_cott1]',
-		  `std_fc_poly1`='$_POST[std_fc_poly1]',
-		  `std_fc_elastane1`='$_POST[std_fc_elastane1]',
-		  `fibercontent`='$_POST[fibercontent]',
-		  `fiber_note`='$_POST[fiber_note]',
-		  `fc_wpi`='$_POST[wpi]',
-		  `fc_cpi`='$_POST[cpi]',
-		  `fc_note`='$_POST[fc_note]',
-		  `f_weight`='$_POST[fabric_weight]',
-		  `fwe_note`='$_POST[fwe_note]',
-		  `f_width`='$_POST[fabric_width]',
-		  `fwi_note`='$_POST[fwi_note]',
-		  `bow`='$_POST[bow]',
-		  `skew`='$_POST[skew]',
-		  `bas_note`='$_POST[bas_note]',
-		  `h_shrinkage_temp`='$_POST[h_shrinkage_temp]',
-		  `h_shrinkage_l1`='$_POST[h_shrinkage_l1]',
-		  `h_shrinkage_w1`='$_POST[h_shrinkage_w1]',
-		  `h_shrinkage_grd`='$_POST[h_shrinkage_grd]',
-		  `h_shrinkage_app`='$_POST[h_shrinkage_app]',
-		  `h_shrinkage_note`='$_POST[h_shrinkage_note]',
-		  `ss_temp`='$_POST[ss_temp]',
-		  `ss_washes3`='$_POST[ss_washes3]',
-		  `ss_washes10`='$_POST[ss_washes10]',
-		  `ss_washes15`='$_POST[ss_washes15]',
-		  `ss_cmt`='$_POST[ss_cmt]',
-		  `shrinkage_l1`='$_POST[shrinkage_len1]',
-		  `shrinkage_l2`='$_POST[shrinkage_len2]',
-		  `shrinkage_l3`='$_POST[shrinkage_len3]',
-		  `shrinkage_l4`='$_POST[shrinkage_len4]',
-		  `shrinkage_l5`='$_POST[shrinkage_len5]',
-		  `shrinkage_l6`='$_POST[shrinkage_len6]',
-		  `shrinkage_w1`='$_POST[shrinkage_wid1]',
-		  `shrinkage_w2`='$_POST[shrinkage_wid2]',
-		  `shrinkage_w3`='$_POST[shrinkage_wid3]',
-		  `shrinkage_w4`='$_POST[shrinkage_wid4]',
-		  `shrinkage_w5`='$_POST[shrinkage_wid5]',
-		  `shrinkage_w6`='$_POST[shrinkage_wid6]',
-		  `spirality1`='$_POST[spirality1]',
-		  `spirality2`='$_POST[spirality2]',
-		  `spirality3`='$_POST[spirality3]',
-		  `spirality4`='$_POST[spirality4]',
-		  `spirality5`='$_POST[spirality5]',
-		  `spirality6`='$_POST[spirality6]',
-		  `ss_linedry`='$_POST[ss_linedry]',
-		  `ss_tumbledry`='$_POST[ss_tumbledry]',
-		  `sns_note`='$_POST[sns_note]',
-		  `apperss_ch1`='$_POST[apperss_ch1]',
-		  `apperss_ch2`='$_POST[apperss_ch2]',
-		  `apperss_ch3`='$_POST[apperss_ch3]',
-		  `apperss_ch4`='$_POST[apperss_ch4]',
-		  `apperss_cc1`='$_POST[apperss_cc1]',
-		  `apperss_cc2`='$_POST[apperss_cc2]',
-		  `apperss_cc3`='$_POST[apperss_cc3]',
-		  `apperss_cc4`='$_POST[apperss_cc4]',
-		  `apperss_st`='$_POST[apperss_st]',
-		  `apperss_pf1`='$_POST[apperss_pf1]',
-		  `apperss_pf2`='$_POST[apperss_pf2]',
-		  `apperss_pf3`='$_POST[apperss_pf3]',
-		  `apperss_pf4`='$_POST[apperss_pf4]',
-		  `apperss_pb1`='$_POST[apperss_pb1]',
-		  `apperss_pb2`='$_POST[apperss_pb2]',
-		  `apperss_pb3`='$_POST[apperss_pb3]',
-		  `apperss_pb4`='$_POST[apperss_pb4]',
-		  `apperss_sf1`='$_POST[apperss_sf1]',
-		  `apperss_sf2`='$_POST[apperss_sf2]',
-		  `apperss_sf3`='$_POST[apperss_sf3]',
-		  `apperss_sf4`='$_POST[apperss_sf4]',
-		  `apperss_sb1`='$_POST[apperss_sb1]',
-		  `apperss_sb2`='$_POST[apperss_sb2]',
-		  `apperss_sb3`='$_POST[apperss_sb3]',
-		  `apperss_sb4`='$_POST[apperss_sb4]',
-	 	  `apperss_note`='$_POST[apperss_note]',
-		  `pm_f1`='$_POST[pillingm_f1]',
-		  `pm_b1`='$_POST[pillingm_b1]',
-		  `pm_f2`='$_POST[pillingm_f2]',
-		  `pm_b2`='$_POST[pillingm_b2]',
-		  `pm_f3`='$_POST[pillingm_f3]',
-		  `pm_b3`='$_POST[pillingm_b3]',
-		  `pm_f4`='$_POST[pillingm_f4]',
-		  `pm_b4`='$_POST[pillingm_b4]',
-		  `pm_f5`='$_POST[pillingm_f5]',
-		  `pm_b5`='$_POST[pillingm_b5]',
-		  `pillm_note`='$_POST[pillm_note]',
-		  `pl_f1`='$_POST[pillingl_f1]',
-		  `pl_b1`='$_POST[pillingl_b1]',
-		  `pl_f2`='$_POST[pillingl_f2]',
-		  `pl_b2`='$_POST[pillingl_b2]',
-		  `pl_f3`='$_POST[pillingl_f3]',
-		  `pl_b3`='$_POST[pillingl_b3]',
-		  `pl_f4`='$_POST[pillingl_f4]',
-		  `pl_b4`='$_POST[pillingl_b4]',
-		  `pl_f5`='$_POST[pillingl_f5]',
-		  `pl_b5`='$_POST[pillingl_b5]',
-		  `pilll_note`='$_POST[pilll_note]',
-		  `pb_f1`='$_POST[pillingb_f1]',
-		  `pb_b1`='$_POST[pillingb_b1]',
-		  `pb_f2`='$_POST[pillingb_f2]',
-		  `pb_b2`='$_POST[pillingb_b2]',
-		  `pb_f3`='$_POST[pillingb_f3]',
-		  `pb_b3`='$_POST[pillingb_b3]',
-		  `pb_f4`='$_POST[pillingb_f4]',
-		  `pb_b4`='$_POST[pillingb_b4]',
-		  `pb_f5`='$_POST[pillingb_f5]',
-		  `pb_b5`='$_POST[pillingb_b5]',
-		  `pillb_note`='$_POST[pillb_note]',
-		  `prt_f1`='$_POST[pillingrt_f1]',
-		  `prt_b1`='$_POST[pillingrt_b1]',
-		  `prt_f2`='$_POST[pillingrt_f2]',
-		  `prt_b2`='$_POST[pillingrt_b2]',
-		  `prt_f3`='$_POST[pillingrt_f3]',
-		  `prt_b3`='$_POST[pillingrt_b3]',
-		  `prt_f4`='$_POST[pillingrt_f4]',
-		  `prt_b4`='$_POST[pillingrt_b4]',
-		  `prt_f5`='$_POST[pillingrt_f5]',
-		  `prt_b5`='$_POST[pillingrt_b5]',
-		  `pillr_note`='$_POST[pillr_note]',
-		  `abration`='$_POST[abr]',
-		  `abr_note`='$_POST[abr_note]',
-		  `sm_l1`='$_POST[snaggingm_l1]',
-		  `sm_w1`='$_POST[snaggingm_w1]',
-		  `sm_l2`='$_POST[snaggingm_l2]',
-		  `sm_w2`='$_POST[snaggingm_w2]',
-		  `sm_l3`='$_POST[snaggingm_l3]',
-		  `sm_w3`='$_POST[snaggingm_w3]',
-		  `sm_l4`='$_POST[snaggingm_l4]',
-		  `sm_w4`='$_POST[snaggingm_w4]',
-		  `snam_note`='$_POST[snam_note]',
-		  `sp_grdl1` ='$_POST[sp_grdl1]',
-		  `sp_clsl1` ='$_POST[sp_clsl1]',
-		  `sp_shol1` ='$_POST[sp_shol1]',
-		  `sp_medl1` ='$_POST[sp_medl1]',
-		  `sp_lonl1` ='$_POST[sp_lonl1]',
-		  `sp_grdw1` ='$_POST[sp_grdw1]',
-		  `sp_clsw1` ='$_POST[sp_clsw1]',
-		  `sp_show1` ='$_POST[sp_show1]',
-		  `sp_medw1` ='$_POST[sp_medw1]',
-		  `sp_lonw1` ='$_POST[sp_lonw1]',
-		  `sp_grdl2` ='$_POST[sp_grdl2]',
-		  `sp_clsl2` ='$_POST[sp_clsl2]',
-		  `sp_shol2` ='$_POST[sp_shol2]',
-		  `sp_medl2` ='$_POST[sp_medl2]',
-		  `sp_lonl2` ='$_POST[sp_lonl2]',
-		  `sp_grdw2` ='$_POST[sp_grdw2]',
-		  `sp_clsw2` ='$_POST[sp_clsw2]',
-		  `sp_show2` ='$_POST[sp_show2]',
-		  `sp_medw2` ='$_POST[sp_medw2]',
-		  `sp_lonw2` ='$_POST[sp_lonw2]',
-		  `snap_note`='$_POST[snap_note]',
-		  `sb_l1`='$_POST[snaggingb_l1]',
-		  `sb_w1`='$_POST[snaggingb_w1]',
-		  `sb_l2`='$_POST[snaggingb_l2]',
-		  `sb_w2`='$_POST[snaggingb_w2]',
-		  `sb_l3`='$_POST[snaggingb_l3]',
-		  `sb_w3`='$_POST[snaggingb_w3]',
-		  `sb_l4`='$_POST[snaggingb_l4]',
-		  `sb_w4`='$_POST[snaggingb_w4]',
-		  `snab_note`='$_POST[snab_note]',
-		  `bs_instron`='$_POST[instron]',
-		  `bs_mullen`='$_POST[mullen]',
-		  `bs_tru`='$_POST[tru_burst]',
-		  `bs_tru2`='$_POST[tru_burst2]',
-		  `burs_note`='$_POST[burs_note]',
-		  `thick1`='$_POST[thick1]',
-		  `thick2`='$_POST[thick2]',
-		  `thick3`='$_POST[thick3]',
-		  `thickav`='$_POST[thickav]',
-		  `thick_note`='$_POST[thick_note]',
-		  `stretch_l1`='$_POST[stretch_l1]',
-		  `stretch_w1`='$_POST[stretch_w1]',
-		  `stretch_l2`='$_POST[stretch_l2]',
-		  `stretch_w2`='$_POST[stretch_w2]',
-		  `stretch_l3`='$_POST[stretch_l3]',
-		  `stretch_w3`='$_POST[stretch_w3]',
-		  `stretch_l4`='$_POST[stretch_l4]',
-		  `stretch_w4`='$_POST[stretch_w4]',
-		  `stretch_l5`='$_POST[stretch_l5]',
-		  `stretch_w5`='$_POST[stretch_w5]',
-		  `load_stretch`='$_POST[load_stretch]',
-		  `stretch_note`='$_POST[stretch_note]',
-		  `recover_l1`='$_POST[recover_l1]',
-		  `recover_w1`='$_POST[recover_w1]',
-		  `recover_l2`='$_POST[recover_l2]',
-		  `recover_w2`='$_POST[recover_w2]',
-		  `recover_l3`='$_POST[recover_l3]',
-		  `recover_w3`='$_POST[recover_w3]',
-		  `recover_l4`='$_POST[recover_l4]',
-		  `recover_w4`='$_POST[recover_w4]',
-		  `recover_l5`='$_POST[recover_l5]',
-		  `recover_w5`='$_POST[recover_w5]',
-		  `recover_l11`='$_POST[recover_l11]',
-		  `recover_w11`='$_POST[recover_w11]',
-		  `recover_l21`='$_POST[recover_l21]',
-		  `recover_w21`='$_POST[recover_w21]',
-		  `recover_l31`='$_POST[recover_l31]',
-		  `recover_w31`='$_POST[recover_w31]',
-		  `recover_l41`='$_POST[recover_l41]',
-		  `recover_w41`='$_POST[recover_w41]',
-		  `recover_l51`='$_POST[recover_l51]',
-		  `recover_w51`='$_POST[recover_w51]',
-		  `recover_note`='$_POST[recover_note]',
-		  `growth_l1`='$_POST[growth_l1]',
-		  `growth_w1`='$_POST[growth_w1]',
-		  `growth_l2`='$_POST[growth_l2]',
-		  `growth_w2`='$_POST[growth_w2]',
-		  `rec_growth_l1`='$_POST[rec_growth_l1]',
-		  `rec_growth_w1`='$_POST[rec_growth_w1]',
-		  `rec_growth_l2`='$_POST[rec_growth_l2]',
-		  `rec_growth_w2`='$_POST[rec_growth_w2]',
-		  `growth_note`='$_POST[growth_note]',
-		  `apper_ch1`='$_POST[apper_ch1]',
-		  `apper_ch2`='$_POST[apper_ch2]',
-		  `apper_ch3`='$_POST[apper_ch3]',
-		  `apper_cc1`='$_POST[apper_cc1]',
-		  `apper_cc2`='$_POST[apper_cc2]',
-		  `apper_cc3`='$_POST[apper_cc3]',
-		  `apper_st`='$_POST[apper_st]',
-		  `apper_st2`='$_POST[apper_st2]',
-		  `apper_st3`='$_POST[apper_st3]',
-		  `apper_pf1`='$_POST[apper_pf1]',
-		  `apper_pf2`='$_POST[apper_pf2]',
-		  `apper_pf3`='$_POST[apper_pf3]',
-		  `apper_pb1`='$_POST[apper_pb1]',
-		  `apper_pb2`='$_POST[apper_pb2]',
-		  `apper_pb3`='$_POST[apper_pb3]',
-		  `apper_acetate`='$_POST[apper_acetate]',
-		  `apper_cotton`='$_POST[apper_cotton]',
-		  `apper_nylon`='$_POST[apper_nylon]',
-		  `apper_poly`='$_POST[apper_poly]',
-		  `apper_acrylic`='$_POST[apper_acrylic]',
-		  `apper_wool`='$_POST[apper_wool]',
-	 	  `apper_note`='$_POST[apper_note]',
-		  `fibre_transfer`='$_POST[fibre_transfer]',
-		  `fibre_grade`='$_POST[fibre_grade]',
-		  `fibre_note`='$_POST[fibre_note]',
-		  `odour`='$_POST[odour]',
-		  `odour_note`='$_POST[odour_note]',
-		  `curling`='$_POST[curling]',
-		  `curling_note`='$_POST[curling_note]',
-		  `nedle`='$_POST[nedle]',
-		  `nedle_note`='$_POST[nedle_note]',
-	 	  `stat_fla`='$_POST[stat_fla]',
-		  `stat_fib`='$_POST[stat_fib]',
-		  `stat_fc`='$_POST[stat_fc]',
-		  `stat_fwss`='$_POST[stat_fwss]',
-		  `stat_fwss2`='$_POST[stat_fwss2]',
-		  `stat_fwss3`='$_POST[stat_fwss3]',
-		  `stat_bsk`='$_POST[stat_bsk]',
-		  `stat_pm`='$_POST[stat_pm]',
-		  `stat_pl`='$_POST[stat_pl]',
-		  `stat_pb`='$_POST[stat_pb]',
-		  `stat_prt`='$_POST[stat_prt]',
-		  `stat_abr`='$_POST[stat_abr]',
-		  `stat_sm`='$_POST[stat_sm]',
-		  `stat_sp`='$_POST[stat_sp]',
-		  `stat_sb`='$_POST[stat_sb]',
-		  `stat_bs`='$_POST[stat_bs]',
-		  `stat_bs2`='$_POST[stat_bs2]',
-		  `stat_bs3`='$_POST[stat_bs3]',
-		  `stat_th`='$_POST[stat_th]',
-		  `stat_sr`='$_POST[stat_sr]',
-		  `stat_gr`='$_POST[stat_gr]',
-		  `stat_ap`='$_POST[stat_ap]',
-		  `stat_hs`='$_POST[stat_hs]',
-		  `stat_ff`='$_POST[stat_ff]',
-		  `stat_odour`='$_POST[stat_odour]',
-		  `stat_curling`='$_POST[stat_curling]',
-		  `stat_nedle`='$_POST[stat_nedle]',
-		  `tgl_update`=now()
-		  WHERE `id_nokk`='$rcek[id]'");
-	if ($sqlPHY) {
-		$sqlPHYD = mysqli_query($con, "UPDATE tbl_tq_disptest SET
-		`dflamability`='$_POST[dflamability]',
-		`dfla_note`='$_POST[dfla_note]',
-		`dfc_cott`='$_POST[dfc_cott]',
-		`dfc_poly`='$_POST[dfc_poly]',
-		`dfc_elastane`='$_POST[dfc_ela]',
-		`dfc_cott1`='$_POST[dfc_cott1]',
-		`dfc_poly1`='$_POST[dfc_poly1]',
-		`dfc_elastane1`='$_POST[dfc_ela1]',
-		`dfibercontent`='$_POST[dfibercontent]',
-		`dfiber_note`='$_POST[dfiber_note]',
-		`std_dfc_cott1`='$_POST[std_dfc_cott1]',
-		`std_dfc_poly1`='$_POST[std_dfc_poly1]',
-		`std_dfc_elastane1`='$_POST[std_dfc_elastane1]',
-		`dfc_wpi`='$_POST[dwpi]',
-		`dfc_cpi`='$_POST[dcpi]',
-		`dfc_note`='$_POST[dfc_note]',
-		`df_weight`='$_POST[dfabric_weight]',
-		`dfwe_note`='$_POST[dfwe_note]',
-		`df_width`='$_POST[dfabric_width]',
-		`dfwi_note`='$_POST[dfwi_note]',
-		`dbow`='$_POST[dbow]',
-		`dskew`='$_POST[dskew]',
-		`dbas_note`='$_POST[dbas_note]',
-		`dh_shrinkage_temp`='$_POST[dh_shrinkage_temp]',
-		`dh_shrinkage_l1`='$_POST[dh_shrinkage_l1]',
-		`dh_shrinkage_w1`='$_POST[dh_shrinkage_w1]',
-		`dh_shrinkage_grd`='$_POST[dh_shrinkage_grd]',
-		`dh_shrinkage_app`='$_POST[dh_shrinkage_app]',
-		`dh_shrinkage_note`='$_POST[dh_shrinkage_note]',
-		`dss_temp`='$_POST[dss_temp]',
-		`dss_washes3`='$_POST[dss_washes3]',
-		`dss_washes10`='$_POST[dss_washes10]',
-		`dss_washes15`='$_POST[dss_washes15]',
-		`dss_cmt`='$_POST[dss_cmt]',
-		`dshrinkage_l1`='$_POST[dshrinkage_len1]',
-		`dshrinkage_l2`='$_POST[dshrinkage_len2]',
-		`dshrinkage_l3`='$_POST[dshrinkage_len3]',
-		`dshrinkage_l4`='$_POST[dshrinkage_len4]',
-		`dshrinkage_l5`='$_POST[dshrinkage_len5]',
-		`dshrinkage_l6`='$_POST[dshrinkage_len6]',
-		`dshrinkage_w1`='$_POST[dshrinkage_wid1]',
-		`dshrinkage_w2`='$_POST[dshrinkage_wid2]',
-		`dshrinkage_w3`='$_POST[dshrinkage_wid3]',
-		`dshrinkage_w4`='$_POST[dshrinkage_wid4]',
-		`dshrinkage_w5`='$_POST[dshrinkage_wid5]',
-		`dshrinkage_w6`='$_POST[dshrinkage_wid6]',
-		`dspirality1`='$_POST[dspirality1]',
-		`dspirality2`='$_POST[dspirality2]',
-		`dspirality3`='$_POST[dspirality3]',
-		`dspirality4`='$_POST[dspirality4]',
-		`dspirality5`='$_POST[dspirality5]',
-		`dspirality6`='$_POST[dspirality6]',
-		`dss_linedry`='$_POST[dss_linedry]',
-		`dss_tumbledry`='$_POST[dss_tumbledry]',
-		`dsns_note`='$_POST[dsns_note]',
-		`dapperss_ch1`='$_POST[dapperss_ch1]',
-		`dapperss_ch2`='$_POST[dapperss_ch2]',
-		`dapperss_ch3`='$_POST[dapperss_ch3]',
-		`dapperss_ch4`='$_POST[dapperss_ch4]',
-		`dapperss_cc1`='$_POST[dapperss_cc1]',
-		`dapperss_cc2`='$_POST[dapperss_cc2]',
-		`dapperss_cc3`='$_POST[dapperss_cc3]',
-		`dapperss_cc4`='$_POST[dapperss_cc4]',
-		`dapperss_st`='$_POST[dapperss_st]',
-		`dapperss_pf1`='$_POST[dapperss_pf1]',
-		`dapperss_pf2`='$_POST[dapperss_pf2]',
-		`dapperss_pf3`='$_POST[dapperss_pf3]',
-		`dapperss_pf4`='$_POST[dapperss_pf4]',
-		`dapperss_pb1`='$_POST[dapperss_pb1]',
-		`dapperss_pb2`='$_POST[dapperss_pb2]',
-		`dapperss_pb3`='$_POST[dapperss_pb3]',
-		`dapperss_pb4`='$_POST[dapperss_pb4]',
-		`dapperss_sf1`='$_POST[dapperss_sf1]',
-		`dapperss_sf2`='$_POST[dapperss_sf2]',
-		`dapperss_sf3`='$_POST[dapperss_sf3]',
-		`dapperss_sf4`='$_POST[dapperss_sf4]',
-		`dapperss_sb1`='$_POST[dapperss_sb1]',
-		`dapperss_sb2`='$_POST[dapperss_sb2]',
-		`dapperss_sb3`='$_POST[dapperss_sb3]',
-		`dapperss_sb4`='$_POST[dapperss_sb4]',
-	 	`dapperss_note`='$_POST[dapperss_note]',
-		`dpm_f1`='$_POST[dpillingm_f1]',
-		`dpm_b1`='$_POST[dpillingm_b1]',
-		`dpm_f2`='$_POST[dpillingm_f2]',
-		`dpm_b2`='$_POST[dpillingm_b2]',
-		`dpm_f3`='$_POST[dpillingm_f3]',
-		`dpm_b3`='$_POST[dpillingm_b3]',
-		`dpm_f4`='$_POST[dpillingm_f4]',
-		`dpm_b4`='$_POST[dpillingm_b4]',
-		`dpm_f5`='$_POST[dpillingm_f5]',
-		`dpm_b5`='$_POST[dpillingm_b5]',
-		`dpillm_note`='$_POST[dpillm_note]',
-		`dpl_f1`='$_POST[dpillingl_f1]',
-		`dpl_b1`='$_POST[dpillingl_b1]',
-		`dpl_f2`='$_POST[dpillingl_f2]',
-		`dpl_b2`='$_POST[dpillingl_b2]',
-		`dpl_f3`='$_POST[dpillingl_f3]',
-		`dpl_b3`='$_POST[dpillingl_b3]',
-		`dpl_f4`='$_POST[dpillingl_f4]',
-		`dpl_b4`='$_POST[dpillingl_b4]',
-		`dpl_f5`='$_POST[dpillingl_f5]',
-		`dpl_b5`='$_POST[dpillingl_b5]',
-		`dpilll_note`='$_POST[dpilll_note]',
-		`dpb_f1`='$_POST[dpillingb_f1]',
-		`dpb_b1`='$_POST[dpillingb_b1]',
-		`dpb_f2`='$_POST[dpillingb_f2]',
-		`dpb_b2`='$_POST[dpillingb_b2]',
-		`dpb_f3`='$_POST[dpillingb_f3]',
-		`dpb_b3`='$_POST[dpillingb_b3]',
-		`dpb_f4`='$_POST[dpillingb_f4]',
-		`dpb_b4`='$_POST[dpillingb_b4]',
-		`dpb_f5`='$_POST[dpillingb_f5]',
-		`dpb_b5`='$_POST[dpillingb_b5]',
-		`dpillb_note`='$_POST[dpillb_note]',
-		`dprt_f1`='$_POST[dpillingrt_f1]',
-		`dprt_b1`='$_POST[dpillingrt_b1]',
-		`dprt_f2`='$_POST[dpillingrt_f2]',
-		`dprt_b2`='$_POST[dpillingrt_b2]',
-		`dprt_f3`='$_POST[dpillingrt_f3]',
-		`dprt_b3`='$_POST[dpillingrt_b3]',
-		`dprt_f4`='$_POST[dpillingrt_f4]',
-		`dprt_b4`='$_POST[dpillingrt_b4]',
-		`dprt_f5`='$_POST[dpillingrt_f5]',
-		`dprt_b5`='$_POST[dpillingrt_b5]',
-		`dpillr_note`='$_POST[dpillr_note]',
-		`dabration`='$_POST[dabr]',
-		`dabr_note`='$_POST[dabr_note]',
-		`dsm_l1`='$_POST[dsnaggingm_l1]',
-		`dsm_w1`='$_POST[dsnaggingm_w1]',
-		`dsm_l2`='$_POST[dsnaggingm_l2]',
-		`dsm_w2`='$_POST[dsnaggingm_w2]',
-		`dsm_l3`='$_POST[dsnaggingm_l3]',
-		`dsm_w3`='$_POST[dsnaggingm_w3]',
-		`dsm_l4`='$_POST[dsnaggingm_l4]',
-		`dsm_w4`='$_POST[dsnaggingm_w4]',
-		`dsnam_note`='$_POST[dsnam_note]',
-		`dsp_grdl1` ='$_POST[dsp_grdl1]',
-		`dsp_clsl1` ='$_POST[dsp_clsl1]',
-		`dsp_shol1` ='$_POST[dsp_shol1]',
-		`dsp_medl1` ='$_POST[dsp_medl1]',
-		`dsp_lonl1` ='$_POST[dsp_lonl1]',
-		`dsp_grdw1` ='$_POST[dsp_grdw1]',
-		`dsp_clsw1` ='$_POST[dsp_clsw1]',
-		`dsp_show1` ='$_POST[dsp_show1]',
-		`dsp_medw1` ='$_POST[dsp_medw1]',
-		`dsp_lonw1` ='$_POST[dsp_lonw1]',
-		`dsp_grdl2` ='$_POST[dsp_grdl2]',
-		`dsp_clsl2` ='$_POST[dsp_clsl2]',
-		`dsp_shol2` ='$_POST[dsp_shol2]',
-		`dsp_medl2` ='$_POST[dsp_medl2]',
-		`dsp_lonl2` ='$_POST[dsp_lonl2]',
-		`dsp_grdw2` ='$_POST[dsp_grdw2]',
-		`dsp_clsw2` ='$_POST[dsp_clsw2]',
-		`dsp_show2` ='$_POST[dsp_show2]',
-		`dsp_medw2` ='$_POST[dsp_medw2]',
-		`dsp_lonw2` ='$_POST[dsp_lonw2]',
-		`dsnap_note`='$_POST[dsnap_note]',
-		`dsb_l1`='$_POST[dsnaggingb_l1]',
-		`dsb_w1`='$_POST[dsnaggingb_w1]',
-		`dsb_l2`='$_POST[dsnaggingb_l2]',
-		`dsb_w2`='$_POST[dsnaggingb_w2]',
-		`dsb_l3`='$_POST[dsnaggingb_l3]',
-		`dsb_w3`='$_POST[dsnaggingb_w3]',
-		`dsb_l4`='$_POST[dsnaggingb_l4]',
-		`dsb_w4`='$_POST[dsnaggingb_w4]',
-		`dsnab_note`='$_POST[dsnab_note]',
-		`dbs_instron`='$_POST[dinstron]',
-		`dbs_mullen`='$_POST[dmullen]',
-		`dbs_tru`='$_POST[dtru_burst]',
-		`dbs_tru2`='$_POST[dtru_burst2]',
-		`dburs_note`='$_POST[dburs_note]',
-		`dthick1`='$_POST[dthick1]',
-		`dthick2`='$_POST[dthick2]',
-		`dthick3`='$_POST[dthick3]',
-		`dthickav`='$_POST[dthickav]',
-		`dthick_note`='$_POST[dthick_note]',
-		`dstretch_l1`='$_POST[dstretch_l1]',
-		`dstretch_w1`='$_POST[dstretch_w1]',
-		`dstretch_l2`='$_POST[dstretch_l2]',
-		`dstretch_w2`='$_POST[dstretch_w2]',
-		`dstretch_l3`='$_POST[dstretch_l3]',
-		`dstretch_w3`='$_POST[dstretch_w3]',
-		`dstretch_l4`='$_POST[dstretch_l4]',
-		`dstretch_w4`='$_POST[dstretch_w4]',
-		`dstretch_l5`='$_POST[dstretch_l5]',
-		`dstretch_w5`='$_POST[dstretch_w5]',
-		`dload_stretch`='$_POST[dload_stretch]',
-		`dstretch_note`='$_POST[dstretch_note]',
-		`drecover_l1`='$_POST[drecover_l1]',
-		`drecover_w1`='$_POST[drecover_w1]',
-		`drecover_l2`='$_POST[drecover_l2]',
-		`drecover_w2`='$_POST[drecover_w2]',
-		`drecover_l3`='$_POST[drecover_l3]',
-		`drecover_w3`='$_POST[drecover_w3]',
-		`drecover_l4`='$_POST[drecover_l4]',
-		`drecover_w4`='$_POST[drecover_w4]',
-		`drecover_l5`='$_POST[drecover_l5]',
-		`drecover_w5`='$_POST[drecover_w5]',
-		`drecover_w11`='$_POST[drecover_w11]',
-		`drecover_l21`='$_POST[drecover_l21]',
-		`drecover_w21`='$_POST[drecover_w21]',
-		`drecover_l31`='$_POST[drecover_l31]',
-		`drecover_w31`='$_POST[drecover_w31]',
-		`drecover_l41`='$_POST[drecover_l41]',
-		`drecover_w41`='$_POST[drecover_w41]',
-		`drecover_l51`='$_POST[drecover_l51]',
-		`drecover_w51`='$_POST[drecover_w51]',
-		`drecover_note`='$_POST[drecover_note]',
-		`dgrowth_l1`='$_POST[dgrowth_l1]',
-		`dgrowth_w1`='$_POST[dgrowth_w1]',
-		`dgrowth_l2`='$_POST[dgrowth_l2]',
-		`dgrowth_w2`='$_POST[dgrowth_w2]',
-		`drec_growth_l1`='$_POST[drec_growth_l1]',
-		`drec_growth_w1`='$_POST[drec_growth_w1]',
-		`drec_growth_l2`='$_POST[drec_growth_l2]',
-		`drec_growth_w2`='$_POST[drec_growth_w2]',
-		`dgrowth_note`='$_POST[dgrowth_note]',
-		`dapper_ch1`='$_POST[dapper_ch1]',
-		`dapper_ch2`='$_POST[dapper_ch2]',
-		`dapper_ch3`='$_POST[dapper_ch3]',
-		`dapper_cc1`='$_POST[dapper_cc1]',
-		`dapper_cc2`='$_POST[dapper_cc2]',
-		`dapper_cc3`='$_POST[dapper_cc3]',
-		`dapper_st`='$_POST[dapper_st]',
-		`dapper_st2`='$_POST[dapper_st2]',
-		`dapper_st3`='$_POST[dapper_st3]',
-		`dapper_pf1`='$_POST[dapper_pf1]',
-		`dapper_pf2`='$_POST[dapper_pf2]',
-		`dapper_pf3`='$_POST[dapper_pf3]',
-		`dapper_pb1`='$_POST[dapper_pb1]',
-		`dapper_pb2`='$_POST[dapper_pb2]',
-		`dapper_pb3`='$_POST[dapper_pb3]',
-		`dapper_acetate`='$_POST[dapper_acetate]',
-		`dapper_cotton`='$_POST[dapper_cotton]',
-		`dapper_nylon`='$_POST[dapper_nylon]',
-		`dapper_poly`='$_POST[dapper_poly]',
-		`dapper_acrylic`='$_POST[dapper_acrylic]',
-		`dapper_wool`='$_POST[dapper_wool]',
-		`dapper_note`='$_POST[dapper_note]',
-		`dfibre_transfer`='$_POST[dfibre_transfer]',
-		`dfibre_grade`='$_POST[dfibre_grade]',
-		`dfibre_note`='$_POST[dfibre_note]',
-		`dodour`='$_POST[dodour]',
-		`dodour_note`='$_POST[dodour_note]',
-		`dcurling`='$_POST[dcurling]',
-		`dcurling_note`='$_POST[dcurling_note]',
-		`dnedle`='$_POST[dnedle]',
-		`dnedle_note`='$_POST[dnedle_note]',
-		`tgl_update`=now()
-		WHERE `id_nokk`='$rcek[id]'");
-		$sqlPHYM = mysqli_query($con, "UPDATE tbl_tq_marginal SET
-				`mflamability`='$_POST[mflamability]',
-				`mfla_note`='$_POST[mfla_note]',
-				`mfc_cott`='$_POST[mfc_cott]',
-				`mfc_poly`='$_POST[mfc_poly]',
-				`mfc_elastane`='$_POST[mfc_ela]',
-				`mfc_cott1`='$_POST[mfc_cott1]',
-				`mfc_poly1`='$_POST[mfc_poly1]',
-				`mfc_elastane1`='$_POST[mfc_ela1]',
-				`std_mfc_cott1`='$_POST[std_mfc_cott1]',
-				`std_mfc_poly1`='$_POST[std_mfc_poly1]',
-				`std_mfc_elastane1`='$_POST[std_mfc_elastane1]',
-				`mfibercontent`='$_POST[mfibercontent]',
-				`mfiber_note`='$_POST[mfiber_note]',
-				`mfc_wpi`='$_POST[mwpi]',
-				`mfc_cpi`='$_POST[mcpi]',
-				`mfc_note`='$_POST[mfc_note]',
-				`mf_weight`='$_POST[mfabric_weight]',
-				`mfwe_note`='$_POST[mfwe_note]',
-				`mf_width`='$_POST[mfabric_width]',
-				`mfwi_note`='$_POST[mfwi_note]',
-				`mbow`='$_POST[mbow]',
-				`mskew`='$_POST[mskew]',
-				`mbas_note`='$_POST[mbas_note]',
-				`mh_shrinkage_temp`='$_POST[mh_shrinkage_temp]',
-				`mh_shrinkage_l1`='$_POST[mh_shrinkage_l1]',
-				`mh_shrinkage_w1`='$_POST[mh_shrinkage_w1]',
-				`mh_shrinkage_grd`='$_POST[mh_shrinkage_grd]',
-				`mh_shrinkage_app`='$_POST[mh_shrinkage_app]',
-				`mh_shrinkage_note`='$_POST[mh_shrinkage_note]',
-				`mss_temp`='$_POST[mss_temp]',
-				`mss_washes3`='$_POST[mss_washes3]',
-				`mss_washes10`='$_POST[mss_washes10]',
-				`mss_washes15`='$_POST[mss_washes15]',
-				`mss_cmt`='$_POST[mss_cmt]',
-				`mshrinkage_l1`='$_POST[mshrinkage_len1]',
-				`mshrinkage_l2`='$_POST[mshrinkage_len2]',
-				`mshrinkage_l3`='$_POST[mshrinkage_len3]',
-				`mshrinkage_l4`='$_POST[mshrinkage_len4]',
-				`mshrinkage_l5`='$_POST[mshrinkage_len5]',
-				`mshrinkage_l6`='$_POST[mshrinkage_len6]',
-				`mshrinkage_w1`='$_POST[mshrinkage_wid1]',
-				`mshrinkage_w2`='$_POST[mshrinkage_wid2]',
-				`mshrinkage_w3`='$_POST[mshrinkage_wid3]',
-				`mshrinkage_w4`='$_POST[mshrinkage_wid4]',
-				`mshrinkage_w5`='$_POST[mshrinkage_wid5]',
-				`mshrinkage_w6`='$_POST[mshrinkage_wid6]',
-				`mspirality1`='$_POST[mspirality1]',
-				`mspirality2`='$_POST[mspirality2]',
-				`mspirality3`='$_POST[mspirality3]',
-				`mspirality4`='$_POST[mspirality4]',
-				`mspirality5`='$_POST[mspirality5]',
-				`mspirality6`='$_POST[mspirality6]',
-				`mss_linedry`='$_POST[mss_linedry]',
-				`mss_tumbledry`='$_POST[mss_tumbledry]',
-				`msns_note`='$_POST[msns_note]',
-				`mapperss_ch1`='$_POST[mapperss_ch1]',
-				`mapperss_ch2`='$_POST[mapperss_ch2]',
-				`mapperss_ch3`='$_POST[mapperss_ch3]',
-				`mapperss_ch4`='$_POST[mapperss_ch4]',
-				`mapperss_cc1`='$_POST[mapperss_cc1]',
-				`mapperss_cc2`='$_POST[mapperss_cc2]',
-				`mapperss_cc3`='$_POST[mapperss_cc3]',
-				`mapperss_cc4`='$_POST[mapperss_cc4]',
-				`mapperss_st`='$_POST[mapperss_st]',
-				`mapperss_pf1`='$_POST[mapperss_pf1]',
-				`mapperss_pf2`='$_POST[mapperss_pf2]',
-				`mapperss_pf3`='$_POST[mapperss_pf3]',
-				`mapperss_pf4`='$_POST[mapperss_pf4]',
-				`mapperss_pb1`='$_POST[mapperss_pb1]',
-				`mapperss_pb2`='$_POST[mapperss_pb2]',
-				`mapperss_pb3`='$_POST[mapperss_pb3]',
-				`mapperss_pb4`='$_POST[mapperss_pb4]',
-				`mapperss_sf1`='$_POST[mapperss_sf1]',
-				`mapperss_sf2`='$_POST[mapperss_sf2]',
-				`mapperss_sf3`='$_POST[mapperss_sf3]',
-				`mapperss_sf4`='$_POST[mapperss_sf4]',
-				`mapperss_sb1`='$_POST[mapperss_sb1]',
-				`mapperss_sb2`='$_POST[mapperss_sb2]',
-				`mapperss_sb3`='$_POST[mapperss_sb3]',
-				`mapperss_sb4`='$_POST[mapperss_sb4]',
-				`mapperss_note`='$_POST[mapperss_note]',
-				`mpm_f1`='$_POST[mpillingm_f1]',
-				`mpm_b1`='$_POST[mpillingm_b1]',
-				`mpm_f2`='$_POST[mpillingm_f2]',
-				`mpm_b2`='$_POST[mpillingm_b2]',
-				`mpm_f3`='$_POST[mpillingm_f3]',
-				`mpm_b3`='$_POST[mpillingm_b3]',
-				`mpm_f4`='$_POST[mpillingm_f4]',
-				`mpm_b4`='$_POST[mpillingm_b4]',
-				`mpm_f5`='$_POST[mpillingm_f5]',
-				`mpm_b5`='$_POST[mpillingm_b5]',
-				`mpillm_note`='$_POST[mpillm_note]',
-				`mpl_f1`='$_POST[mpillingl_f1]',
-				`mpl_b1`='$_POST[mpillingl_b1]',
-				`mpl_f2`='$_POST[mpillingl_f2]',
-				`mpl_b2`='$_POST[mpillingl_b2]',
-				`mpl_f3`='$_POST[mpillingl_f3]',
-				`mpl_b3`='$_POST[mpillingl_b3]',
-				`mpl_f4`='$_POST[mpillingl_f4]',
-				`mpl_b4`='$_POST[mpillingl_b4]',
-				`mpl_f5`='$_POST[mpillingl_f5]',
-				`mpl_b5`='$_POST[mpillingl_b5]',
-				`mpilll_note`='$_POST[mpilll_note]',
-				`mpb_f1`='$_POST[mpillingb_f1]',
-				`mpb_b1`='$_POST[mpillingb_b1]',
-				`mpb_f2`='$_POST[mpillingb_f2]',
-				`mpb_b2`='$_POST[mpillingb_b2]',
-				`mpb_f3`='$_POST[mpillingb_f3]',
-				`mpb_b3`='$_POST[mpillingb_b3]',
-				`mpb_f4`='$_POST[mpillingb_f4]',
-				`mpb_b4`='$_POST[mpillingb_b4]',
-				`mpb_f5`='$_POST[mpillingb_f5]',
-				`mpb_b5`='$_POST[mpillingb_b5]',
-				`mpillb_note`='$_POST[mpillb_note]',
-				`mprt_f1`='$_POST[mpillingrt_f1]',
-				`mprt_b1`='$_POST[mpillingrt_b1]',
-				`mprt_f2`='$_POST[mpillingrt_f2]',
-				`mprt_b2`='$_POST[mpillingrt_b2]',
-				`mprt_f3`='$_POST[mpillingrt_f3]',
-				`mprt_b3`='$_POST[mpillingrt_b3]',
-				`mprt_f4`='$_POST[mpillingrt_f4]',
-				`mprt_b4`='$_POST[mpillingrt_b4]',
-				`mprt_f5`='$_POST[mpillingrt_f5]',
-				`mprt_b5`='$_POST[mpillingrt_b5]',
-				`mpillr_note`='$_POST[mpillr_note]',
-				`mabration`='$_POST[mabr]',
-				`mabr_note`='$_POST[mabr_note]',
-				`msm_l1`='$_POST[msnaggingm_l1]',
-				`msm_w1`='$_POST[msnaggingm_w1]',
-				`msm_l2`='$_POST[msnaggingm_l2]',
-				`msm_w2`='$_POST[msnaggingm_w2]',
-				`msm_l3`='$_POST[msnaggingm_l3]',
-				`msm_w3`='$_POST[msnaggingm_w3]',
-				`msm_l4`='$_POST[msnaggingm_l4]',
-				`msm_w4`='$_POST[msnaggingm_w4]',
-				`msnam_note`='$_POST[msnam_note]',
-				`msp_grdl1` ='$_POST[msp_grdl1]',
-				`msp_clsl1` ='$_POST[msp_clsl1]',
-				`msp_shol1` ='$_POST[msp_shol1]',
-				`msp_medl1` ='$_POST[msp_medl1]',
-				`msp_lonl1` ='$_POST[msp_lonl1]',
-				`msp_grdw1` ='$_POST[msp_grdw1]',
-				`msp_clsw1` ='$_POST[msp_clsw1]',
-				`msp_show1` ='$_POST[msp_show1]',
-				`msp_medw1` ='$_POST[msp_medw1]',
-				`msp_lonw1` ='$_POST[msp_lonw1]',
-				`msp_grdl2` ='$_POST[msp_grdl2]',
-				`msp_clsl2` ='$_POST[msp_clsl2]',
-				`msp_shol2` ='$_POST[msp_shol2]',
-				`msp_medl2` ='$_POST[msp_medl2]',
-				`msp_lonl2` ='$_POST[msp_lonl2]',
-				`msp_grdw2` ='$_POST[msp_grdw2]',
-				`msp_clsw2` ='$_POST[msp_clsw2]',
-				`msp_show2` ='$_POST[msp_show2]',
-				`msp_medw2` ='$_POST[msp_medw2]',
-				`msp_lonw2` ='$_POST[msp_lonw2]',
-				`msnap_note`='$_POST[msnap_note]',
-				`msb_l1`='$_POST[msnaggingb_l1]',
-				`msb_w1`='$_POST[msnaggingb_w1]',
-				`msb_l2`='$_POST[msnaggingb_l2]',
-				`msb_w2`='$_POST[msnaggingb_w2]',
-				`msb_l3`='$_POST[msnaggingb_l3]',
-				`msb_w3`='$_POST[msnaggingb_w3]',
-				`msb_l4`='$_POST[msnaggingb_l4]',
-				`msb_w4`='$_POST[msnaggingb_w4]',
-				`msnab_note`='$_POST[msnab_note]',
-				`mbs_instron`='$_POST[minstron]',
-				`mbs_mullen`='$_POST[mmullen]',
-				`mbs_tru`='$_POST[mtru_burst]',
-				`mbs_tru2`='$_POST[mtru_burst2]',
-				`mburs_note`='$_POST[mburs_note]',
-				`mthick1`='$_POST[mthick1]',
-				`mthick2`='$_POST[mthick2]',
-				`mthick3`='$_POST[mthick3]',
-				`mthickav`='$_POST[mthickav]',
-				`mthick_note`='$_POST[mthick_note]',
-				`mstretch_l1`='$_POST[mstretch_l1]',
-				`mstretch_w1`='$_POST[mstretch_w1]',
-				`mstretch_l2`='$_POST[mstretch_l2]',
-				`mstretch_w2`='$_POST[mstretch_w2]',
-				`mstretch_l3`='$_POST[mstretch_l3]',
-				`mstretch_w3`='$_POST[mstretch_w3]',
-				`mstretch_l4`='$_POST[mstretch_l4]',
-				`mstretch_w4`='$_POST[mstretch_w4]',
-				`mstretch_l5`='$_POST[mstretch_l5]',
-				`mstretch_w5`='$_POST[mstretch_w5]',
-				`mload_stretch`='$_POST[mload_stretch]',
-				`mstretch_note`='$_POST[mstretch_note]',
-				`mrecover_l1`='$_POST[mrecover_l1]',
-				`mrecover_w1`='$_POST[mrecover_w1]',
-				`mrecover_l2`='$_POST[mrecover_l2]',
-				`mrecover_w2`='$_POST[mrecover_w2]',
-				`mrecover_l3`='$_POST[mrecover_l3]',
-				`mrecover_w3`='$_POST[mrecover_w3]',
-				`mrecover_l4`='$_POST[mrecover_l4]',
-				`mrecover_w4`='$_POST[mrecover_w4]',
-				`mrecover_l5`='$_POST[mrecover_l5]',
-				`mrecover_w5`='$_POST[mrecover_w5]',
-				`mrecover_l11`='$_POST[mrecover_l11]',
-				`mrecover_w11`='$_POST[mrecover_w11]',
-				`mrecover_l21`='$_POST[mrecover_l21]',
-				`mrecover_w21`='$_POST[mrecover_w21]',
-				`mrecover_l31`='$_POST[mrecover_l31]',
-				`mrecover_w31`='$_POST[mrecover_w31]',
-				`mrecover_l41`='$_POST[mrecover_l41]',
-				`mrecover_w41`='$_POST[mrecover_w41]',
-				`mrecover_l51`='$_POST[mrecover_l51]',
-				`mrecover_w51`='$_POST[mrecover_w51]',
-				`mrecover_note`='$_POST[mrecover_note]',
-				`mgrowth_l1`='$_POST[mgrowth_l1]',
-				`mgrowth_w1`='$_POST[mgrowth_w1]',
-				`mgrowth_l2`='$_POST[mgrowth_l2]',
-				`mgrowth_w2`='$_POST[mgrowth_w2]',
-				`mrec_growth_l1`='$_POST[mrec_growth_l1]',
-				`mrec_growth_w1`='$_POST[mrec_growth_w1]',
-				`mrec_growth_l2`='$_POST[mrec_growth_l2]',
-				`mrec_growth_w2`='$_POST[mrec_growth_w2]',
-				`mgrowth_note`='$_POST[mgrowth_note]',
-				`mapper_ch1`='$_POST[mapper_ch1]',
-				`mapper_ch2`='$_POST[mapper_ch2]',
-				`mapper_ch3`='$_POST[mapper_ch3]',
-				`mapper_cc1`='$_POST[mapper_cc1]',
-				`mapper_cc2`='$_POST[mapper_cc2]',
-				`mapper_cc3`='$_POST[mapper_cc3]',
-				`mapper_st`='$_POST[mapper_st]',
-				`mapper_st2`='$_POST[mapper_st2]',
-				`mapper_st3`='$_POST[mapper_st3]',
-				`mapper_pf1`='$_POST[mapper_pf1]',
-				`mapper_pf2`='$_POST[mapper_pf2]',
-				`mapper_pf3`='$_POST[mapper_pf3]',
-				`mapper_pb1`='$_POST[mapper_pb1]',
-				`mapper_pb2`='$_POST[mapper_pb2]',
-				`mapper_pb3`='$_POST[mapper_pb3]',
-				`mapper_acetate`='$_POST[mapper_acetate]',
-				`mapper_cotton`='$_POST[mapper_cotton]',
-				`mapper_nylon`='$_POST[mapper_nylon]',
-				`mapper_poly`='$_POST[mapper_poly]',
-				`mapper_acrylic`='$_POST[mapper_acrylic]',
-				`mapper_wool`='$_POST[mapper_wool]',
-				`mapper_note`='$_POST[mapper_note]',
-				`mfibre_transfer`='$_POST[mfibre_transfer]',
-				`mfibre_grade`='$_POST[mfibre_grade]',
-				`mfibre_note`='$_POST[mfibre_note]',
-				`modour`='$_POST[modour]',
-				`modour_note`='$_POST[modour_note]',
-				`tgl_update`=now()
-				WHERE `id_nokk`='$rcek[id]'");
+	
+	$sql = "
+	UPDATE db_qc.tbl_tq_test SET
+		flamability = ?,
+		fla_note = ?,
+		fc_cott = ?,
+		fc_poly = ?,
+		fc_elastane = ?,
+		fc_cott1 = ?,
+		fc_poly1 = ?,
+		fc_elastane1 = ?,
+		std_fc_cott1 = ?,
+		std_fc_poly1 = ?,
+		std_fc_elastane1 = ?,
+		fibercontent = ?,
+		fiber_note = ?,
+		fc_wpi = ?,
+		fc_cpi = ?,
+		fc_note = ?,
+		f_weight = ?,
+		fwe_note = ?,
+		f_width = ?,
+		fwi_note = ?,
+		bow = ?,
+		skew = ?,
+		bas_note = ?,
+		h_shrinkage_temp = ?,
+		h_shrinkage_l1 = ?,
+		h_shrinkage_w1 = ?,
+		h_shrinkage_grd = ?,
+		h_shrinkage_app = ?,
+		h_shrinkage_note = ?,
+		ss_temp = ?,
+		ss_washes3 = ?,
+		ss_washes10 = ?,
+		ss_washes15 = ?,
+		ss_cmt = ?,
+		shrinkage_l1 = ?,
+		shrinkage_l2 = ?,
+		shrinkage_l3 = ?,
+		shrinkage_l4 = ?,
+		shrinkage_l5 = ?,
+		shrinkage_l6 = ?,
+		shrinkage_w1 = ?,
+		shrinkage_w2 = ?,
+		shrinkage_w3 = ?,
+		shrinkage_w4 = ?,
+		shrinkage_w5 = ?,
+		shrinkage_w6 = ?,
+		spirality1 = ?,
+		spirality2 = ?,
+		spirality3 = ?,
+		spirality4 = ?,
+		spirality5 = ?,
+		spirality6 = ?,
+		ss_linedry = ?,
+		ss_tumbledry = ?,
+		sns_note = ?,
+		apperss_note = ?,
+		pillm_note = ?,
+		pilll_note = ?,
+		pillb_note = ?,
+		pillr_note = ?,
+		abration = ?,
+		abr_note = ?,
+		snam_note = ?,
+		snap_note = ?,
+		snab_note = ?,
+		burs_note = ?,
+		thick_note = ?,
+		stretch_note = ?,
+		recover_note = ?,
+		growth_note = ?,
+		apper_note = ?,
+		fibre_note = ?,
+		odour = ?,
+		odour_note = ?,
+		curling = ?,
+		curling_note = ?,
+		nedle = ?,
+		nedle_note = ?,
+		stat_fla = ?,
+		stat_fib = ?,
+		stat_fc = ?,
+		stat_fwss = ?,
+		stat_fwss2 = ?,
+		stat_fwss3 = ?,
+		stat_bsk = ?,
+		stat_pm = ?,
+		stat_pl = ?,
+		stat_pb = ?,
+		stat_prt = ?,
+		stat_abr = ?,
+		stat_sm = ?,
+		stat_sp = ?,
+		stat_sb = ?,
+		stat_bs = ?,
+		stat_bs2 = ?,
+		stat_bs3 = ?,
+		stat_th = ?,
+		stat_sr = ?,
+		stat_gr = ?,
+		stat_ap = ?,
+		stat_hs = ?,
+		stat_ff = ?,
+		stat_odour = ?,
+		stat_curling = ?,
+		stat_nedle = ?,
+		tgl_update = GETDATE()
+	WHERE id_nokk = ?
+	";
 
+	$params = [
+		$_POST['flamability'],
+		$_POST['fla_note'],
+		$_POST['fc_cott'],
+		$_POST['fc_poly'],
+		$_POST['fc_ela'],
+		$_POST['fc_cott1'],
+		$_POST['fc_poly1'],
+		$_POST['fc_ela1'],
+		$_POST['std_fc_cott1'],
+		$_POST['std_fc_poly1'],
+		$_POST['std_fc_elastane1'],
+		$_POST['fibercontent'],
+		$_POST['fiber_note'],
+		$_POST['wpi'],
+		$_POST['cpi'],
+		$_POST['fc_note'],
+		$_POST['fabric_weight'],
+		$_POST['fwe_note'],
+		$_POST['fabric_width'],
+		$_POST['fwi_note'],
+		$_POST['bow'],
+		$_POST['skew'],
+		$_POST['bas_note'],
+		$_POST['h_shrinkage_temp'],
+		$_POST['h_shrinkage_l1'],
+		$_POST['h_shrinkage_w1'],
+		$_POST['h_shrinkage_grd'],
+		$_POST['h_shrinkage_app'],
+		$_POST['h_shrinkage_note'],
+		$_POST['ss_temp'],
+		$_POST['ss_washes3'],
+		$_POST['ss_washes10'],
+		$_POST['ss_washes15'],
+		$_POST['ss_cmt'],
+		$_POST['shrinkage_len1'],
+		$_POST['shrinkage_len2'],
+		$_POST['shrinkage_len3'],
+		$_POST['shrinkage_len4'],
+		$_POST['shrinkage_len5'],
+		$_POST['shrinkage_len6'],
+		$_POST['shrinkage_wid1'],
+		$_POST['shrinkage_wid2'],
+		$_POST['shrinkage_wid3'],
+		$_POST['shrinkage_wid4'],
+		$_POST['shrinkage_wid5'],
+		$_POST['shrinkage_wid6'],
+		$_POST['spirality1'],
+		$_POST['spirality2'],
+		$_POST['spirality3'],
+		$_POST['spirality4'],
+		$_POST['spirality5'],
+		$_POST['spirality6'],
+		$_POST['ss_linedry'],
+		$_POST['ss_tumbledry'],
+		$_POST['sns_note'],
+		$_POST['apperss_note'],
+		$_POST['pillm_note'],
+		$_POST['pilll_note'],
+		$_POST['pillb_note'],
+		$_POST['pillr_note'],
+		$_POST['abr'],
+		$_POST['abr_note'],
+		$_POST['snam_note'],
+		$_POST['snap_note'],
+		$_POST['snab_note'],
+		$_POST['burs_note'],
+		$_POST['thick_note'],
+		$_POST['stretch_note'],
+		$_POST['recover_note'],
+		$_POST['growth_note'],
+		$_POST['apper_note'],
+		$_POST['fibre_note'],
+		$_POST['odour'],
+		$_POST['odour_note'],
+		$_POST['curling'],
+		$_POST['curling_note'],
+		$_POST['nedle'],
+		$_POST['nedle_note'],
+		$_POST['stat_fla'],
+		$_POST['stat_fib'],
+		$_POST['stat_fc'],
+		$_POST['stat_fwss'],
+		$_POST['stat_fwss2'],
+		$_POST['stat_fwss3'],
+		$_POST['stat_bsk'],
+		$_POST['stat_pm'],
+		$_POST['stat_pl'],
+		$_POST['stat_pb'],
+		$_POST['stat_prt'],
+		$_POST['stat_abr'],
+		$_POST['stat_sm'],
+		$_POST['stat_sp'],
+		$_POST['stat_sb'],
+		$_POST['stat_bs'],
+		$_POST['stat_bs2'],
+		$_POST['stat_bs3'],
+		$_POST['stat_th'],
+		$_POST['stat_sr'],
+		$_POST['stat_gr'],
+		$_POST['stat_ap'],
+		$_POST['stat_hs'],
+		$_POST['stat_ff'],
+		$_POST['stat_odour'],
+		$_POST['stat_curling'],
+		$_POST['stat_nedle'],
+		$rcek['id'] // id_nokk
+	];
+
+	$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+	if ($sqlPHY === false) {
+		die(print_r(sqlsrv_errors(), true));
+	}
+
+
+	if ($sqlPHY) {
+
+		$sql = "
+			UPDATE db_qc.tbl_tq_disptest SET
+				dflamability = ?,
+				dfla_note = ?,
+				dfc_cott = ?,
+				dfc_poly = ?,
+				dfc_elastane = ?,
+				dfc_cott1 = ?,
+				dfc_poly1 = ?,
+				dfc_elastane1 = ?,
+				dfibercontent = ?,
+				dfiber_note = ?,
+				std_dfc_cott1 = ?,
+				std_dfc_poly1 = ?,
+				std_dfc_elastane1 = ?,
+				dfc_wpi = ?,
+				dfc_cpi = ?,
+				dfc_note = ?,
+				df_weight = ?,
+				dfwe_note = ?,
+				df_width = ?,
+				dfwi_note = ?,
+				dbow = ?,
+				dskew = ?,
+				dbas_note = ?,
+				dh_shrinkage_temp = ?,
+				dh_shrinkage_l1 = ?,
+				dh_shrinkage_w1 = ?,
+				dh_shrinkage_grd = ?,
+				dh_shrinkage_app = ?,
+				dh_shrinkage_note = ?,
+				dss_temp = ?,
+				dss_washes3 = ?,
+				dss_washes10 = ?,
+				dss_washes15 = ?,
+				dss_cmt = ?,
+				dshrinkage_l1 = ?,
+				dshrinkage_l2 = ?,
+				dshrinkage_l3 = ?,
+				dshrinkage_l4 = ?,
+				dshrinkage_l5 = ?,
+				dshrinkage_l6 = ?,
+				dshrinkage_w1 = ?,
+				dshrinkage_w2 = ?,
+				dshrinkage_w3 = ?,
+				dshrinkage_w4 = ?,
+				dshrinkage_w5 = ?,
+				dshrinkage_w6 = ?,
+				dspirality1 = ?,
+				dspirality2 = ?,
+				dspirality3 = ?,
+				dspirality4 = ?,
+				dspirality5 = ?,
+				dspirality6 = ?,
+				dss_linedry = ?,
+				dss_tumbledry = ?,
+				dsns_note = ?,
+				dapperss_note = ?,
+				dpillm_note = ?,
+				dpilll_note = ?,
+				dpillb_note = ?,
+				dpillr_note = ?,
+				dabration = ?,
+				dabr_note = ?,
+				dsnam_note = ?,
+				dsnap_note = ?,
+				dsnab_note = ?,
+				dburs_note = ?,
+				dthick_note = ?,
+				dstretch_note = ?,
+				drecover_note = ?,
+				dgrowth_note = ?,
+				dapper_note = ?,
+				dfibre_note = ?,
+				dodour = ?,
+				dodour_note = ?,
+				dcurling = ?,
+				dcurling_note = ?,
+				dnedle = ?,
+				dnedle_note = ?,
+				tgl_update = GETDATE()
+			WHERE id_nokk = ?
+			";
+		
+		$params = [
+			$_POST['dflamability'],
+			$_POST['dfla_note'],
+			$_POST['dfc_cott'],
+			$_POST['dfc_poly'],
+			$_POST['dfc_ela'],
+			$_POST['dfc_cott1'],
+			$_POST['dfc_poly1'],
+			$_POST['dfc_ela1'],
+			$_POST['dfibercontent'],
+			$_POST['dfiber_note'],
+			$_POST['std_dfc_cott1'],
+			$_POST['std_dfc_poly1'],
+			$_POST['std_dfc_elastane1'],
+			$_POST['dwpi'],
+			$_POST['dcpi'],
+			$_POST['dfc_note'],
+			$_POST['dfabric_weight'],
+			$_POST['dfwe_note'],
+			$_POST['dfabric_width'],
+			$_POST['dfwi_note'],
+			$_POST['dbow'],
+			$_POST['dskew'],
+			$_POST['dbas_note'],
+			$_POST['dh_shrinkage_temp'],
+			$_POST['dh_shrinkage_l1'],
+			$_POST['dh_shrinkage_w1'],
+			$_POST['dh_shrinkage_grd'],
+			$_POST['dh_shrinkage_app'],
+			$_POST['dh_shrinkage_note'],
+			$_POST['dss_temp'],
+			$_POST['dss_washes3'],
+			$_POST['dss_washes10'],
+			$_POST['dss_washes15'],
+			$_POST['dss_cmt'],
+			$_POST['dshrinkage_len1'],
+			$_POST['dshrinkage_len2'],
+			$_POST['dshrinkage_len3'],
+			$_POST['dshrinkage_len4'],
+			$_POST['dshrinkage_len5'],
+			$_POST['dshrinkage_len6'],
+			$_POST['dshrinkage_wid1'],
+			$_POST['dshrinkage_wid2'],
+			$_POST['dshrinkage_wid3'],
+			$_POST['dshrinkage_wid4'],
+			$_POST['dshrinkage_wid5'],
+			$_POST['dshrinkage_wid6'],
+			$_POST['dspirality1'],
+			$_POST['dspirality2'],
+			$_POST['dspirality3'],
+			$_POST['dspirality4'],
+			$_POST['dspirality5'],
+			$_POST['dspirality6'],
+			$_POST['dss_linedry'],
+			$_POST['dss_tumbledry'],
+			$_POST['dsns_note'],
+			$_POST['dapperss_note'],
+			$_POST['dpillm_note'],
+			$_POST['dpilll_note'],
+			$_POST['dpillb_note'],
+			$_POST['dpillr_note'],
+			$_POST['dabr'],
+			$_POST['dabr_note'],
+			$_POST['dsnam_note'],
+			$_POST['dsnap_note'],
+			$_POST['dsnab_note'],
+			$_POST['dburs_note'],
+			$_POST['dthick_note'],
+			$_POST['dstretch_note'],
+			$_POST['drecover_note'],
+			$_POST['dgrowth_note'],
+			$_POST['dapper_note'],
+			$_POST['dfibre_note'],
+			$_POST['dodour'],
+			$_POST['dodour_note'],
+			$_POST['dcurling'],
+			$_POST['dcurling_note'],
+			$_POST['dnedle'],
+			$_POST['dnedle_note'],
+			$rcek['id'] // id_nokk
+		];
+
+		$sqlPHYD = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+		if ($sqlPHYD === false) {
+			die(print_r(sqlsrv_errors(), true));
+		}
+
+		$sql = "
+		UPDATE db_qc.tbl_tq_marginal SET
+			mflamability      = ?,
+			mfla_note         = ?,
+			mfc_cott          = ?,
+			mfc_poly          = ?,
+			mfc_elastane      = ?,
+			mfc_cott1         = ?,
+			mfc_poly1         = ?,
+			mfc_elastane1     = ?,
+			std_mfc_cott1     = ?,
+			std_mfc_poly1     = ?,
+			std_mfc_elastane1 = ?,
+			mfibercontent     = ?,
+			mfiber_note       = ?,
+			mfc_wpi           = ?,
+			mfc_cpi           = ?,
+			mfc_note          = ?,
+			mf_weight         = ?,
+			mfwe_note         = ?,
+			mf_width          = ?,
+			mfwi_note         = ?,
+			mbow              = ?,
+			mskew             = ?,
+			mbas_note         = ?,
+			mh_shrinkage_temp = ?,
+			mh_shrinkage_l1   = ?,
+			mh_shrinkage_w1   = ?,
+			mh_shrinkage_grd  = ?,
+			mh_shrinkage_app  = ?,
+			mh_shrinkage_note = ?,
+			mss_temp          = ?,
+			mss_washes3       = ?,
+			mss_washes10      = ?,
+			mss_washes15      = ?,
+			mss_cmt           = ?,
+			mshrinkage_l1     = ?,
+			mshrinkage_l2     = ?,
+			mshrinkage_l3     = ?,
+			mshrinkage_l4     = ?,
+			mshrinkage_l5     = ?,
+			mshrinkage_l6     = ?,
+			mshrinkage_w1     = ?,
+			mshrinkage_w2     = ?,
+			mshrinkage_w3     = ?,
+			mshrinkage_w4     = ?,
+			mshrinkage_w5     = ?,
+			mshrinkage_w6     = ?,
+			mspirality1       = ?,
+			mspirality2       = ?,
+			mspirality3       = ?,
+			mspirality4       = ?,
+			mspirality5       = ?,
+			mspirality6       = ?,
+			mss_linedry       = ?,
+			mss_tumbledry     = ?,
+			msns_note         = ?,
+			mapperss_note     = ?,
+			mfibre_transfer   = ?,
+			mfibre_grade      = ?,
+			mfibre_note       = ?,
+			modour            = ?,
+			modour_note       = ?,
+			tgl_update        = GETDATE()
+		WHERE id_nokk = ?
+		";
+
+		$params = [
+			$_POST['mflamability'],
+			$_POST['mfla_note'],
+			$_POST['mfc_cott'],
+			$_POST['mfc_poly'],
+			$_POST['mfc_ela'],
+			$_POST['mfc_cott1'],
+			$_POST['mfc_poly1'],
+			$_POST['mfc_ela1'],
+			$_POST['std_mfc_cott1'],
+			$_POST['std_mfc_poly1'],
+			$_POST['std_mfc_elastane1'],
+			$_POST['mfibercontent'],
+			$_POST['mfiber_note'],
+			$_POST['mwpi'],
+			$_POST['mcpi'],
+			$_POST['mfc_note'],
+			$_POST['mfabric_weight'],
+			$_POST['mfwe_note'],
+			$_POST['mfabric_width'],
+			$_POST['mfwi_note'],
+			$_POST['mbow'],
+			$_POST['mskew'],
+			$_POST['mbas_note'],
+			$_POST['mh_shrinkage_temp'],
+			$_POST['mh_shrinkage_l1'],
+			$_POST['mh_shrinkage_w1'],
+			$_POST['mh_shrinkage_grd'],
+			$_POST['mh_shrinkage_app'],
+			$_POST['mh_shrinkage_note'],
+			$_POST['mss_temp'],
+			$_POST['mss_washes3'],
+			$_POST['mss_washes10'],
+			$_POST['mss_washes15'],
+			$_POST['mss_cmt'],
+			$_POST['mshrinkage_len1'],
+			$_POST['mshrinkage_len2'],
+			$_POST['mshrinkage_len3'],
+			$_POST['mshrinkage_len4'],
+			$_POST['mshrinkage_len5'],
+			$_POST['mshrinkage_len6'],
+			$_POST['mshrinkage_wid1'],
+			$_POST['mshrinkage_wid2'],
+			$_POST['mshrinkage_wid3'],
+			$_POST['mshrinkage_wid4'],
+			$_POST['mshrinkage_wid5'],
+			$_POST['mshrinkage_wid6'],
+			$_POST['mspirality1'],
+			$_POST['mspirality2'],
+			$_POST['mspirality3'],
+			$_POST['mspirality4'],
+			$_POST['mspirality5'],
+			$_POST['mspirality6'],
+			$_POST['mss_linedry'],
+			$_POST['mss_tumbledry'],
+			$_POST['msns_note'],
+			$_POST['mapperss_note'],
+			$_POST['mfibre_transfer'],
+			$_POST['mfibre_grade'],
+			$_POST['mfibre_note'],
+			$_POST['modour'],
+			$_POST['modour_note'],
+			$rcek['id']
+		];
+									
+		$stmt = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+		if ($stmt === false) {
+			die(print_r(sqlsrv_errors(), true));
+		}
 
 
 		echo "<script>swal({
@@ -16422,836 +16737,904 @@ if ($_POST['physical_save'] == "save" and $cek1 > 0) {
 		});</script>";
 	}
 } else if ($_POST['physical_save'] == "save") {
-	$sqlPHYDI = mysqli_query($con, "INSERT INTO tbl_tq_disptest SET
-		`id_nokk`='$rcek[id]',
-		`dflamability`='$_POST[dflamability]',
-		`dfla_note`='$_POST[dfla_note]',
-		`dfc_cott`='$_POST[dfc_cott]',
-		`dfc_poly`='$_POST[dfc_poly]',
-		`dfc_elastane`='$_POST[dfc_ela]',
-		`dfc_cott1`='$_POST[dfc_cott1]',
-		`dfc_poly1`='$_POST[dfc_poly1]',
-		`dfc_elastane1`='$_POST[dfc_ela1]',
-		`std_dfc_cott1`='$_POST[std_dfc_cott1]',
-		`std_dfc_poly1`='$_POST[std_dfc_poly1]',
-		`std_dfc_elastane1`='$_POST[std_dfc_elastane1]',
-		`dfibercontent`='$_POST[dfibercontent]',
-		`dfiber_note`='$_POST[dfiber_note]',
-		`dfc_wpi`='$_POST[dwpi]',
-		`dfc_cpi`='$_POST[dcpi]',
-		`dfc_note`='$_POST[dfc_note]',
-		`df_weight`='$_POST[dfabric_weight]',
-		`dfwe_note`='$_POST[dfwe_note]',
-		`df_width`='$_POST[dfabric_width]',
-		`dfwi_note`='$_POST[dfwi_note]',
-		`dbow`='$_POST[dbow]',
-		`dskew`='$_POST[dskew]',
-		`dbas_note`='$_POST[dbas_note]',
-		`dh_shrinkage_temp`='$_POST[dh_shrinkage_temp]',
-		`dh_shrinkage_l1`='$_POST[dh_shrinkage_l1]',
-		`dh_shrinkage_w1`='$_POST[dh_shrinkage_w1]',
-		`dh_shrinkage_grd`='$_POST[dh_shrinkage_grd]',
-		`dh_shrinkage_app`='$_POST[dh_shrinkage_app]',
-		`dh_shrinkage_note`='$_POST[dh_shrinkage_note]',
-		`dss_temp`='$_POST[dss_temp]',
-		`dss_washes3`='$_POST[dss_washes3]',
-		`dss_washes10`='$_POST[dss_washes10]',
-		`dss_washes15`='$_POST[dss_washes15]',
-		`dss_cmt`='$_POST[dss_cmt]',
-		`dshrinkage_l1`='$_POST[dshrinkage_len1]',
-		`dshrinkage_l2`='$_POST[dshrinkage_len2]',
-		`dshrinkage_l3`='$_POST[dshrinkage_len3]',
-		`dshrinkage_l4`='$_POST[dshrinkage_len4]',
-		`dshrinkage_l5`='$_POST[dshrinkage_len5]',
-		`dshrinkage_l6`='$_POST[dshrinkage_len6]',
-		`dshrinkage_w1`='$_POST[dshrinkage_wid1]',
-		`dshrinkage_w2`='$_POST[dshrinkage_wid2]',
-		`dshrinkage_w3`='$_POST[dshrinkage_wid3]',
-		`dshrinkage_w4`='$_POST[dshrinkage_wid4]',
-		`dshrinkage_w5`='$_POST[dshrinkage_wid5]',
-		`dshrinkage_w6`='$_POST[dshrinkage_wid6]',
-		`dspirality1`='$_POST[dspirality1]',
-		`dspirality2`='$_POST[dspirality2]',
-		`dspirality3`='$_POST[dspirality3]',
-		`dspirality4`='$_POST[dspirality4]',
-		`dspirality5`='$_POST[dspirality5]',
-		`dspirality6`='$_POST[dspirality6]',
-		`dss_linedry`='$_POST[dss_linedry]',
-		`dss_tumbledry`='$_POST[dss_tumbledry]',
-		`dsns_note`='$_POST[dsns_note]',
-		`dapperss_ch1`='$_POST[dapperss_ch1]',
-		`dapperss_ch2`='$_POST[dapperss_ch2]',
-		`dapperss_ch3`='$_POST[dapperss_ch3]',
-		`dapperss_ch4`='$_POST[dapperss_ch4]',
-		`dapperss_cc1`='$_POST[dapperss_cc1]',
-		`dapperss_cc2`='$_POST[dapperss_cc2]',
-		`dapperss_cc3`='$_POST[dapperss_cc3]',
-		`dapperss_cc4`='$_POST[dapperss_cc4]',
-		`dapperss_st`='$_POST[dapperss_st]',
-		`dapperss_pf1`='$_POST[dapperss_pf1]',
-		`dapperss_pf2`='$_POST[dapperss_pf2]',
-		`dapperss_pf3`='$_POST[dapperss_pf3]',
-		`dapperss_pf4`='$_POST[dapperss_pf4]',
-		`dapperss_pb1`='$_POST[dapperss_pb1]',
-		`dapperss_pb2`='$_POST[dapperss_pb2]',
-		`dapperss_pb3`='$_POST[dapperss_pb3]',
-		`dapperss_pb4`='$_POST[dapperss_pb4]',
-		`dapperss_sf1`='$_POST[dapperss_sf1]',
-		`dapperss_sf2`='$_POST[dapperss_sf2]',
-		`dapperss_sf3`='$_POST[dapperss_sf3]',
-		`dapperss_sf4`='$_POST[dapperss_sf4]',
-		`dapperss_sb1`='$_POST[dapperss_sb1]',
-		`dapperss_sb2`='$_POST[dapperss_sb2]',
-		`dapperss_sb3`='$_POST[dapperss_sb3]',
-		`dapperss_sb4`='$_POST[dapperss_sb4]',
-	 	`dapperss_note`='$_POST[dapperss_note]',
-		`dpm_f1`='$_POST[dpillingm_f1]',
-		`dpm_b1`='$_POST[dpillingm_b1]',
-		`dpm_f2`='$_POST[dpillingm_f2]',
-		`dpm_b2`='$_POST[dpillingm_b2]',
-		`dpm_f3`='$_POST[dpillingm_f3]',
-		`dpm_b3`='$_POST[dpillingm_b3]',
-		`dpm_f4`='$_POST[dpillingm_f4]',
-		`dpm_b4`='$_POST[dpillingm_b4]',
-		`dpm_f5`='$_POST[dpillingm_f5]',
-		`dpm_b5`='$_POST[dpillingm_b5]',
-		`dpillm_note`='$_POST[dpillm_note]',
-		`dpl_f1`='$_POST[dpillingl_f1]',
-		`dpl_b1`='$_POST[dpillingl_b1]',
-		`dpl_f2`='$_POST[dpillingl_f2]',
-		`dpl_b2`='$_POST[dpillingl_b2]',
-		`dpl_f3`='$_POST[dpillingl_f3]',
-		`dpl_b3`='$_POST[dpillingl_b3]',
-		`dpl_f4`='$_POST[dpillingl_f4]',
-		`dpl_b4`='$_POST[dpillingl_b4]',
-		`dpl_f5`='$_POST[dpillingl_f5]',
-		`dpl_b5`='$_POST[dpillingl_b5]',
-		`dpilll_note`='$_POST[dpilll_note]',
-		`dpb_f1`='$_POST[dpillingb_f1]',
-		`dpb_b1`='$_POST[dpillingb_b1]',
-		`dpb_f2`='$_POST[dpillingb_f2]',
-		`dpb_b2`='$_POST[dpillingb_b2]',
-		`dpb_f3`='$_POST[dpillingb_f3]',
-		`dpb_b3`='$_POST[dpillingb_b3]',
-		`dpb_f4`='$_POST[dpillingb_f4]',
-		`dpb_b4`='$_POST[dpillingb_b4]',
-		`dpb_f5`='$_POST[dpillingb_f5]',
-		`dpb_b5`='$_POST[dpillingb_b5]',
-		`dpillb_note`='$_POST[dpillb_note]',
-		`dprt_f1`='$_POST[dpillingrt_f1]',
-		`dprt_b1`='$_POST[dpillingrt_b1]',
-		`dprt_f2`='$_POST[dpillingrt_f2]',
-		`dprt_b2`='$_POST[dpillingrt_b2]',
-		`dprt_f3`='$_POST[dpillingrt_f3]',
-		`dprt_b3`='$_POST[dpillingrt_b3]',
-		`dprt_f4`='$_POST[dpillingrt_f4]',
-		`dprt_b4`='$_POST[dpillingrt_b4]',
-		`dprt_f5`='$_POST[dpillingrt_f5]',
-		`dprt_b5`='$_POST[dpillingrt_b5]',
-		`dpillr_note`='$_POST[dpillr_note]',
-		`dabration`='$_POST[dabr]',
-		`dabr_note`='$_POST[dabr_note]',
-		`dsm_l1`='$_POST[dsnaggingm_l1]',
-		`dsm_w1`='$_POST[dsnaggingm_w1]',
-		`dsm_l2`='$_POST[dsnaggingm_l2]',
-		`dsm_w2`='$_POST[dsnaggingm_w2]',
-		`dsm_l3`='$_POST[dsnaggingm_l3]',
-		`dsm_w3`='$_POST[dsnaggingm_w3]',
-		`dsm_l4`='$_POST[dsnaggingm_l4]',
-		`dsm_w4`='$_POST[dsnaggingm_w4]',
-		`dsnam_note`='$_POST[dsnam_note]',
-		`dsp_grdl1` ='$_POST[dsp_grdl1]',
-		`dsp_clsl1` ='$_POST[dsp_clsl1]',
-		`dsp_shol1` ='$_POST[dsp_shol1]',
-		`dsp_medl1` ='$_POST[dsp_medl1]',
-		`dsp_lonl1` ='$_POST[dsp_lonl1]',
-		`dsp_grdw1` ='$_POST[dsp_grdw1]',
-		`dsp_clsw1` ='$_POST[dsp_clsw1]',
-		`dsp_show1` ='$_POST[dsp_show1]',
-		`dsp_medw1` ='$_POST[dsp_medw1]',
-		`dsp_lonw1` ='$_POST[dsp_lonw1]',
-		`dsp_grdl2` ='$_POST[dsp_grdl2]',
-		`dsp_clsl2` ='$_POST[dsp_clsl2]',
-		`dsp_shol2` ='$_POST[dsp_shol2]',
-		`dsp_medl2` ='$_POST[dsp_medl2]',
-		`dsp_lonl2` ='$_POST[dsp_lonl2]',
-		`dsp_grdw2` ='$_POST[dsp_grdw2]',
-		`dsp_clsw2` ='$_POST[dsp_clsw2]',
-		`dsp_show2` ='$_POST[dsp_show2]',
-		`dsp_medw2` ='$_POST[dsp_medw2]',
-		`dsp_lonw2` ='$_POST[dsp_lonw2]',
-		`dsnap_note`='$_POST[dsnap_note]',
-		`dsb_l1`='$_POST[dsnaggingb_l1]',
-		`dsb_w1`='$_POST[dsnaggingb_w1]',
-		`dsb_l2`='$_POST[dsnaggingb_l2]',
-		`dsb_w2`='$_POST[dsnaggingb_w2]',
-		`dsb_l3`='$_POST[dsnaggingb_l3]',
-		`dsb_w3`='$_POST[dsnaggingb_w3]',
-		`dsb_l4`='$_POST[dsnaggingb_l4]',
-		`dsb_w4`='$_POST[dsnaggingb_w4]',
-		`dsnab_note`='$_POST[dsnab_note]',
-		`dbs_instron`='$_POST[dinstron]',
-		`dbs_mullen`='$_POST[dmullen]',
-		`dbs_tru`='$_POST[dtru_burst]',
-		`dbs_tru2`='$_POST[dtru_burst2]',
-		`dburs_note`='$_POST[dburs_note]',
-		`dthick1`='$_POST[dthick1]',
-		`dthick2`='$_POST[dthick2]',
-		`dthick3`='$_POST[dthick3]',
-		`dthickav`='$_POST[dthickav]',
-		`dthick_note`='$_POST[dthick_note]',
-		`dstretch_l1`='$_POST[dstretch_l1]',
-		`dstretch_w1`='$_POST[dstretch_w1]',
-		`dstretch_l2`='$_POST[dstretch_l2]',
-		`dstretch_w2`='$_POST[dstretch_w2]',
-		`dstretch_l3`='$_POST[dstretch_l3]',
-		`dstretch_w3`='$_POST[dstretch_w3]',
-		`dstretch_l4`='$_POST[dstretch_l4]',
-		`dstretch_w4`='$_POST[dstretch_w4]',
-		`dstretch_l5`='$_POST[dstretch_l5]',
-		`dstretch_w5`='$_POST[dstretch_w5]',
-		`dload_stretch`='$_POST[dload_stretch]',
-		`dstretch_note`='$_POST[dstretch_note]',
-		`drecover_l1`='$_POST[drecover_l1]',
-		`drecover_w1`='$_POST[drecover_w1]',
-		`drecover_l2`='$_POST[drecover_l2]',
-		`drecover_w2`='$_POST[drecover_w2]',
-		`drecover_l3`='$_POST[drecover_l3]',
-		`drecover_w3`='$_POST[drecover_w3]',
-		`drecover_l4`='$_POST[drecover_l4]',
-		`drecover_w4`='$_POST[drecover_w4]',
-		`drecover_l5`='$_POST[drecover_l5]',
-		`drecover_w5`='$_POST[drecover_w5]',
-		`drecover_w11`='$_POST[drecover_w11]',
-		`drecover_l21`='$_POST[drecover_l21]',
-		`drecover_w21`='$_POST[drecover_w21]',
-		`drecover_l31`='$_POST[drecover_l31]',
-		`drecover_w31`='$_POST[drecover_w31]',
-		`drecover_l41`='$_POST[drecover_l41]',
-		`drecover_w41`='$_POST[drecover_w41]',
-		`drecover_l51`='$_POST[drecover_l51]',
-		`drecover_w51`='$_POST[drecover_w51]',
-		`drecover_note`='$_POST[drecover_note]',
-		`dgrowth_l1`='$_POST[dgrowth_l1]',
-		`dgrowth_w1`='$_POST[dgrowth_w1]',
-		`dgrowth_l2`='$_POST[dgrowth_l2]',
-		`dgrowth_w2`='$_POST[dgrowth_w2]',
-		`drec_growth_l1`='$_POST[drec_growth_l1]',
-		`drec_growth_w1`='$_POST[drec_growth_w1]',
-		`drec_growth_l2`='$_POST[drec_growth_l2]',
-		`drec_growth_w2`='$_POST[drec_growth_w2]',
-		`dgrowth_note`='$_POST[dgrowth_note]',
-		`dapper_ch1`='$_POST[dapper_ch1]',
-		`dapper_ch2`='$_POST[dapper_ch2]',
-		`dapper_ch3`='$_POST[dapper_ch3]',
-		`dapper_cc1`='$_POST[dapper_cc1]',
-		`dapper_cc2`='$_POST[dapper_cc2]',
-		`dapper_cc3`='$_POST[dapper_cc3]',
-		`dapper_st`='$_POST[dapper_st]',
-		`dapper_st2`='$_POST[dapper_st2]',
-		`dapper_st3`='$_POST[dapper_st3]',
-		`dapper_pf1`='$_POST[dapper_pf1]',
-		`dapper_pf2`='$_POST[dapper_pf2]',
-		`dapper_pf3`='$_POST[dapper_pf3]',
-		`dapper_pb1`='$_POST[dapper_pb1]',
-		`dapper_pb2`='$_POST[dapper_pb2]',
-		`dapper_pb3`='$_POST[dapper_pb3]',
-		`dapper_acetate`='$_POST[dapper_acetate]',
-		`dapper_cotton`='$_POST[dapper_cotton]',
-		`dapper_nylon`='$_POST[dapper_nylon]',
-		`dapper_poly`='$_POST[dapper_poly]',
-		`dapper_acrylic`='$_POST[dapper_acrylic]',
-		`dapper_wool`='$_POST[dapper_wool]',
-		`dapper_note`='$_POST[dapper_note]',
-		`dfibre_transfer`='$_POST[dfibre_transfer]',
-		`dfibre_grade`='$_POST[dfibre_grade]',
-		`dfibre_note`='$_POST[dfibre_note]',
-		`dodour`='$_POST[dodour]',
-		`dodour_note`='$_POST[dodour_note]',
-		`dcurling`='$_POST[dcurling]',
-		`dcurling_note`='$_POST[dcurling_note]',
-		`dnedle`='$_POST[dnedle]',
-		`dnedle_note`='$_POST[dnedle_note]',
-		`tgl_buat`=now(),
-		`tgl_update`=now()");
 
-		$sqlPHYMI = mysqli_query($con, "INSERT INTO tbl_tq_marginal SET
-`id_nokk`='$rcek[id]',
-`mflamability`='$_POST[mflamability]',
-`mfla_note`='$_POST[mfla_note]',
-`mfc_cott`='$_POST[mfc_cott]',
-`mfc_poly`='$_POST[mfc_poly]',
-`mfc_elastane`='$_POST[mfc_ela]',
-`mfc_cott1`='$_POST[mfc_cott1]',
-`mfc_poly1`='$_POST[mfc_poly1]',
-`mfc_elastane1`='$_POST[mfc_ela1]',
-`mfibercontent`='$_POST[mfibercontent]',
-`mfiber_note`='$_POST[mfiber_note]',
-`std_mfc_cott1`='$_POST[std_mfc_cott1]',
-`std_mfc_poly1`='$_POST[std_mfc_poly1]',
-`std_mfc_elastane1`='$_POST[std_mfc_elastane1]',
-`mfc_wpi`='$_POST[mwpi]',
-`mfc_cpi`='$_POST[mcpi]',
-`mfc_note`='$_POST[mfc_note]',
-`mf_weight`='$_POST[mfabric_weight]',
-`mfwe_note`='$_POST[mfwe_note]',
-`mf_width`='$_POST[mfabric_width]',
-`mfwi_note`='$_POST[mfwi_note]',
-`mbow`='$_POST[mbow]',
-`mskew`='$_POST[mskew]',
-`mbas_note`='$_POST[mbas_note]',
-`mh_shrinkage_temp`='$_POST[mh_shrinkage_temp]',
-`mh_shrinkage_l1`='$_POST[mh_shrinkage_l1]',
-`mh_shrinkage_w1`='$_POST[mh_shrinkage_w1]',
-`mh_shrinkage_grd`='$_POST[mh_shrinkage_grd]',
-`mh_shrinkage_app`='$_POST[mh_shrinkage_app]',
-`mh_shrinkage_note`='$_POST[mh_shrinkage_note]',
-`mss_temp`='$_POST[mss_temp]',
-`mss_washes3`='$_POST[mss_washes3]',
-`mss_washes10`='$_POST[mss_washes10]',
-`mss_washes15`='$_POST[mss_washes15]',
-`mss_cmt`='$_POST[mss_cmt]',
-`mshrinkage_l1`='$_POST[mshrinkage_len1]',
-`mshrinkage_l2`='$_POST[mshrinkage_len2]',
-`mshrinkage_l3`='$_POST[mshrinkage_len3]',
-`mshrinkage_l4`='$_POST[mshrinkage_len4]',
-`mshrinkage_l5`='$_POST[mshrinkage_len5]',
-`mshrinkage_l6`='$_POST[mshrinkage_len6]',
-`mshrinkage_w1`='$_POST[mshrinkage_wid1]',
-`mshrinkage_w2`='$_POST[mshrinkage_wid2]',
-`mshrinkage_w3`='$_POST[mshrinkage_wid3]',
-`mshrinkage_w4`='$_POST[mshrinkage_wid4]',
-`mshrinkage_w5`='$_POST[mshrinkage_wid5]',
-`mshrinkage_w6`='$_POST[mshrinkage_wid6]',
-`mspirality1`='$_POST[mspirality1]',
-`mspirality2`='$_POST[mspirality2]',
-`mspirality3`='$_POST[mspirality3]',
-`mspirality4`='$_POST[mspirality4]',
-`mspirality5`='$_POST[mspirality5]',
-`mspirality6`='$_POST[mspirality6]',
-`mss_linedry`='$_POST[mss_linedry]',
-`mss_tumbledry`='$_POST[mss_tumbledry]',
-`msns_note`='$_POST[msns_note]',
-`mapperss_ch1`='$_POST[mapperss_ch1]',
-`mapperss_ch2`='$_POST[mapperss_ch2]',
-`mapperss_ch3`='$_POST[mapperss_ch3]',
-`mapperss_ch4`='$_POST[mapperss_ch4]',
-`mapperss_cc1`='$_POST[mapperss_cc1]',
-`mapperss_cc2`='$_POST[mapperss_cc2]',
-`mapperss_cc3`='$_POST[mapperss_cc3]',
-`mapperss_cc4`='$_POST[mapperss_cc4]',
-`mapperss_st`='$_POST[mapperss_st]',
-`mapperss_pf1`='$_POST[mapperss_pf1]',
-`mapperss_pf2`='$_POST[mapperss_pf2]',
-`mapperss_pf3`='$_POST[mapperss_pf3]',
-`mapperss_pf4`='$_POST[mapperss_pf4]',
-`mapperss_pb1`='$_POST[mapperss_pb1]',
-`mapperss_pb2`='$_POST[mapperss_pb2]',
-`mapperss_pb3`='$_POST[mapperss_pb3]',
-`mapperss_pb4`='$_POST[mapperss_pb4]',
-`mapperss_sf1`='$_POST[mapperss_sf1]',
-`mapperss_sf2`='$_POST[mapperss_sf2]',
-`mapperss_sf3`='$_POST[mapperss_sf3]',
-`mapperss_sf4`='$_POST[mapperss_sf4]',
-`mapperss_sb1`='$_POST[mapperss_sb1]',
-`mapperss_sb2`='$_POST[mapperss_sb2]',
-`mapperss_sb3`='$_POST[mapperss_sb3]',
-`mapperss_sb4`='$_POST[mapperss_sb4]',
-`mapperss_note`='$_POST[mapperss_note]',
-`mpm_f1`='$_POST[mpillingm_f1]',
-`mpm_b1`='$_POST[mpillingm_b1]',
-`mpm_f2`='$_POST[mpillingm_f2]',
-`mpm_b2`='$_POST[mpillingm_b2]',
-`mpm_f3`='$_POST[mpillingm_f3]',
-`mpm_b3`='$_POST[mpillingm_b3]',
-`mpm_f4`='$_POST[mpillingm_f4]',
-`mpm_b4`='$_POST[mpillingm_b4]',
-`mpm_f5`='$_POST[mpillingm_f5]',
-`mpm_b5`='$_POST[mpillingm_b5]',
-`mpillm_note`='$_POST[mpillm_note]',
-`mpl_f1`='$_POST[mpillingl_f1]',
-`mpl_b1`='$_POST[mpillingl_b1]',
-`mpl_f2`='$_POST[mpillingl_f2]',
-`mpl_b2`='$_POST[mpillingl_b2]',
-`mpl_f3`='$_POST[mpillingl_f3]',
-`mpl_b3`='$_POST[mpillingl_b3]',
-`mpl_f4`='$_POST[mpillingl_f4]',
-`mpl_b4`='$_POST[mpillingl_b4]',
-`mpl_f5`='$_POST[mpillingl_f5]',
-`mpl_b5`='$_POST[mpillingl_b5]',
-`mpilll_note`='$_POST[mpilll_note]',
-`mpb_f1`='$_POST[mpillingb_f1]',
-`mpb_b1`='$_POST[mpillingb_b1]',
-`mpb_f2`='$_POST[mpillingb_f2]',
-`mpb_b2`='$_POST[mpillingb_b2]',
-`mpb_f3`='$_POST[mpillingb_f3]',
-`mpb_b3`='$_POST[mpillingb_b3]',
-`mpb_f4`='$_POST[mpillingb_f4]',
-`mpb_b4`='$_POST[mpillingb_b4]',
-`mpb_f5`='$_POST[mpillingb_f5]',
-`mpb_b5`='$_POST[mpillingb_b5]',
-`mpillb_note`='$_POST[mpillb_note]',
-`mprt_f1`='$_POST[mpillingrt_f1]',
-`mprt_b1`='$_POST[mpillingrt_b1]',
-`mprt_f2`='$_POST[mpillingrt_f2]',
-`mprt_b2`='$_POST[mpillingrt_b2]',
-`mprt_f3`='$_POST[mpillingrt_f3]',
-`mprt_b3`='$_POST[mpillingrt_b3]',
-`mprt_f4`='$_POST[mpillingrt_f4]',
-`mprt_b4`='$_POST[mpillingrt_b4]',
-`mprt_f5`='$_POST[mpillingrt_f5]',
-`mprt_b5`='$_POST[mpillingrt_b5]',
-`mpillr_note`='$_POST[mpillr_note]',
-`mabration`='$_POST[mabr]',
-`mabr_note`='$_POST[mabr_note]',
-`msm_l1`='$_POST[msnaggingm_l1]',
-`msm_w1`='$_POST[msnaggingm_w1]',
-`msm_l2`='$_POST[msnaggingm_l2]',
-`msm_w2`='$_POST[msnaggingm_w2]',
-`msm_l3`='$_POST[msnaggingm_l3]',
-`msm_w3`='$_POST[msnaggingm_w3]',
-`msm_l4`='$_POST[msnaggingm_l4]',
-`msm_w4`='$_POST[msnaggingm_w4]',
-`msnam_note`='$_POST[msnam_note]',
-`msp_grdl1` ='$_POST[msp_grdl1]',
-`msp_clsl1` ='$_POST[msp_clsl1]',
-`msp_shol1` ='$_POST[msp_shol1]',
-`msp_medl1` ='$_POST[msp_medl1]',
-`msp_lonl1` ='$_POST[msp_lonl1]',
-`msp_grdw1` ='$_POST[msp_grdw1]',
-`msp_clsw1` ='$_POST[msp_clsw1]',
-`msp_show1` ='$_POST[msp_show1]',
-`msp_medw1` ='$_POST[msp_medw1]',
-`msp_lonw1` ='$_POST[msp_lonw1]',
-`msp_grdl2` ='$_POST[msp_grdl2]',
-`msp_clsl2` ='$_POST[msp_clsl2]',
-`msp_shol2` ='$_POST[msp_shol2]',
-`msp_medl2` ='$_POST[msp_medl2]',
-`msp_lonl2` ='$_POST[msp_lonl2]',
-`msp_grdw2` ='$_POST[msp_grdw2]',
-`msp_clsw2` ='$_POST[msp_clsw2]',
-`msp_show2` ='$_POST[msp_show2]',
-`msp_medw2` ='$_POST[msp_medw2]',
-`msp_lonw2` ='$_POST[msp_lonw2]',
-`msnap_note`='$_POST[msnap_note]',
-`msb_l1`='$_POST[msnaggingb_l1]',
-`msb_w1`='$_POST[msnaggingb_w1]',
-`msb_l2`='$_POST[msnaggingb_l2]',
-`msb_w2`='$_POST[msnaggingb_w2]',
-`msb_l3`='$_POST[msnaggingb_l3]',
-`msb_w3`='$_POST[msnaggingb_w3]',
-`msb_l4`='$_POST[msnaggingb_l4]',
-`msb_w4`='$_POST[msnaggingb_w4]',
-`msnab_note`='$_POST[msnab_note]',
-`mbs_instron`='$_POST[minstron]',
-`mbs_mullen`='$_POST[mmullen]',
-`mbs_tru`='$_POST[mtru_burst]',
-`mbs_tru2`='$_POST[mtru_burst2]',
-`mburs_note`='$_POST[mburs_note]',
-`mthick1`='$_POST[mthick1]',
-`mthick2`='$_POST[mthick2]',
-`mthick3`='$_POST[mthick3]',
-`mthickav`='$_POST[mthickav]',
-`mthick_note`='$_POST[mthick_note]',
-`mstretch_l1`='$_POST[mstretch_l1]',
-`mstretch_w1`='$_POST[mstretch_w1]',
-`mstretch_l2`='$_POST[mstretch_l2]',
-`mstretch_w2`='$_POST[mstretch_w2]',
-`mstretch_l3`='$_POST[mstretch_l3]',
-`mstretch_w3`='$_POST[mstretch_w3]',
-`mstretch_l4`='$_POST[mstretch_l4]',
-`mstretch_w4`='$_POST[mstretch_w4]',
-`mstretch_l5`='$_POST[mstretch_l5]',
-`mstretch_w5`='$_POST[mstretch_w5]',
-`mload_stretch`='$_POST[mload_stretch]',
-`mstretch_note`='$_POST[mstretch_note]',
-`mrecover_l1`='$_POST[mrecover_l1]',
-`mrecover_w1`='$_POST[mrecover_w1]',
-`mrecover_l2`='$_POST[mrecover_l2]',
-`mrecover_w2`='$_POST[mrecover_w2]',
-`mrecover_l3`='$_POST[mrecover_l3]',
-`mrecover_w3`='$_POST[mrecover_w3]',
-`mrecover_l4`='$_POST[mrecover_l4]',
-`mrecover_w4`='$_POST[mrecover_w4]',
-`mrecover_l5`='$_POST[mrecover_l5]',
-`mrecover_w5`='$_POST[mrecover_w5]',
-`mrecover_l11`='$_POST[mrecover_l11]',
-`mrecover_w11`='$_POST[mrecover_w11]',
-`mrecover_l21`='$_POST[mrecover_l21]',
-`mrecover_w21`='$_POST[mrecover_w21]',
-`mrecover_l31`='$_POST[mrecover_l31]',
-`mrecover_w31`='$_POST[mrecover_w31]',
-`mrecover_l41`='$_POST[mrecover_l41]',
-`mrecover_w41`='$_POST[mrecover_w41]',
-`mrecover_l51`='$_POST[mrecover_l51]',
-`mrecover_w51`='$_POST[mrecover_w51]',
-`mrecover_note`='$_POST[mrecover_note]',
-`mgrowth_l1`='$_POST[mgrowth_l1]',
-`mgrowth_w1`='$_POST[mgrowth_w1]',
-`mgrowth_l2`='$_POST[mgrowth_l2]',
-`mgrowth_w2`='$_POST[mgrowth_w2]',
-`mrec_growth_l1`='$_POST[mrec_growth_l1]',
-`mrec_growth_w1`='$_POST[mrec_growth_w1]',
-`mrec_growth_l2`='$_POST[mrec_growth_l2]',
-`mrec_growth_w2`='$_POST[mrec_growth_w2]',
-`mgrowth_note`='$_POST[mgrowth_note]',
-`mapper_ch1`='$_POST[mapper_ch1]',
-`mapper_ch2`='$_POST[mapper_ch2]',
-`mapper_ch3`='$_POST[mapper_ch3]',
-`mapper_cc1`='$_POST[mapper_cc1]',
-`mapper_cc2`='$_POST[mapper_cc2]',
-`mapper_cc3`='$_POST[mapper_cc3]',
-`mapper_st`='$_POST[mapper_st]',
-`mapper_st2`='$_POST[mapper_st2]',
-`mapper_st3`='$_POST[mapper_st3]',
-`mapper_pf1`='$_POST[mapper_pf1]',
-`mapper_pf2`='$_POST[mapper_pf2]',
-`mapper_pf3`='$_POST[mapper_pf3]',
-`mapper_pb1`='$_POST[mapper_pb1]',
-`mapper_pb2`='$_POST[mapper_pb2]',
-`mapper_pb3`='$_POST[mapper_pb3]',
-`mapper_acetate`='$_POST[mapper_acetate]',
-`mapper_cotton`='$_POST[mapper_cotton]',
-`mapper_nylon`='$_POST[mapper_nylon]',
-`mapper_poly`='$_POST[mapper_poly]',
-`mapper_acrylic`='$_POST[mapper_acrylic]',
-`mapper_wool`='$_POST[mapper_wool]',
-`mapper_note`='$_POST[mapper_note]',
-`mfibre_transfer`='$_POST[mfibre_transfer]',
-`mfibre_grade`='$_POST[mfibre_grade]',
-`mfibre_note`='$_POST[mfibre_note]',
-`modour`='$_POST[modour]',
-`modour_note`='$_POST[modour_note]',
-`tgl_update`=now()");
-	$sqlPHY = mysqli_query($con, "INSERT INTO tbl_tq_test SET
-		  `id_nokk`='$rcek[id]',
-		  `flamability`='$_POST[flamability]',
-		  `fla_note`='$_POST[fla_note]',
-		  `fc_cott`='$_POST[fc_cott]',
-		  `fc_poly`='$_POST[fc_poly]',
-		  `fc_elastane`='$_POST[fc_ela]',
-		  `fc_cott1`='$_POST[fc_cott1]',
-		  `fc_poly1`='$_POST[fc_poly1]',
-		  `fc_elastane1`='$_POST[fc_ela1]',
-		  `std_fc_cott1`='$_POST[std_fc_cott1]',
-		  `std_fc_poly1`='$_POST[std_fc_poly1]',
-		  `std_fc_elastane1`='$_POST[std_fc_ela1]',
-		  `fibercontent`='$_POST[fibercontent]',
-		  `fiber_note`='$_POST[fiber_note]',
-		  `fc_wpi`='$_POST[wpi]',
-		  `fc_cpi`='$_POST[cpi]',
-		  `fc_note`='$_POST[fc_note]',
-		  `f_weight`='$_POST[fabric_weight]',
-		  `fwe_note`='$_POST[fwe_note]',
-		  `f_width`='$_POST[fabric_width]',
-		  `fwi_note`='$_POST[fwi_note]',
-		  `bow`='$_POST[bow]',
-		  `skew`='$_POST[skew]',
-		  `bas_note`='$_POST[bas_note]',
-		  `h_shrinkage_temp`='$_POST[h_shrinkage_temp]',
-		  `h_shrinkage_l1`='$_POST[h_shrinkage_l1]',
-		  `h_shrinkage_w1`='$_POST[h_shrinkage_w1]',
-		  `h_shrinkage_grd`='$_POST[h_shrinkage_grd]',
-		  `h_shrinkage_app`='$_POST[h_shrinkage_app]',
-		  `h_shrinkage_note`='$_POST[h_shrinkage_note]',
-		  `ss_temp`='$_POST[ss_temp]',
-		  `ss_washes3`='$_POST[ss_washes3]',
-		  `ss_washes10`='$_POST[ss_washes10]',
-		  `ss_washes15`='$_POST[ss_washes15]',
-		  `ss_cmt`='$_POST[ss_cmt]',
-		  `shrinkage_l1`='$_POST[shrinkage_len1]',
-		  `shrinkage_l2`='$_POST[shrinkage_len2]',
-		  `shrinkage_l3`='$_POST[shrinkage_len3]',
-		  `shrinkage_l4`='$_POST[shrinkage_len4]',
-		  `shrinkage_l5`='$_POST[shrinkage_len5]',
-		  `shrinkage_l6`='$_POST[shrinkage_len6]',
-		  `shrinkage_w1`='$_POST[shrinkage_wid1]',
-		  `shrinkage_w2`='$_POST[shrinkage_wid2]',
-		  `shrinkage_w3`='$_POST[shrinkage_wid3]',
-		  `shrinkage_w4`='$_POST[shrinkage_wid4]',
-		  `shrinkage_w5`='$_POST[shrinkage_wid5]',
-		  `shrinkage_w6`='$_POST[shrinkage_wid6]',
-		  `spirality1`='$_POST[spirality1]',
-		  `spirality2`='$_POST[spirality2]',
-		  `spirality3`='$_POST[spirality3]',
-		  `spirality4`='$_POST[spirality4]',
-		  `spirality5`='$_POST[spirality5]',
-		  `spirality6`='$_POST[spirality6]',
-		  `ss_linedry`='$_POST[ss_linedry]',
-		  `ss_tumbledry`='$_POST[ss_tumbledry]',
-		  `sns_note`='$_POST[sns_note]',
-		  `apperss_ch1`='$_POST[apperss_ch1]',
-		  `apperss_ch2`='$_POST[apperss_ch2]',
-		  `apperss_ch3`='$_POST[apperss_ch3]',
-		  `apperss_ch4`='$_POST[apperss_ch4]',
-		  `apperss_cc1`='$_POST[apperss_cc1]',
-		  `apperss_cc2`='$_POST[apperss_cc2]',
-		  `apperss_cc3`='$_POST[apperss_cc3]',
-		  `apperss_cc4`='$_POST[apperss_cc4]',
-		  `apperss_st`='$_POST[apperss_st]',
-		  `apperss_pf1`='$_POST[apperss_pf1]',
-		  `apperss_pf2`='$_POST[apperss_pf2]',
-		  `apperss_pf3`='$_POST[apperss_pf3]',
-		  `apperss_pf4`='$_POST[apperss_pf4]',
-		  `apperss_pb1`='$_POST[apperss_pb1]',
-		  `apperss_pb2`='$_POST[apperss_pb2]',
-		  `apperss_pb3`='$_POST[apperss_pb3]',
-		  `apperss_pb4`='$_POST[apperss_pb4]',
-		  `apperss_sf1`='$_POST[apperss_sf1]',
-		  `apperss_sf2`='$_POST[apperss_sf2]',
-		  `apperss_sf3`='$_POST[apperss_sf3]',
-		  `apperss_sf4`='$_POST[apperss_sf4]',
-		  `apperss_sb1`='$_POST[apperss_sb1]',
-		  `apperss_sb2`='$_POST[apperss_sb2]',
-		  `apperss_sb3`='$_POST[apperss_sb3]',
-		  `apperss_sb4`='$_POST[apperss_sb4]',
-	 	  `apperss_note`='$_POST[apperss_note]',
-		  `pm_f1`='$_POST[pillingm_f1]',
-		  `pm_b1`='$_POST[pillingm_b1]',
-		  `pm_f2`='$_POST[pillingm_f2]',
-		  `pm_b2`='$_POST[pillingm_b2]',
-		  `pm_f3`='$_POST[pillingm_f3]',
-		  `pm_b3`='$_POST[pillingm_b3]',
-		  `pm_f4`='$_POST[pillingm_f4]',
-		  `pm_b4`='$_POST[pillingm_b4]',
-		  `pm_f5`='$_POST[pillingm_f5]',
-		  `pm_b5`='$_POST[pillingm_b5]',
-		  `pillm_note`='$_POST[pillm_note]',
-		  `pl_f1`='$_POST[pillingl_f1]',
-		  `pl_b1`='$_POST[pillingl_b1]',
-		  `pl_f2`='$_POST[pillingl_f2]',
-		  `pl_b2`='$_POST[pillingl_b2]',
-		  `pl_f3`='$_POST[pillingl_f3]',
-		  `pl_b3`='$_POST[pillingl_b3]',
-		  `pl_f4`='$_POST[pillingl_f4]',
-		  `pl_b4`='$_POST[pillingl_b4]',
-		  `pl_f5`='$_POST[pillingl_f5]',
-		  `pl_b5`='$_POST[pillingl_b5]',
-		  `pilll_note`='$_POST[pilll_note]',
-		  `pb_f1`='$_POST[pillingb_f1]',
-		  `pb_b1`='$_POST[pillingb_b1]',
-		  `pb_f2`='$_POST[pillingb_f2]',
-		  `pb_b2`='$_POST[pillingb_b2]',
-		  `pb_f3`='$_POST[pillingb_f3]',
-		  `pb_b3`='$_POST[pillingb_b3]',
-		  `pb_f4`='$_POST[pillingb_f4]',
-		  `pb_b4`='$_POST[pillingb_b4]',
-		  `pb_f5`='$_POST[pillingb_f5]',
-		  `pb_b5`='$_POST[pillingb_b5]',
-		  `pillb_note`='$_POST[pillb_note]',
-		  `prt_f1`='$_POST[pillingrt_f1]',
-		  `prt_b1`='$_POST[pillingrt_b1]',
-		  `prt_f2`='$_POST[pillingrt_f2]',
-		  `prt_b2`='$_POST[pillingrt_b2]',
-		  `prt_f3`='$_POST[pillingrt_f3]',
-		  `prt_b3`='$_POST[pillingrt_b3]',
-		  `prt_f4`='$_POST[pillingrt_f4]',
-		  `prt_b4`='$_POST[pillingrt_b4]',
-		  `prt_f5`='$_POST[pillingrt_f5]',
-		  `prt_b5`='$_POST[pillingrt_b5]',
-		  `pillr_note`='$_POST[pillr_note]',
-		  `abration`='$_POST[abr]',
-		  `abr_note`='$_POST[abr_note]',
-		  `sm_l1`='$_POST[snaggingm_l1]',
-		  `sm_w1`='$_POST[snaggingm_w1]',
-		  `sm_l2`='$_POST[snaggingm_l2]',
-		  `sm_w2`='$_POST[snaggingm_w2]',
-		  `sm_l3`='$_POST[snaggingm_l3]',
-		  `sm_w3`='$_POST[snaggingm_w3]',
-		  `sm_l4`='$_POST[snaggingm_l4]',
-		  `sm_w4`='$_POST[snaggingm_w4]',
-		  `snam_note`='$_POST[snam_note]',
-		  `sp_grdl1` ='$_POST[sp_grdl1]',
-		  `sp_clsl1` ='$_POST[sp_clsl1]',
-		  `sp_shol1` ='$_POST[sp_shol1]',
-		  `sp_medl1` ='$_POST[sp_medl1]',
-		  `sp_lonl1` ='$_POST[sp_lonl1]',
-		  `sp_grdw1` ='$_POST[sp_grdw1]',
-		  `sp_clsw1` ='$_POST[sp_clsw1]',
-		  `sp_show1` ='$_POST[sp_show1]',
-		  `sp_medw1` ='$_POST[sp_medw1]',
-		  `sp_lonw1` ='$_POST[sp_lonw1]',
-		  `sp_grdl2` ='$_POST[sp_grdl2]',
-		  `sp_clsl2` ='$_POST[sp_clsl2]',
-		  `sp_shol2` ='$_POST[sp_shol2]',
-		  `sp_medl2` ='$_POST[sp_medl2]',
-		  `sp_lonl2` ='$_POST[sp_lonl2]',
-		  `sp_grdw2` ='$_POST[sp_grdw2]',
-		  `sp_clsw2` ='$_POST[sp_clsw2]',
-		  `sp_show2` ='$_POST[sp_show2]',
-		  `sp_medw2` ='$_POST[sp_medw2]',
-		  `sp_lonw2` ='$_POST[sp_lonw2]',
-		  `snap_note`='$_POST[snap_note]',
-		  `sb_l1`='$_POST[snaggingb_l1]',
-		  `sb_w1`='$_POST[snaggingb_w1]',
-		  `sb_l2`='$_POST[snaggingb_l2]',
-		  `sb_w2`='$_POST[snaggingb_w2]',
-		  `sb_l3`='$_POST[snaggingb_l3]',
-		  `sb_w3`='$_POST[snaggingb_w3]',
-		  `sb_l4`='$_POST[snaggingb_l4]',
-		  `sb_w4`='$_POST[snaggingb_w4]',
-		  `snab_note`='$_POST[snab_note]',
-		  `bs_instron`='$_POST[instron]',
-		  `bs_mullen`='$_POST[mullen]',
-		  `bs_tru`='$_POST[tru_burst]',
-		  `bs_tru2`='$_POST[tru_burst2]',
-		  `burs_note`='$_POST[burs_note]',
-		  `thick1`='$_POST[thick1]',
-		  `thick2`='$_POST[thick2]',
-		  `thick3`='$_POST[thick3]',
-		  `thickav`='$_POST[thickav]',
-		  `thick_note`='$_POST[thick_note]',
-		  `stretch_l1`='$_POST[stretch_l1]',
-		  `stretch_w1`='$_POST[stretch_w1]',
-		  `stretch_l2`='$_POST[stretch_l2]',
-		  `stretch_w2`='$_POST[stretch_w2]',
-		  `stretch_l3`='$_POST[stretch_l3]',
-		  `stretch_w3`='$_POST[stretch_w3]',
-		  `stretch_l4`='$_POST[stretch_l4]',
-		  `stretch_w4`='$_POST[stretch_w4]',
-		  `stretch_l5`='$_POST[stretch_l5]',
-		  `stretch_w5`='$_POST[stretch_w5]',
-		  `load_stretch`='$_POST[load_stretch]',
-		  `stretch_note`='$_POST[stretch_note]',
-		  `recover_l1`='$_POST[recover_l1]',
-		  `recover_w1`='$_POST[recover_w1]',
-		  `recover_l2`='$_POST[recover_l2]',
-		  `recover_w2`='$_POST[recover_w2]',
-		  `recover_l3`='$_POST[recover_l3]',
-		  `recover_w3`='$_POST[recover_w3]',
-		  `recover_l4`='$_POST[recover_l4]',
-		  `recover_w4`='$_POST[recover_w4]',
-		  `recover_l5`='$_POST[recover_l5]',
-		  `recover_w5`='$_POST[recover_w5]',
-		  `recover_l11`='$_POST[recover_l11]',
-		  `recover_w11`='$_POST[recover_w11]',
-		  `recover_l21`='$_POST[recover_l21]',
-		  `recover_w21`='$_POST[recover_w21]',
-		  `recover_l31`='$_POST[recover_l31]',
-		  `recover_w31`='$_POST[recover_w31]',
-		  `recover_l41`='$_POST[recover_l41]',
-		  `recover_w41`='$_POST[recover_w41]',
-		  `recover_l51`='$_POST[recover_l51]',
-		  `recover_w51`='$_POST[recover_w51]',
-		  `recover_note`='$_POST[recover_note]',
-		  `growth_l1`='$_POST[growth_l1]',
-		  `growth_w1`='$_POST[growth_w1]',
-		  `growth_l2`='$_POST[growth_l2]',
-		  `growth_w2`='$_POST[growth_w2]',
-		  `rec_growth_l1`='$_POST[rec_growth_l1]',
-		  `rec_growth_w1`='$_POST[rec_growth_w1]',
-		  `rec_growth_l2`='$_POST[rec_growth_l2]',
-		  `rec_growth_w2`='$_POST[rec_growth_w2]',
-		  `growth_note`='$_POST[growth_note]',
-		  `apper_ch1`='$_POST[apper_ch1]',
-		  `apper_ch2`='$_POST[apper_ch2]',
-		  `apper_ch3`='$_POST[apper_ch3]',
-		  `apper_cc1`='$_POST[apper_cc1]',
-		  `apper_cc2`='$_POST[apper_cc2]',
-		  `apper_cc3`='$_POST[apper_cc3]',
-		  `apper_st`='$_POST[apper_st]',
-		  `apper_st2`='$_POST[apper_st2]',
-		  `apper_st3`='$_POST[apper_st3]',
-		  `apper_pf1`='$_POST[apper_pf1]',
-		  `apper_pf2`='$_POST[apper_pf2]',
-		  `apper_pf3`='$_POST[apper_pf3]',
-		  `apper_pb1`='$_POST[apper_pb1]',
-		  `apper_pb2`='$_POST[apper_pb2]',
-		  `apper_pb3`='$_POST[apper_pb3]',
-		  `apper_acetate`='$_POST[apper_acetate]',
-		  `apper_cotton`='$_POST[apper_cotton]',
-		  `apper_nylon`='$_POST[apper_nylon]',
-		  `apper_poly`='$_POST[apper_poly]',
-		  `apper_acrylic`='$_POST[apper_acrylic]',
-		  `apper_wool`='$_POST[apper_wool]',
-	 	  `apper_note`='$_POST[apper_note]',
-		  `fibre_transfer`='$_POST[fibre_transfer]',
-		  `fibre_grade`='$_POST[fibre_grade]',
-	 	  `fibre_note`='$_POST[fibre_note]',
-		   `odour`='$_POST[odour]',
-		  `odour_note`='$_POST[odour_note]',
-		  `curling`='$_POST[curling]',
-		  `curling_note`='$_POST[curling_note]',
-		  `nedle`='$_POST[nedle]',
-		  `nedle_note`='$_POST[nedle_note]',
-		  `stat_fla`='$_POST[stat_fla]',
-		  `stat_fib`='$_POST[stat_fib]',
-		  `stat_fc`='$_POST[stat_fc]',
-		  `stat_fwss`='$_POST[stat_fwss]',
-		  `stat_fwss2`='$_POST[stat_fwss2]',
-		  `stat_fwss3`='$_POST[stat_fwss3]',
-		  `stat_bsk`='$_POST[stat_bsk]',
-		  `stat_pm`='$_POST[stat_pm]',
-		  `stat_pl`='$_POST[stat_pl]',
-		  `stat_pb`='$_POST[stat_pb]',
-		  `stat_prt`='$_POST[stat_prt]',
-		  `stat_abr`='$_POST[stat_abr]',
-		  `stat_sm`='$_POST[stat_sm]',
-		  `stat_sp`='$_POST[stat_sp]',
-		  `stat_sb`='$_POST[stat_sb]',
-		  `stat_bs`='$_POST[stat_bs]',
-		  `stat_bs2`='$_POST[stat_bs2]',
-		  `stat_bs3`='$_POST[stat_bs3]',
-		  `stat_th`='$_POST[stat_th]',
-		  `stat_sr`='$_POST[stat_sr]',
-		  `stat_gr`='$_POST[stat_gr]',
-		  `stat_ap`='$_POST[stat_ap]',
-		  `stat_hs`='$_POST[stat_hs]',
-		  `stat_ff`='$_POST[stat_ff]',
-		  `stat_odour`='$_POST[stat_odour]',
-		  `stat_curling`='$_POST[stat_curling]',
-		  `stat_nedle`='$_POST[stat_nedle]',
-		  `wick_l1`='$_POST[wick_l1]',
-		  `wick_w1`='$_POST[wick_w1]',
-		  `wick_l2`='$_POST[wick_l2]',
-		  `wick_w2`='$_POST[wick_w2]',
-		  `wick_l3`='$_POST[wick_l3]',
-		  `wick_w3`='$_POST[wick_w3]',
-		  `wick_note`='$_POST[wick_note]',
-		  `absor_f1`='$_POST[absor_f1]',
-		  `absor_f2`='$_POST[absor_f2]',
-		  `absor_f3`='$_POST[absor_f3]',
-		  `absor_b1`='$_POST[absor_b1]',
-		  `absor_b2`='$_POST[absor_b2]',
-		  `absor_b3`='$_POST[absor_b3]',
-		  `absor_note`='$_POST[absor_note]',
-		  `dry1`='$_POST[dry1]',
-		  `dry2`='$_POST[dry2]',
-		  `dry3`='$_POST[dry3]',
-		  `dry_note`='$_POST[dry_note]',
-		  `repp1`='$_POST[repp1]',
-		  `repp2`='$_POST[repp3]',
-		  `repp3`='$_POST[repp3]',
-		  `repp4`='$_POST[repp4]',
-		  `repp_note`='$_POST[repp_note]',
-		  `ph`='$_POST[ph]',
-		  `ph_note`='$_POST[ph_note]',
-		  `soil` = '$_POST[soil]',
-		  `soil_note` = '$_POST[soil_note]',
-		  `tgl_buat`=now(),
-		  `tgl_update`=now()");
+	$sql = "
+		INSERT INTO db_qc.tbl_tq_disptest (
+			id_nokk,
+			dflamability, dfla_note,
+			dfc_cott, dfc_poly, dfc_elastane,
+			dfc_cott1, dfc_poly1, dfc_elastane1,
+			std_dfc_cott1, std_dfc_poly1, std_dfc_elastane1,
+			dfibercontent, dfiber_note,
+			dfc_wpi, dfc_cpi, dfc_note,
+			df_weight, dfwe_note,
+			df_width, dfwi_note,
+			dbow, dskew, dbas_note,
+			dh_shrinkage_temp, dh_shrinkage_l1, dh_shrinkage_w1,
+			dh_shrinkage_grd, dh_shrinkage_app, dh_shrinkage_note,
+			dss_temp, dss_washes3, dss_washes10, dss_washes15, dss_cmt,
+			dshrinkage_l1, dshrinkage_l2, dshrinkage_l3,
+			dshrinkage_l4, dshrinkage_l5, dshrinkage_l6,
+			dshrinkage_w1, dshrinkage_w2, dshrinkage_w3,
+			dshrinkage_w4, dshrinkage_w5, dshrinkage_w6,
+			dspirality1, dspirality2, dspirality3,
+			dspirality4, dspirality5, dspirality6,
+			dss_linedry, dss_tumbledry,
+			dsns_note,
+			dapperss_note,
+			dfibre_transfer, dfibre_grade, dfibre_note,
+			dodour, dodour_note,
+			dcurling, dcurling_note,
+			dnedle, dnedle_note,
+			tgl_buat, tgl_update
+		) VALUES (
+			?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,
+			GETDATE(), GETDATE()
+		)
+		";
+
+		$params = [
+			$rcek['id'],
+			$_POST['dflamability'], $_POST['dfla_note'],
+			$_POST['dfc_cott'], $_POST['dfc_poly'], $_POST['dfc_ela'],
+			$_POST['dfc_cott1'], $_POST['dfc_poly1'], $_POST['dfc_ela1'],
+			$_POST['std_dfc_cott1'], $_POST['std_dfc_poly1'], $_POST['std_dfc_elastane1'],
+			$_POST['dfibercontent'], $_POST['dfiber_note'],
+			$_POST['dwpi'], $_POST['dcpi'], $_POST['dfc_note'],
+			$_POST['dfabric_weight'], $_POST['dfwe_note'],
+			$_POST['dfabric_width'], $_POST['dfwi_note'],
+			$_POST['dbow'], $_POST['dskew'], $_POST['dbas_note'],
+			$_POST['dh_shrinkage_temp'], $_POST['dh_shrinkage_l1'], $_POST['dh_shrinkage_w1'],
+			$_POST['dh_shrinkage_grd'], $_POST['dh_shrinkage_app'], $_POST['dh_shrinkage_note'],
+			$_POST['dss_temp'], $_POST['dss_washes3'], $_POST['dss_washes10'], $_POST['dss_washes15'], $_POST['dss_cmt'],
+			$_POST['dshrinkage_len1'], $_POST['dshrinkage_len2'], $_POST['dshrinkage_len3'],
+			$_POST['dshrinkage_len4'], $_POST['dshrinkage_len5'], $_POST['dshrinkage_len6'],
+			$_POST['dshrinkage_wid1'], $_POST['dshrinkage_wid2'], $_POST['dshrinkage_wid3'],
+			$_POST['dshrinkage_wid4'], $_POST['dshrinkage_wid5'], $_POST['dshrinkage_wid6'],
+			$_POST['dspirality1'], $_POST['dspirality2'], $_POST['dspirality3'],
+			$_POST['dspirality4'], $_POST['dspirality5'], $_POST['dspirality6'],
+			$_POST['dss_linedry'], $_POST['dss_tumbledry'],
+			$_POST['dsns_note'],
+			$_POST['dapperss_note'],
+			$_POST['dfibre_transfer'], $_POST['dfibre_grade'], $_POST['dfibre_note'],
+			$_POST['dodour'], $_POST['dodour_note'],
+			$_POST['dcurling'], $_POST['dcurling_note'],
+			$_POST['dnedle'], $_POST['dnedle_note']
+		];
+		
+		$sqlPHYDI = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+		if ($sqlPHYDI === false) {
+			die(print_r(sqlsrv_errors(), true));
+		}
+
+
+	$sqlPHYMI = sqlsrv_query($con_db_qc_sqlsrv, "
+		INSERT INTO db_qc.tbl_tq_marginal (
+			[id_nokk],
+			[mflamability],
+			[mfla_note],
+			[mfc_cott],
+			[mfc_poly],
+			[mfc_elastane],
+			[mfc_cott1],
+			[mfc_poly1],
+			[mfc_elastane1],
+			[mfibercontent],
+			[mfiber_note],
+			[std_mfc_cott1],
+			[std_mfc_poly1],
+			[std_mfc_elastane1],
+			[mfc_wpi],
+			[mfc_cpi],
+			[mfc_note],
+			[mf_weight],
+			[mfwe_note],
+			[mf_width],
+			[mfwi_note],
+			[mbow],
+			[mskew],
+			[mbas_note],
+			[mh_shrinkage_temp],
+			[mh_shrinkage_l1],
+			[mh_shrinkage_w1],
+			[mh_shrinkage_grd],
+			[mh_shrinkage_app],
+			[mh_shrinkage_note],
+			[mss_temp],
+			[mss_washes3],
+			[mss_washes10],
+			[mss_washes15],
+			[mss_cmt],
+			[mshrinkage_l1],
+			[mshrinkage_l2],
+			[mshrinkage_l3],
+			[mshrinkage_l4],
+			[mshrinkage_l5],
+			[mshrinkage_l6],
+			[mshrinkage_w1],
+			[mshrinkage_w2],
+			[mshrinkage_w3],
+			[mshrinkage_w4],
+			[mshrinkage_w5],
+			[mshrinkage_w6],
+			[mspirality1],
+			[mspirality2],
+			[mspirality3],
+			[mspirality4],
+			[mspirality5],
+			[mspirality6],
+			[mss_linedry],
+			[mss_tumbledry],
+			[msns_note],
+			[mapperss_ch1],
+			[mapperss_ch2],
+			[mapperss_ch3],
+			[mapperss_ch4],
+			[mapperss_cc1],
+			[mapperss_cc2],
+			[mapperss_cc3],
+			[mapperss_cc4],
+			[mapperss_st],
+			[mapperss_pf1],
+			[mapperss_pf2],
+			[mapperss_pf3],
+			[mapperss_pf4],
+			[mapperss_pb1],
+			[mapperss_pb2],
+			[mapperss_pb3],
+			[mapperss_pb4],
+			[mapperss_sf1],
+			[mapperss_sf2],
+			[mapperss_sf3],
+			[mapperss_sf4],
+			[mapperss_sb1],
+			[mapperss_sb2],
+			[mapperss_sb3],
+			[mapperss_sb4],
+			[mapperss_note],
+			[modour],
+			[modour_note],
+			[tgl_update]
+		) VALUES (
+			'$rcek[id]',
+			'$_POST[mflamability]',
+			'$_POST[mfla_note]',
+			'$_POST[mfc_cott]',
+			'$_POST[mfc_poly]',
+			'$_POST[mfc_ela]',
+			'$_POST[mfc_cott1]',
+			'$_POST[mfc_poly1]',
+			'$_POST[mfc_ela1]',
+			'$_POST[mfibercontent]',
+			'$_POST[mfiber_note]',
+			'$_POST[std_mfc_cott1]',
+			'$_POST[std_mfc_poly1]',
+			'$_POST[std_mfc_elastane1]',
+			'$_POST[mwpi]',
+			'$_POST[mcpi]',
+			'$_POST[mfc_note]',
+			'$_POST[mfabric_weight]',
+			'$_POST[mfwe_note]',
+			'$_POST[mfabric_width]',
+			'$_POST[mfwi_note]',
+			'$_POST[mbow]',
+			'$_POST[mskew]',
+			'$_POST[mbas_note]',
+			'$_POST[mh_shrinkage_temp]',
+			'$_POST[mh_shrinkage_l1]',
+			'$_POST[mh_shrinkage_w1]',
+			'$_POST[mh_shrinkage_grd]',
+			'$_POST[mh_shrinkage_app]',
+			'$_POST[mh_shrinkage_note]',
+			'$_POST[mss_temp]',
+			'$_POST[mss_washes3]',
+			'$_POST[mss_washes10]',
+			'$_POST[mss_washes15]',
+			'$_POST[mss_cmt]',
+			'$_POST[mshrinkage_len1]',
+			'$_POST[mshrinkage_len2]',
+			'$_POST[mshrinkage_len3]',
+			'$_POST[mshrinkage_len4]',
+			'$_POST[mshrinkage_len5]',
+			'$_POST[mshrinkage_len6]',
+			'$_POST[mshrinkage_wid1]',
+			'$_POST[mshrinkage_wid2]',
+			'$_POST[mshrinkage_wid3]',
+			'$_POST[mshrinkage_wid4]',
+			'$_POST[mshrinkage_wid5]',
+			'$_POST[mshrinkage_wid6]',
+			'$_POST[mspirality1]',
+			'$_POST[mspirality2]',
+			'$_POST[mspirality3]',
+			'$_POST[mspirality4]',
+			'$_POST[mspirality5]',
+			'$_POST[mspirality6]',
+			'$_POST[mss_linedry]',
+			'$_POST[mss_tumbledry]',
+			'$_POST[msns_note]',
+			'$_POST[mapperss_ch1]',
+			'$_POST[mapperss_ch2]',
+			'$_POST[mapperss_ch3]',
+			'$_POST[mapperss_ch4]',
+			'$_POST[mapperss_cc1]',
+			'$_POST[mapperss_cc2]',
+			'$_POST[mapperss_cc3]',
+			'$_POST[mapperss_cc4]',
+			'$_POST[mapperss_st]',
+			'$_POST[mapperss_pf1]',
+			'$_POST[mapperss_pf2]',
+			'$_POST[mapperss_pf3]',
+			'$_POST[mapperss_pf4]',
+			'$_POST[mapperss_pb1]',
+			'$_POST[mapperss_pb2]',
+			'$_POST[mapperss_pb3]',
+			'$_POST[mapperss_pb4]',
+			'$_POST[mapperss_sf1]',
+			'$_POST[mapperss_sf2]',
+			'$_POST[mapperss_sf3]',
+			'$_POST[mapperss_sf4]',
+			'$_POST[mapperss_sb1]',
+			'$_POST[mapperss_sb2]',
+			'$_POST[mapperss_sb3]',
+			'$_POST[mapperss_sb4]',
+			'$_POST[mapperss_note]',
+			'$_POST[modour]',
+			'$_POST[modour_note]',
+			GETDATE()
+		)
+	");
+
+	
+	$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, "
+		INSERT INTO db_qc.tbl_tq_test (
+			[id_nokk],
+			[flamability],
+			[fla_note],
+			[fc_cott],
+			[fc_poly],
+			[fc_elastane],
+			[fc_cott1],
+			[fc_poly1],
+			[fc_elastane1],
+			[std_fc_cott1],
+			[std_fc_poly1],
+			[std_fc_elastane1],
+			[fibercontent],
+			[fiber_note],
+			[fc_wpi],
+			[fc_cpi],
+			[fc_note],
+			[f_weight],
+			[fwe_note],
+			[f_width],
+			[fwi_note],
+			[bow],
+			[skew],
+			[bas_note],
+			[h_shrinkage_temp],
+			[h_shrinkage_l1],
+			[h_shrinkage_w1],
+			[h_shrinkage_grd],
+			[h_shrinkage_app],
+			[h_shrinkage_note],
+			[ss_temp],
+			[ss_washes3],
+			[ss_washes10],
+			[ss_washes15],
+			[ss_cmt],
+			[shrinkage_l1],
+			[shrinkage_l2],
+			[shrinkage_l3],
+			[shrinkage_l4],
+			[shrinkage_l5],
+			[shrinkage_l6],
+			[shrinkage_w1],
+			[shrinkage_w2],
+			[shrinkage_w3],
+			[shrinkage_w4],
+			[shrinkage_w5],
+			[shrinkage_w6],
+			[spirality1],
+			[spirality2],
+			[spirality3],
+			[spirality4],
+			[spirality5],
+			[spirality6],
+			[ss_linedry],
+			[ss_tumbledry],
+			[sns_note],
+			[apperss_ch1],
+			[apperss_ch2],
+			[apperss_ch3],
+			[apperss_ch4],
+			[apperss_cc1],
+			[apperss_cc2],
+			[apperss_cc3],
+			[apperss_cc4],
+			[apperss_st],
+			[apperss_pf1],
+			[apperss_pf2],
+			[apperss_pf3],
+			[apperss_pf4],
+			[apperss_pb1],
+			[apperss_pb2],
+			[apperss_pb3],
+			[apperss_pb4],
+			[apperss_sf1],
+			[apperss_sf2],
+			[apperss_sf3],
+			[apperss_sf4],
+			[apperss_sb1],
+			[apperss_sb2],
+			[apperss_sb3],
+			[apperss_sb4],
+			[apperss_note],
+			[pm_f1],
+			[pm_b1],
+			[pm_f2],
+			[pm_b2],
+			[pm_f3],
+			[pm_b3],
+			[pm_f4],
+			[pm_b4],
+			[pm_f5],
+			[pm_b5],
+			[pillm_note],
+			[pl_f1],
+			[pl_b1],
+			[pl_f2],
+			[pl_b2],
+			[pl_f3],
+			[pl_b3],
+			[pl_f4],
+			[pl_b4],
+			[pl_f5],
+			[pl_b5],
+			[pilll_note],
+			[pb_f1],
+			[pb_b1],
+			[pb_f2],
+			[pb_b2],
+			[pb_f3],
+			[pb_b3],
+			[pb_f4],
+			[pb_b4],
+			[pb_f5],
+			[pb_b5],
+			[pillb_note],
+			[prt_f1],
+			[prt_b1],
+			[prt_f2],
+			[prt_b2],
+			[prt_f3],
+			[prt_b3],
+			[prt_f4],
+			[prt_b4],
+			[prt_f5],
+			[prt_b5],
+			[pillr_note],
+			[abration],
+			[abr_note],
+			[sm_l1],
+			[sm_w1],
+			[sm_l2],
+			[sm_w2],
+			[sm_l3],
+			[sm_w3],
+			[sm_l4],
+			[sm_w4],
+			[snam_note],
+			[sp_grdl1],
+			[sp_clsl1],
+			[sp_shol1],
+			[sp_medl1],
+			[sp_lonl1],
+			[sp_grdw1],
+			[sp_clsw1],
+			[sp_show1],
+			[sp_medw1],
+			[sp_lonw1],
+			[sp_grdl2],
+			[sp_clsl2],
+			[sp_shol2],
+			[sp_medl2],
+			[sp_lonl2],
+			[sp_grdw2],
+			[sp_clsw2],
+			[sp_show2],
+			[sp_medw2],
+			[sp_lonw2],
+			[snap_note],
+			[sb_l1],
+			[sb_w1],
+			[sb_l2],
+			[sb_w2],
+			[sb_l3],
+			[sb_w3],
+			[sb_l4],
+			[sb_w4],
+			[snab_note],
+			[bs_instron],
+			[bs_mullen],
+			[bs_tru],
+			[bs_tru2],
+			[burs_note],
+			[thick1],
+			[thick2],
+			[thick3],
+			[thickav],
+			[thick_note],
+			[stretch_l1],
+			[stretch_w1],
+			[stretch_l2],
+			[stretch_w2],
+			[stretch_l3],
+			[stretch_w3],
+			[stretch_l4],
+			[stretch_w4],
+			[stretch_l5],
+			[stretch_w5],
+			[load_stretch],
+			[stretch_note],
+			[recover_l1],
+			[recover_w1],
+			[recover_l2],
+			[recover_w2],
+			[recover_l3],
+			[recover_w3],
+			[recover_l4],
+			[recover_w4],
+			[recover_l5],
+			[recover_w5],
+			[recover_l11],
+			[recover_w11],
+			[recover_l21],
+			[recover_w21],
+			[recover_l31],
+			[recover_w31],
+			[recover_l41],
+			[recover_w41],
+			[recover_l51],
+			[recover_w51],
+			[recover_note],
+			[growth_l1],
+			[growth_w1],
+			[growth_l2],
+			[growth_w2],
+			[rec_growth_l1],
+			[rec_growth_w1],
+			[rec_growth_l2],
+			[rec_growth_w2],
+			[growth_note],
+			[apper_ch1],
+			[apper_ch2],
+			[apper_ch3],
+			[apper_cc1],
+			[apper_cc2],
+			[apper_cc3],
+			[apper_st],
+			[apper_st2],
+			[apper_st3],
+			[apper_pf1],
+			[apper_pf2],
+			[apper_pf3],
+			[apper_pb1],
+			[apper_pb2],
+			[apper_pb3],
+			[apper_acetate],
+			[apper_cotton],
+			[apper_nylon],
+			[apper_poly],
+			[apper_acrylic],
+			[apper_wool],
+			[apper_note],
+			[fibre_transfer],
+			[fibre_grade],
+			[fibre_note],
+			[odour],
+			[odour_note],
+			[curling],
+			[curling_note],
+			[nedle],
+			[nedle_note],
+			[stat_fla],
+			[stat_fib],
+			[stat_fc],
+			[stat_fwss],
+			[stat_fwss2],
+			[stat_fwss3],
+			[stat_bsk],
+			[stat_pm],
+			[stat_pl],
+			[stat_pb],
+			[stat_prt],
+			[stat_abr],
+			[stat_sm],
+			[stat_sp],
+			[stat_sb],
+			[stat_bs],
+			[stat_bs2],
+			[stat_bs3],
+			[stat_th],
+			[stat_sr],
+			[stat_gr],
+			[stat_ap],
+			[stat_hs],
+			[stat_ff],
+			[stat_odour],
+			[stat_curling],
+			[stat_nedle],
+			[wick_l1],
+			[wick_w1],
+			[wick_l2],
+			[wick_w2],
+			[wick_l3],
+			[wick_w3],
+			[wick_note],
+			[absor_f1],
+			[absor_f2],
+			[absor_f3],
+			[absor_b1],
+			[absor_b2],
+			[absor_b3],
+			[absor_note],
+			[dry1],
+			[dry2],
+			[dry3],
+			[dry_note],
+			[repp1],
+			[repp2],
+			[repp3],
+			[repp4],
+			[repp_note],
+			[ph],
+			[ph_note],
+			[soil],
+			[soil_note],
+			[tgl_buat],
+			[tgl_update]
+		) VALUES (
+			'$rcek[id]',
+			'$_POST[flamability]',
+			'$_POST[fla_note]',
+			'$_POST[fc_cott]',
+			'$_POST[fc_poly]',
+			'$_POST[fc_ela]',
+			'$_POST[fc_cott1]',
+			'$_POST[fc_poly1]',
+			'$_POST[fc_ela1]',
+			'$_POST[std_fc_cott1]',
+			'$_POST[std_fc_poly1]',
+			'$_POST[std_fc_ela1]',
+			'$_POST[fibercontent]',
+			'$_POST[fiber_note]',
+			'$_POST[wpi]',
+			'$_POST[cpi]',
+			'$_POST[fc_note]',
+			'$_POST[fabric_weight]',
+			'$_POST[fwe_note]',
+			'$_POST[fabric_width]',
+			'$_POST[fwi_note]',
+			'$_POST[bow]',
+			'$_POST[skew]',
+			'$_POST[bas_note]',
+			'$_POST[h_shrinkage_temp]',
+			'$_POST[h_shrinkage_l1]',
+			'$_POST[h_shrinkage_w1]',
+			'$_POST[h_shrinkage_grd]',
+			'$_POST[h_shrinkage_app]',
+			'$_POST[h_shrinkage_note]',
+			'$_POST[ss_temp]',
+			'$_POST[ss_washes3]',
+			'$_POST[ss_washes10]',
+			'$_POST[ss_washes15]',
+			'$_POST[ss_cmt]',
+			'$_POST[shrinkage_len1]',
+			'$_POST[shrinkage_len2]',
+			'$_POST[shrinkage_len3]',
+			'$_POST[shrinkage_len4]',
+			'$_POST[shrinkage_len5]',
+			'$_POST[shrinkage_len6]',
+			'$_POST[shrinkage_wid1]',
+			'$_POST[shrinkage_wid2]',
+			'$_POST[shrinkage_wid3]',
+			'$_POST[shrinkage_wid4]',
+			'$_POST[shrinkage_wid5]',
+			'$_POST[shrinkage_wid6]',
+			'$_POST[spirality1]',
+			'$_POST[spirality2]',
+			'$_POST[spirality3]',
+			'$_POST[spirality4]',
+			'$_POST[spirality5]',
+			'$_POST[spirality6]',
+			'$_POST[ss_linedry]',
+			'$_POST[ss_tumbledry]',
+			'$_POST[sns_note]',
+			'$_POST[apperss_ch1]',
+			'$_POST[apperss_ch2]',
+			'$_POST[apperss_ch3]',
+			'$_POST[apperss_ch4]',
+			'$_POST[apperss_cc1]',
+			'$_POST[apperss_cc2]',
+			'$_POST[apperss_cc3]',
+			'$_POST[apperss_cc4]',
+			'$_POST[apperss_st]',
+			'$_POST[apperss_pf1]',
+			'$_POST[apperss_pf2]',
+			'$_POST[apperss_pf3]',
+			'$_POST[apperss_pf4]',
+			'$_POST[apperss_pb1]',
+			'$_POST[apperss_pb2]',
+			'$_POST[apperss_pb3]',
+			'$_POST[apperss_pb4]',
+			'$_POST[apperss_sf1]',
+			'$_POST[apperss_sf2]',
+			'$_POST[apperss_sf3]',
+			'$_POST[apperss_sf4]',
+			'$_POST[apperss_sb1]',
+			'$_POST[apperss_sb2]',
+			'$_POST[apperss_sb3]',
+			'$_POST[apperss_sb4]',
+			'$_POST[apperss_note]',
+			'$_POST[pillingm_f1]',
+			'$_POST[pillingm_b1]',
+			'$_POST[pillingm_f2]',
+			'$_POST[pillingm_b2]',
+			'$_POST[pillingm_f3]',
+			'$_POST[pillingm_b3]',
+			'$_POST[pillingm_f4]',
+			'$_POST[pillingm_b4]',
+			'$_POST[pillingm_f5]',
+			'$_POST[pillingm_b5]',
+			'$_POST[pillm_note]',
+			'$_POST[pillingl_f1]',
+			'$_POST[pillingl_b1]',
+			'$_POST[pillingl_f2]',
+			'$_POST[pillingl_b2]',
+			'$_POST[pillingl_f3]',
+			'$_POST[pillingl_b3]',
+			'$_POST[pillingl_f4]',
+			'$_POST[pillingl_b4]',
+			'$_POST[pillingl_f5]',
+			'$_POST[pillingl_b5]',
+			'$_POST[pilll_note]',
+			'$_POST[pillingb_f1]',
+			'$_POST[pillingb_b1]',
+			'$_POST[pillingb_f2]',
+			'$_POST[pillingb_b2]',
+			'$_POST[pillingb_f3]',
+			'$_POST[pillingb_b3]',
+			'$_POST[pillingb_f4]',
+			'$_POST[pillingb_b4]',
+			'$_POST[pillingb_f5]',
+			'$_POST[pillingb_b5]',
+			'$_POST[pillb_note]',
+			'$_POST[pillingrt_f1]',
+			'$_POST[pillingrt_b1]',
+			'$_POST[pillingrt_f2]',
+			'$_POST[pillingrt_b2]',
+			'$_POST[pillingrt_f3]',
+			'$_POST[pillingrt_b3]',
+			'$_POST[pillingrt_f4]',
+			'$_POST[pillingrt_b4]',
+			'$_POST[pillingrt_f5]',
+			'$_POST[pillingrt_b5]',
+			'$_POST[pillr_note]',
+			'$_POST[abr]',
+			'$_POST[abr_note]',
+			'$_POST[snaggingm_l1]',
+			'$_POST[snaggingm_w1]',
+			'$_POST[snaggingm_l2]',
+			'$_POST[snaggingm_w2]',
+			'$_POST[snaggingm_l3]',
+			'$_POST[snaggingm_w3]',
+			'$_POST[snaggingm_l4]',
+			'$_POST[snaggingm_w4]',
+			'$_POST[snam_note]',
+			'$_POST[sp_grdl1]',
+			'$_POST[sp_clsl1]',
+			'$_POST[sp_shol1]',
+			'$_POST[sp_medl1]',
+			'$_POST[sp_lonl1]',
+			'$_POST[sp_grdw1]',
+			'$_POST[sp_clsw1]',
+			'$_POST[sp_show1]',
+			'$_POST[sp_medw1]',
+			'$_POST[sp_lonw1]',
+			'$_POST[sp_grdl2]',
+			'$_POST[sp_clsl2]',
+			'$_POST[sp_shol2]',
+			'$_POST[sp_medl2]',
+			'$_POST[sp_lonl2]',
+			'$_POST[sp_grdw2]',
+			'$_POST[sp_clsw2]',
+			'$_POST[sp_show2]',
+			'$_POST[sp_medw2]',
+			'$_POST[sp_lonw2]',
+			'$_POST[snap_note]',
+			'$_POST[snaggingb_l1]',
+			'$_POST[snaggingb_w1]',
+			'$_POST[snaggingb_l2]',
+			'$_POST[snaggingb_w2]',
+			'$_POST[snaggingb_l3]',
+			'$_POST[snaggingb_w3]',
+			'$_POST[snaggingb_l4]',
+			'$_POST[snaggingb_w4]',
+			'$_POST[snab_note]',
+			'$_POST[instron]',
+			'$_POST[mullen]',
+			'$_POST[tru_burst]',
+			'$_POST[tru_burst2]',
+			'$_POST[burs_note]',
+			'$_POST[thick1]',
+			'$_POST[thick2]',
+			'$_POST[thick3]',
+			'$_POST[thickav]',
+			'$_POST[thick_note]',
+			'$_POST[stretch_l1]',
+			'$_POST[stretch_w1]',
+			'$_POST[stretch_l2]',
+			'$_POST[stretch_w2]',
+			'$_POST[stretch_l3]',
+			'$_POST[stretch_w3]',
+			'$_POST[stretch_l4]',
+			'$_POST[stretch_w4]',
+			'$_POST[stretch_l5]',
+			'$_POST[stretch_w5]',
+			'$_POST[load_stretch]',
+			'$_POST[stretch_note]',
+			'$_POST[recover_l1]',
+			'$_POST[recover_w1]',
+			'$_POST[recover_l2]',
+			'$_POST[recover_w2]',
+			'$_POST[recover_l3]',
+			'$_POST[recover_w3]',
+			'$_POST[recover_l4]',
+			'$_POST[recover_w4]',
+			'$_POST[recover_l5]',
+			'$_POST[recover_w5]',
+			'$_POST[recover_l11]',
+			'$_POST[recover_w11]',
+			'$_POST[recover_l21]',
+			'$_POST[recover_w21]',
+			'$_POST[recover_l31]',
+			'$_POST[recover_w31]',
+			'$_POST[recover_l41]',
+			'$_POST[recover_w41]',
+			'$_POST[recover_l51]',
+			'$_POST[recover_w51]',
+			'$_POST[recover_note]',
+			'$_POST[growth_l1]',
+			'$_POST[growth_w1]',
+			'$_POST[growth_l2]',
+			'$_POST[growth_w2]',
+			'$_POST[rec_growth_l1]',
+			'$_POST[rec_growth_w1]',
+			'$_POST[rec_growth_l2]',
+			'$_POST[rec_growth_w2]',
+			'$_POST[growth_note]',
+			'$_POST[apper_ch1]',
+			'$_POST[apper_ch2]',
+			'$_POST[apper_ch3]',
+			'$_POST[apper_cc1]',
+			'$_POST[apper_cc2]',
+			'$_POST[apper_cc3]',
+			'$_POST[apper_st]',
+			'$_POST[apper_st2]',
+			'$_POST[apper_st3]',
+			'$_POST[apper_pf1]',
+			'$_POST[apper_pf2]',
+			'$_POST[apper_pf3]',
+			'$_POST[apper_pb1]',
+			'$_POST[apper_pb2]',
+			'$_POST[apper_pb3]',
+			'$_POST[apper_acetate]',
+			'$_POST[apper_cotton]',
+			'$_POST[apper_nylon]',
+			'$_POST[apper_poly]',
+			'$_POST[apper_acrylic]',
+			'$_POST[apper_wool]',
+			'$_POST[apper_note]',
+			'$_POST[fibre_transfer]',
+			'$_POST[fibre_grade]',
+			'$_POST[fibre_note]',
+			'$_POST[odour]',
+			'$_POST[odour_note]',
+			'$_POST[curling]',
+			'$_POST[curling_note]',
+			'$_POST[nedle]',
+			'$_POST[nedle_note]',
+			'$_POST[stat_fla]',
+			'$_POST[stat_fib]',
+			'$_POST[stat_fc]',
+			'$_POST[stat_fwss]',
+			'$_POST[stat_fwss2]',
+			'$_POST[stat_fwss3]',
+			'$_POST[stat_bsk]',
+			'$_POST[stat_pm]',
+			'$_POST[stat_pl]',
+			'$_POST[stat_pb]',
+			'$_POST[stat_prt]',
+			'$_POST[stat_abr]',
+			'$_POST[stat_sm]',
+			'$_POST[stat_sp]',
+			'$_POST[stat_sb]',
+			'$_POST[stat_bs]',
+			'$_POST[stat_bs2]',
+			'$_POST[stat_bs3]',
+			'$_POST[stat_th]',
+			'$_POST[stat_sr]',
+			'$_POST[stat_gr]',
+			'$_POST[stat_ap]',
+			'$_POST[stat_hs]',
+			'$_POST[stat_ff]',
+			'$_POST[stat_odour]',
+			'$_POST[stat_curling]',
+			'$_POST[stat_nedle]',
+			'$_POST[wick_l1]',
+			'$_POST[wick_w1]',
+			'$_POST[wick_l2]',
+			'$_POST[wick_w2]',
+			'$_POST[wick_l3]',
+			'$_POST[wick_w3]',
+			'$_POST[wick_note]',
+			'$_POST[absor_f1]',
+			'$_POST[absor_f2]',
+			'$_POST[absor_f3]',
+			'$_POST[absor_b1]',
+			'$_POST[absor_b2]',
+			'$_POST[absor_b3]',
+			'$_POST[absor_note]',
+			'$_POST[dry1]',
+			'$_POST[dry2]',
+			'$_POST[dry3]',
+			'$_POST[dry_note]',
+			'$_POST[repp1]',
+			'$_POST[repp3]',
+			'$_POST[repp3]',
+			'$_POST[repp4]',
+			'$_POST[repp_note]',
+			'$_POST[ph]',
+			'$_POST[ph_note]',
+			'$_POST[soil]',
+			'$_POST[soil_note]',
+			GETDATE(),
+			GETDATE()
+		)
+		");
+
+
 	if ($sqlPHY) {
 		echo "<script>swal({
-title: 'Data Physical Telah Tersimpan',
-text: 'Klik Ok untuk input data kembali',
-type: 'success',
-}).then((result) => {
-if (result.value) {
+			title: 'Data Physical Telah Tersimpan',
+			text: 'Klik Ok untuk input data kembali',
+			type: 'success',
+			}).then((result) => {
+			if (result.value) {
 
-	window.location.href='TestingNewNoTes-$notes';
-}
-});</script>";
+				window.location.href='TestingNewNoTes-$notes';
+			}
+			});</script>";
 	} else {
 		echo "<script>swal({
-title: 'Data Physical Gagal Tersimpan',
-text: 'Klik Ok untuk input data kembali',
-type: 'error',
-}).then((result) => {
-if (result.value) {
+		title: 'Data Physical Gagal Tersimpan',
+		text: 'Klik Ok untuk input data kembali',
+		type: 'error',
+		}).then((result) => {
+		if (result.value) {
 
-	window.location.href='TestingNewNoTes-$notes';
-}
-});</script>";
+			window.location.href='TestingNewNoTes-$notes';
+		}
+		});</script>";
 	}
 
 }
@@ -17262,265 +17645,276 @@ $sco_alkaline_afterwash = $_POST['sco_alkaline_afterwash1'] . '/' . $_POST['sco_
 $sca_alkaline_afterwash = $_POST['sca_alkaline_afterwash1'] . '/' . $_POST['sca_alkaline_afterwash2'] . '/' . $_POST['sca_alkaline_afterwash3'];
 
 if ($_POST['colorfastness_save'] == "save" and $cek1 > 0) {
-	$sqlCLR = mysqli_query($con, "UPDATE tbl_tq_test SET
-	`wash_temp`='$_POST[wash_temp]',
-	`wash_colorchange`='$_POST[wash_colorchange]',
-	`wash_acetate`='$_POST[wash_acetate]',
-	`wash_cotton`='$_POST[wash_cotton]',
-	`wash_nylon`='$_POST[wash_nylon]',
-	`wash_poly`='$_POST[wash_poly]',
-	`wash_acrylic`='$_POST[wash_acrylic]',
-	`wash_wool`='$_POST[wash_wool]',
-	`wash_staining`='$_POST[wash_staining]',
-	`wash_note`='$_POST[wash_note]',
-	`water_colorchange`='$_POST[water_colorchange]',
-	`water_acetate`='$_POST[water_acetate]',
-	`water_cotton`='$_POST[water_cotton]',
-	`water_nylon`='$_POST[water_nylon]',
-	`water_poly`='$_POST[water_poly]',
-	`water_acrylic`='$_POST[water_acrylic]',
-	`water_wool`='$_POST[water_wool]',
-	`water_staining`='$_POST[water_staining]',
-	`water_note`='$_POST[water_note]',
-	`acid_colorchange`='$_POST[acid_colorchange]',
-	`acid_acetate`='$_POST[acid_acetate]',
-	`acid_cotton`='$_POST[acid_cotton]',
-	`acid_nylon`='$_POST[acid_nylon]',
-	`acid_poly`='$_POST[acid_poly]',
-	`acid_acrylic`='$_POST[acid_acrylic]',
-	`acid_wool`='$_POST[acid_wool]',
-	`acid_staining`='$_POST[acid_staining]',
-	`acid_note`='$_POST[acid_note]',
-	`alkaline_colorchange`='$_POST[alkaline_colorchange]',
-	`alkaline_acetate`='$_POST[alkaline_acetate]',
-	`alkaline_cotton`='$_POST[alkaline_cotton]',
-	`alkaline_nylon`='$_POST[alkaline_nylon]',
-	`alkaline_poly`='$_POST[alkaline_poly]',
-	`alkaline_acrylic`='$_POST[alkaline_acrylic]',
-	`alkaline_wool`='$_POST[alkaline_wool]',
-	`alkaline_staining`='$_POST[alkaline_staining]',
-	`alkaline_note`='$_POST[alkaline_note]',
-	`crock_len1`='$_POST[crock_len1]',
-	`crock_wid1`='$_POST[crock_wid1]',
-	`crock_len2`='$_POST[crock_len2]',
-	`crock_wid2`='$_POST[crock_wid2]',
-	`crock_note`='$_POST[crock_note]',
-	`phenolic_colorchange`='$_POST[phenolic_colorchange]',
-	`phenolic_note`='$_POST[phenolic_note]',
-	`cm_printing_colorchange`='$_POST[cm_printing_colorchange]',
-	`cm_printing_staining`='$_POST[cm_printing_staining]',
-	`cm_printing_note`='$_POST[cm_printing_note]',
-	`cm_dye_temp`='$_POST[cm_dye_temp]',
-	`cm_dye_colorchange`='$_POST[cm_dye_colorchange]',
-	`cm_dye_stainingface`='$_POST[cm_dye_stainingface]',
-	`cm_dye_stainingback`='$_POST[cm_dye_stainingback]',
-	`cm_dye_note`='$_POST[cm_dye_note]',
-	`light_rating1`='$_POST[light_rating1]',
-	`light_rating2`='$_POST[light_rating2]',
-	`light_note`='$_POST[light_note]',
-	`light_pers_colorchange`='$_POST[light_pers_colorchange]',
-	`light_pers_note`='$_POST[light_pers_note]',
-	`saliva_staining`='$_POST[saliva_staining]',
-	`saliva_note`='$_POST[saliva_note]',
-	`bleeding`='$_POST[bleeding]',
-	`bleeding_note`='$_POST[bleeding_note]',
-	`chlorin`='$_POST[chlorin]',
-	`nchlorin1`='$_POST[nchlorin1]',
-	`nchlorin2`='$_POST[nchlorin2]',
-	`chlorin_note`='$_POST[chlorin_note]',
-	`dye_tf_sstaining`='$_POST[dye_tf_sstaining]',
-	`dye_tf_cstaining`='$_POST[dye_tf_cstaining]',
-	`dye_tf_acetate`='$_POST[dye_tf_acetate]',
-	`dye_tf_cotton`='$_POST[dye_tf_cotton]',
-	`dye_tf_nylon`='$_POST[dye_tf_nylon]',
-	`dye_tf_poly`='$_POST[dye_tf_poly]',
-	`dye_tf_acrylic`='$_POST[dye_tf_acrylic]',
-	`dye_tf_wool`='$_POST[dye_tf_wool]',
-	`dye_tf_note`='$_POST[dye_tf_note]',
-	`stat_wf`='$_POST[stat_wf]',
-	`stat_wtr`='$_POST[stat_wtr]',
-	`stat_pac`='$_POST[stat_pac]',
-	`stat_pal`='$_POST[stat_pal]',
-	`stat_cr`='$_POST[stat_cr]',
-	`stat_py`='$_POST[stat_py]',
-	`stat_cmo`='$_POST[stat_cmo]',
-	`stat_cm`='$_POST[stat_cm]',
-	`stat_lg`='$_POST[stat_lg]',
-	`stat_lp`='$_POST[stat_lp]',
-	`stat_slv`='$_POST[stat_slv]',
-	`stat_bld`='$_POST[stat_bld]',
-	`stat_chl`='$_POST[stat_chl]',
-	`stat_nchl`='$_POST[stat_nchl]',
-	`stat_dye`='$_POST[stat_dye]',
-	`tgl_update`=now(),
-	`sco_acid_original`= '$sco_original',
-	`sco_acid_status`= '$_POST[sco_acid_status]',
-	`sca_acid_original`= '$sca_acid',
-	`sca_acid_status`= '$_POST[sca_acid_status]',
-	`sco_alkaline_afterwash` = '$sco_alkaline_afterwash',
-	`sco_alkaline_status` = '$_POST[sco_alkaline_status]',
-	`sca_alkaline_afterwash` = '$sca_alkaline_afterwash',
-	`sca_alkaline_status` = '$_POST[sca_alkaline_status]',
-	`sc_note` =  '$_POST[sc_note]'
-	WHERE `id_nokk`='$rcek[id]'
-	");
+	
+	$sqlCLR = sqlsrv_query($con_db_qc_sqlsrv, "
+		UPDATE db_qc.tbl_tq_test SET
+			[wash_temp]='$_POST[wash_temp]',
+			[wash_colorchange]='$_POST[wash_colorchange]',
+			[wash_acetate]='$_POST[wash_acetate]',
+			[wash_cotton]='$_POST[wash_cotton]',
+			[wash_nylon]='$_POST[wash_nylon]',
+			[wash_poly]='$_POST[wash_poly]',
+			[wash_acrylic]='$_POST[wash_acrylic]',
+			[wash_wool]='$_POST[wash_wool]',
+			[wash_staining]='$_POST[wash_staining]',
+			[wash_note]='$_POST[wash_note]',
+			[water_colorchange]='$_POST[water_colorchange]',
+			[water_acetate]='$_POST[water_acetate]',
+			[water_cotton]='$_POST[water_cotton]',
+			[water_nylon]='$_POST[water_nylon]',
+			[water_poly]='$_POST[water_poly]',
+			[water_acrylic]='$_POST[water_acrylic]',
+			[water_wool]='$_POST[water_wool]',
+			[water_staining]='$_POST[water_staining]',
+			[water_note]='$_POST[water_note]',
+			[acid_colorchange]='$_POST[acid_colorchange]',
+			[acid_acetate]='$_POST[acid_acetate]',
+			[acid_cotton]='$_POST[acid_cotton]',
+			[acid_nylon]='$_POST[acid_nylon]',
+			[acid_poly]='$_POST[acid_poly]',
+			[acid_acrylic]='$_POST[acid_acrylic]',
+			[acid_wool]='$_POST[acid_wool]',
+			[acid_staining]='$_POST[acid_staining]',
+			[acid_note]='$_POST[acid_note]',
+			[alkaline_colorchange]='$_POST[alkaline_colorchange]',
+			[alkaline_acetate]='$_POST[alkaline_acetate]',
+			[alkaline_cotton]='$_POST[alkaline_cotton]',
+			[alkaline_nylon]='$_POST[alkaline_nylon]',
+			[alkaline_poly]='$_POST[alkaline_poly]',
+			[alkaline_acrylic]='$_POST[alkaline_acrylic]',
+			[alkaline_wool]='$_POST[alkaline_wool]',
+			[alkaline_staining]='$_POST[alkaline_staining]',
+			[alkaline_note]='$_POST[alkaline_note]',
+			[crock_len1]='$_POST[crock_len1]',
+			[crock_wid1]='$_POST[crock_wid1]',
+			[crock_len2]='$_POST[crock_len2]',
+			[crock_wid2]='$_POST[crock_wid2]',
+			[crock_note]='$_POST[crock_note]',
+			[phenolic_colorchange]='$_POST[phenolic_colorchange]',
+			[phenolic_note]='$_POST[phenolic_note]',
+			[cm_printing_colorchange]='$_POST[cm_printing_colorchange]',
+			[cm_printing_staining]='$_POST[cm_printing_staining]',
+			[cm_printing_note]='$_POST[cm_printing_note]',
+			[cm_dye_temp]='$_POST[cm_dye_temp]',
+			[cm_dye_colorchange]='$_POST[cm_dye_colorchange]',
+			[cm_dye_stainingface]='$_POST[cm_dye_stainingface]',
+			[cm_dye_stainingback]='$_POST[cm_dye_stainingback]',
+			[cm_dye_note]='$_POST[cm_dye_note]',
+			[light_rating1]='$_POST[light_rating1]',
+			[light_rating2]='$_POST[light_rating2]',
+			[light_note]='$_POST[light_note]',
+			[light_pers_colorchange]='$_POST[light_pers_colorchange]',
+			[light_pers_note]='$_POST[light_pers_note]',
+			[saliva_staining]='$_POST[saliva_staining]',
+			[saliva_note]='$_POST[saliva_note]',
+			[bleeding]='$_POST[bleeding]',
+			[bleeding_note]='$_POST[bleeding_note]',
+			[chlorin]='$_POST[chlorin]',
+			[nchlorin1]='$_POST[nchlorin1]',
+			[nchlorin2]='$_POST[nchlorin2]',
+			[chlorin_note]='$_POST[chlorin_note]',
+			[dye_tf_sstaining]='$_POST[dye_tf_sstaining]',
+			[dye_tf_cstaining]='$_POST[dye_tf_cstaining]',
+			[dye_tf_acetate]='$_POST[dye_tf_acetate]',
+			[dye_tf_cotton]='$_POST[dye_tf_cotton]',
+			[dye_tf_nylon]='$_POST[dye_tf_nylon]',
+			[dye_tf_poly]='$_POST[dye_tf_poly]',
+			[dye_tf_acrylic]='$_POST[dye_tf_acrylic]',
+			[dye_tf_wool]='$_POST[dye_tf_wool]',
+			[dye_tf_note]='$_POST[dye_tf_note]',
+			[stat_wf]='$_POST[stat_wf]',
+			[stat_wtr]='$_POST[stat_wtr]',
+			[stat_pac]='$_POST[stat_pac]',
+			[stat_pal]='$_POST[stat_pal]',
+			[stat_cr]='$_POST[stat_cr]',
+			[stat_py]='$_POST[stat_py]',
+			[stat_cmo]='$_POST[stat_cmo]',
+			[stat_cm]='$_POST[stat_cm]',
+			[stat_lg]='$_POST[stat_lg]',
+			[stat_lp]='$_POST[stat_lp]',
+			[stat_slv]='$_POST[stat_slv]',
+			[stat_bld]='$_POST[stat_bld]',
+			[stat_chl]='$_POST[stat_chl]',
+			[stat_nchl]='$_POST[stat_nchl]',
+			[stat_dye]='$_POST[stat_dye]',
+			[tgl_update]=GETDATE(),
+			[sco_acid_original]='$sco_original',
+			[sco_acid_status]='$_POST[sco_acid_status]',
+			[sca_acid_original]='$sca_acid',
+			[sca_acid_status]='$_POST[sca_acid_status]',
+			[sco_alkaline_afterwash]='$sco_alkaline_afterwash',
+			[sco_alkaline_status]='$_POST[sco_alkaline_status]',
+			[sca_alkaline_afterwash]='$sca_alkaline_afterwash',
+			[sca_alkaline_status]='$_POST[sca_alkaline_status]',
+			[sc_note]='$_POST[sc_note]'
+		WHERE [id_nokk]='$rcek[id]'
+		");
+
+
+
 	if ($sqlCLR) {
-		$sqlCLRD = mysqli_query($con, "UPDATE tbl_tq_disptest SET
-	`dwash_temp`='$_POST[dwash_temp]',
-	`dwash_colorchange`='$_POST[dwash_colorchange]',
-	`dwash_acetate`='$_POST[dwash_acetate]',
-	`dwash_cotton`='$_POST[dwash_cotton]',
-	`dwash_nylon`='$_POST[dwash_nylon]',
-	`dwash_poly`='$_POST[dwash_poly]',
-	`dwash_acrylic`='$_POST[dwash_acrylic]',
-	`dwash_wool`='$_POST[dwash_wool]',
-	`dwash_staining`='$_POST[dwash_staining]',
-	`dwash_note`='$_POST[dwash_note]',
-	`dwater_colorchange`='$_POST[dwater_colorchange]',
-	`dwater_acetate`='$_POST[dwater_acetate]',
-	`dwater_cotton`='$_POST[dwater_cotton]',
-	`dwater_nylon`='$_POST[dwater_nylon]',
-	`dwater_poly`='$_POST[dwater_poly]',
-	`dwater_acrylic`='$_POST[dwater_acrylic]',
-	`dwater_wool`='$_POST[dwater_wool]',
-	`dwater_staining`='$_POST[dwater_staining]',
-	`dwater_note`='$_POST[dwater_note]',
-	`dacid_colorchange`='$_POST[dacid_colorchange]',
-	`dacid_acetate`='$_POST[dacid_acetate]',
-	`dacid_cotton`='$_POST[dacid_cotton]',
-	`dacid_nylon`='$_POST[dacid_nylon]',
-	`dacid_poly`='$_POST[dacid_poly]',
-	`dacid_acrylic`='$_POST[dacid_acrylic]',
-	`dacid_wool`='$_POST[dacid_wool]',
-	`dacid_staining`='$_POST[dacid_staining]',
-	`dacid_note`='$_POST[dacid_note]',
-	`dalkaline_colorchange`='$_POST[dalkaline_colorchange]',
-	`dalkaline_acetate`='$_POST[dalkaline_acetate]',
-	`dalkaline_cotton`='$_POST[dalkaline_cotton]',
-	`dalkaline_nylon`='$_POST[dalkaline_nylon]',
-	`dalkaline_poly`='$_POST[dalkaline_poly]',
-	`dalkaline_acrylic`='$_POST[dalkaline_acrylic]',
-	`dalkaline_wool`='$_POST[dalkaline_wool]',
-	`dalkaline_staining`='$_POST[dalkaline_staining]',
-	`dalkaline_note`='$_POST[dalkaline_note]',
-	`dcrock_len1`='$_POST[dcrock_len1]',
-	`dcrock_wid1`='$_POST[dcrock_wid1]',
-	`dcrock_len2`='$_POST[dcrock_len2]',
-	`dcrock_wid2`='$_POST[dcrock_wid2]',
-	`dcrock_note`='$_POST[dcrock_note]',
-	`dphenolic_colorchange`='$_POST[dphenolic_colorchange]',
-	`dphenolic_note`='$_POST[dphenolic_note]',
-	`dcm_printing_colorchange`='$_POST[dcm_printing_colorchange]',
-	`dcm_printing_staining`='$_POST[dcm_printing_staining]',
-	`dcm_printing_note`='$_POST[dcm_printing_note]',
-	`dcm_dye_temp`='$_POST[dcm_dye_temp]',
-	`dcm_dye_colorchange`='$_POST[dcm_dye_colorchange]',
-	`dcm_dye_stainingface`='$_POST[dcm_dye_stainingface]',
-	`dcm_dye_stainingback`='$_POST[dcm_dye_stainingback]',
-	`dcm_dye_note`='$_POST[dcm_dye_note]',
-	`dlight_rating1`='$_POST[dlight_rating1]',
-	`dlight_rating2`='$_POST[dlight_rating2]',
-	`dlight_note`='$_POST[dlight_note]',
-	`dlight_pers_colorchange`='$_POST[dlight_pers_colorchange]',
-	`dlight_pers_note`='$_POST[dlight_pers_note]',
-	`dsaliva_staining`='$_POST[dsaliva_staining]',
-	`dsaliva_note`='$_POST[dsaliva_note]',
-	`dbleeding`='$_POST[dbleeding]',
-	`dbleeding_note`='$_POST[dbleeding_note]',
-	`dchlorin`='$_POST[dchlorin]',
-	`dnchlorin1`='$_POST[dnchlorin1]',
-	`dnchlorin2`='$_POST[dnchlorin2]',
-	`dchlorin_note`='$_POST[dchlorin_note]',
-	`ddye_tf_sstaining`='$_POST[ddye_tf_sstaining]',
-	`ddye_tf_cstaining`='$_POST[ddye_tf_cstaining]',
-	`ddye_tf_acetate`='$_POST[ddye_tf_acetate]',
-	`ddye_tf_cotton`='$_POST[ddye_tf_cotton]',
-	`ddye_tf_nylon`='$_POST[ddye_tf_nylon]',
-	`ddye_tf_poly`='$_POST[ddye_tf_poly]',
-	`ddye_tf_acrylic`='$_POST[ddye_tf_acrylic]',
-	`ddye_tf_wool`='$_POST[ddye_tf_wool]',
-	`ddye_tf_note`='$_POST[ddye_tf_note]',
-	`tgl_update`=now()
-	WHERE `id_nokk`='$rcek[id]'
-	");
-	$sqlCLRM = mysqli_query($con, "UPDATE tbl_tq_marginal SET
-	`mwash_temp`='$_POST[mwash_temp]',
-	`mwash_colorchange`='$_POST[mwash_colorchange]',
-	`mwash_acetate`='$_POST[mwash_acetate]',
-	`mwash_cotton`='$_POST[mwash_cotton]',
-	`mwash_nylon`='$_POST[mwash_nylon]',
-	`mwash_poly`='$_POST[mwash_poly]',
-	`mwash_acrylic`='$_POST[mwash_acrylic]',
-	`mwash_wool`='$_POST[mwash_wool]',
-	`mwash_staining`='$_POST[mwash_staining]',
-	`mwash_note`='$_POST[mwash_note]',
-	`mwater_colorchange`='$_POST[mwater_colorchange]',
-	`mwater_acetate`='$_POST[mwater_acetate]',
-	`mwater_cotton`='$_POST[mwater_cotton]',
-	`mwater_nylon`='$_POST[mwater_nylon]',
-	`mwater_poly`='$_POST[mwater_poly]',
-	`mwater_acrylic`='$_POST[mwater_acrylic]',
-	`mwater_wool`='$_POST[mwater_wool]',
-	`mwater_staining`='$_POST[mwater_staining]',
-	`mwater_note`='$_POST[mwater_note]',
-	`macid_colorchange`='$_POST[macid_colorchange]',
-	`macid_acetate`='$_POST[macid_acetate]',
-	`macid_cotton`='$_POST[macid_cotton]',
-	`macid_nylon`='$_POST[macid_nylon]',
-	`macid_poly`='$_POST[macid_poly]',
-	`macid_acrylic`='$_POST[macid_acrylic]',
-	`macid_wool`='$_POST[macid_wool]',
-	`macid_staining`='$_POST[macid_staining]',
-	`macid_note`='$_POST[macid_note]',
-	`malkaline_colorchange`='$_POST[malkaline_colorchange]',
-	`malkaline_acetate`='$_POST[malkaline_acetate]',
-	`malkaline_cotton`='$_POST[malkaline_cotton]',
-	`malkaline_nylon`='$_POST[malkaline_nylon]',
-	`malkaline_poly`='$_POST[malkaline_poly]',
-	`malkaline_acrylic`='$_POST[malkaline_acrylic]',
-	`malkaline_wool`='$_POST[malkaline_wool]',
-	`malkaline_staining`='$_POST[malkaline_staining]',
-	`malkaline_note`='$_POST[malkaline_note]',
-	`mcrock_len1`='$_POST[mcrock_len1]',
-	`mcrock_wid1`='$_POST[mcrock_wid1]',
-	`mcrock_len2`='$_POST[mcrock_len2]',
-	`mcrock_wid2`='$_POST[mcrock_wid2]',
-	`mcrock_note`='$_POST[mcrock_note]',
-	`mphenolic_colorchange`='$_POST[mphenolic_colorchange]',
-	`mphenolic_note`='$_POST[mphenolic_note]',
-	`mcm_printing_colorchange`='$_POST[mcm_printing_colorchange]',
-	`mcm_printing_staining`='$_POST[mcm_printing_staining]',
-	`mcm_printing_note`='$_POST[mcm_printing_note]',
-	`mcm_dye_temp`='$_POST[mcm_dye_temp]',
-	`mcm_dye_colorchange`='$_POST[mcm_dye_colorchange]',
-	`mcm_dye_stainingface`='$_POST[mcm_dye_stainingface]',
-	`mcm_dye_stainingback`='$_POST[mcm_dye_stainingback]',
-	`mcm_dye_note`='$_POST[mcm_dye_note]',
-	`mlight_rating1`='$_POST[mlight_rating1]',
-	`mlight_rating2`='$_POST[mlight_rating2]',
-	`mlight_note`='$_POST[mlight_note]',
-	`mlight_pers_colorchange`='$_POST[mlight_pers_colorchange]',
-	`mlight_pers_note`='$_POST[mlight_pers_note]',
-	`msaliva_staining`='$_POST[msaliva_staining]',
-	`msaliva_note`='$_POST[msaliva_note]',
-	`mbleeding`='$_POST[mbleeding]',
-	`mbleeding_note`='$_POST[mbleeding_note]',
-	`mchlorin`='$_POST[mchlorin]',
-	`mnchlorin1`='$_POST[mnchlorin1]',
-	`mnchlorin2`='$_POST[mnchlorin2]',
-	`mchlorin_note`='$_POST[mchlorin_note]',
-	`mdye_tf_sstaining`='$_POST[mdye_tf_sstaining]',
-	`mdye_tf_cstaining`='$_POST[mdye_tf_cstaining]',
-	`mdye_tf_acetate`='$_POST[mdye_tf_acetate]',
-	`mdye_tf_cotton`='$_POST[mdye_tf_cotton]',
-	`mdye_tf_nylon`='$_POST[mdye_tf_nylon]',
-	`mdye_tf_poly`='$_POST[mdye_tf_poly]',
-	`mdye_tf_acrylic`='$_POST[mdye_tf_acrylic]',
-	`mdye_tf_wool`='$_POST[mdye_tf_wool]',
-	`mdye_tf_note`='$_POST[mdye_tf_note]',
-	`tgl_update`=now()
-	WHERE `id_nokk`='$rcek[id]'
-	");
+	
+	$sqlCLRD = sqlsrv_query($con_db_qc_sqlsrv, "
+		UPDATE db_qc.tbl_tq_disptest SET
+			[dwash_temp]='$_POST[dwash_temp]',
+			[dwash_colorchange]='$_POST[dwash_colorchange]',
+			[dwash_acetate]='$_POST[dwash_acetate]',
+			[dwash_cotton]='$_POST[dwash_cotton]',
+			[dwash_nylon]='$_POST[dwash_nylon]',
+			[dwash_poly]='$_POST[dwash_poly]',
+			[dwash_acrylic]='$_POST[dwash_acrylic]',
+			[dwash_wool]='$_POST[dwash_wool]',
+			[dwash_staining]='$_POST[dwash_staining]',
+			[dwash_note]='$_POST[dwash_note]',
+			[dwater_colorchange]='$_POST[dwater_colorchange]',
+			[dwater_acetate]='$_POST[dwater_acetate]',
+			[dwater_cotton]='$_POST[dwater_cotton]',
+			[dwater_nylon]='$_POST[dwater_nylon]',
+			[dwater_poly]='$_POST[dwater_poly]',
+			[dwater_acrylic]='$_POST[dwater_acrylic]',
+			[dwater_wool]='$_POST[dwater_wool]',
+			[dwater_staining]='$_POST[dwater_staining]',
+			[dwater_note]='$_POST[dwater_note]',
+			[dacid_colorchange]='$_POST[dacid_colorchange]',
+			[dacid_acetate]='$_POST[dacid_acetate]',
+			[dacid_cotton]='$_POST[dacid_cotton]',
+			[dacid_nylon]='$_POST[dacid_nylon]',
+			[dacid_poly]='$_POST[dacid_poly]',
+			[dacid_acrylic]='$_POST[dacid_acrylic]',
+			[dacid_wool]='$_POST[dacid_wool]',
+			[dacid_staining]='$_POST[dacid_staining]',
+			[dacid_note]='$_POST[dacid_note]',
+			[dalkaline_colorchange]='$_POST[dalkaline_colorchange]',
+			[dalkaline_acetate]='$_POST[dalkaline_acetate]',
+			[dalkaline_cotton]='$_POST[dalkaline_cotton]',
+			[dalkaline_nylon]='$_POST[dalkaline_nylon]',
+			[dalkaline_poly]='$_POST[dalkaline_poly]',
+			[dalkaline_acrylic]='$_POST[dalkaline_acrylic]',
+			[dalkaline_wool]='$_POST[dalkaline_wool]',
+			[dalkaline_staining]='$_POST[dalkaline_staining]',
+			[dalkaline_note]='$_POST[dalkaline_note]',
+			[dcrock_len1]='$_POST[dcrock_len1]',
+			[dcrock_wid1]='$_POST[dcrock_wid1]',
+			[dcrock_len2]='$_POST[dcrock_len2]',
+			[dcrock_wid2]='$_POST[dcrock_wid2]',
+			[dcrock_note]='$_POST[dcrock_note]',
+			[dphenolic_colorchange]='$_POST[dphenolic_colorchange]',
+			[dphenolic_note]='$_POST[dphenolic_note]',
+			[dcm_printing_colorchange]='$_POST[dcm_printing_colorchange]',
+			[dcm_printing_staining]='$_POST[dcm_printing_staining]',
+			[dcm_printing_note]='$_POST[dcm_printing_note]',
+			[dcm_dye_temp]='$_POST[dcm_dye_temp]',
+			[dcm_dye_colorchange]='$_POST[dcm_dye_colorchange]',
+			[dcm_dye_stainingface]='$_POST[dcm_dye_stainingface]',
+			[dcm_dye_stainingback]='$_POST[dcm_dye_stainingback]',
+			[dcm_dye_note]='$_POST[dcm_dye_note]',
+			[dlight_rating1]='$_POST[dlight_rating1]',
+			[dlight_rating2]='$_POST[dlight_rating2]',
+			[dlight_note]='$_POST[dlight_note]',
+			[dlight_pers_colorchange]='$_POST[dlight_pers_colorchange]',
+			[dlight_pers_note]='$_POST[dlight_pers_note]',
+			[dsaliva_staining]='$_POST[dsaliva_staining]',
+			[dsaliva_note]='$_POST[dsaliva_note]',
+			[dbleeding]='$_POST[dbleeding]',
+			[dbleeding_note]='$_POST[dbleeding_note]',
+			[dchlorin]='$_POST[dchlorin]',
+			[dnchlorin1]='$_POST[dnchlorin1]',
+			[dnchlorin2]='$_POST[dnchlorin2]',
+			[dchlorin_note]='$_POST[dchlorin_note]',
+			[ddye_tf_sstaining]='$_POST[ddye_tf_sstaining]',
+			[ddye_tf_cstaining]='$_POST[ddye_tf_cstaining]',
+			[ddye_tf_acetate]='$_POST[ddye_tf_acetate]',
+			[ddye_tf_cotton]='$_POST[ddye_tf_cotton]',
+			[ddye_tf_nylon]='$_POST[ddye_tf_nylon]',
+			[ddye_tf_poly]='$_POST[ddye_tf_poly]',
+			[ddye_tf_acrylic]='$_POST[ddye_tf_acrylic]',
+			[ddye_tf_wool]='$_POST[ddye_tf_wool]',
+			[ddye_tf_note]='$_POST[ddye_tf_note]',
+			[tgl_update]=GETDATE()
+		WHERE [id_nokk]='$rcek[id]'
+		");
+	
+	$sqlCLRM = sqlsrv_query($con_db_qc_sqlsrv, "
+		UPDATE db_qc.tbl_tq_marginal SET
+			[mwash_temp]='$_POST[mwash_temp]',
+			[mwash_colorchange]='$_POST[mwash_colorchange]',
+			[mwash_acetate]='$_POST[mwash_acetate]',
+			[mwash_cotton]='$_POST[mwash_cotton]',
+			[mwash_nylon]='$_POST[mwash_nylon]',
+			[mwash_poly]='$_POST[mwash_poly]',
+			[mwash_acrylic]='$_POST[mwash_acrylic]',
+			[mwash_wool]='$_POST[mwash_wool]',
+			[mwash_staining]='$_POST[mwash_staining]',
+			[mwash_note]='$_POST[mwash_note]',
+			[mwater_colorchange]='$_POST[mwater_colorchange]',
+			[mwater_acetate]='$_POST[mwater_acetate]',
+			[mwater_cotton]='$_POST[mwater_cotton]',
+			[mwater_nylon]='$_POST[mwater_nylon]',
+			[mwater_poly]='$_POST[mwater_poly]',
+			[mwater_acrylic]='$_POST[mwater_acrylic]',
+			[mwater_wool]='$_POST[mwater_wool]',
+			[mwater_staining]='$_POST[mwater_staining]',
+			[mwater_note]='$_POST[mwater_note]',
+			[macid_colorchange]='$_POST[macid_colorchange]',
+			[macid_acetate]='$_POST[macid_acetate]',
+			[macid_cotton]='$_POST[macid_cotton]',
+			[macid_nylon]='$_POST[macid_nylon]',
+			[macid_poly]='$_POST[macid_poly]',
+			[macid_acrylic]='$_POST[macid_acrylic]',
+			[macid_wool]='$_POST[macid_wool]',
+			[macid_staining]='$_POST[macid_staining]',
+			[macid_note]='$_POST[macid_note]',
+			[malkaline_colorchange]='$_POST[malkaline_colorchange]',
+			[malkaline_acetate]='$_POST[malkaline_acetate]',
+			[malkaline_cotton]='$_POST[malkaline_cotton]',
+			[malkaline_nylon]='$_POST[malkaline_nylon]',
+			[malkaline_poly]='$_POST[malkaline_poly]',
+			[malkaline_acrylic]='$_POST[malkaline_acrylic]',
+			[malkaline_wool]='$_POST[malkaline_wool]',
+			[malkaline_staining]='$_POST[malkaline_staining]',
+			[malkaline_note]='$_POST[malkaline_note]',
+			[mcrock_len1]='$_POST[mcrock_len1]',
+			[mcrock_wid1]='$_POST[mcrock_wid1]',
+			[mcrock_len2]='$_POST[mcrock_len2]',
+			[mcrock_wid2]='$_POST[mcrock_wid2]',
+			[mcrock_note]='$_POST[mcrock_note]',
+			[mphenolic_colorchange]='$_POST[mphenolic_colorchange]',
+			[mphenolic_note]='$_POST[mphenolic_note]',
+			[mcm_printing_colorchange]='$_POST[mcm_printing_colorchange]',
+			[mcm_printing_staining]='$_POST[mcm_printing_staining]',
+			[mcm_printing_note]='$_POST[mcm_printing_note]',
+			[mcm_dye_temp]='$_POST[mcm_dye_temp]',
+			[mcm_dye_colorchange]='$_POST[mcm_dye_colorchange]',
+			[mcm_dye_stainingface]='$_POST[mcm_dye_stainingface]',
+			[mcm_dye_stainingback]='$_POST[mcm_dye_stainingback]',
+			[mcm_dye_note]='$_POST[mcm_dye_note]',
+			[mlight_rating1]='$_POST[mlight_rating1]',
+			[mlight_rating2]='$_POST[mlight_rating2]',
+			[mlight_note]='$_POST[mlight_note]',
+			[mlight_pers_colorchange]='$_POST[mlight_pers_colorchange]',
+			[mlight_pers_note]='$_POST[mlight_pers_note]',
+			[msaliva_staining]='$_POST[msaliva_staining]',
+			[msaliva_note]='$_POST[msaliva_note]',
+			[mbleeding]='$_POST[mbleeding]',
+			[mbleeding_note]='$_POST[mbleeding_note]',
+			[mchlorin]='$_POST[mchlorin]',
+			[mnchlorin1]='$_POST[mnchlorin1]',
+			[mnchlorin2]='$_POST[mnchlorin2]',
+			[mchlorin_note]='$_POST[mchlorin_note]',
+			[mdye_tf_sstaining]='$_POST[mdye_tf_sstaining]',
+			[mdye_tf_cstaining]='$_POST[mdye_tf_cstaining]',
+			[mdye_tf_acetate]='$_POST[mdye_tf_acetate]',
+			[mdye_tf_cotton]='$_POST[mdye_tf_cotton]',
+			[mdye_tf_nylon]='$_POST[mdye_tf_nylon]',
+			[mdye_tf_poly]='$_POST[mdye_tf_poly]',
+			[mdye_tf_acrylic]='$_POST[mdye_tf_acrylic]',
+			[mdye_tf_wool]='$_POST[mdye_tf_wool]',
+			[mdye_tf_note]='$_POST[mdye_tf_note]',
+			[tgl_update]=GETDATE()
+		WHERE [id_nokk]='$rcek[id]'
+		");
+
+
 		echo "<script>swal({
 	title: 'Colorfastness Berhasil di Update',
 	text: 'Klik Ok untuk input data kembali',
@@ -17533,265 +17927,130 @@ if ($_POST['colorfastness_save'] == "save" and $cek1 > 0) {
 	});</script>";
 	}
 } else if ($_POST['colorfastness_save'] == "save") {
-	$sqlCLR = mysqli_query($con, "INSERT INTO tbl_tq_test SET
-	`id_nokk`='$rcek[id]',
-	`wash_temp`='$_POST[wash_temp]',
-	`wash_colorchange`='$_POST[wash_colorchange]',
-	`wash_acetate`='$_POST[wash_acetate]',
-	`wash_cotton`='$_POST[wash_cotton]',
-	`wash_nylon`='$_POST[wash_nylon]',
-	`wash_poly`='$_POST[wash_poly]',
-	`wash_acrylic`='$_POST[wash_acrylic]',
-	`wash_wool`='$_POST[wash_wool]',
-	`wash_staining`='$_POST[wash_staining]',
-	`wash_note`='$_POST[wash_note]',
-	`water_colorchange`='$_POST[water_colorchange]',
-	`water_acetate`='$_POST[water_acetate]',
-	`water_cotton`='$_POST[water_cotton]',
-	`water_nylon`='$_POST[water_nylon]',
-	`water_poly`='$_POST[water_poly]',
-	`water_acrylic`='$_POST[water_acrylic]',
-	`water_wool`='$_POST[water_wool]',
-	`water_staining`='$_POST[water_staining]',
-	`water_note`='$_POST[water_note]',
-	`acid_colorchange`='$_POST[acid_colorchange]',
-	`acid_acetate`='$_POST[acid_acetate]',
-	`acid_cotton`='$_POST[acid_cotton]',
-	`acid_nylon`='$_POST[acid_nylon]',
-	`acid_poly`='$_POST[acid_poly]',
-	`acid_acrylic`='$_POST[acid_acrylic]',
-	`acid_wool`='$_POST[acid_wool]',
-	`acid_staining`='$_POST[acid_staining]',
-	`acid_note`='$_POST[acid_note]',
-	`alkaline_colorchange`='$_POST[alkaline_colorchange]',
-	`alkaline_acetate`='$_POST[alkaline_acetate]',
-	`alkaline_cotton`='$_POST[alkaline_cotton]',
-	`alkaline_nylon`='$_POST[alkaline_nylon]',
-	`alkaline_poly`='$_POST[alkaline_poly]',
-	`alkaline_acrylic`='$_POST[alkaline_acrylic]',
-	`alkaline_wool`='$_POST[alkaline_wool]',
-	`alkaline_staining`='$_POST[alkaline_staining]',
-	`alkaline_note`='$_POST[alkaline_note]',
-	`crock_len1`='$_POST[crock_len1]',
-	`crock_wid1`='$_POST[crock_wid1]',
-	`crock_len2`='$_POST[crock_len2]',
-	`crock_wid2`='$_POST[crock_wid2]',
-	`crock_note`='$_POST[crock_note]',
-	`phenolic_colorchange`='$_POST[phenolic_colorchange]',
-	`phenolic_note`='$_POST[phenolic_note]',
-	`cm_printing_colorchange`='$_POST[cm_printing_colorchange]',
-	`cm_printing_staining`='$_POST[cm_printing_staining]',
-	`cm_printing_note`='$_POST[cm_printing_note]',
-	`cm_dye_temp`='$_POST[cm_dye_temp]',
-	`cm_dye_colorchange`='$_POST[cm_dye_colorchange]',
-	`cm_dye_stainingface`='$_POST[cm_dye_stainingface]',
-	`cm_dye_stainingback`='$_POST[cm_dye_stainingback]',
-	`cm_dye_note`='$_POST[cm_dye_note]',
-	`light_rating1`='$_POST[light_rating1]',
-	`light_rating2`='$_POST[light_rating2]',
-	`light_note`='$_POST[light_note]',
-	`light_pers_colorchange`='$_POST[light_pers_colorchange]',
-	`light_pers_note`='$_POST[light_pers_note]',
-	`saliva_staining`='$_POST[saliva_staining]',
-	`saliva_note`='$_POST[saliva_note]',
-	`bleeding`='$_POST[bleeding]',
-	`bleeding_note`='$_POST[bleeding_note]',
-	`chlorin`='$_POST[chlorin]',
-	`nchlorin1`='$_POST[nchlorin1]',
-	`nchlorin2`='$_POST[nchlorin2]',
-	`chlorin_note`='$_POST[chlorin_note]',
-	`dye_tf_sstaining`='$_POST[dye_tf_sstaining]',
-	`dye_tf_cstaining`='$_POST[dye_tf_cstaining]',
-	`dye_tf_acetate`='$_POST[dye_tf_acetate]',
-	`dye_tf_cotton`='$_POST[dye_tf_cotton]',
-	`dye_tf_nylon`='$_POST[dye_tf_nylon]',
-	`dye_tf_poly`='$_POST[dye_tf_poly]',
-	`dye_tf_acrylic`='$_POST[dye_tf_acrylic]',
-	`dye_tf_wool`='$_POST[dye_tf_wool]',
-	`dye_tf_note`='$_POST[dye_tf_note]',
-	`stat_wf`='$_POST[stat_wf]',
-	`stat_wtr`='$_POST[stat_wtr]',
-	`stat_pac`='$_POST[stat_pac]',
-	`stat_pal`='$_POST[stat_pal]',
-	`stat_cr`='$_POST[stat_cr]',
-	`stat_py`='$_POST[stat_py]',
-	`stat_cmo`='$_POST[stat_cmo]',
-	`stat_cm`='$_POST[stat_cm]',
-	`stat_lg`='$_POST[stat_lg]',
-	`stat_lp`='$_POST[stat_lp]',
-	`stat_slv`='$_POST[stat_slv]',
-	`stat_bld`='$_POST[stat_bld]',
-	`stat_chl`='$_POST[stat_chl]',
-	`stat_nchl`='$_POST[stat_nchl]',
-	`stat_dye`='$_POST[stat_dye]',
-	`tgl_buat`=now(),
-	`tgl_update`=now(),
-	`sco_acid_original`= '$sco_original',
-	`sco_acid_status`= '$_POST[sco_acid_status]',
-	`sca_acid_original`= '$sca_acid',
-	`sca_acid_status`= '$_POST[sca_acid_status]',
-	`sco_alkaline_afterwash` = '$sco_alkaline_afterwash',
-	`sco_alkaline_status` = '$_POST[sco_alkaline_status]',
-	`sca_alkaline_afterwash` = '$sca_alkaline_afterwash',
-	`sca_alkaline_status` = '$_POST[sca_alkaline_status]',
-	`sc_note` =  '$_POST[sc_note]'
+	
+	$sqlCLR = sqlsrv_query($con_db_qc_sqlsrv, "
+	INSERT INTO db_qc.tbl_tq_test (
+		[id_nokk],
+		[wash_temp],[wash_colorchange],[wash_acetate],[wash_cotton],[wash_nylon],[wash_poly],[wash_acrylic],[wash_wool],[wash_staining],[wash_note],
+		[water_colorchange],[water_acetate],[water_cotton],[water_nylon],[water_poly],[water_acrylic],[water_wool],[water_staining],[water_note],
+		[acid_colorchange],[acid_acetate],[acid_cotton],[acid_nylon],[acid_poly],[acid_acrylic],[acid_wool],[acid_staining],[acid_note],
+		[alkaline_colorchange],[alkaline_acetate],[alkaline_cotton],[alkaline_nylon],[alkaline_poly],[alkaline_acrylic],[alkaline_wool],[alkaline_staining],[alkaline_note],
+		[crock_len1],[crock_wid1],[crock_len2],[crock_wid2],[crock_note],
+		[phenolic_colorchange],[phenolic_note],
+		[cm_printing_colorchange],[cm_printing_staining],[cm_printing_note],
+		[cm_dye_temp],[cm_dye_colorchange],[cm_dye_stainingface],[cm_dye_stainingback],[cm_dye_note],
+		[light_rating1],[light_rating2],[light_note],[light_pers_colorchange],[light_pers_note],
+		[saliva_staining],[saliva_note],
+		[bleeding],[bleeding_note],
+		[chlorin],[nchlorin1],[nchlorin2],[chlorin_note],
+		[dye_tf_sstaining],[dye_tf_cstaining],[dye_tf_acetate],[dye_tf_cotton],[dye_tf_nylon],[dye_tf_poly],[dye_tf_acrylic],[dye_tf_wool],[dye_tf_note],
+		[stat_wf],[stat_wtr],[stat_pac],[stat_pal],[stat_cr],[stat_py],[stat_cmo],[stat_cm],[stat_lg],[stat_lp],
+		[stat_slv],[stat_bld],[stat_chl],[stat_nchl],[stat_dye],
+		[tgl_buat],[tgl_update],
+		[sco_acid_original],[sco_acid_status],
+		[sca_acid_original],[sca_acid_status],
+		[sco_alkaline_afterwash],[sco_alkaline_status],
+		[sca_alkaline_afterwash],[sca_alkaline_status],
+		[sc_note]
+	) VALUES (
+		'$rcek[id]',
+		'$_POST[wash_temp]','$_POST[wash_colorchange]','$_POST[wash_acetate]','$_POST[wash_cotton]','$_POST[wash_nylon]','$_POST[wash_poly]','$_POST[wash_acrylic]','$_POST[wash_wool]','$_POST[wash_staining]','$_POST[wash_note]',
+		'$_POST[water_colorchange]','$_POST[water_acetate]','$_POST[water_cotton]','$_POST[water_nylon]','$_POST[water_poly]','$_POST[water_acrylic]','$_POST[water_wool]','$_POST[water_staining]','$_POST[water_note]',
+		'$_POST[acid_colorchange]','$_POST[acid_acetate]','$_POST[acid_cotton]','$_POST[acid_nylon]','$_POST[acid_poly]','$_POST[acid_acrylic]','$_POST[acid_wool]','$_POST[acid_staining]','$_POST[acid_note]',
+		'$_POST[alkaline_colorchange]','$_POST[alkaline_acetate]','$_POST[alkaline_cotton]','$_POST[alkaline_nylon]','$_POST[alkaline_poly]','$_POST[alkaline_acrylic]','$_POST[alkaline_wool]','$_POST[alkaline_staining]','$_POST[alkaline_note]',
+		'$_POST[crock_len1]','$_POST[crock_wid1]','$_POST[crock_len2]','$_POST[crock_wid2]','$_POST[crock_note]',
+		'$_POST[phenolic_colorchange]','$_POST[phenolic_note]',
+		'$_POST[cm_printing_colorchange]','$_POST[cm_printing_staining]','$_POST[cm_printing_note]',
+		'$_POST[cm_dye_temp]','$_POST[cm_dye_colorchange]','$_POST[cm_dye_stainingface]','$_POST[cm_dye_stainingback]','$_POST[cm_dye_note]',
+		'$_POST[light_rating1]','$_POST[light_rating2]','$_POST[light_note]','$_POST[light_pers_colorchange]','$_POST[light_pers_note]',
+		'$_POST[saliva_staining]','$_POST[saliva_note]',
+		'$_POST[bleeding]','$_POST[bleeding_note]',
+		'$_POST[chlorin]','$_POST[nchlorin1]','$_POST[nchlorin2]','$_POST[chlorin_note]',
+		'$_POST[dye_tf_sstaining]','$_POST[dye_tf_cstaining]','$_POST[dye_tf_acetate]','$_POST[dye_tf_cotton]','$_POST[dye_tf_nylon]','$_POST[dye_tf_poly]','$_POST[dye_tf_acrylic]','$_POST[dye_tf_wool]','$_POST[dye_tf_note]',
+		'$_POST[stat_wf]','$_POST[stat_wtr]','$_POST[stat_pac]','$_POST[stat_pal]','$_POST[stat_cr]','$_POST[stat_py]','$_POST[stat_cmo]','$_POST[stat_cm]','$_POST[stat_lg]','$_POST[stat_lp]',
+		'$_POST[stat_slv]','$_POST[stat_bld]','$_POST[stat_chl]','$_POST[stat_nchl]','$_POST[stat_dye]',
+		GETDATE(),GETDATE(),
+		'$sco_original','$_POST[sco_acid_status]',
+		'$sca_acid','$_POST[sca_acid_status]',
+		'$sco_alkaline_afterwash','$_POST[sco_alkaline_status]',
+		'$sca_alkaline_afterwash','$_POST[sca_alkaline_status]',
+		'$_POST[sc_note]'
+	)
 	");
-	$sqlCLRMI = mysqli_query($con, "INSERT INTO tbl_tq_marginal SET
-	`id_nokk`='$rcek[id]',
-	`mwash_temp`='$_POST[mwash_temp]',
-	`mwash_colorchange`='$_POST[mwash_colorchange]',
-	`mwash_acetate`='$_POST[mwash_acetate]',
-	`mwash_cotton`='$_POST[mwash_cotton]',
-	`mwash_nylon`='$_POST[mwash_nylon]',
-	`mwash_poly`='$_POST[mwash_poly]',
-	`mwash_acrylic`='$_POST[mwash_acrylic]',
-	`mwash_wool`='$_POST[mwash_wool]',
-	`mwash_staining`='$_POST[mwash_staining]',
-	`mwash_note`='$_POST[mwash_note]',
-	`mwater_colorchange`='$_POST[mwater_colorchange]',
-	`mwater_acetate`='$_POST[mwater_acetate]',
-	`mwater_cotton`='$_POST[mwater_cotton]',
-	`mwater_nylon`='$_POST[mwater_nylon]',
-	`mwater_poly`='$_POST[mwater_poly]',
-	`mwater_acrylic`='$_POST[mwater_acrylic]',
-	`mwater_wool`='$_POST[mwater_wool]',
-	`mwater_staining`='$_POST[mwater_staining]',
-	`mwater_note`='$_POST[mwater_note]',
-	`macid_colorchange`='$_POST[macid_colorchange]',
-	`macid_acetate`='$_POST[macid_acetate]',
-	`macid_cotton`='$_POST[macid_cotton]',
-	`macid_nylon`='$_POST[macid_nylon]',
-	`macid_poly`='$_POST[macid_poly]',
-	`macid_acrylic`='$_POST[macid_acrylic]',
-	`macid_wool`='$_POST[macid_wool]',
-	`macid_staining`='$_POST[macid_staining]',
-	`macid_note`='$_POST[macid_note]',
-	`malkaline_colorchange`='$_POST[malkaline_colorchange]',
-	`malkaline_acetate`='$_POST[malkaline_acetate]',
-	`malkaline_cotton`='$_POST[malkaline_cotton]',
-	`malkaline_nylon`='$_POST[malkaline_nylon]',
-	`malkaline_poly`='$_POST[malkaline_poly]',
-	`malkaline_acrylic`='$_POST[malkaline_acrylic]',
-	`malkaline_wool`='$_POST[malkaline_wool]',
-	`malkaline_staining`='$_POST[malkaline_staining]',
-	`malkaline_note`='$_POST[malkaline_note]',
-	`mcrock_len1`='$_POST[mcrock_len1]',
-	`mcrock_wid1`='$_POST[mcrock_wid1]',
-	`mcrock_len2`='$_POST[mcrock_len2]',
-	`mcrock_wid2`='$_POST[mcrock_wid2]',
-	`mcrock_note`='$_POST[mcrock_note]',
-	`mphenolic_colorchange`='$_POST[mphenolic_colorchange]',
-	`mphenolic_note`='$_POST[mphenolic_note]',
-	`mcm_printing_colorchange`='$_POST[mcm_printing_colorchange]',
-	`mcm_printing_staining`='$_POST[mcm_printing_staining]',
-	`mcm_printing_note`='$_POST[mcm_printing_note]',
-	`mcm_dye_temp`='$_POST[mcm_dye_temp]',
-	`mcm_dye_colorchange`='$_POST[mcm_dye_colorchange]',
-	`mcm_dye_stainingface`='$_POST[mcm_dye_stainingface]',
-	`mcm_dye_stainingback`='$_POST[mcm_dye_stainingback]',
-	`mcm_dye_note`='$_POST[mcm_dye_note]',
-	`mlight_rating1`='$_POST[mlight_rating1]',
-	`mlight_rating2`='$_POST[mlight_rating2]',
-	`mlight_note`='$_POST[mlight_note]',
-	`mlight_pers_colorchange`='$_POST[mlight_pers_colorchange]',
-	`mlight_pers_note`='$_POST[mlight_pers_note]',
-	`msaliva_staining`='$_POST[msaliva_staining]',
-	`msaliva_note`='$_POST[msaliva_note]',
-	`mbleeding`='$_POST[mbleeding]',
-	`mbleeding_note`='$_POST[mbleeding_note]',
-	`mchlorin`='$_POST[mchlorin]',
-	`mnchlorin1`='$_POST[mnchlorin1]',
-	`mnchlorin2`='$_POST[mnchlorin2]',
-	`mchlorin_note`='$_POST[mchlorin_note]',
-	`mdye_tf_sstaining`='$_POST[mdye_tf_sstaining]',
-	`mdye_tf_cstaining`='$_POST[mdye_tf_cstaining]',
-	`mdye_tf_acetate`='$_POST[mdye_tf_acetate]',
-	`mdye_tf_cotton`='$_POST[mdye_tf_cotton]',
-	`mdye_tf_nylon`='$_POST[mdye_tf_nylon]',
-	`mdye_tf_poly`='$_POST[mdye_tf_poly]',
-	`mdye_tf_acrylic`='$_POST[mdye_tf_acrylic]',
-	`mdye_tf_wool`='$_POST[mdye_tf_wool]',
-	`mdye_tf_note`='$_POST[mdye_tf_note]',
-	`tgl_update`=now()");
-	$sqlCLRDI = mysqli_query($con, "INSERT INTO tbl_tq_disptest SET
-	`id_nokk`='$rcek[id]',
-	`dwash_temp`='$_POST[dwash_temp]',
-	`dwash_colorchange`='$_POST[dwash_colorchange]',
-	`dwash_acetate`='$_POST[dwash_acetate]',
-	`dwash_cotton`='$_POST[dwash_cotton]',
-	`dwash_nylon`='$_POST[dwash_nylon]',
-	`dwash_poly`='$_POST[dwash_poly]',
-	`dwash_acrylic`='$_POST[dwash_acrylic]',
-	`dwash_wool`='$_POST[dwash_wool]',
-	`dwash_staining`='$_POST[dwash_staining]',
-	`dwash_note`='$_POST[dwash_note]',
-	`dwater_colorchange`='$_POST[dwater_colorchange]',
-	`dwater_acetate`='$_POST[dwater_acetate]',
-	`dwater_cotton`='$_POST[dwater_cotton]',
-	`dwater_nylon`='$_POST[dwater_nylon]',
-	`dwater_poly`='$_POST[dwater_poly]',
-	`dwater_acrylic`='$_POST[dwater_acrylic]',
-	`dwater_wool`='$_POST[dwater_wool]',
-	`dwater_staining`='$_POST[dwater_staining]',
-	`dwater_note`='$_POST[dwater_note]',
-	`dacid_colorchange`='$_POST[dacid_colorchange]',
-	`dacid_acetate`='$_POST[dacid_acetate]',
-	`dacid_cotton`='$_POST[dacid_cotton]',
-	`dacid_nylon`='$_POST[dacid_nylon]',
-	`dacid_poly`='$_POST[dacid_poly]',
-	`dacid_acrylic`='$_POST[dacid_acrylic]',
-	`dacid_wool`='$_POST[dacid_wool]',
-	`dacid_staining`='$_POST[dacid_staining]',
-	`dacid_note`='$_POST[dacid_note]',
-	`dalkaline_colorchange`='$_POST[dalkaline_colorchange]',
-	`dalkaline_acetate`='$_POST[dalkaline_acetate]',
-	`dalkaline_cotton`='$_POST[dalkaline_cotton]',
-	`dalkaline_nylon`='$_POST[dalkaline_nylon]',
-	`dalkaline_poly`='$_POST[dalkaline_poly]',
-	`dalkaline_acrylic`='$_POST[dalkaline_acrylic]',
-	`dalkaline_wool`='$_POST[dalkaline_wool]',
-	`dalkaline_staining`='$_POST[dalkaline_staining]',
-	`dalkaline_note`='$_POST[dalkaline_note]',
-	`dcrock_len1`='$_POST[dcrock_len1]',
-	`dcrock_wid1`='$_POST[dcrock_wid1]',
-	`dcrock_len2`='$_POST[dcrock_len2]',
-	`dcrock_wid2`='$_POST[dcrock_wid2]',
-	`dcrock_note`='$_POST[dcrock_note]',
-	`dphenolic_colorchange`='$_POST[dphenolic_colorchange]',
-	`dphenolic_note`='$_POST[dphenolic_note]',
-	`dcm_printing_colorchange`='$_POST[dcm_printing_colorchange]',
-	`dcm_printing_staining`='$_POST[dcm_printing_staining]',
-	`dcm_printing_note`='$_POST[dcm_printing_note]',
-	`dcm_dye_temp`='$_POST[dcm_dye_temp]',
-	`dcm_dye_colorchange`='$_POST[dcm_dye_colorchange]',
-	`dcm_dye_stainingface`='$_POST[dcm_dye_stainingface]',
-	`dcm_dye_stainingback`='$_POST[dcm_dye_stainingback]',
-	`dcm_dye_note`='$_POST[dcm_dye_note]',
-	`dlight_rating1`='$_POST[dlight_rating1]',
-	`dlight_rating2`='$_POST[dlight_rating2]',
-	`dlight_note`='$_POST[dlight_note]',
-	`dlight_pers_colorchange`='$_POST[dlight_pers_colorchange]',
-	`dlight_pers_note`='$_POST[dlight_pers_note]',
-	`dsaliva_staining`='$_POST[dsaliva_staining]',
-	`dsaliva_note`='$_POST[dsaliva_note]',
-	`dbleeding`='$_POST[dbleeding]',
-	`dbleeding_note`='$_POST[dbleeding_note]',
-	`dchlorin`='$_POST[dchlorin]',
-	`dnchlorin1`='$_POST[dnchlorin1]',
-	`dnchlorin2`='$_POST[dnchlorin2]',
-	`dchlorin_note`='$_POST[dchlorin_note]',
-	`ddye_tf_sstaining`='$_POST[ddye_tf_sstaining]',
-	`ddye_tf_cstaining`='$_POST[ddye_tf_cstaining]',
-	`ddye_tf_acetate`='$_POST[ddye_tf_acetate]',
-	`ddye_tf_cotton`='$_POST[ddye_tf_cotton]',
-	`ddye_tf_nylon`='$_POST[ddye_tf_nylon]',
-	`ddye_tf_poly`='$_POST[ddye_tf_poly]',
-	`ddye_tf_acrylic`='$_POST[ddye_tf_acrylic]',
-	`ddye_tf_wool`='$_POST[ddye_tf_wool]',
-	`ddye_tf_note`='$_POST[ddye_tf_note]',
-	`tgl_buat`=now(),
-	`tgl_update`=now()
+
+	$sqlCLRMI = sqlsrv_query($con_db_qc_sqlsrv, "
+	INSERT INTO db_qc.tbl_tq_marginal (
+		[id_nokk],
+		[mwash_temp],[mwash_colorchange],[mwash_acetate],[mwash_cotton],[mwash_nylon],[mwash_poly],[mwash_acrylic],[mwash_wool],[mwash_staining],[mwash_note],
+		[mwater_colorchange],[mwater_acetate],[mwater_cotton],[mwater_nylon],[mwater_poly],[mwater_acrylic],[mwater_wool],[mwater_staining],[mwater_note],
+		[macid_colorchange],[macid_acetate],[macid_cotton],[macid_nylon],[macid_poly],[macid_acrylic],[macid_wool],[macid_staining],[macid_note],
+		[malkaline_colorchange],[malkaline_acetate],[malkaline_cotton],[malkaline_nylon],[malkaline_poly],[malkaline_acrylic],[malkaline_wool],[malkaline_staining],[malkaline_note],
+		[mcrock_len1],[mcrock_wid1],[mcrock_len2],[mcrock_wid2],[mcrock_note],
+		[mphenolic_colorchange],[mphenolic_note],
+		[mcm_printing_colorchange],[mcm_printing_staining],[mcm_printing_note],
+		[mcm_dye_temp],[mcm_dye_colorchange],[mcm_dye_stainingface],[mcm_dye_stainingback],[mcm_dye_note],
+		[mlight_rating1],[mlight_rating2],[mlight_note],[mlight_pers_colorchange],[mlight_pers_note],
+		[msaliva_staining],[msaliva_note],
+		[mbleeding],[mbleeding_note],
+		[mchlorin],[mnchlorin1],[mnchlorin2],[mchlorin_note],
+		[mdye_tf_sstaining],[mdye_tf_cstaining],[mdye_tf_acetate],[mdye_tf_cotton],[mdye_tf_nylon],[mdye_tf_poly],[mdye_tf_acrylic],[mdye_tf_wool],[mdye_tf_note],
+		[tgl_update]
+	) VALUES (
+		'$rcek[id]',
+		'$_POST[mwash_temp]','$_POST[mwash_colorchange]','$_POST[mwash_acetate]','$_POST[mwash_cotton]','$_POST[mwash_nylon]','$_POST[mwash_poly]','$_POST[mwash_acrylic]','$_POST[mwash_wool]','$_POST[mwash_staining]','$_POST[mwash_note]',
+		'$_POST[mwater_colorchange]','$_POST[mwater_acetate]','$_POST[mwater_cotton]','$_POST[mwater_nylon]','$_POST[mwater_poly]','$_POST[mwater_acrylic]','$_POST[mwater_wool]','$_POST[mwater_staining]','$_POST[mwater_note]',
+		'$_POST[macid_colorchange]','$_POST[macid_acetate]','$_POST[macid_cotton]','$_POST[macid_nylon]','$_POST[macid_poly]','$_POST[macid_acrylic]','$_POST[macid_wool]','$_POST[macid_staining]','$_POST[macid_note]',
+		'$_POST[malkaline_colorchange]','$_POST[malkaline_acetate]','$_POST[malkaline_cotton]','$_POST[malkaline_nylon]','$_POST[malkaline_poly]','$_POST[malkaline_acrylic]','$_POST[malkaline_wool]','$_POST[malkaline_staining]','$_POST[malkaline_note]',
+		'$_POST[mcrock_len1]','$_POST[mcrock_wid1]','$_POST[mcrock_len2]','$_POST[mcrock_wid2]','$_POST[mcrock_note]',
+		'$_POST[mphenolic_colorchange]','$_POST[mphenolic_note]',
+		'$_POST[mcm_printing_colorchange]','$_POST[mcm_printing_staining]','$_POST[mcm_printing_note]',
+		'$_POST[mcm_dye_temp]','$_POST[mcm_dye_colorchange]','$_POST[mcm_dye_stainingface]','$_POST[mcm_dye_stainingback]','$_POST[mcm_dye_note]',
+		'$_POST[mlight_rating1]','$_POST[mlight_rating2]','$_POST[mlight_note]','$_POST[mlight_pers_colorchange]','$_POST[mlight_pers_note]',
+		'$_POST[msaliva_staining]','$_POST[msaliva_note]',
+		'$_POST[mbleeding]','$_POST[mbleeding_note]',
+		'$_POST[mchlorin]','$_POST[mnchlorin1]','$_POST[mnchlorin2]','$_POST[mchlorin_note]',
+		'$_POST[mdye_tf_sstaining]','$_POST[mdye_tf_cstaining]','$_POST[mdye_tf_acetate]','$_POST[mdye_tf_cotton]','$_POST[mdye_tf_nylon]','$_POST[mdye_tf_poly]','$_POST[mdye_tf_acrylic]','$_POST[mdye_tf_wool]','$_POST[mdye_tf_note]',
+		GETDATE()
+	)
 	");
+
+
+	$sqlCLRDI = sqlsrv_query($con_db_qc_sqlsrv, "
+		INSERT INTO db_qc.tbl_tq_disptest (
+			[id_nokk],
+			[dwash_temp],[dwash_colorchange],[dwash_acetate],[dwash_cotton],[dwash_nylon],[dwash_poly],[dwash_acrylic],[dwash_wool],[dwash_staining],[dwash_note],
+			[dwater_colorchange],[dwater_acetate],[dwater_cotton],[dwater_nylon],[dwater_poly],[dwater_acrylic],[dwater_wool],[dwater_staining],[dwater_note],
+			[dacid_colorchange],[dacid_acetate],[dacid_cotton],[dacid_nylon],[dacid_poly],[dacid_acrylic],[dacid_wool],[dacid_staining],[dacid_note],
+			[dalkaline_colorchange],[dalkaline_acetate],[dalkaline_cotton],[dalkaline_nylon],[dalkaline_poly],[dalkaline_acrylic],[dalkaline_wool],[dalkaline_staining],[dalkaline_note],
+			[dcrock_len1],[dcrock_wid1],[dcrock_len2],[dcrock_wid2],[dcrock_note],
+			[dphenolic_colorchange],[dphenolic_note],
+			[dcm_printing_colorchange],[dcm_printing_staining],[dcm_printing_note],
+			[dcm_dye_temp],[dcm_dye_colorchange],[dcm_dye_stainingface],[dcm_dye_stainingback],[dcm_dye_note],
+			[dlight_rating1],[dlight_rating2],[dlight_note],[dlight_pers_colorchange],[dlight_pers_note],
+			[dsaliva_staining],[dsaliva_note],
+			[dbleeding],[dbleeding_note],
+			[dchlorin],[dnchlorin1],[dnchlorin2],[dchlorin_note],
+			[ddye_tf_sstaining],[ddye_tf_cstaining],[ddye_tf_acetate],[ddye_tf_cotton],[ddye_tf_nylon],[ddye_tf_poly],[ddye_tf_acrylic],[ddye_tf_wool],[ddye_tf_note],
+			[tgl_buat],[tgl_update]
+		) VALUES (
+			'$rcek[id]',
+			'$_POST[dwash_temp]','$_POST[dwash_colorchange]','$_POST[dwash_acetate]','$_POST[dwash_cotton]','$_POST[dwash_nylon]','$_POST[dwash_poly]','$_POST[dwash_acrylic]','$_POST[dwash_wool]','$_POST[dwash_staining]','$_POST[dwash_note]',
+			'$_POST[dwater_colorchange]','$_POST[dwater_acetate]','$_POST[dwater_cotton]','$_POST[dwater_nylon]','$_POST[dwater_poly]','$_POST[dwater_acrylic]','$_POST[dwater_wool]','$_POST[dwater_staining]','$_POST[dwater_note]',
+			'$_POST[dacid_colorchange]','$_POST[dacid_acetate]','$_POST[dacid_cotton]','$_POST[dacid_nylon]','$_POST[dacid_poly]','$_POST[dacid_acrylic]','$_POST[dacid_wool]','$_POST[dacid_staining]','$_POST[dacid_note]',
+			'$_POST[dalkaline_colorchange]','$_POST[dalkaline_acetate]','$_POST[dalkaline_cotton]','$_POST[dalkaline_nylon]','$_POST[dalkaline_poly]','$_POST[dalkaline_acrylic]','$_POST[dalkaline_wool]','$_POST[dalkaline_staining]','$_POST[dalkaline_note]',
+			'$_POST[dcrock_len1]','$_POST[dcrock_wid1]','$_POST[dcrock_len2]','$_POST[dcrock_wid2]','$_POST[dcrock_note]',
+			'$_POST[dphenolic_colorchange]','$_POST[dphenolic_note]',
+			'$_POST[dcm_printing_colorchange]','$_POST[dcm_printing_staining]','$_POST[dcm_printing_note]',
+			'$_POST[dcm_dye_temp]','$_POST[dcm_dye_colorchange]','$_POST[dcm_dye_stainingface]','$_POST[dcm_dye_stainingback]','$_POST[dcm_dye_note]',
+			'$_POST[dlight_rating1]','$_POST[dlight_rating2]','$_POST[dlight_note]','$_POST[dlight_pers_colorchange]','$_POST[dlight_pers_note]',
+			'$_POST[dsaliva_staining]','$_POST[dsaliva_note]',
+			'$_POST[dbleeding]','$_POST[dbleeding_note]',
+			'$_POST[dchlorin]','$_POST[dnchlorin1]','$_POST[dnchlorin2]','$_POST[dchlorin_note]',
+			'$_POST[ddye_tf_sstaining]','$_POST[ddye_tf_cstaining]','$_POST[ddye_tf_acetate]','$_POST[ddye_tf_cotton]','$_POST[ddye_tf_nylon]','$_POST[ddye_tf_poly]','$_POST[ddye_tf_acrylic]','$_POST[ddye_tf_wool]','$_POST[ddye_tf_note]',
+			GETDATE(), GETDATE()
+		)
+		");
+
 	if ($sqlCLR) {
 		echo "<script>swal({
 		  title: 'Colorfastness Berhasil di Input',
@@ -17806,136 +18065,144 @@ if ($_POST['colorfastness_save'] == "save" and $cek1 > 0) {
 	}
 }
 if ($_POST['functional_save'] == "save" and $cek1 > 0) {
-	$sqlFPH = mysqli_query($con, "UPDATE tbl_tq_test SET
-	`wick_l1` = '$_POST[wick_l1]',
-	`wick_w1` = '$_POST[wick_w1]',
-	`wick_l2` = '$_POST[wick_l2]',
-	`wick_w2` = '$_POST[wick_w2]',
-	`wick_l3` = '$_POST[wick_l3]',
-	`wick_w3` = '$_POST[wick_w3]',
-	`wick_l4` = '$_POST[wick_l4]',
-	`wick_w4` = '$_POST[wick_w4]',
-	`wick_note` = '$_POST[wick_note]',
-	`absor_f1` = '$_POST[absor_f1]',
-	`absor_f2` = '$_POST[absor_f2]',
-	`absor_f3` = '$_POST[absor_f3]',
-	`absor_b1` = '$_POST[absor_b1]',
-	`absor_b2` = '$_POST[absor_b2]',
-	`absor_b3` = '$_POST[absor_b3]',
-	`absor_note` = '$_POST[absor_note]',
-	`dry1` = '$_POST[dry1]',
-	`dry2` = '$_POST[dry2]',
-	`dry3` = '$_POST[dry3]',
-	`dryaf1` = '$_POST[dryaf1]',
-	`dryaf2` = '$_POST[dryaf2]',
-	`dryaf3` = '$_POST[dryaf3]',
-	`dry_note` = '$_POST[dry_note]',
-	`repp1` = '$_POST[repp1]',
-	`repp2` = '$_POST[repp2]',
-	`repp3` = '$_POST[repp3]',
-	`repp4` = '$_POST[repp4]',
-	`repp_note` = '$_POST[repp_note]',
-	`ph` = '$_POST[ph]',
-	`ph_note` = '$_POST[ph_note]',
-	`soil` = '$_POST[soil]',
-	`soil_note` = '$_POST[soil_note]',
-	`humidity` = '$_POST[humidity]',
-	`humidity_note` = '$_POST[humidity_note]',
-	`stat_wic`='$_POST[stat_wic]',
-	`stat_wic1`='$_POST[stat_wic1]',
-	`stat_wic2`='$_POST[stat_wic2]',
-	`stat_wic3`='$_POST[stat_wic3]',
-	`stat_abs`='$_POST[stat_abs]',
-	`stat_abs1`='$_POST[stat_abs1]',
-	`stat_dry`='$_POST[stat_dry]',
-	`stat_dry1`='$_POST[stat_dry1]',
-	`stat_wp`='$_POST[stat_wp]',
-	`stat_wp1`='$_POST[stat_wp1]',
-	`stat_ph`='$_POST[stat_ph]',
-	`stat_sor`='$_POST[stat_sor]',
-	`stat_hum`='$_POST[stat_hum]',
-	`tgl_update`=now()
-    WHERE `id_nokk`='$rcek[id]'
-	");
-	if ($sqlFPH) {
-		$sqlFPHD = mysqli_query($con, "UPDATE tbl_tq_disptest SET
-	`dwick_l1` = '$_POST[dwick_l1]',
-	`dwick_w1` = '$_POST[dwick_w1]',
-	`dwick_l2` = '$_POST[dwick_l2]',
-	`dwick_w2` = '$_POST[dwick_w2]',
-	`dwick_l3` = '$_POST[dwick_l3]',
-	`dwick_w3` = '$_POST[dwick_w3]',
-	`dwick_l4` = '$_POST[dwick_l4]',
-	`dwick_w4` = '$_POST[dwick_w4]',
-	`dwick_note` = '$_POST[dwick_note]',
-	`dabsor_f1` = '$_POST[dabsor_f1]',
-	`dabsor_f2` = '$_POST[dabsor_f2]',
-	`dabsor_f3` = '$_POST[dabsor_f3]',
-	`dabsor_b1` = '$_POST[dabsor_b1]',
-	`dabsor_b2` = '$_POST[dabsor_b2]',
-	`dabsor_b3` = '$_POST[dabsor_b3]',
-	`dabsor_note` = '$_POST[dabsor_note]',
-	`ddry1` = '$_POST[ddry1]',
-	`ddry2` = '$_POST[ddry2]',
-	`ddry3` = '$_POST[ddry3]',
-	`ddryaf1` = '$_POST[ddryaf1]',
-	`ddryaf2` = '$_POST[ddryaf2]',
-	`ddryaf3` = '$_POST[ddryaf3]',
-	`ddry_note` = '$_POST[ddry_note]',
-	`drepp1` = '$_POST[drepp1]',
-	`drepp2` = '$_POST[drepp2]',
-	`drepp3` = '$_POST[drepp3]',
-	`drepp4` = '$_POST[drepp4]',
-	`drepp_note` = '$_POST[drepp_note]',
-	`dph` = '$_POST[dph]',
-	`dph_note` = '$_POST[dph_note]',
-	`dsoil` = '$_POST[dsoil]',
-	`dsoil_note` = '$_POST[dsoil_note]',
-	`dhumidity` = '$_POST[dhumidity]',
-	`dhumidity_note` = '$_POST[dhumidity_note]',
-	`tgl_update`=now()
-	WHERE `id_nokk`='$rcek[id]'
-	");
-		
+	
+	$sqlFPH = sqlsrv_query($con_db_qc_sqlsrv, "
+		UPDATE db_qc.tbl_tq_test SET
+			[wick_l1] = '$_POST[wick_l1]',
+			[wick_w1] = '$_POST[wick_w1]',
+			[wick_l2] = '$_POST[wick_l2]',
+			[wick_w2] = '$_POST[wick_w2]',
+			[wick_l3] = '$_POST[wick_l3]',
+			[wick_w3] = '$_POST[wick_w3]',
+			[wick_l4] = '$_POST[wick_l4]',
+			[wick_w4] = '$_POST[wick_w4]',
+			[wick_note] = '$_POST[wick_note]',
+			[absor_f1] = '$_POST[absor_f1]',
+			[absor_f2] = '$_POST[absor_f2]',
+			[absor_f3] = '$_POST[absor_f3]',
+			[absor_b1] = '$_POST[absor_b1]',
+			[absor_b2] = '$_POST[absor_b2]',
+			[absor_b3] = '$_POST[absor_b3]',
+			[absor_note] = '$_POST[absor_note]',
+			[dry1] = '$_POST[dry1]',
+			[dry2] = '$_POST[dry2]',
+			[dry3] = '$_POST[dry3]',
+			[dryaf1] = '$_POST[dryaf1]',
+			[dryaf2] = '$_POST[dryaf2]',
+			[dryaf3] = '$_POST[dryaf3]',
+			[dry_note] = '$_POST[dry_note]',
+			[repp1] = '$_POST[repp1]',
+			[repp2] = '$_POST[repp2]',
+			[repp3] = '$_POST[repp3]',
+			[repp4] = '$_POST[repp4]',
+			[repp_note] = '$_POST[repp_note]',
+			[ph] = '$_POST[ph]',
+			[ph_note] = '$_POST[ph_note]',
+			[soil] = '$_POST[soil]',
+			[soil_note] = '$_POST[soil_note]',
+			[humidity] = '$_POST[humidity]',
+			[humidity_note] = '$_POST[humidity_note]',
+			[stat_wic] = '$_POST[stat_wic]',
+			[stat_wic1] = '$_POST[stat_wic1]',
+			[stat_wic2] = '$_POST[stat_wic2]',
+			[stat_wic3] = '$_POST[stat_wic3]',
+			[stat_abs] = '$_POST[stat_abs]',
+			[stat_abs1] = '$_POST[stat_abs1]',
+			[stat_dry] = '$_POST[stat_dry]',
+			[stat_dry1] = '$_POST[stat_dry1]',
+			[stat_wp] = '$_POST[stat_wp]',
+			[stat_wp1] = '$_POST[stat_wp1]',
+			[stat_ph] = '$_POST[stat_ph]',
+			[stat_sor] = '$_POST[stat_sor]',
+			[stat_hum] = '$_POST[stat_hum]',
+			[tgl_update] = GETDATE()
+		WHERE [id_nokk] = '$rcek[id]'
+		");
 
-		$sqlFPHM = mysqli_query($con, "UPDATE tbl_tq_marginal SET
-`mwick_l1` = '$_POST[mwick_l1]',
-`mwick_w1` = '$_POST[mwick_w1]',
-`mwick_l2` = '$_POST[mwick_l2]',
-`mwick_w2` = '$_POST[mwick_w2]',
-`mwick_l3` = '$_POST[mwick_l3]',
-`mwick_w3` = '$_POST[mwick_w3]',
-`mwick_l4` = '$_POST[mwick_l4]',
-`mwick_w4` = '$_POST[mwick_w4]',
-`mwick_note` = '$_POST[mwick_note]',
-`mabsor_f1` = '$_POST[mabsor_f1]',
-`mabsor_f2` = '$_POST[mabsor_f2]',
-`mabsor_f3` = '$_POST[mabsor_f3]',
-`mabsor_b1` = '$_POST[mabsor_b1]',
-`mabsor_b2` = '$_POST[mabsor_b2]',
-`mabsor_b3` = '$_POST[mabsor_b3]',
-`mabsor_note` = '$_POST[mabsor_note]',
-`mdry1` = '$_POST[mdry1]',
-`mdry2` = '$_POST[mdry2]',
-`mdry3` = '$_POST[mdry3]',
-`mdryaf1` = '$_POST[mdryaf1]',
-`mdryaf2` = '$_POST[mdryaf2]',
-`mdryaf3` = '$_POST[mdryaf3]',
-`mdry_note` = '$_POST[mdry_note]',
-`mrepp1` = '$_POST[mrepp1]',
-`mrepp2` = '$_POST[mrepp2]',
-`mrepp3` = '$_POST[mrepp3]',
-`mrepp4` = '$_POST[mrepp4]',
-`mrepp_note` = '$_POST[mrepp_note]',
-`mph` = '$_POST[mph]',
-`mph_note` = '$_POST[mph_note]',
-`msoil` = '$_POST[msoil]',
-`msoil_note` = '$_POST[msoil_note]',
-`mhumidity` = '$_POST[mhumidity]',
-`mhumidity_note` = '$_POST[mhumidity_note]',
-`tgl_update`=now()
-WHERE `id_nokk`='$rcek[id]'
-");
+
+	if ($sqlFPH) {	
+
+	$sqlFPHD = sqlsrv_query($con_db_qc_sqlsrv, "
+		UPDATE db_qc.tbl_tq_disptest SET
+			[dwick_l1] = '$_POST[dwick_l1]',
+			[dwick_w1] = '$_POST[dwick_w1]',
+			[dwick_l2] = '$_POST[dwick_l2]',
+			[dwick_w2] = '$_POST[dwick_w2]',
+			[dwick_l3] = '$_POST[dwick_l3]',
+			[dwick_w3] = '$_POST[dwick_w3]',
+			[dwick_l4] = '$_POST[dwick_l4]',
+			[dwick_w4] = '$_POST[dwick_w4]',
+			[dwick_note] = '$_POST[dwick_note]',
+			[dabsor_f1] = '$_POST[dabsor_f1]',
+			[dabsor_f2] = '$_POST[dabsor_f2]',
+			[dabsor_f3] = '$_POST[dabsor_f3]',
+			[dabsor_b1] = '$_POST[dabsor_b1]',
+			[dabsor_b2] = '$_POST[dabsor_b2]',
+			[dabsor_b3] = '$_POST[dabsor_b3]',
+			[dabsor_note] = '$_POST[dabsor_note]',
+			[ddry1] = '$_POST[ddry1]',
+			[ddry2] = '$_POST[ddry2]',
+			[ddry3] = '$_POST[ddry3]',
+			[ddryaf1] = '$_POST[ddryaf1]',
+			[ddryaf2] = '$_POST[ddryaf2]',
+			[ddryaf3] = '$_POST[ddryaf3]',
+			[ddry_note] = '$_POST[ddry_note]',
+			[drepp1] = '$_POST[drepp1]',
+			[drepp2] = '$_POST[drepp2]',
+			[drepp3] = '$_POST[drepp3]',
+			[drepp4] = '$_POST[drepp4]',
+			[drepp_note] = '$_POST[drepp_note]',
+			[dph] = '$_POST[dph]',
+			[dph_note] = '$_POST[dph_note]',
+			[dsoil] = '$_POST[dsoil]',
+			[dsoil_note] = '$_POST[dsoil_note]',
+			[dhumidity] = '$_POST[dhumidity]',
+			[dhumidity_note] = '$_POST[dhumidity_note]',
+			[tgl_update] = GETDATE()
+		WHERE [id_nokk] = '$rcek[id]'
+		");
+
+	$sqlFPHM = sqlsrv_query($con_db_qc_sqlsrv, "
+	UPDATE db_qc.tbl_tq_marginal SET
+		[mwick_l1] = '$_POST[mwick_l1]',
+		[mwick_w1] = '$_POST[mwick_w1]',
+		[mwick_l2] = '$_POST[mwick_l2]',
+		[mwick_w2] = '$_POST[mwick_w2]',
+		[mwick_l3] = '$_POST[mwick_l3]',
+		[mwick_w3] = '$_POST[mwick_w3]',
+		[mwick_l4] = '$_POST[mwick_l4]',
+		[mwick_w4] = '$_POST[mwick_w4]',
+		[mwick_note] = '$_POST[mwick_note]',
+		[mabsor_f1] = '$_POST[mabsor_f1]',
+		[mabsor_f2] = '$_POST[mabsor_f2]',
+		[mabsor_f3] = '$_POST[mabsor_f3]',
+		[mabsor_b1] = '$_POST[mabsor_b1]',
+		[mabsor_b2] = '$_POST[mabsor_b2]',
+		[mabsor_b3] = '$_POST[mabsor_b3]',
+		[mabsor_note] = '$_POST[mabsor_note]',
+		[mdry1] = '$_POST[mdry1]',
+		[mdry2] = '$_POST[mdry2]',
+		[mdry3] = '$_POST[mdry3]',
+		[mdryaf1] = '$_POST[mdryaf1]',
+		[mdryaf2] = '$_POST[mdryaf2]',
+		[mdryaf3] = '$_POST[mdryaf3]',
+		[mdry_note] = '$_POST[mdry_note]',
+		[mrepp1] = '$_POST[mrepp1]',
+		[mrepp2] = '$_POST[mrepp2]',
+		[mrepp3] = '$_POST[mrepp3]',
+		[mrepp4] = '$_POST[mrepp4]',
+		[mrepp_note] = '$_POST[mrepp_note]',
+		[mph] = '$_POST[mph]',
+		[mph_note] = '$_POST[mph_note]',
+		[msoil] = '$_POST[msoil]',
+		[msoil_note] = '$_POST[msoil_note]',
+		[mhumidity] = '$_POST[mhumidity]',
+		[mhumidity_note] = '$_POST[mhumidity_note]',
+		[tgl_update] = GETDATE()
+	WHERE [id_nokk] = '$rcek[id]'
+	");
+
+
 		echo "<script>swal({
 	title: 'Functional Berhasil di Update',
 	text: 'Klik Ok untuk input data kembali',
@@ -17948,135 +18215,128 @@ WHERE `id_nokk`='$rcek[id]'
 	});</script>";
 	}
 } else if ($_POST['functional_save'] == "save") {
-	$sqlFPH = mysqli_query($con, "INSERT INTO tbl_tq_test SET
-	`id_nokk`='$rcek[id]',
-	`wick_l1` = '$_POST[wick_l1]',
-	`wick_w1` = '$_POST[wick_w1]',
-	`wick_l2` = '$_POST[wick_l2]',
-	`wick_w2` = '$_POST[wick_w2]',
-	`wick_l3` = '$_POST[wick_l3]',
-	`wick_w3` = '$_POST[wick_w3]',
-	`wick_l4` = '$_POST[wick_l4]',
-	`wick_w4` = '$_POST[wick_w4]',
-	`wick_note` = '$_POST[wick_note]',
-	`absor_f1` = '$_POST[absor_f1]',
-	`absor_f2` = '$_POST[absor_f2]',
-	`absor_f3` = '$_POST[absor_f3]',
-	`absor_b1` = '$_POST[absor_b1]',
-	`absor_b2` = '$_POST[absor_b2]',
-	`absor_b3` = '$_POST[absor_b3]',
-	`absor_note` = '$_POST[absor_note]',
-	`dry1` = '$_POST[dry1]',
-	`dry2` = '$_POST[dry2]',
-	`dry3` = '$_POST[dry3]',
-	`dryaf1` = '$_POST[dryaf1]',
-	`dryaf2` = '$_POST[dryaf2]',
-	`dryaf3` = '$_POST[dryaf3]',
-	`dry_note` = '$_POST[dry_note]',
-	`repp1` = '$_POST[repp1]',
-	`repp2` = '$_POST[repp2]',
-	`repp3` = '$_POST[repp3]',
-	`repp4` = '$_POST[repp4]',
-	`repp_note` = '$_POST[repp_note]',
-	`ph` = '$_POST[ph]',
-	`ph_note` = '$_POST[ph_note]',
-	`soil` = '$_POST[soil]',
-	`soil_note` = '$_POST[soil_note]',
-	`humidity` = '$_POST[humidity]',
-	`humidity_note` = '$_POST[humidity_note]',
-	`stat_wic`='$_POST[stat_wic]',
-	`stat_wic1`='$_POST[stat_wic1]',
-	`stat_wic2`='$_POST[stat_wic2]',
-	`stat_wic3`='$_POST[stat_wic3]',
-	`stat_abs`='$_POST[stat_abs]',
-	`stat_abs1`='$_POST[stat_abs1]',
-	`stat_dry`='$_POST[stat_dry]',
-	`stat_dry1`='$_POST[stat_dry1]',
-	`stat_wp`='$_POST[stat_wp]',
-	`stat_wp1`='$_POST[stat_wp1]',
-	`stat_ph`='$_POST[stat_ph]',
-	`stat_sor`='$_POST[stat_sor]',
-	`stat_hum`='$_POST[stat_hum]',
-	`tgl_buat`=now(),
-	`tgl_update`=now()
+
+	$sqlFPH = sqlsrv_query($con_db_qc_sqlsrv, "
+		INSERT INTO db_qc.tbl_tq_test (
+			[id_nokk],
+			[wick_l1],[wick_w1],[wick_l2],[wick_w2],[wick_l3],[wick_w3],[wick_l4],[wick_w4],
+			[wick_note],
+			[absor_f1],[absor_f2],[absor_f3],[absor_b1],[absor_b2],[absor_b3],[absor_note],
+			[dry1],[dry2],[dry3],[dryaf1],[dryaf2],[dryaf3],[dry_note],
+			[repp1],[repp2],[repp3],[repp4],[repp_note],
+			[ph],[ph_note],
+			[soil],[soil_note],
+			[humidity],[humidity_note],
+			[stat_wic],[stat_wic1],[stat_wic2],[stat_wic3],
+			[stat_abs],[stat_abs1],
+			[stat_dry],[stat_dry1],
+			[stat_wp],[stat_wp1],
+			[stat_ph],[stat_sor],[stat_hum],
+			[tgl_buat],[tgl_update]
+		) VALUES (
+			'$rcek[id]',
+			'$_POST[wick_l1]','$_POST[wick_w1]','$_POST[wick_l2]','$_POST[wick_w2]',
+			'$_POST[wick_l3]','$_POST[wick_w3]','$_POST[wick_l4]','$_POST[wick_w4]',
+			'$_POST[wick_note]',
+			'$_POST[absor_f1]','$_POST[absor_f2]','$_POST[absor_f3]',
+			'$_POST[absor_b1]','$_POST[absor_b2]','$_POST[absor_b3]',
+			'$_POST[absor_note]',
+			'$_POST[dry1]','$_POST[dry2]','$_POST[dry3]',
+			'$_POST[dryaf1]','$_POST[dryaf2]','$_POST[dryaf3]',
+			'$_POST[dry_note]',
+			'$_POST[repp1]','$_POST[repp2]','$_POST[repp3]','$_POST[repp4]',
+			'$_POST[repp_note]',
+			'$_POST[ph]','$_POST[ph_note]',
+			'$_POST[soil]','$_POST[soil_note]',
+			'$_POST[humidity]','$_POST[humidity_note]',
+			'$_POST[stat_wic]','$_POST[stat_wic1]','$_POST[stat_wic2]','$_POST[stat_wic3]',
+			'$_POST[stat_abs]','$_POST[stat_abs1]',
+			'$_POST[stat_dry]','$_POST[stat_dry1]',
+			'$_POST[stat_wp]','$_POST[stat_wp1]',
+			'$_POST[stat_ph]','$_POST[stat_sor]','$_POST[stat_hum]',
+			GETDATE(), GETDATE()
+		)
+		");
+
+	$sqlFPHDI = sqlsrv_query($con_db_qc_sqlsrv, "
+		INSERT INTO db_qc.tbl_tq_disptest (
+			[id_nokk],
+			[dwick_l1],[dwick_w1],[dwick_l2],[dwick_w2],
+			[dwick_l3],[dwick_w3],[dwick_l4],[dwick_w4],
+			[dwick_note],
+			[dabsor_f1],[dabsor_f2],[dabsor_f3],
+			[dabsor_b1],[dabsor_b2],[dabsor_b3],
+			[dabsor_note],
+			[ddry1],[ddry2],[ddry3],
+			[ddryaf1],[ddryaf2],[ddryaf3],
+			[ddry_note],
+			[drepp1],[drepp2],[drepp3],[drepp4],
+			[drepp_note],
+			[dph],[dph_note],
+			[dsoil],[dsoil_note],
+			[dhumidity],[dhumidity_note],
+			[tgl_buat],[tgl_update]
+		) VALUES (
+			'$rcek[id]',
+			'$_POST[dwick_l1]','$_POST[dwick_w1]',
+			'$_POST[dwick_l2]','$_POST[dwick_w2]',
+			'$_POST[dwick_l3]','$_POST[dwick_w3]',
+			'$_POST[dwick_l4]','$_POST[dwick_w4]',
+			'$_POST[dwick_note]',
+			'$_POST[dabsor_f1]','$_POST[dabsor_f2]','$_POST[dabsor_f3]',
+			'$_POST[dabsor_b1]','$_POST[dabsor_b2]','$_POST[dabsor_b3]',
+			'$_POST[dabsor_note]',
+			'$_POST[ddry1]','$_POST[ddry2]','$_POST[ddry3]',
+			'$_POST[ddryaf1]','$_POST[ddryaf2]','$_POST[ddryaf3]',
+			'$_POST[ddry_note]',
+			'$_POST[drepp1]','$_POST[drepp2]','$_POST[drepp3]','$_POST[drepp4]',
+			'$_POST[drepp_note]',
+			'$_POST[dph]','$_POST[dph_note]',
+			'$_POST[dsoil]','$_POST[dsoil_note]',
+			'$_POST[dhumidity]','$_POST[dhumidity_note]',
+			GETDATE(), GETDATE()
+		)
+		");
+
+	$sqlFPHMI = sqlsrv_query($con_db_qc_sqlsrv, "
+	INSERT INTO db_qc.tbl_tq_marginal (
+		[id_nokk],
+		[mwick_l1],[mwick_w1],[mwick_l2],[mwick_w2],
+		[mwick_l3],[mwick_w3],[mwick_l4],[mwick_w4],
+		[mwick_note],
+		[mabsor_f1],[mabsor_f2],[mabsor_f3],
+		[mabsor_b1],[mabsor_b2],[mabsor_b3],
+		[mabsor_note],
+		[mdry1],[mdry2],[mdry3],
+		[mdryaf1],[mdryaf2],[mdryaf3],
+		[mdry_note],
+		[mrepp1],[mrepp2],[mrepp3],[mrepp4],
+		[mrepp_note],
+		[mph],[mph_note],
+		[msoil],[msoil_note],
+		[mhumidity],[mhumidity_note],
+		[tgl_update]
+	) VALUES (
+		'$rcek[id]',
+		'$_POST[mwick_l1]','$_POST[mwick_w1]',
+		'$_POST[mwick_l2]','$_POST[mwick_w2]',
+		'$_POST[mwick_l3]','$_POST[mwick_w3]',
+		'$_POST[mwick_l4]','$_POST[mwick_w4]',
+		'$_POST[mwick_note]',
+		'$_POST[mabsor_f1]','$_POST[mabsor_f2]','$_POST[mabsor_f3]',
+		'$_POST[mabsor_b1]','$_POST[mabsor_b2]','$_POST[mabsor_b3]',
+		'$_POST[mabsor_note]',
+		'$_POST[mdry1]','$_POST[mdry2]','$_POST[mdry3]',
+		'$_POST[mdryaf1]','$_POST[mdryaf2]','$_POST[mdryaf3]',
+		'$_POST[mdry_note]',
+		'$_POST[mrepp1]','$_POST[mrepp2]','$_POST[mrepp3]','$_POST[mrepp4]',
+		'$_POST[mrepp_note]',
+		'$_POST[mph]','$_POST[mph_note]',
+		'$_POST[msoil]','$_POST[msoil_note]',
+		'$_POST[mhumidity]','$_POST[mhumidity_note]',
+		GETDATE()
+	)
 	");
-	
-$sqlFPHDI = mysqli_query($con, "INSERT INTO tbl_tq_disptest SET
-`id_nokk`='$rcek[id]',
-`dwick_l1` = '$_POST[dwick_l1]',
-`dwick_w1` = '$_POST[dwick_w1]',
-`dwick_l2` = '$_POST[dwick_l2]',
-`dwick_w2` = '$_POST[dwick_w2]',
-`dwick_l3` = '$_POST[dwick_l3]',
-`dwick_w3` = '$_POST[dwick_w3]',
-`dwick_l4` = '$_POST[dwick_l4]',
-`dwick_w4` = '$_POST[dwick_w4]',
-`dwick_note` = '$_POST[dwick_note]',
-`dabsor_f1` = '$_POST[dabsor_f1]',
-`dabsor_f2` = '$_POST[dabsor_f2]',
-`dabsor_f3` = '$_POST[dabsor_f3]',
-`dabsor_b1` = '$_POST[dabsor_b1]',
-`dabsor_b2` = '$_POST[dabsor_b2]',
-`dabsor_b3` = '$_POST[dabsor_b3]',
-`dabsor_note` = '$_POST[dabsor_note]',
-`ddry1` = '$_POST[ddry1]',
-`ddry2` = '$_POST[ddry2]',
-`ddry3` = '$_POST[ddry3]',
-`ddryaf1` = '$_POST[ddryaf1]',
-`ddryaf2` = '$_POST[ddryaf2]',
-`ddryaf3` = '$_POST[ddryaf3]',
-`ddry_note` = '$_POST[ddry_note]',
-`drepp1` = '$_POST[drepp1]',
-`drepp2` = '$_POST[drepp2]',
-`drepp3` = '$_POST[drepp3]',
-`drepp4` = '$_POST[drepp4]',
-`drepp_note` = '$_POST[drepp_note]',
-`dph` = '$_POST[dph]',
-`dph_note` = '$_POST[dph_note]',
-`dsoil` = '$_POST[dsoil]',
-`dsoil_note` = '$_POST[dsoil_note]',
-`dhumidity` = '$_POST[dhumidity]',
-`dhumidity_note` = '$_POST[dhumidity_note]',
-`tgl_buat`=now(),
-`tgl_update`=now()
-");
-	$sqlFPHMI = mysqli_query($con, "INSERT INTO tbl_tq_marginal SET
-`id_nokk`='$rcek[id]',
-`mwick_l1` = '$_POST[mwick_l1]',
-`mwick_w1` = '$_POST[mwick_w1]',
-`mwick_l2` = '$_POST[mwick_l2]',
-`mwick_w2` = '$_POST[mwick_w2]',
-`mwick_l3` = '$_POST[mwick_l3]',
-`mwick_w3` = '$_POST[mwick_w3]',
-`mwick_l4` = '$_POST[mwick_l4]',
-`mwick_w4` = '$_POST[mwick_w4]',
-`mwick_note` = '$_POST[mwick_note]',
-`mabsor_f1` = '$_POST[mabsor_f1]',
-`mabsor_f2` = '$_POST[mabsor_f2]',
-`mabsor_f3` = '$_POST[mabsor_f3]',
-`mabsor_b1` = '$_POST[mabsor_b1]',
-`mabsor_b2` = '$_POST[mabsor_b2]',
-`mabsor_b3` = '$_POST[mabsor_b3]',
-`mabsor_note` = '$_POST[mabsor_note]',
-`mdry1` = '$_POST[mdry1]',
-`mdry2` = '$_POST[mdry2]',
-`mdry3` = '$_POST[mdry3]',
-`mdryaf1` = '$_POST[mdryaf1]',
-`mdryaf2` = '$_POST[mdryaf2]',
-`mdryaf3` = '$_POST[mdryaf3]',
-`mdry_note` = '$_POST[mdry_note]',
-`mrepp1` = '$_POST[mrepp1]',
-`mrepp2` = '$_POST[mrepp2]',
-`mrepp3` = '$_POST[mrepp3]',
-`mrepp4` = '$_POST[mrepp4]',
-`mrepp_note` = '$_POST[mrepp_note]',
-`mph` = '$_POST[mph]',
-`mph_note` = '$_POST[mph_note]',
-`msoil` = '$_POST[msoil]',
-`msoil_note` = '$_POST[msoil_note]',
-`mhumidity` = '$_POST[mhumidity]',
-`mhumidity_note` = '$_POST[mhumidity_note]',
-`tgl_update`=now()");
 
 	if ($sqlFPH) {
 		echo "<script>swal({

@@ -2,13 +2,19 @@
 include '../../koneksi.php';
 
 if (isset($_GET['nodemand'])) {
-    $nodemand = mysqli_real_escape_string($con, $_GET['nodemand']); // aman dari SQL Injection
+    $nodemand = $_GET['nodemand'];
 
-    $sql = "SELECT DISTINCT no_test FROM tbl_tq_nokk WHERE nodemand = '$nodemand' ORDER BY no_test DESC LIMIT 1";
-    $query = mysqli_query($con, $sql);
+    $sql = "
+    SELECT TOP 1 no_test
+        FROM db_qc.tbl_tq_nokk
+        WHERE nodemand = ?
+        ORDER BY no_test DESC
+    ";
+    $query = sqlsrv_query($con_invqc_sqlsrv, $sql, [$nodemand]);
 
-    if ($query && mysqli_num_rows($query) > 0) {
-        $row = mysqli_fetch_assoc($query);
+    $row = sqlsrv_fetch_array($query, SQLSRV_FETCH_ASSOC);
+
+    if ($row) {
         echo json_encode(['no_test' => $row['no_test']]);
     } else {
         echo json_encode(['no_test' => null]);

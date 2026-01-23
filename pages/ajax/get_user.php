@@ -5,15 +5,12 @@ if (isset($_GET['nama_bow'])) {
     $nama_bow = $_GET['nama_bow'];
 										
     $query = "SELECT u.nama 
-              FROM user_login u 
+              FROM db_qc.user_login u 
               WHERE u.id = ?";
     
-    $stmt = mysqli_prepare($con, $query);
-    mysqli_stmt_bind_param($stmt, 's', $nama_bow);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+    $stmt = sqlsrv_query($con_db_qc_sqlsrv, $query, [$nama_bow]);
 
-    if ($row = mysqli_fetch_assoc($result)) {
+    if ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
         echo json_encode(['success' => true, 'nama_user' => $row['nama']]);
     } else {
         echo json_encode(['success' => false]);
