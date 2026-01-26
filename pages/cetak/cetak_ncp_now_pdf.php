@@ -5,8 +5,8 @@ require_once('dompdf/autoload.inc.php');
 
 ini_set("error_reporting", 1);	
 include "../../tgl_indo.php";
-$qry=mysqli_query($con,"SELECT * FROM tbl_ncp_qcf_now WHERE id='".$_GET['id']."'");
-$d=mysqli_fetch_array($qry);
+$qry=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_ncp_qcf_now WHERE id='".$_GET['id']."'");
+$d=sqlsrv_fetch_array($qry);
 $nokk1 = $d['nodemand'];
 ?>
 <?php
@@ -71,7 +71,7 @@ body{
       <td colspan="5" align="center"><font size="-1"><strong>No. NCP: '.$d['no_ncp_gabungan'].'</strong></font></td>
     </tr>
     <tr>
-      <td colspan="2" align="left">TANGGAL: '.tanggal_indo ($d['tgl_buat'],true).'</td>
+      <td colspan="2" align="left">TANGGAL: '.tanggal_indo (date_format($d['tgl_buat'], 'Y-m-d'),true).'</td>
       <td colspan="4" align="right">&nbsp;</td>
     </tr>
     <tr>

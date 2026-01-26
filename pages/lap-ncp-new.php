@@ -22,8 +22,8 @@ include "koneksi.php";
   $Kategori = isset($_POST['kategori']) ? $_POST['kategori'] : '';
   $Cancel = isset($_POST['chkcancel']) ? $_POST['chkcancel'] : '';
   $Rev2A = isset($_POST['chkrev']) ? $_POST['chkrev'] : '';
-  $jamA = isset($_POST['jam_awal']) ? $_POST['jam_awal'] : '';
-  $jamAr = isset($_POST['jam_akhir']) ? $_POST['jam_akhir'] : '';
+  $jamA = isset($_POST['jam_awal']) ? $_POST['jam_awal'] : '00:00';
+  $jamAr = isset($_POST['jam_akhir']) ? $_POST['jam_akhir'] : '00:00';
   if ($_POST['gshift'] == "ALL") {
     $shft = " ";
   } else {
@@ -269,30 +269,31 @@ include "koneksi.php";
               $totaldll = 0;
               $totaldDis = 0;
               $totaldllDis = 0;
-              $qryAll = mysqli_query($con, "SELECT COUNT(*) AS jml_all, SUM(berat) AS berat_all FROM tbl_ncp_qcf_new WHERE $WKategori DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' AND (masalah_dominan!='' OR masalah_dominan!=NULL) $sts ");
-              $rAll = mysqli_fetch_array($qryAll);
-              $qryAllDis = mysqli_query($con, "SELECT COUNT(*) AS jml_all, SUM(berat) AS berat_all FROM tbl_ncp_qcf_new WHERE $WKategori DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' AND (masalah_dominan!='' OR masalah_dominan!=NULL) AND `status`='Disposisi' $sts ");
-              $rAllDis = mysqli_fetch_array($qryAllDis);
-              $qrydef = mysqli_query($con, "SELECT SUM(berat) AS berat, ROUND(COUNT(masalah_dominan)/(SELECT COUNT(*) FROM tbl_ncp_qcf_new WHERE $WKategori DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' $sts
+              $qryAll = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) AS jml_all, SUM(berat) AS berat_all FROM db_qc.tbl_ncp_qcf_new WHERE $WKategori TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' AND (masalah_dominan!='' OR masalah_dominan!=NULL) $sts ");
+              $rAll = sqlsrv_fetch_array($qryAll);
+              $qryAllDis = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) AS jml_all, SUM(berat) AS berat_all FROM db_qc.tbl_ncp_qcf_new WHERE $WKategori TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' AND (masalah_dominan!='' OR masalah_dominan!=NULL) AND status='Disposisi' $sts ");
+              $rAllDis = sqlsrv_fetch_array($qryAllDis);
+              $qrydef = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 5 SUM(berat) AS berat, ROUND(COUNT(masalah_dominan)/(SELECT COUNT(*) FROM db_qc.tbl_ncp_qcf_new WHERE $WKategori TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' $sts
             AND (masalah_dominan!='' OR masalah_dominan!=NULL))*100,1) AS persen,
             masalah_dominan
             FROM
-            `tbl_ncp_qcf_new`
-            WHERE $WKategori DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' AND (masalah_dominan!='' OR masalah_dominan!=NULL) $sts  
+            db_qc.tbl_ncp_qcf_new
+            WHERE $WKategori TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' AND (masalah_dominan!='' OR masalah_dominan!=NULL) $sts  
             GROUP BY masalah_dominan
-            ORDER BY berat DESC LIMIT 5");
-              $qryBDominan = mysqli_query($con, "SELECT COUNT(*) AS jml_all, SUM(berat) AS berat_all FROM tbl_ncp_qcf_new WHERE $WKategori DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' AND (masalah_dominan='' OR masalah_dominan=NULL) $sts ");
-              $rBD = mysqli_fetch_array($qryBDominan);
-              $qryAllDisBD = mysqli_query($con, "SELECT COUNT(*) AS jml_all, SUM(berat) AS berat_all FROM tbl_ncp_qcf_new WHERE $WKategori DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' AND (masalah_dominan='' OR masalah_dominan=NULL) AND `status`='Disposisi' $sts ");
-              $rAllDisBD = mysqli_fetch_array($qryAllDisBD);
-              while ($rd = mysqli_fetch_array($qrydef)) {
-                $qrydefDis = mysqli_query($con, "SELECT SUM(berat) AS berat, ROUND(COUNT(masalah_dominan)/(SELECT COUNT(*) FROM tbl_ncp_qcf_new WHERE $WKategori DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' AND `status`='Disposisi' AND masalah_dominan='$rd[masalah_dominan]' $sts
+            ORDER BY berat DESC");
+              $qryBDominan = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) AS jml_all, SUM(berat) AS berat_all FROM db_qc.tbl_ncp_qcf_new WHERE $WKategori TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' AND (masalah_dominan='' OR masalah_dominan=NULL) $sts ");
+              $rBD = sqlsrv_fetch_array($qryBDominan);
+              $qryAllDisBD = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) AS jml_all, SUM(berat) AS berat_all FROM db_qc.tbl_ncp_qcf_new WHERE $WKategori TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' AND (masalah_dominan='' OR masalah_dominan=NULL) AND status='Disposisi' $sts ");
+              $rAllDisBD = sqlsrv_fetch_array($qryAllDisBD);
+              while ($rd = sqlsrv_fetch_array($qrydef)) {
+                $qrydefDis = sqlsrv_query($con_db_qc_sqlsrv, "SELECT SUM(berat) AS berat, ROUND(COUNT(masalah_dominan)/(SELECT COUNT(*) FROM db_qc.tbl_ncp_qcf_new WHERE $WKategori TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' AND status='Disposisi' AND masalah_dominan='$rd[masalah_dominan]' $sts
               AND (masalah_dominan!='' OR masalah_dominan!=NULL))*100,1) AS persen,
               masalah_dominan
               FROM
-              `tbl_ncp_qcf_new`
-              WHERE $WKategori DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' AND `status`='Disposisi' AND masalah_dominan='$rd[masalah_dominan]' AND (masalah_dominan!='' OR masalah_dominan!=NULL) $sts ");
-                $rdDis = mysqli_fetch_array($qrydefDis);
+              db_qc.tbl_ncp_qcf_new
+              WHERE $WKategori TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' AND status='Disposisi' AND masalah_dominan='$rd[masalah_dominan]' AND (masalah_dominan!='' OR masalah_dominan!=NULL) $sts 
+              GROUP BY masalah_dominan");
+                $rdDis = sqlsrv_fetch_array($qrydefDis);
               ?>
                 <tr valign="top">
                   <td align="center">
@@ -419,26 +420,27 @@ include "koneksi.php";
               $totaldlldpt = 0;
               $totaldptDis = 0;
               $totaldlldptDis = 0;
-              $qryAllDpt = mysqli_query($con, "SELECT COUNT(*) AS jml_all, SUM(berat) AS berat_all FROM tbl_ncp_qcf_new WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' AND (dept!='' OR dept!=NULL) AND NOT status='Cancel' AND ncp_hitung='ya' ");
-              $rAllDpt = mysqli_fetch_array($qryAllDpt);
-              $qryAllDptDis = mysqli_query($con, "SELECT COUNT(*) AS jml_all, SUM(berat) AS berat_all FROM tbl_ncp_qcf_new WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' AND (dept!='' OR dept!=NULL) AND `status`='Disposisi' AND NOT status='Cancel' AND ncp_hitung='ya' ");
-              $rAllDptDis = mysqli_fetch_array($qryAllDptDis);
-              $qrydpt = mysqli_query($con, "SELECT SUM(berat) AS berat, ROUND(COUNT(dept)/(SELECT COUNT(*) FROM tbl_ncp_qcf_new WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' AND NOT status='Cancel'
+              $qryAllDpt = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) AS jml_all, SUM(berat) AS berat_all FROM db_qc.tbl_ncp_qcf_new WHERE TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' AND (dept!='' OR dept!=NULL) AND NOT status='Cancel' AND ncp_hitung='ya' ");
+              $rAllDpt = sqlsrv_fetch_array($qryAllDpt);
+              $qryAllDptDis = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) AS jml_all, SUM(berat) AS berat_all FROM db_qc.tbl_ncp_qcf_new WHERE TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' AND (dept!='' OR dept!=NULL) AND status='Disposisi' AND NOT status='Cancel' AND ncp_hitung='ya' ");
+              $rAllDptDis = sqlsrv_fetch_array($qryAllDptDis);
+              $qrydpt = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 5 SUM(berat) AS berat, ROUND(COUNT(dept)/(SELECT COUNT(*) FROM db_qc.tbl_ncp_qcf_new WHERE TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' AND NOT status='Cancel'
             AND (dept!='' OR dept!=NULL))*100,1) AS persen,
             dept
             FROM
-            `tbl_ncp_qcf_new`
-            WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' AND (dept!='' OR dept!=NULL) AND $WKategori NOT status='Cancel'  
+            db_qc.tbl_ncp_qcf_new
+            WHERE TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' AND (dept!='' OR dept!=NULL) AND $WKategori NOT status='Cancel'  
             GROUP BY dept
-            ORDER BY berat DESC LIMIT 5");
-              while ($rdpt = mysqli_fetch_array($qrydpt)) {
-                $qrydptDis = mysqli_query($con, "SELECT SUM(berat) AS berat, ROUND(COUNT(dept)/(SELECT COUNT(*) FROM tbl_ncp_qcf_new WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' AND `status`='Disposisi' AND dept='$rdpt[dept]' AND NOT status='Cancel'
+            ORDER BY berat DESC");
+              while ($rdpt = sqlsrv_fetch_array($qrydpt)) {
+                $qrydptDis = sqlsrv_query($con_db_qc_sqlsrv, "SELECT SUM(berat) AS berat, ROUND(COUNT(dept)/(SELECT COUNT(*) FROM db_qc.tbl_ncp_qcf_new WHERE TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' AND status='Disposisi' AND dept='$rdpt[dept]' AND NOT status='Cancel'
               AND (dept!='' OR dept!=NULL))*100,1) AS persen,
               dept
               FROM
-              `tbl_ncp_qcf_new`
-              WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' AND `status`='Disposisi' AND dept='$rdpt[dept]' AND (dept!='' OR dept!=NULL) AND NOT status='Cancel' AND ncp_hitung='ya'");
-                $rdptDis = mysqli_fetch_array($qrydptDis);
+              db_qc.tbl_ncp_qcf_new
+              WHERE TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' AND status='Disposisi' AND dept='$rdpt[dept]' AND (dept!='' OR dept!=NULL) AND NOT status='Cancel' AND ncp_hitung='ya'
+              GROUP BY dept");
+                $rdptDis = sqlsrv_fetch_array($qrydptDis);
               ?>
                 <tr valign="top">
                   <td align="center">
@@ -496,10 +498,10 @@ include "koneksi.php";
   </div>
   <?php
 
-  $qry1 = mysqli_query($con, "SELECT * $FR2A FROM tbl_ncp_qcf_new WHERE $Wdept $WKategori DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' $sts $WR2A 
+  $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * $FR2A FROM db_qc.tbl_ncp_qcf_new WHERE $Wdept $WKategori TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' $sts $WR2A 
 	$GR2A");
-  $qrySUM = mysqli_query($con, "SELECT COUNT(*) as Lot, SUM(rol) as Rol,SUM(berat) as Berat FROM tbl_ncp_qcf_new WHERE $Wdept $WKategori DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' AND '$stop_date' $sts ");
-  $rSUM = mysqli_fetch_array($qrySUM);
+  $qrySUM = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) as Lot, SUM(rol) as Rol,SUM(berat) as Berat FROM db_qc.tbl_ncp_qcf_new WHERE $Wdept $WKategori TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' $sts ");
+  $rSUM = sqlsrv_fetch_array($qrySUM);
   ?>
   <div class="row">
     <div class="col-xs-12">
@@ -691,14 +693,14 @@ include "koneksi.php";
             <tbody>
               <?php
               $no = 1;
-              while ($row1 = mysqli_fetch_array($qry1)) {
+              while ($row1 = sqlsrv_fetch_array($qry1)) {
                 if ($row1['nokk_salinan'] != "") {
                   $nokk1 = $row1['nokk_salinan'];
                 } else {
                   $nokk1 = $row1['nokk'];
                 }
-                $qryckw = mysqli_query($con, "SELECT * FROM tbl_cocok_warna_dye WHERE `dept`='QCF' AND nodemand='$row1[nodemand]' ORDER BY id DESC");
-                $rowckw = mysqli_fetch_array($qryckw);
+                $qryckw = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_cocok_warna_dye WHERE dept='QCF' AND nodemand='$row1[nodemand]' ORDER BY id DESC");
+                $rowckw = sqlsrv_fetch_array($qryckw);
 				$sqlDB2="SELECT
 					p.DESCRIPTION
 				FROM
@@ -713,7 +715,7 @@ include "koneksi.php";
                     <?php echo $no; ?>
                   </td>
                   <td align="center">
-                    <?php echo $row1['tgl_buat']; ?><br>
+                    <?php echo date_format($row1['tgl_buat'], 'Y-m-d'); ?><br>
                     <div class="btn-group"><a href="pages/cetak/cetak_ncp_now.php?id=<?php echo $row1['id']; ?>" class="btn btn-xs btn-danger" target="_blank"><i class="fa fa-print"></i></a><a href="pages/cetak/cetak_ncp_now_pdf.php?id=<?php echo $row1['id']; ?>" class="btn btn-xs btn-info" target="_blank"><i class="fa fa-file-pdf-o"></i></a></div>
                   </td>
                   <td>
@@ -844,19 +846,13 @@ include "koneksi.php";
                     <?php echo $row1['nsp']; ?>
                   </td>
                   <td align="center">
-                    <?php if ($row1['tgl_rencana'] != "") {
-                      echo date("d/m/y", strtotime($row1['tgl_rencana']));
-                    } ?>
+                    <?php echo ($row1['tgl_rencana'] !== null) ? date_format($row1['tgl_rencana'], 'd/m/y') : '';?>
                   </td>
                   <td align="center">
-                    <?php if ($row1['tgl_selesai'] != "") {
-                      echo date("d/m/y", strtotime($row1['tgl_selesai']));
-                    } ?>
+                    <?php echo ($row1['tgl_selesai'] !== null) ? date_format($row1['tgl_selesai'], 'd/m/y') : '';?>
                   </td>
                   <td align="center">
-                    <?php if ($row1['tgl_delivery'] != "") {
-                      echo date("d/m/y", strtotime($row1['tgl_delivery']));
-                    } ?>
+                    <?php echo ($row1['tgl_delivery'] !== null) ? date_format($row1['tgl_delivery'], 'd/m/y') : '';?>
                   </td>
                   <td align="center">'
                     <?php if ($row1['nokk_salinan'] != "") {

@@ -20,8 +20,10 @@ $Kategori=$_GET['kategori'];
 $Cancel=$_GET['cancel'];
 $Rev2A=$_GET['chkrev'];
 	
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+            CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg;");
+$rTgl   = sqlsrv_fetch_array($qTgl);
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 
 
@@ -227,9 +229,9 @@ Periode : <?php echo tanggal_indo($_GET['awal']);?> s/d <?php echo tanggal_indo(
 		$GR2A= " ORDER BY id ASC ";
 	}	  
 			
-	$qry1=mysqli_query($con,"SELECT * $FR2A FROM tbl_ncp_qcf_now WHERE $Wdept $Wkategori DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' $sts $WR2A 
+	$qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * $FR2A FROM db_qc.tbl_ncp_qcf_now WHERE $Wdept $Wkategori TRY_CAST(tgl_buat AS DATE) BETWEEN '$Awal' AND '$Akhir' $sts $WR2A 
 	$GR2A ");
-			while($row1=mysqli_fetch_array($qry1)){
+			while($row1=sqlsrv_fetch_array($qry1)){
 				
 $sqlSVR="SELECT ID FROM ProcessControlBatches WHERE documentno='$row1[nokk]'";
 $qrySVR=sqlsrv_query($conn,$sqlSVR);
