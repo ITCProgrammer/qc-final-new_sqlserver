@@ -1,7 +1,7 @@
 <?PHP
 session_start();
 ini_set("error_reporting", 1);
-include"koneksi.php";
+include "koneksi.php";
 
 ?>
 
@@ -23,14 +23,14 @@ $Nama	= isset($_POST['nama']) ? $_POST['nama'] : '';
 $jamA	= isset($_POST['jam_awal']) ? $_POST['jam_awal'] : '';
 $jamAr	= isset($_POST['jam_akhir']) ? $_POST['jam_akhir'] : '';
 if(strlen($jamA)==5){
-	$start_date = $Awal." ".$jamA;
+	$start_date = $Awal." ".$jamA.":00";
 }else{ 
-	$start_date = $Awal." 0".$jamA;
+	$start_date = $Awal." 0".$jamA.":00";
 }	
 if(strlen($jamAr)==5){
-	$stop_date  = $Akhir." ".$jamAr;
+	$stop_date  = $Akhir." ".$jamAr.":59";
 }else{ 
-	$stop_date  = $Akhir." 0".$jamAr;
+	$stop_date  = $Akhir." 0".$jamAr.":59";
 }	
 ?>
 	
@@ -84,8 +84,8 @@ if(strlen($jamAr)==5){
 				<select name="nama" class="form-control select2" style="width: 100%;">
 					<option value="">Pilih</option>
 					<option value="ALL" <?php if($Nama=="ALL"){echo "SELECTED";}?>>ALL</option>
-					<?php $sqlPr=mysqli_query($con,"SELECT nama FROM user_login WHERE level='INSPEKSI' AND dept='QC' AND akses='biasa'");
-					while($rP=mysqli_fetch_array($sqlPr)){ ?>
+					<?php $sqlPr=sqlsrv_query($con_db_qc_sqlsrv,"SELECT [nama] FROM db_qc.user_login WHERE level='INSPEKSI' AND dept='QC' AND akses='biasa'");
+					while($rP=sqlsrv_fetch_array($sqlPr,SQLSRV_FETCH_ASSOC)){ ?>
 					<option value="<?php echo $rP['nama'];?>" <?php if($Nama==$rP['nama']){ echo "SELECTED";}?>><?php echo $rP['nama'];?></option>	
 						<?php } ?>
 				</select>
@@ -125,7 +125,7 @@ if(strlen($jamAr)==5){
   <div class="col-xs-12">
     <div class="box">
       <div class="box-header with-border">
-        <h3 class="box-title">Data Inspeksi</h3><br><?php if($_POST['awal']!="") { ?><b>Periode: <?php echo $start_date." to ".$stop_date ?> Nama Inspektor: <?php echo $Nama; ?></b>
+        <h3 class="box-title">Data Inspeksi</h3><br><?php if($_POST['awal']!="") { ?><b>Periode: <?php echo substr($start_date,0, -3)." to ".substr($stop_date,0, -3) ?> Nama Inspektor: <?php echo $Nama; ?></b>
 		<?php } ?>
         <?php if($_POST['awal']!="") { ?> 
 		<div class="btn-group pull-right">
@@ -187,7 +187,7 @@ if(strlen($jamAr)==5){
 	$WProses=" b.proses='$Proses' AND ";	
 	}*/
 			
-	$qry1=mysqli_query($con,"SELECT
+	$qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
 	a.catatan,
 	a.personil,
 	b.langganan,
@@ -198,65 +198,54 @@ if(strlen($jamAr)==5){
 	b.jenis_kain,
 	b.warna,
 	b.lot,
-	b.tgl_delivery,
+	CONVERT(VARCHAR(10),b.tgl_delivery) tgl_delivery,
 	b.no_mesin,
 	b.bruto,
 	b.rol,
 	a.jml_rol,
 	a.qty,
-	if(a.jml_rol>0,CONCAT(a.jml_rol,'x',a.qty),CONCAT(b.rol,'x',b.bruto)) as qty_bruto,
-	if(a.yard>0,a.yard,b.pjng_order) as yard,
+	CASE
+         WHEN a.jml_rol>0 THEN CONCAT(a.jml_rol,'x',a.qty)
+         ELSE CONCAT(b.rol,'x',b.bruto)
+    END as qty_bruto,
+    CASE
+         WHEN a.yard>0 THEN a.yard
+         ELSE b.pjng_order
+    END as yard,
 	b.tgl_mulai,
 	b.tgl_stop,
 	b.istirahat,
 	b.lembap_fin,
 	b.lembap_qcf,
 	a.catatan,
-	TIMESTAMPDIFF(
-    MINUTE,
-	b.tgl_mulai,b.tgl_stop) as waktu,
+	DATEDIFF(Minute,b.tgl_mulai, b.tgl_stop) as waktu ,
 	b.proses,
-	IF
-	( c.status_produk = '1', 'OK', IF(c.status_produk = '2', 'TK','PR')) AS sts,
-IF
-	(
-	NOT c.no_gerobak6 = '',
-	CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3, '+', no_gerobak4, '+', no_gerobak5, '+', no_gerobak6 ),
-IF
-	(
-	NOT c.no_gerobak5 = '',
-	CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3, '+', no_gerobak4, '+', no_gerobak5 ),
-IF
-	(
-	NOT c.no_gerobak4 = '',
-	CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3, '+', no_gerobak4 ),
-IF
-	(
-	NOT c.no_gerobak3 = '',
-	CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3 ),
-IF
-	(
-	NOT c.no_gerobak2 = '',
-	CONCAT( no_gerobak1, '+', no_gerobak2 ),
-IF
-	( NOT c.no_gerobak1 = '', c.no_gerobak1, '' ) 
-	) 
-	) 
-	) 
-	) 
-	) AS no_grobak 
+    CASE
+         WHEN c.status_produk = '1' THEN 'OK'
+         WHEN c.status_produk = '2' THEN 'TK'
+         ELSE 'PR'
+    END as sts,	
+    CASE
+         WHEN NOT c.no_gerobak6 = '' THEN CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3, '+', no_gerobak4, '+', no_gerobak5, '+', no_gerobak6 )
+         WHEN NOT c.no_gerobak5 = '' THEN CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3, '+', no_gerobak4, '+', no_gerobak5 )
+         WHEN NOT c.no_gerobak4 = '' THEN CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3, '+', no_gerobak4 )
+         WHEN NOT c.no_gerobak3 = '' THEN CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3 )         
+         WHEN NOT c.no_gerobak2 = '' THEN CONCAT( no_gerobak1, '+', no_gerobak2 )      
+         WHEN NOT c.no_gerobak1 = '' THEN c.no_gerobak1  
+         ELSE ''
+    END as no_grobak
 FROM
-	tbl_inspection a
-	INNER JOIN tbl_schedule b ON a.id_schedule = b.id
-	INNER JOIN tbl_gerobak c ON c.id_schedule = b.id
+	db_qc.tbl_inspection a
+	INNER JOIN db_qc.tbl_schedule b ON a.id_schedule = b.id
+	INNER JOIN db_qc.tbl_gerobak c ON c.id_schedule = b.id	
 WHERE
-	DATE_FORMAT( a.tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
+	a.tgl_buat BETWEEN '$start_date' 
 	AND '$stop_date' $Wnama $Wshift $WGshift
 ORDER BY
 	a.id ASC");
 		$totOk=0;$totTk=0;$totPr=0;$totOkQ=0;$totTkQ=0;$totPrQ=0;$totF=0;$totO=0;$totFQ=0;$totOQ=0;
 
-			while($row1=mysqli_fetch_array($qry1)){
+			while($row1=sqlsrv_fetch_array($qry1,SQLSRV_FETCH_ASSOC)){
 			$hourdiff  = (int)$row1['waktu']-(int)$row1['istirahat'];
 		 ?>
           <tr valign="top" bgcolor="<?php echo $bgcolor; ?>">

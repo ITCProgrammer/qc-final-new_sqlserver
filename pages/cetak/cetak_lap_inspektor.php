@@ -12,7 +12,7 @@ include "../../koneksi.php";
 ?>
 <div align="center"> <h1>LAPORAN HARIAN INSPEKTOR DEPT. QCF</h1></div>
 <!--script disini -->
-<h3>Tanggal : <?php echo $_GET['awal']." s/d ".$_GET['akhir'];?></h3>
+<h3>Tanggal : <?php echo substr($_GET['awal'],0,-3)." s/d ".substr($_GET['akhir'],0,-3);?></h3>
 <table width="100%" border="1" class="table-list1">
   <tr>
     <td width="5%"><h4>No</h4></td>
@@ -43,31 +43,37 @@ include "../../koneksi.php";
   }else{	
     $Wnama=" AND a.personil='$_GET[personil]'  ";	
   }
-  $sql=mysqli_query($con,"SELECT
-	b.shift,
-	b.g_shift,
-  b.proses,
-  b.warna,
-	a.personil,
-	sum( a.jml_rol ) AS rol,
-	sum( a.qty ) AS bruto,
-	sum( a.yard ) AS panjang,
-  TIMESTAMPDIFF(MINUTE, b.tgl_mulai,b.tgl_stop) AS waktu,
-  IF(a.yard>0,a.yard,b.pjng_order) AS yard,
-	IF(b.istirahat='',0,b.istirahat) AS istirahat  
-FROM
-  tbl_inspection a
-LEFT JOIN 
-	tbl_schedule b 
-ON 
-	a.id_schedule=b.id  
-WHERE
-	DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$_GET[awal]' 
-	AND '$_GET[akhir]' $Wnama $Wshift $WGshift
-GROUP BY b.warna,b.proses,a.personil
-ORDER BY
-	a.personil ASC");
-  while($row=mysqli_fetch_array($sql)){
+  $sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+                                        max(b.shift),
+                                        max(b.g_shift),
+                                        b.proses,
+                                        b.warna,
+                                        a.personil,
+                                        sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) AS rol,
+                                        sum( a.qty ) AS bruto,
+                                        sum( a.yard ) AS panjang,
+                                        DATEDIFF(Minute,max(b.tgl_mulai), max(b.tgl_stop)) as waktu ,
+                                        max(CASE
+                                          WHEN a.yard>0 THEN a.yard
+                                          ELSE b.pjng_order
+                                        END) as yard,
+                                        max(CASE
+                                          WHEN b.istirahat='' THEN 0
+                                          ELSE b.istirahat
+                                        END) AS istirahat
+                                      FROM
+                                        db_qc.tbl_inspection a
+                                      LEFT JOIN 
+                                        db_qc.tbl_schedule b 
+                                      ON 
+                                        a.id_schedule=b.id  
+                                      WHERE
+                                        a.tgl_buat BETWEEN '$_GET[awal]' 
+                                        AND '$_GET[akhir]' $Wnama $Wshift $WGshift
+                                      GROUP BY b.warna,b.proses,a.personil
+                                      ORDER BY
+                                        a.personil ASC");
+  while($row=sqlsrv_fetch_array($sql,SQLSRV_FETCH_ASSOC)){
     $hourdiff  = (int)$row['waktu']-(int)$row['istirahat'];
 	    ?>
   <tr>

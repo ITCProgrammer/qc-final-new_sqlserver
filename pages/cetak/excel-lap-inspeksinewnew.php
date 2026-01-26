@@ -11,7 +11,7 @@ session_start();
 include "../../koneksi.php";
 ?>
 <div align="center"> <h1>LAPORAN INSPEKTOR NEW</h1></div>
-<h3>Tanggal : <?php echo $_GET['awal']." s/d ".$_GET['akhir'];?></h3>
+<h3>Tanggal : <?php echo substr($_GET['awal'],0,-3)." s/d ".substr($_GET['akhir'],0,-3);?></h3>
 <table width="100%" border="1">
     <tr>
         <th rowspan="4" align="center" bgcolor="#729FCF">Nama Operator</th>
@@ -127,22 +127,22 @@ include "../../koneksi.php";
     }else{	
         $Wnama=" AND a.personil='$_GET[personil]'  ";	
     }
-        $sql = mysqli_query($con, 
+        $sql = sqlsrv_query($con_db_qc_sqlsrv, 
                 "SELECT 
                     a.personil, 
                     b.shift, 
-                    GROUP_CONCAT(DISTINCT b.t_jawab SEPARATOR ',') AS t_jawab, 
+                    b.t_jawab, 
                     b.t_jawab_buyer,
-                    COUNT(DISTINCT(DATE_FORMAT(a.tgl_update, '%Y-%m-%d'))) AS hari_kerja 
+                    COUNT(DISTINCT CONVERT(DATE,a.tgl_update)) AS hari_kerja
                 FROM 
-                    tbl_inspection a 
+                    db_qc.tbl_inspection a 
                 LEFT JOIN 
-                    tbl_schedule b 
+                    db_qc.tbl_schedule b 
                 ON 
                     a.id_schedule = b.id 
                 WHERE 
                     a.status = 'selesai' 
-                    AND DATE_FORMAT(a.tgl_update, '%Y-%m-%d %H:%i') BETWEEN '$_GET[awal]' AND '$_GET[akhir]' 
+                    AND a.tgl_update BETWEEN '$_GET[awal]' AND '$_GET[akhir]' 
                     $Wnama 
                     $Wshift 
                     $WGshift 
@@ -156,184 +156,238 @@ include "../../koneksi.php";
                 ORDER BY 
                     a.personil ASC
             ");
-        while($r=mysqli_fetch_array($sql)){
+        while($r=sqlsrv_fetch_array($sql,SQLSRV_FETCH_ASSOC)){
              //Inspect
-             $sqlIns=mysqli_query($con,"SELECT
-             b.g_shift,
-             SUM( a.jml_rol ) AS rolIns,
+             $sqlIns=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+             min(b.g_shift) g_shift,
+             sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) AS rolIns,
              SUM( a.qty ) AS brutoIns,
              SUM( a.yard ) AS panjangIns,
-             TIMESTAMPDIFF(MINUTE, b.tgl_mulai,b.tgl_stop) AS waktuIns,
-             IF(a.yard>0,a.yard,b.pjng_order) AS yardIns,
-             IF(b.istirahat='',0,b.istirahat) AS istirahatIns  
+             max(DATEDIFF(Minute,b.tgl_mulai, b.tgl_stop)) as waktuIns ,        
+			  min(CASE
+			    WHEN a.yard>0 THEN a.yard
+			    ELSE b.pjng_order
+			  END) as yardIns,
+			  min(CASE
+			    WHEN b.istirahat='' THEN 0
+			    ELSE b.istirahat
+			  END) AS istirahatIns 
              FROM
-               tbl_inspection a
+                db_qc.tbl_inspection a
              LEFT JOIN 
-                 tbl_schedule b 
+                db_qc.tbl_schedule b 
              ON 
                  a.id_schedule=b.id  
              WHERE
-                 DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$_GET[awal]' AND '$_GET[akhir]' AND proses='Inspect Finish' AND a.personil='$r[personil]' AND b.shift='$r[shift]' AND b.t_jawab_buyer='$r[t_jawab_buyer]'");
-             $rIns=mysqli_fetch_array($sqlIns);
+                 a.tgl_update BETWEEN '$_GET[awal]' AND '$_GET[akhir]' AND proses='Inspect Finish' AND a.personil='$r[personil]' AND b.shift='$r[shift]' AND b.t_jawab_buyer='$r[t_jawab_buyer]'");
+             $rIns=sqlsrv_fetch_array($sqlIns,SQLSRV_FETCH_ASSOC);
              $hourdiffIns  = (int)$rIns['waktuIns']-(int)$rIns['istirahatIns'];
             
-            $sqlIQK=mysqli_query($con,"SELECT
-            b.g_shift,
-            SUM( a.jml_rol ) AS rolIQK,
+            $sqlIQK=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            min(b.g_shift) g_shift,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) AS rolIQK,
             SUM( a.qty ) AS brutoIQK,
             SUM( a.yard ) AS panjangIQK,
-            TIMESTAMPDIFF(MINUTE, b.tgl_mulai,b.tgl_stop) AS waktuIQK,
-            IF(a.yard>0,a.yard,b.pjng_order) AS yardIQK,
-	        IF(b.istirahat='',0,b.istirahat) AS istirahatIQK 
+            max(DATEDIFF(Minute,b.tgl_mulai, b.tgl_stop)) as waktuIQK , 
+	        min(CASE
+			    WHEN a.yard>0 THEN a.yard
+			    ELSE b.pjng_order
+			    END) as yardIQK,
+			min(CASE
+			    WHEN b.istirahat='' THEN 0
+			    ELSE b.istirahat
+			    END) AS istirahatIQK
             FROM
-            tbl_inspection a
+                db_qc.tbl_inspection a
             LEFT JOIN 
-                tbl_schedule b 
+                db_qc.tbl_schedule b 
             ON 
                 a.id_schedule=b.id  
             WHERE
-                DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$_GET[awal]' 
+                a.tgl_update BETWEEN '$_GET[awal]' 
                 AND '$_GET[akhir]' AND proses='Inspect Qty Kecil' AND a.personil='$r[personil]' AND b.shift='$r[shift]' AND b.t_jawab_buyer='$r[t_jawab_buyer]'");
-            $rIQK=mysqli_fetch_array($sqlIQK);
+            $rIQK=sqlsrv_fetch_array($sqlIQK,SQLSRV_FETCH_ASSOC);
             $hourdiffIQK  = (int)$rIQK['waktuIQK']-(int)$rIQK['istirahatIQK'];
             
-            $sqlW=mysqli_query($con,"SELECT
-            b.g_shift,
-            SUM( a.jml_rol ) AS rolW,
+            $sqlW=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            min(b.g_shift) g_shift,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) AS rolW,
             SUM( a.qty ) AS brutoW,
             SUM( a.yard ) AS panjangW,
-            TIMESTAMPDIFF(MINUTE, b.tgl_mulai,b.tgl_stop) AS waktuW,
-            IF(a.yard>0,a.yard,b.pjng_order) AS yardW,
-	        IF(b.istirahat='',0,b.istirahat) AS istirahatW
+            max(DATEDIFF(Minute,b.tgl_mulai, b.tgl_stop)) as waktuW , 
+	        min(CASE
+			    WHEN a.yard>0 THEN a.yard
+			    ELSE b.pjng_order
+			  END) as yardW,
+			min(CASE
+			    WHEN b.istirahat='' THEN 0
+			    ELSE b.istirahat
+			  END) AS istirahatW
             FROM
-            tbl_inspection a
+                db_qc.tbl_inspection a
             LEFT JOIN 
-                tbl_schedule b 
+                db_qc.tbl_schedule b 
             ON 
                 a.id_schedule=b.id  
             WHERE
-                DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$_GET[awal]' 
+                a.tgl_update BETWEEN '$_GET[awal]' 
                 AND '$_GET[akhir]' AND proses='Inspect White' AND a.personil='$r[personil]' AND b.shift='$r[shift]' AND b.t_jawab_buyer='$r[t_jawab_buyer]'");
-            $rW=mysqli_fetch_array($sqlW);
+            $rW=sqlsrv_fetch_array($sqlW,SQLSRV_FETCH_ASSOC);
             $hourdiffW  = (int)$rW['waktuW']-(int)$rW['istirahatW'];            
-            $sqlO=mysqli_query($con,"SELECT
-            b.g_shift,
-            SUM( a.jml_rol ) AS rolO,
+            $sqlO=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            min(b.g_shift) g_shift,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) AS rolO,
             SUM( a.qty ) AS brutoO,
             SUM( a.yard ) AS panjangO,
-            TIMESTAMPDIFF(MINUTE, b.tgl_mulai,b.tgl_stop) AS waktuO,
-            IF(a.yard>0,a.yard,b.pjng_order) AS yardO,
-	        IF(b.istirahat='',0,b.istirahat) AS istirahatO   
+            max(DATEDIFF(Minute,b.tgl_mulai, b.tgl_stop)) as waktuO , 
+	        min(CASE
+			    WHEN a.yard>0 THEN a.yard
+			    ELSE b.pjng_order
+			  END) as yardO,
+			min(CASE
+			    WHEN b.istirahat='' THEN 0
+			    ELSE b.istirahat
+			  END) AS istirahatO  
             FROM
-            tbl_inspection a
+                db_qc.tbl_inspection a
             LEFT JOIN 
-                tbl_schedule b 
+                db_qc.tbl_schedule b 
             ON 
                 a.id_schedule=b.id  
             WHERE
-                DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$_GET[awal]' 
+                a.tgl_update BETWEEN '$_GET[awal]' 
                 AND '$_GET[akhir]' AND proses='Inspect Oven' AND a.personil='$r[personil]' AND b.shift='$r[shift]' AND b.t_jawab_buyer='$r[t_jawab_buyer]'");
-            $rO=mysqli_fetch_array($sqlO);
+            $rO=sqlsrv_fetch_array($sqlO,SQLSRV_FETCH_ASSOC);
             $hourdiffO  = (int)$rO['waktuO']-(int)$rO['istirahatO'];
             //Pisah
-            $sqlP=mysqli_query($con,"SELECT
-            b.g_shift,
-            SUM( a.jml_rol ) AS rolP,
+            $sqlP=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            min(b.g_shift) g_shift,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) AS rolP,
             SUM( a.qty ) AS brutoP,
             SUM( a.yard ) AS panjangP,
-            TIMESTAMPDIFF(MINUTE, b.tgl_mulai,b.tgl_stop) AS waktuP,
-            IF(a.yard>0,a.yard,b.pjng_order) AS yardP,
-	        IF(b.istirahat='',0,b.istirahat) AS istirahatP 
+            max(DATEDIFF(Minute,b.tgl_mulai, b.tgl_stop)) as waktuP , 
+	        min(CASE
+			    WHEN a.yard>0 THEN a.yard
+			    ELSE b.pjng_order
+			  END) as yardP,
+			min(CASE
+			    WHEN b.istirahat='' THEN 0
+			    ELSE b.istirahat
+			  END) AS istirahatP
             FROM
-            tbl_inspection a
+                db_qc.tbl_inspection a
             LEFT JOIN 
-                tbl_schedule b 
+                db_qc.tbl_schedule b 
             ON 
                 a.id_schedule=b.id  
             WHERE
-                DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$_GET[awal]' 
+                a.tgl_update BETWEEN '$_GET[awal]' 
                 AND '$_GET[akhir]' AND proses='Pisah' AND a.personil='$r[personil]' AND b.shift='$r[shift]' AND b.t_jawab_buyer='$r[t_jawab_buyer]'");
-            $rP=mysqli_fetch_array($sqlP);
+            $rP=sqlsrv_fetch_array($sqlP,SQLSRV_FETCH_ASSOC);
             $hourdiffP  = (int)$rP['waktuP']-(int)$rP['istirahatP'];
             //Perbaikan
-            $sqlPb=mysqli_query($con,"SELECT
-            b.g_shift,
-            SUM( a.jml_rol ) AS rolPb,
+            $sqlPb=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            min(b.g_shift) g_shift,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) AS rolPb,
             SUM( a.qty ) AS brutoPb,
             SUM( a.yard ) AS panjangPb,
-            TIMESTAMPDIFF(MINUTE, b.tgl_mulai,b.tgl_stop) AS waktuPb,
-            IF(a.yard>0,a.yard,b.pjng_order) AS yardPb,
-	        IF(b.istirahat='',0,b.istirahat) AS istirahatPb 
+	        max(DATEDIFF(Minute,b.tgl_mulai, b.tgl_stop)) as waktuPb , 
+	        min(CASE
+			    WHEN a.yard>0 THEN a.yard
+			    ELSE b.pjng_order
+			  END) as yardPb,
+			min(CASE
+			    WHEN b.istirahat='' THEN 0
+			    ELSE b.istirahat
+			  END) AS istirahatPb
             FROM
-            tbl_inspection a
+                db_qc.tbl_inspection a
             LEFT JOIN 
-                tbl_schedule b 
+                db_qc.tbl_schedule b 
             ON 
                 a.id_schedule=b.id  
             WHERE
-                DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$_GET[awal]' 
+                a.tgl_update BETWEEN '$_GET[awal]' 
                 AND '$_GET[akhir]' AND proses='Perbaikan' AND a.personil='$r[personil]' AND b.shift='$r[shift]' AND b.t_jawab_buyer='$r[t_jawab_buyer]'");
-            $rPb=mysqli_fetch_array($sqlPb);
+            $rPb=sqlsrv_fetch_array($sqlPb,SQLSRV_FETCH_ASSOC);
             $hourdiffPb  = (int)$rPb['waktuPb']-(int)$rPb['istirahatPb'];
             //Perbaikan Grade
-            $sqlPG=mysqli_query($con,"SELECT
-            b.g_shift,
-            SUM( a.jml_rol ) AS rolPG,
+            $sqlPG=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            min(b.g_shift) g_shift,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) AS rolPG,
             SUM( a.qty ) AS brutoPG,
             SUM( a.yard ) AS panjangPG,
-            TIMESTAMPDIFF(MINUTE, b.tgl_mulai,b.tgl_stop) AS waktuPG,
-            IF(a.yard>0,a.yard,b.pjng_order) AS yardPG,
-	        IF(b.istirahat='',0,b.istirahat) AS istirahatPG 
+	        max(DATEDIFF(Minute,b.tgl_mulai, b.tgl_stop)) as waktuPG , 
+	        min(CASE
+			    WHEN a.yard>0 THEN a.yard
+			    ELSE b.pjng_order
+			  END) as yardPG,
+			min(CASE
+			    WHEN b.istirahat='' THEN 0
+			    ELSE b.istirahat
+			  END) AS istirahatPG
             FROM
-            tbl_inspection a
+                db_qc.tbl_inspection a
             LEFT JOIN 
-                tbl_schedule b 
+                db_qc.tbl_schedule b 
             ON 
                 a.id_schedule=b.id  
             WHERE
-                DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$_GET[awal]' 
+                a.tgl_update BETWEEN '$_GET[awal]' 
                 AND '$_GET[akhir]' AND proses='Perbaikan Grade' AND a.personil='$r[personil]' AND b.shift='$r[shift]' AND b.t_jawab_buyer='$r[t_jawab_buyer]'");
-            $rPG=mysqli_fetch_array($sqlPG);
+            $rPG=sqlsrv_fetch_array($sqlPG,SQLSRV_FETCH_ASSOC);
             $hourdiffPG  = (int)$rPG['waktuPG']-(int)$rPG['istirahatPG'];
             
-            $sqlPack=mysqli_query($con,"SELECT
-            b.g_shift,
-            SUM( a.jml_rol ) AS rolPack,
+            $sqlPack=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            min(b.g_shift) g_shift,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) AS rolPack,
             SUM( a.qty ) AS brutoPack,
             SUM( a.yard ) AS panjangPack,
-            TIMESTAMPDIFF(MINUTE, b.tgl_mulai,b.tgl_stop) AS waktuPack,
-            IF(a.yard>0,a.yard,b.pjng_order) AS yardPack,
-	        IF(b.istirahat='',0,b.istirahat) AS istirahatPack 
+            max(DATEDIFF(Minute,b.tgl_mulai, b.tgl_stop)) as waktuPack , 
+	        min(CASE
+			    WHEN a.yard>0 THEN a.yard
+			    ELSE b.pjng_order
+			  END) as yardPack,
+			min(CASE
+			    WHEN b.istirahat='' THEN 0
+			    ELSE b.istirahat
+			  END) AS istirahatPack
             FROM
-            tbl_inspection a
+                db_qc.tbl_inspection a
             LEFT JOIN 
-                tbl_schedule b 
+                db_qc.tbl_schedule b 
             ON 
                 a.id_schedule=b.id  
             WHERE
-                DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$_GET[awal]' 
+                a.tgl_update BETWEEN '$_GET[awal]' 
                 AND '$_GET[akhir]' AND proses='Packing' AND a.personil='$r[personil]' AND b.shift='$r[shift]' AND b.t_jawab_buyer='$r[t_jawab_buyer]'");
-            $rPack=mysqli_fetch_array($sqlPack);
+            $rPack=sqlsrv_fetch_array($sqlPack,SQLSRV_FETCH_ASSOC);
             $hourdiffPack  = (int)$rPack['waktuPack']-(int)$rPack['istirahatPack'];
             //Inspect Packing
-            $sqlIP=mysqli_query($con,"SELECT
-            b.g_shift,
-            SUM( a.jml_rol ) AS rolIP,
+            $sqlIP=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            min(b.g_shift) g_shift,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) AS rolIP,
             SUM( a.qty ) AS brutoIP,
             SUM( a.yard ) AS panjangIP,
-            TIMESTAMPDIFF(MINUTE, b.tgl_mulai,b.tgl_stop) AS waktuIP,
-            IF(a.yard>0,a.yard,b.pjng_order) AS yardIP,
-	        IF(b.istirahat='',0,b.istirahat) AS istirahatIP 
+            max(DATEDIFF(Minute,b.tgl_mulai, b.tgl_stop)) as waktuIP , 
+	        min(CASE
+			    WHEN a.yard>0 THEN a.yard
+			    ELSE b.pjng_order
+			  END) as yardIP,
+			min(CASE
+			    WHEN b.istirahat='' THEN 0
+			    ELSE b.istirahat
+			  END) AS istirahatIP
             FROM
-            tbl_inspection a
+                db_qc.tbl_inspection a
             LEFT JOIN 
-                tbl_schedule b 
+                db_qc.tbl_schedule b 
             ON 
                 a.id_schedule=b.id  
             WHERE
-                DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$_GET[awal]' 
+                a.tgl_update BETWEEN '$_GET[awal]' 
                 AND '$_GET[akhir]' AND proses='Inspect Packing' AND a.personil='$r[personil]' AND b.shift='$r[shift]' AND b.t_jawab_buyer='$r[t_jawab_buyer]'");
-            $rIP=mysqli_fetch_array($sqlIP);
+            $rIP=sqlsrv_fetch_array($sqlIP,SQLSRV_FETCH_ASSOC);
             $hourdiffIP  = (int)$rIP['waktuIP']-(int)$rIP['istirahatIP'];
 
     ?>
