@@ -3,8 +3,8 @@ ini_set("error_reporting", 1);
 session_start();
 include("../koneksi.php");
     $modal_id=$_GET['id'];
-	$modal=mysqli_query($con,"SELECT * FROM tbl_ncp_qcf WHERE id='$modal_id' ");
-while($r=mysqli_fetch_array($modal)){	
+	$modal=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_ncp_qcf WHERE id='$modal_id' ");
+while($r=sqlsrv_fetch_array($modal)){	
 ?>
           <div class="modal-dialog">
             <div class="modal-content">
@@ -22,7 +22,7 @@ while($r=mysqli_fetch_array($modal)){
         <div class="col-sm-4">
           <div class="input-group date">
             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-            <input name="tgl_kembali" type="text" class="form-control pull-right" id="datepicker" placeholder="0000-00-00" value="<?php echo $r['tgl_kembali']; ?>"/>
+            <input name="tgl_kembali" type="text" class="form-control pull-right" id="datepicker" placeholder="0000-00-00" value="<?php echo ($r['tgl_kembali'] !== null) ? date_format($r['tgl_kembali'], 'Y-m-d') : ''; ?>"/>
           </div>
         </div>
 	  </div>		  
@@ -31,7 +31,7 @@ while($r=mysqli_fetch_array($modal)){
         <div class="col-sm-4">
           <div class="input-group date">
             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-            <input name="tgl_serah" type="text" class="form-control pull-right" id="datepicker1" placeholder="0000-00-00" value="<?php echo $r['tgl_serah']; ?>"/>
+            <input name="tgl_serah" type="text" class="form-control pull-right" id="datepicker1" placeholder="0000-00-00" value="<?php echo ($r['tgl_serah'] !== null) ? date_format($r['tgl_serah'], 'Y-m-d') : ''; ?>"/>
           </div>
         </div>
 	  </div>
@@ -41,7 +41,7 @@ while($r=mysqli_fetch_array($modal)){
         <div class="col-sm-4">
           <div class="input-group date">
             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-            <input name="tgl_selesai" type="text" class="form-control pull-right" id="datepicker2" placeholder="0000-00-00" value="<?php echo $r['tgl_selesai']; ?>"/>
+            <input name="tgl_selesai" type="text" class="form-control pull-right" id="datepicker2" placeholder="0000-00-00" value="<?php echo ($r['tgl_selesai'] !== null) ? date_format($r['tgl_selesai'], 'Y-m-d') : ''; ?>"/>
           </div>
         </div>
 	  </div>

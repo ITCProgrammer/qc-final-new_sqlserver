@@ -4,11 +4,11 @@ session_start();
 include "../../koneksi.php";
 include "../../tgl_indo.php";
 if($_GET['id']!=""){
-$qry=mysqli_query($con,"SELECT * FROM tbl_ncp_qcf WHERE id='$_GET[id]'");
+$qry=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_ncp_qcf WHERE id='$_GET[id]'");
 }else{
-$qry=mysqli_query($con,"SELECT * FROM tbl_ncp_qcf WHERE no_ncp='$_GET[no_ncp]'");
+$qry=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_ncp_qcf WHERE no_ncp='$_GET[no_ncp]'");
 }
-$d=mysqli_fetch_array($qry);
+$d=sqlsrv_fetch_array($qry);
 //RMP Benang
 if(strpos($d['rmp_benang'],"Horizontal")>-1){
 	$rmpBng1="x";
@@ -80,7 +80,7 @@ if(strpos($d['rmp_rajut'],"Horizontal")>-1){
 <table border="0" width="100%">
 	<tbody>	
     <tr>
-      <td colspan="2" align="left">TANGGAL: <?php echo tanggal_indo ($d['tgl_buat'],true);?></td>
+      <td colspan="2" align="left">TANGGAL: <?php echo tanggal_indo (date_format($d['tgl_buat'], 'Y-m-d'),true);?></td>
 		<td colspan="4" align="right">&nbsp;</td>
     </tr>
     <tr>
@@ -316,7 +316,7 @@ Penanggung Jawab</td>
       <td rowspan="5" align="center" valign="middle" style="border-top:1px #000000 solid; 
 	border-bottom:1px #000000 solid;
 	border-left:1px #000000 solid; 
-	border-right:1px #000000 solid;"><?php echo tanggal_indo ($d['tgl_rencana']);?></td>
+	border-right:1px #000000 solid;"><?php echo tanggal_indo (date_format($d['tgl_rencana'], 'Y-m-d'));?></td>
       <td rowspan="5" style="border-top:1px #000000 solid; 
 	border-bottom:1px #000000 solid;
 	border-left:1px #000000 solid; 

@@ -11,8 +11,10 @@ $Awal=$_GET['awal'];
 $Akhir=$_GET['akhir'];
 $Dept=$_GET['dept'];
 $Cancel=$_GET['cancel'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+            CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg;");
+$rTgl   = sqlsrv_fetch_array($qTgl);
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -161,12 +163,12 @@ border:hidden;
 	}else{
 		$sts="  ";
   }
-	$qry1=mysqli_query($con,"SELECT * FROM tbl_ncp_qcf WHERE $Wdept DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' $sts ORDER BY id ASC");
-			while($row1=mysqli_fetch_array($qry1)){
+	$qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_ncp_qcf WHERE $Wdept TRY_CAST(tgl_buat AS DATE) BETWEEN '$Awal' AND '$Akhir' $sts ORDER BY id ASC");
+			while($row1=sqlsrv_fetch_array($qry1)){
 		 ?>
           <tr valign="top">
             <td align="center"><?php echo $no; ?></td>
-            <td align="center"><?php echo date("d/m/y", strtotime($row1['tgl_buat']));?></td>
+            <td align="center"><?php echo date_format($row1['tgl_buat'], 'd/m/y');?></td>
             <td align="center"><?php echo strtoupper($row1['no_ncp']);?></td>
             <td><?php echo strtoupper($row1['langganan']);?></td>
             <td><?php echo strtoupper($row1['buyer']);?></td>
@@ -183,8 +185,8 @@ border:hidden;
             <td align="left"><?php echo strtoupper($row1['masalah']);?></td>
             <td align="center"><?php echo strtoupper($row1['penyelesaian']);?></td>
             <td align="center"><?php echo strtoupper($row1['nsp']);?></td>
-            <td align="center"><?php if($row1['tgl_rencana']!=""){ echo date("d/m/y", strtotime($row1['tgl_rencana'])); }?></td>
-            <td align="center"><?php if($row1['tgl_selesai']!=""){echo date("d/m/y", strtotime($row1['tgl_selesai']));}?></td>
+            <td align="center"><?php if($row1['tgl_rencana']!=""){ echo date_format($row1['tgl_rencana'], "d/m/y"); }?></td>
+            <td align="center"><?php if($row1['tgl_selesai']!=""){echo date_format($row1['tgl_selesai'], "d/m/y");}?></td>
           </tr>
 		<?php	$no++;  
 			if($row1['status']!="Cancel"){
