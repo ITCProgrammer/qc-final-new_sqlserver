@@ -4,8 +4,8 @@ session_start();
 include "../../koneksi.php";
   $Awal=$_GET['awal'];
   $Akhir=$_GET['akhir'];
-  $qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-  $rTgl=mysqli_fetch_array($qTgl);
+  $qTgl=sqlsrv_query($con_db_qc_sqlsrv," SELECT CONVERT(varchar(9), GETDATE(), 6) AS tgl_skrg, CONVERT(varchar(8), GETDATE(), 108) AS jam_skrg ");
+  $rTgl=sqlsrv_fetch_array($qTgl);
   if($Awal!=""){
 	  $tgl=substr($Awal,0,10); 
 	  $jam=$Awal;
@@ -13,17 +13,17 @@ include "../../koneksi.php";
 	  $tgl=$rTgl['tgl_skrg']; 
 	  $jam=$rTgl['jam_skrg'];
   }
-  $jamA = isset($_GET['jam_awal']) ? $_GET['jam_awal'] : '';
-  $jamAr = isset($_GET['jam_akhir']) ? $_GET['jam_akhir'] : '';
+  $jamA = isset($_GET['jam_awal']) ? $_GET['jam_awal'] : '00:00';
+  $jamAr = isset($_GET['jam_akhir']) ? $_GET['jam_akhir'] : '00:00';
   if (strlen($jamA) == 5) {
     $start_date = $Awal . " " . $jamA;
   } else {
-    $start_date = $Awal . " 0" . $jamA;
+    $start_date = $Awal . " " . $jamA;
   }
   if (strlen($jamAr) == 5) {
     $stop_date = $Akhir . " " . $jamAr;
   } else {
-    $stop_date = $Akhir . " 0" . $jamAr;
+    $stop_date = $Akhir . " " . $jamAr;
   }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -178,8 +178,8 @@ border:hidden;
       $no=1;
       $Awal=$_GET['awal'];
       $Akhir=$_GET['akhir'];
-      if($_GET['shift']!="ALL"){$shft=" AND `shift`='$_GET[shift]' "; }else{$shft=" ";}		
-      $qry1=mysqli_query($con,"SELECT * FROM tbl_lap_inspeksi WHERE DATE_FORMAT( CONCAT(tgl_update,' ',jam_update), '%Y-%m-%d %H:%i') BETWEEN '$start_date' AND '$stop_date' AND `dept`='QCF' $shft ORDER BY id ASC");
+      if($_GET['shift']!="ALL"){$shft=" AND shift='$_GET[shift]' "; }else{$shft=" ";}		
+      $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_lap_inspeksi WHERE TRY_CAST( CONCAT(tgl_update,' ',jam_update) AS DATE) between '$start_date' AND '$stop_date' AND dept='QCF' $shft ORDER BY id ASC");
       $lotOK=0;$lotBWA=0;$lotBWB=0;$lotBWC=0;$lotTBD=0;$lot=0;
       $lotFin=0;$lotFin1x=0;$lotPdr=0;$lotOven=0;$lotComp=0;
       $lotSt=0;$lotAP=0;$lotPB=0;
@@ -189,11 +189,11 @@ border:hidden;
       $brutoOK=0;$brutoBWA=0;$brutoBWB=0;$brutoBWC=0;$brutoTBD=0;$bruto=0;
       $brutoFin=0;$brutoFin1x=0;$brutoPdr=0;$brutoOven=0;$brutoComp=0;
       $brutoSt=0;$brutoAP=0;$brutoPB=0;$bruto=0;
-          while($row=mysqli_fetch_array($qry1)){
+          while($row=sqlsrv_fetch_array($qry1)){
         ?>
           <tr valign="top">
           <td align="center"><font size="-2"><?php echo $no;?></font></td>
-          <td align="center"><font size="-2"><?php echo $row['tgl_update'];?></font></td>
+          <td align="center"><font size="-2"><?php echo ($row['tgl_update'] !== null) ? date_format($row['tgl_update'], 'Y-m-d') : '';?></font></td>
           <td align="center"><font size="-2"><?php echo $row['nodemand'];?></font></td>
           <td><font size="-2"><?php echo substr($row['pelanggan'],0,7)." ".substr($row['pelanggan'],7,40);?></font></td>
           <td><font size="-2"><?php echo substr($row['no_po'],0,10)." ".substr($row['no_po'],10,20)." ".substr($row['no_po'],20,40);?></font></td>
@@ -209,7 +209,7 @@ border:hidden;
           <td align="center"><font size="-2"><?php echo $row['status'];?></font></td>
           <td align="center"><font size="-2"><?php echo $row['proses'];?></font></td>
           <td align="center"><font size="-2"><?php echo $row['colorist_qcf'];?></font></td>
-          <td align="center"><font size="-2"><?php echo $row['tgl_pengiriman'];?></font></td>
+          <td align="center"><font size="-2"><?php echo ($row['tgl_pengiriman'] !== null) ? date_format($row['tgl_pengiriman'], 'Y-m-d') : '';?></font></td>
           <td align="center"><font size="-2"><?php echo $row['catatan'];?></font></td>
           </tr>
         <?php 

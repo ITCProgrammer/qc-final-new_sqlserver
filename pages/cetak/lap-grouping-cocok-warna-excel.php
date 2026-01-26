@@ -50,77 +50,102 @@ Shift : <?php echo $shift; ?>
   <tbody>
     <?php
 
-    $shiftCondition = ($shift != "ALL") ? " AND `shift`='$shift' " : "";
+    $shiftCondition = ($shift != "ALL") ? " AND shift='$shift' " : "";
 
-    $query = "select
-                SUBSTRING_INDEX(pelanggan, '/',-1) as buyer,
+    $query = "SELECT
+                CASE
+                    WHEN pelanggan LIKE '%/%'
+                    THEN RIGHT(pelanggan, CHARINDEX('/', REVERSE(pelanggan)) - 1)
+                    ELSE pelanggan
+                END AS buyer,
                 trim(no_item) as no_item,
-                group_concat(distinct trim(no_warna)) as no_warna_group
+                STRING_AGG(no_warna, ',') AS no_warna_group
               from
-                tbl_lap_inspeksi
+                db_qc.tbl_lap_inspeksi
               where
-                `dept` = 'QCF'
-                and DATE_FORMAT( CONCAT(tgl_update, ' ', jam_update), '%Y-%m-%d') between '$awal' AND '$akhir' $shiftCondition
-                and `grouping` != ''
+                dept = 'QCF'
+                and TRY_CAST( CONCAT(tgl_update,' ',jam_update) AS DATE) between '$awal' AND '$akhir' $shiftCondition
+                and grouping != ''
               group by
-                buyer,
+                CASE
+                    WHEN pelanggan LIKE '%/%'
+                    THEN RIGHT(pelanggan, CHARINDEX('/', REVERSE(pelanggan)) - 1)
+                    ELSE pelanggan
+                END,
                 no_item
               order by
                 buyer asc";
 
-    $result = mysqli_query($con, $query);
+    $result = sqlsrv_query($con_db_qc_sqlsrv, $query);
 
     $no = 1;
     $satu = 1;
     $satuTemp = 1;
-    while ($row = mysqli_fetch_array($result)) {
+    while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
       $no_warna_group = explode(',', $row['no_warna_group']);
       $no_warna_group_string = "'" . implode("', '", explode(',', $row['no_warna_group'])) . "'";
 
-      $query2 = "select 
+      $query2 = "SELECT 
                     count(*) as total_warna
                   from (
-                  select
-                    no_warna,
-                    warna,
-                    group_concat(`grouping`) as groupings
-                  from
-                    tbl_lap_inspeksi
-                  where
-                    `dept` = 'QCF'
-                    and DATE_FORMAT( CONCAT(tgl_update, ' ', jam_update), '%Y-%m-%d') between '$awal' AND '$akhir' $shiftCondition
-                    and SUBSTRING_INDEX(pelanggan, '/',-1) = '$row[buyer]'
-                    and `grouping` != ''
-                  group by
-                    SUBSTRING_INDEX(pelanggan, '/',-1),
-                    no_item,
-                    no_warna) temp";
+                    SELECT
+                      no_warna,
+                      warna,
+                      STRING_AGG(grouping, ',') as groupings
+                    from
+                      db_qc.tbl_lap_inspeksi
+                    where
+                      dept = 'QCF'
+                      and TRY_CAST( CONCAT(tgl_update,' ',jam_update) AS DATE) between '$awal' AND '$akhir' $shiftCondition
+                      and CASE
+                          WHEN pelanggan LIKE '%/%'
+                          THEN RIGHT(pelanggan, CHARINDEX('/', REVERSE(pelanggan)) - 1)
+                          ELSE pelanggan
+                      END = '$row[buyer]'
+                      and grouping IS NOT NULL
+                    group by
+                      CASE
+                          WHEN pelanggan LIKE '%/%'
+                          THEN RIGHT(pelanggan, CHARINDEX('/', REVERSE(pelanggan)) - 1)
+                          ELSE pelanggan
+                      END,
+                      no_item,
+                      no_warna,
+                      warna
+                  ) temp";
 
-      $result2 = mysqli_query($con, $query2);
-      $row2 = mysqli_fetch_array($result2);
+      $result2 = sqlsrv_query($con_db_qc_sqlsrv, $query2);
+      $row2 = sqlsrv_fetch_array($result2);
       $total_warna = $row2['total_warna'];
 
-      $query3 = "select
+      $query3 = "SELECT
                   no_warna,
                   warna,
-                  group_concat(`grouping`) as groupings
+                  STRING_AGG(grouping, ',') as groupings
                 from
-                  tbl_lap_inspeksi
+                  db_qc.tbl_lap_inspeksi
                 where
-                  `dept` = 'QCF'
-                  and DATE_FORMAT( CONCAT(tgl_update, ' ', jam_update), '%Y-%m-%d') between '$awal' AND '$akhir' $shiftCondition
-                  and SUBSTRING_INDEX(pelanggan, '/',-1) = '$row[buyer]'
+                  dept = 'QCF'
+                  and TRY_CAST( CONCAT(tgl_update,' ',jam_update) AS DATE) between '$awal' AND '$akhir' $shiftCondition
+                  and CASE
+                          WHEN pelanggan LIKE '%/%'
+                          THEN RIGHT(pelanggan, CHARINDEX('/', REVERSE(pelanggan)) - 1)
+                          ELSE pelanggan
+                      END = '$row[buyer]'
                   and no_item = '$row[no_item]'
-                  and no_warna in ($no_warna_group_string)
-                  and grouping != ''
+                  and no_warna IN ($no_warna_group_string)
+                  and grouping IS NOT NULL
                 group by
-                  no_warna";
+                  no_warna, warna";
 
-      $result3 = mysqli_query($con, $query3);
-      $totalRowResult3 = mysqli_num_rows($result3);
+      $result3 = sqlsrv_query($con_db_qc_sqlsrv, $query3);
+      $query3_count = "SELECT COUNT(*) as total FROM ($query3) as sub";
+      $result3_count = sqlsrv_query($con_db_qc_sqlsrv, $query3_count);
+      $row3_count = sqlsrv_fetch_array($result3_count, SQLSRV_FETCH_ASSOC);
+      $totalRowResult3 = $row3_count['total'];
 
       $dua = 1;
-      while ($row3 = mysqli_fetch_array($result3)) {
+      while ($row3 = sqlsrv_fetch_array($result3)) {
 
         $A = 0;
         $B = 0;

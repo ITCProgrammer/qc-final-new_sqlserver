@@ -14,13 +14,13 @@ $Akhir=$_GET['akhir'];
 ?>
 <body>
 <?php 
-      $sqlball=mysqli_query($con,"SELECT
+      $sqlball=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
       count(a.nokk) as jml_kk_all 
       from 
       db_qc.tbl_lap_inspeksi a
       where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-      AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir'");
-      $rball=mysqli_fetch_array($sqlball);
+      AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir'");
+      $rball=sqlsrv_fetch_array($sqlball);
       ?>
 <strong>Periode: <?php echo $Awal; ?> s/d <?php echo $Akhir; ?></strong><br>
 <table width="100%" border="1">
@@ -36,67 +36,100 @@ $Akhir=$_GET['akhir'];
     </tr>
 	<?php 
           $no=1;
-          $sqlby=mysqli_query($con,"SELECT 
-          SUBSTRING_INDEX(a.pelanggan,'/',-1) as buyer,
-          count(a.nokk) as jml_kk
-          from 
-          db_qc.tbl_lap_inspeksi a
-          where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-          AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-          group by 
-          substring_index(a.pelanggan,'/',-1)
-          order by jml_kk desc limit 5");
-          while($rby=mysqli_fetch_array($sqlby)){
+          $sqlby=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 5 
+            CASE
+                WHEN a.pelanggan LIKE '%/%'
+                THEN RIGHT(a.pelanggan, CHARINDEX('/', REVERSE(a.pelanggan)) - 1)
+                ELSE a.pelanggan
+            END AS buyer,
+            count(a.nokk) as jml_kk
+            from 
+            db_qc.tbl_lap_inspeksi a
+            where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
+            AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' 
+            group by 
+            CASE
+                WHEN a.pelanggan LIKE '%/%'
+                THEN RIGHT(a.pelanggan, CHARINDEX('/', REVERSE(a.pelanggan)) - 1)
+                ELSE a.pelanggan
+            END
+            order by jml_kk desc");
+          while($rby=sqlsrv_fetch_array($sqlby)){
           //GROUP A
-          $sqlga=mysqli_query($con,"SELECT
-          a.`grouping`,
+          $sqlga=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+          a.grouping,
           count(a.nokk) as jml_kk_a
           from 
           db_qc.tbl_lap_inspeksi a
           where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-          AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-          and a.`grouping` = 'A' and SUBSTRING_INDEX(a.pelanggan,'/',-1) ='$rby[buyer]'");
-          $rga=mysqli_fetch_array($sqlga);
+          AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' 
+          and a.grouping = 'A' and CASE
+                WHEN a.pelanggan LIKE '%/%'
+                THEN RIGHT(a.pelanggan, CHARINDEX('/', REVERSE(a.pelanggan)) - 1)
+                ELSE a.pelanggan
+            END ='$rby[buyer]'
+            GROUP BY a.grouping");
+          $rga=sqlsrv_fetch_array($sqlga);
           //GROUP B
-          $sqlgb=mysqli_query($con,"SELECT
-          a.`grouping`,
+          $sqlgb=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+          a.grouping,
           count(a.nokk) as jml_kk_b
           from 
           db_qc.tbl_lap_inspeksi a
           where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-          AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-          and a.`grouping` = 'B' and SUBSTRING_INDEX(a.pelanggan,'/',-1) ='$rby[buyer]'");
-          $rgb=mysqli_fetch_array($sqlgb);
+          AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' 
+          and a.grouping = 'B' and CASE
+                WHEN a.pelanggan LIKE '%/%'
+                THEN RIGHT(a.pelanggan, CHARINDEX('/', REVERSE(a.pelanggan)) - 1)
+                ELSE a.pelanggan
+            END ='$rby[buyer]'
+            GROUP BY a.grouping");
+          $rgb=sqlsrv_fetch_array($sqlgb);
           //GROUP C
-          $sqlgc=mysqli_query($con,"SELECT
-          a.`grouping`,
+          $sqlgc=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+          a.grouping,
           count(a.nokk) as jml_kk_c
           from 
           db_qc.tbl_lap_inspeksi a
           where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-          AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-          and a.`grouping` = 'C' and SUBSTRING_INDEX(a.pelanggan,'/',-1) ='$rby[buyer]'");
-          $rgc=mysqli_fetch_array($sqlgc);
+          AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' 
+          and a.grouping = 'C' and CASE
+                WHEN a.pelanggan LIKE '%/%'
+                THEN RIGHT(a.pelanggan, CHARINDEX('/', REVERSE(a.pelanggan)) - 1)
+                ELSE a.pelanggan
+            END ='$rby[buyer]'
+            GROUP BY a.grouping");
+          $rgc=sqlsrv_fetch_array($sqlgc);
           //GROUP D
-          $sqlgd=mysqli_query($con,"SELECT
-          a.`grouping`,
+          $sqlgd=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+          a.grouping,
           count(a.nokk) as jml_kk_d
           from 
           db_qc.tbl_lap_inspeksi a
           where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-          AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-          and a.`grouping` = 'D' and SUBSTRING_INDEX(a.pelanggan,'/',-1) ='$rby[buyer]'");
-          $rgd=mysqli_fetch_array($sqlgd);
+          AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' 
+          and a.grouping = 'D' and CASE
+                WHEN a.pelanggan LIKE '%/%'
+                THEN RIGHT(a.pelanggan, CHARINDEX('/', REVERSE(a.pelanggan)) - 1)
+                ELSE a.pelanggan
+            END ='$rby[buyer]'
+            GROUP BY a.grouping");
+          $rgd=sqlsrv_fetch_array($sqlgd);
           //NULL
-          $sqlgn=mysqli_query($con,"SELECT
-          a.`grouping`,
+          $sqlgn=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+          a.grouping,
           count(a.nokk) as jml_kk_null
           from 
           db_qc.tbl_lap_inspeksi a
           where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-          AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-          and (a.`grouping` = '' or a.`grouping` is null ) and SUBSTRING_INDEX(a.pelanggan,'/',-1) ='$rby[buyer]'");
-          $rgn=mysqli_fetch_array($sqlgn);
+          AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' 
+          and (a.grouping = '' or a.grouping is null ) and CASE
+                WHEN a.pelanggan LIKE '%/%'
+                THEN RIGHT(a.pelanggan, CHARINDEX('/', REVERSE(a.pelanggan)) - 1)
+                ELSE a.pelanggan
+            END ='$rby[buyer]'
+            GROUP BY a.grouping");
+          $rgn=sqlsrv_fetch_array($sqlgn);
           ?>
         <tr valign="top">
             <td align="center"><?php echo $no;?></td>

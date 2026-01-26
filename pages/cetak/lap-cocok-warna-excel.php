@@ -22,18 +22,18 @@ if($_GET['awal']!=""){
 	$tgl=$_GET['awal'];
 	$tgl1=$_GET['akhir'];
 	$shift=$_GET['shift'];
-	$jamA = isset($_GET['jam_awal']) ? $_GET['jam_awal'] : '';
-    $jamAr = isset($_GET['jam_akhir']) ? $_GET['jam_akhir'] : '';
+	$jamA = isset($_GET['jam_awal']) ? $_GET['jam_awal'] : '00:00';
+    $jamAr = isset($_GET['jam_akhir']) ? $_GET['jam_akhir'] : '00:00';
 }
   if (strlen($jamA) == 5) {
     $start_date = $tgl . " " . $jamA;
   } else {
-    $start_date = $tgl . " 0" . $jamA;
+    $start_date = $tgl . " " . $jamA;
   }
   if (strlen($jamAr) == 5) {
     $stop_date = $tgl1 . " " . $jamAr;
   } else {
-    $stop_date = $tgl1 . " 0" . $jamAr;
+    $stop_date = $tgl1 . " " . $jamAr;
   }
 ?>
 Tanggal : <?php echo $start_date." s/d ".$stop_date;?><br>
@@ -74,10 +74,10 @@ $rollBWB=0;$brutoBWB=0;$rollBWC=0;$brutoBWC=0;$rollTBD=0;$brutoTBD=0;
 $roll=0;$bruto=0;
 
  if($_GET['shift']!="ALL"){
- $shft=" AND `shift`='$_GET[shift]' "; }else{$shft=" ";}
+ $shft=" AND shift='$_GET[shift]' "; }else{$shft=" ";}
  
-  $sql=mysqli_query($con,"SELECT * FROM tbl_lap_inspeksi WHERE DATE_FORMAT( CONCAT(tgl_update,' ',jam_update), '%Y-%m-%d %H:%i') between '$start_date' AND '$stop_date' ".$shft." AND `dept`='QCF' ORDER BY id ASC");
-  while($row=mysqli_fetch_array($sql)){
+  $sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_lap_inspeksi WHERE TRY_CAST( CONCAT(tgl_update,' ',jam_update) AS DATE) between '$start_date' AND '$stop_date' ".$shft." AND dept='QCF' ORDER BY id ASC");
+  while($row=sqlsrv_fetch_array($sql)){
 	$pos = strpos($row['pelanggan'], "/");
                 if ($pos > 0) {
                   $lgg1 = substr($row['pelanggan'], 0, $pos);
@@ -89,7 +89,7 @@ $roll=0;$bruto=0;
   ?>
   <tr>
     <td><?php echo $no;?></td>
-    <td><?php echo $row['tgl_update'];?></td>
+    <td><?php echo ($row['tgl_update'] !== null) ? date_format($row['tgl_update'], 'Y-m-d') : '';?></td>
     <td>'<?php echo $row['nodemand'];?></td>
     <td><?php echo $lgg1;?></td>
     <td><?php echo $byr1;?></td>
@@ -105,7 +105,7 @@ $roll=0;$bruto=0;
     <td align="center"><?php echo $row['shift'];?></td>
     <td><?php echo $row['status'];?></td>
     <td><?php echo $row['proses'];?></td>
-    <td align="center"><?php echo $row['tgl_pengiriman'];?></td>
+    <td align="center"><?php echo ($row['tgl_pengiriman'] !== null) ? date_format($row['tgl_pengiriman'], 'Y-m-d') : '';?></td>
     <td><?php echo $row['grouping'];?></td>
     <td><?php echo $row['hue'];?></td>
     <td><?php echo $row['catatan'];?></td>

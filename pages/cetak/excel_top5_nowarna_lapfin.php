@@ -14,13 +14,13 @@ $Akhir=$_GET['akhir'];
 ?>
 <body>
 <?php 
-      $sqlball=mysqli_query($con,"SELECT
+      $sqlball=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
       count(a.nokk) as jml_kk_all 
       from 
       db_qc.tbl_lap_inspeksi a
       where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-      AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir'");
-      $rball=mysqli_fetch_array($sqlball);
+      AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir'");
+      $rball=sqlsrv_fetch_array($sqlball);
       ?>
 <strong>Periode: <?php echo $Awal; ?> s/d <?php echo $Akhir; ?></strong><br>
 <table width="100%" border="1">
@@ -37,74 +37,89 @@ $Akhir=$_GET['akhir'];
     </tr>
     <?php 
           $no=1;
-          $sqlw=mysqli_query($con,"SELECT 
+          $sqlw=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 5
           no_warna,
           warna,
           count(a.nokk) as jml_kk
           from 
           db_qc.tbl_lap_inspeksi a
           where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-          AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
+          AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' 
           group by 
           no_warna,
           warna
-          order by jml_kk desc limit 5");
-          while($rw=mysqli_fetch_array($sqlw)){
+          order by jml_kk desc");
+          while($rw=sqlsrv_fetch_array($sqlw)){
           //GROUP A
-          $sqlwa=mysqli_query($con,"SELECT
+          $sqlwa=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
           no_warna,
           warna,
           count(a.nokk) as jml_kk_a
           from 
           db_qc.tbl_lap_inspeksi a
           where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-          AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-          and a.`grouping` = 'A' and a.no_warna ='$rw[no_warna]' and a.warna ='$rw[warna]'");
-          $rwa=mysqli_fetch_array($sqlwa);
+          AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' 
+          and a.grouping = 'A' and a.no_warna ='$rw[no_warna]' and a.warna ='$rw[warna]'
+          group by 
+          no_warna,
+          warna");
+          $rwa=sqlsrv_fetch_array($sqlwa);
           //GROUP B
-          $sqlwb=mysqli_query($con,"SELECT
+          $sqlwb=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
           no_warna,
           warna,
           count(a.nokk) as jml_kk_b
           from 
           db_qc.tbl_lap_inspeksi a
           where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-          AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-          and a.`grouping` = 'B' and a.no_warna ='$rw[no_warna]' and a.warna ='$rw[warna]'");
-          $rwb=mysqli_fetch_array($sqlwb);
+          AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' 
+          and a.grouping = 'B' and a.no_warna ='$rw[no_warna]' and a.warna ='$rw[warna]'
+          group by 
+          no_warna,
+          warna");
+          $rwb=sqlsrv_fetch_array($sqlwb);
           //GROUP C
-          $sqlwc=mysqli_query($con,"SELECT
+          $sqlwc=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
           no_warna,
           warna,
           count(a.nokk) as jml_kk_c
           from 
           db_qc.tbl_lap_inspeksi a
           where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-          AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-          and a.`grouping` = 'C' and a.no_warna ='$rw[no_warna]' and a.warna ='$rw[warna]'");
-          $rwc=mysqli_fetch_array($sqlwc);
+          AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' 
+          and a.grouping = 'C' and a.no_warna ='$rw[no_warna]' and a.warna ='$rw[warna]'
+          group by 
+          no_warna,
+          warna");
+          $rwc=sqlsrv_fetch_array($sqlwc);
           //GROUP D
-          $sqlwd=mysqli_query($con,"SELECT
+          $sqlwd=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
           no_warna,
           warna,
           count(a.nokk) as jml_kk_d
           from 
           db_qc.tbl_lap_inspeksi a
           where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-          AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-          and a.`grouping` = 'D' and a.no_warna ='$rw[no_warna]' and a.warna ='$rw[warna]'");
-          $rwd=mysqli_fetch_array($sqlwd);
+          AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' 
+          and a.grouping = 'D' and a.no_warna ='$rw[no_warna]' and a.warna ='$rw[warna]'
+          group by 
+          no_warna,
+          warna");
+          $rwd=sqlsrv_fetch_array($sqlwd);
           //NULL
-          $sqlwn=mysqli_query($con,"SELECT
+          $sqlwn=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
           no_warna,
           warna,
           count(a.nokk) as jml_kk_null
           from 
           db_qc.tbl_lap_inspeksi a
           where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF'
-          AND DATE_FORMAT( a.tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-          and (a.`grouping` = '' or a.`grouping` is null ) and a.no_warna ='$rw[no_warna]' and a.warna ='$rw[warna]'");
-          $rwn=mysqli_fetch_array($sqlwn);
+          AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' 
+          and (a.grouping = '' or a.grouping is null ) and a.no_warna ='$rw[no_warna]' and a.warna ='$rw[warna]'
+          group by 
+          no_warna,
+          warna");
+          $rwn=sqlsrv_fetch_array($sqlwn);
           ?>
           <tr valign="top">
             <td align="center"><?php echo $no;?></td>
