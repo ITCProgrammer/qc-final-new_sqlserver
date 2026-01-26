@@ -16,28 +16,43 @@ include "koneksi.php";
 </head>
 
 <body>
-	<?php
-	$Awal = isset($_POST['awal']) ? $_POST['awal'] : '';
-	$Akhir = isset($_POST['akhir']) ? $_POST['akhir'] : '';
-	$Dept = isset($_POST['dept']) ? $_POST['dept'] : '';
-	$Shift = isset($_POST['shift']) ? $_POST['shift'] : '';
-	$GShift = isset($_POST['gshift']) ? $_POST['gshift'] : '';
-	$Proses = isset($_POST['proses']) ? $_POST['proses'] : '';
-	$jamA = isset($_POST['jam_awal']) ? $_POST['jam_awal'] : '';
-	$jamAr = isset($_POST['jam_akhir']) ? $_POST['jam_akhir'] : '';
-	$Buyer = isset($_POST['buyer']) ? $_POST['buyer'] : '';
-	$Item = isset($_POST['no_item']) ? $_POST['no_item'] : '';
-	if (strlen($jamA) == 5) {
-		$start_date = $Awal . ' ' . $jamA;
-	} else {
-		$start_date = $Awal . ' 0' . $jamA;
-	}
-	if (strlen($jamAr) == 5) {
-		$stop_date = $Akhir . ' ' . $jamAr;
-	} else {
-		$stop_date = $Akhir . ' 0' . $jamAr;
-	}
-	?>
+<?php
+$Awal  = isset($_POST['awal']) ? $_POST['awal'] : '';
+$Akhir = isset($_POST['akhir']) ? $_POST['akhir'] : '';
+$Dept  = isset($_POST['dept']) ? $_POST['dept'] : '';
+$Shift = isset($_POST['shift']) ? $_POST['shift'] : '';
+$GShift= isset($_POST['gshift']) ? $_POST['gshift'] : '';
+$Proses= isset($_POST['proses']) ? $_POST['proses'] : '';
+$jamA  = isset($_POST['jam_awal']) ? $_POST['jam_awal'] : '';
+$jamAr = isset($_POST['jam_akhir']) ? $_POST['jam_akhir'] : '';
+$Buyer = isset($_POST['buyer']) ? $_POST['buyer'] : '';
+$Item  = isset($_POST['no_item']) ? $_POST['no_item'] : '';
+
+// ==== hanya tangani tanggal saja ====
+// kalau tanggal kosong (menu pertama dibuka), set aman biar SQL Server gak error
+if ($Awal == '' || $Akhir == '') {
+    $start_date = '1900-01-01 00:00:00';
+    $stop_date  = '1900-01-01 00:00:00';
+} else {
+    // rapikan jam: kalau kosong -> default, kalau HH:MM -> tambah :00
+    $jamA  = trim($jamA);
+    $jamAr = trim($jamAr);
+
+    if ($jamA == '')  $jamA  = '00:00:00';
+    if ($jamAr == '') $jamAr = '23:59:59';
+
+    if (strlen($jamA) == 5)  $jamA  .= ':00';   // HH:MM -> HH:MM:00
+    if (strlen($jamAr) == 5) $jamAr .= ':00';   // HH:MM -> HH:MM:00
+
+    // pastikan format jam valid, kalau tidak valid fallback default
+    if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $jamA))  $jamA  = '00:00:00';
+    if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $jamAr)) $jamAr = '23:59:59';
+
+    $start_date = trim($Awal)  . ' ' . $jamA;
+    $stop_date  = trim($Akhir) . ' ' . $jamAr;
+}
+?>
+
 	<div class="row">
 		<div class="col-xs-4">
 			<div class="box box-primary">
@@ -138,8 +153,8 @@ include "koneksi.php";
 								<select name="buyer" class="form-control select2" id="buyer" style="width: 100%">
 									<option value="">Pilih</option>
 									<?php
-									$sqlBuyer = mysqli_query($con, "SELECT buyer FROM tbl_schedule  GROUP BY buyer");
-									while ($rBy = mysqli_fetch_array($sqlBuyer)) {
+									$sqlBuyer = sqlsrv_query($con_db_qc_sqlsrv, "SELECT buyer FROM db_qc.tbl_schedule  GROUP BY buyer");
+									while ($rBy = sqlsrv_fetch_array($sqlBuyer)) {
 										?>
 										<option value="<?php echo $rBy['buyer']; ?>" <?php if ($Buyer == $rBy['buyer']) {
 											   echo "SELECTED";
@@ -177,295 +192,213 @@ include "koneksi.php";
 				</div>
 				<div class="box-body">
 					<?php 
-					function buildQCWhere(&$params, $start_date, $stop_date, $Shift, $GShift, $Proses)
-							{
-								$where = [];
+						function buildQCWhere(&$params, $start_date, $stop_date, $Shift, $GShift, $Proses)
+						{
+							$where = [];
 
-								$where[] = "t.tgl_masuk BETWEEN ? AND ?";
-								$params[] = $start_date;
-								$params[] = $stop_date;
+							$where[] = "t.tgl_masuk BETWEEN ? AND ?";
+							$params[] = $start_date;
+							$params[] = $stop_date;
 
-								if ($Shift !== "ALL" && $Shift !== "") {
-									$where[] = "t.shift = ?";
-									$params[] = $Shift;
-								}
-
-								if ($GShift !== "ALL" && $GShift !== "") {
-									$where[] = "t.gshift = ?";
-									$params[] = $GShift;
-								}
-
-								if (!empty($Proses)) {
-									$where[] = "t.development = ?";
-									$params[] = $Proses;
-								}
-
-								return implode(" AND ", $where);
+							if ($Shift !== "ALL" && $Shift !== "") {
+								$where[] = "t.shift = ?";
+								$params[] = $Shift;
 							}
 
-					function getQCCountByShift($con, $start_date, $stop_date, $Shift, $GShift, $Proses)
-							{
-								$params = [];
-								$whereSQL = buildQCWhere($params, $start_date, $stop_date, $Shift, $GShift, $Proses);
+							if ($GShift !== "ALL" && $GShift !== "") {
+								$where[] = "t.gshift = ?";
+								$params[] = $GShift;
+							}
 
-								$sql = "
-									SELECT t.gshift, COUNT(*) AS total
+							if (!empty($Proses)) {
+								$where[] = "t.development = ?";
+								$params[] = $Proses;
+							}
+
+							return implode(" AND ", $where);
+						}
+
+						function execCountByShiftSqlsrv($con_db_qc_sqlsrv, $sql, $params)
+						{
+							$stmt = sqlsrv_prepare($con_db_qc_sqlsrv, $sql, $params);
+							if (!$stmt) {
+								echo "<pre>Prepare failed: " . print_r(sqlsrv_errors(), true) . "</pre>";
+								return ['A'=>0,'B'=>0,'C'=>0,'NON'=>0];
+							}
+
+							if (!sqlsrv_execute($stmt)) {
+								echo "<pre>Execute failed: " . print_r(sqlsrv_errors(), true) . "</pre>";
+								sqlsrv_free_stmt($stmt);
+								return ['A'=>0,'B'=>0,'C'=>0,'NON'=>0];
+							}
+
+							$data = ['A'=>0,'B'=>0,'C'=>0,'NON'=>0];
+							while ($r = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+								$gshift = $r['gshift'] ?? '';
+								$total  = (int)($r['total'] ?? 0);
+
+								if ($gshift !== '' && array_key_exists($gshift, $data)) {
+									$data[$gshift] = $total;
+								}
+							}
+
+							sqlsrv_free_stmt($stmt);
+							return $data;
+						}
+
+						function getQCCountByShift($con_db_qc_sqlsrv, $start_date, $stop_date, $Shift, $GShift, $Proses)
+						{
+							$params = [];
+							$whereSQL = buildQCWhere($params, $start_date, $stop_date, $Shift, $GShift, $Proses);
+
+							$sql = " SELECT t.gshift, COUNT(*) AS total
+								FROM db_qc.tbl_tq_nokk t
+								WHERE $whereSQL
+								GROUP BY t.gshift
+							";
+
+							return execCountByShiftSqlsrv($con_db_qc_sqlsrv, $sql, $params);
+						}
+
+						function getCountTest($con_db_qc_sqlsrv, $start_date, $stop_date, $Shift, $GShift, $Proses)
+						{
+							$params = [];
+							$whereSQL = buildQCWhere($params, $start_date, $stop_date, $Shift, $GShift, $Proses);
+
+							$sql = " SELECT t.gshift, COUNT(*) AS total
+								FROM (
+									SELECT
+										t.operator,
+										t.shift,
+										t.gshift,
+										t.tgl_update AS tanggal_update_headerkk,
+										t.tgl_masuk  AS tanggal_masuk_kk,
+										t1.tgl_approve AS tanggal_approve,
+										CASE
+											WHEN t1.tgl_update > t1.tgl_buat THEN t1.tgl_update
+											ELSE t1.tgl_buat
+										END AS tgl_masuk,
+										t1.tgl_buat   AS tanggal_buat_data,
+										t1.tgl_update AS tanggal_update_data
 									FROM db_qc.tbl_tq_nokk t
-									WHERE $whereSQL
-									GROUP BY t.gshift
-								";
+									LEFT JOIN db_qc.tbl_tq_test t1 ON t1.id_nokk = t.id
+									WHERE
+										(t.operator IS NOT NULL AND t.shift IS NOT NULL AND t.gshift IS NOT NULL)
+								) AS t
+								WHERE $whereSQL
+								GROUP BY t.gshift
+							";
 
-								$stmt = mysqli_prepare($con, $sql);
-								$types = str_repeat('s', count($params));
-								mysqli_stmt_bind_param($stmt, $types, ...$params);
-								mysqli_stmt_execute($stmt);
-								$res = mysqli_stmt_get_result($stmt);
+							return execCountByShiftSqlsrv($con_db_qc_sqlsrv, $sql, $params);
+						}
 
-								$data = ['A'=>0,'B'=>0,'C'=>0,'NON'=>0];
-								while ($r = mysqli_fetch_assoc($res)) {
-									$data[$r['gshift']] = (int)$r['total'];
-								}
-								return $data;
-							}
+						function getCountLot($con_db_qc_sqlsrv, $start_date, $stop_date, $Shift, $GShift, $Proses)
+						{
+							$params = [];
+							$whereSQL = buildQCWhere($params, $start_date, $stop_date, $Shift, $GShift, $Proses);
 
-					function getCountTest($con, $start_date, $stop_date, $Shift, $GShift, $Proses)
-							{
-								$params = [];
-								$whereSQL = buildQCWhere($params, $start_date, $stop_date, $Shift, $GShift, $Proses);
+							$sql = " SELECT t.gshift, COUNT(*) AS total
+								FROM (
+									SELECT
+										t.operator,
+										t.shift,
+										t.gshift,
+										t.tgl_update AS tanggal_update_headerkk,
+										t.tgl_masuk  AS tanggal_masuk_kk,
+										t1.tgl_approve AS tgl_masuk,
+										CASE
+											WHEN t1.tgl_update > t1.tgl_buat THEN t1.tgl_update
+											ELSE t1.tgl_buat
+										END AS tgl_masuk_data_kk,
+										t1.tgl_buat   AS tanggal_buat_data,
+										t1.tgl_update AS tanggal_update_data
+									FROM db_qc.tbl_tq_nokk t
+									LEFT JOIN db_qc.tbl_tq_test t1 ON t1.id_nokk = t.id
+									WHERE
+										(t.operator IS NOT NULL AND t.shift IS NOT NULL AND t.gshift IS NOT NULL)
+								) AS t
+								WHERE $whereSQL
+								GROUP BY t.gshift
+							";
 
-								$sql = "SELECT
-											t.gshift,
-											COUNT(*) AS total
-										FROM
-												(
-												SELECT
-													t.operator,
-													t.shift,
-													t.gshift,
-													t.tgl_update as tanggal_update_headerkk,
-													t.tgl_masuk as tanggal_masuk_kk,
-													t1.tgl_approve as tanggal_approve,
-													CASE
-														WHEN t1.tgl_update > t1.tgl_buat THEN t1.tgl_update
-														ELSE t1.tgl_buat
-													END AS tgl_masuk,
-													t1.tgl_buat as tanggal_buat_data,
-													t1.tgl_update as tanggal_update_data
-												FROM
-													tbl_tq_nokk t
-												LEFT JOIN tbl_tq_test t1 ON
-													t1.id_nokk = t.id
-												WHERE
-													(t.operator is not null
-													AND t.shift is not null
-													AND t.gshift is not null)
-											) AS t
-										WHERE $whereSQL
-										GROUP BY t.gshift
-								";
+							return execCountByShiftSqlsrv($con_db_qc_sqlsrv, $sql, $params);
+						}
 
-								$stmt = mysqli_prepare($con, $sql);
-								$types = str_repeat('s', count($params));
-								mysqli_stmt_bind_param($stmt, $types, ...$params);
-								mysqli_stmt_execute($stmt);
-								$res = mysqli_stmt_get_result($stmt);
+						function getCountLotNa($con_db_qc_sqlsrv, $start_date, $stop_date, $Shift, $GShift, $Proses)
+						{
+							$params = [];
+							$whereSQL = buildQCWhere($params, $start_date, $stop_date, $Shift, $GShift, $Proses);
 
-								$data = ['A'=>0,'B'=>0,'C'=>0,'NON'=>0];
-								while ($r = mysqli_fetch_assoc($res)) {
-									$data[$r['gshift']] = (int)$r['total'];
-								}
-								return $data;
-							}
+							$sql = " SELECT t.gshift, COUNT(*) AS total
+								FROM (
+									SELECT
+										t.operator,
+										t.shift,
+										t.gshift,
+										t.tgl_update AS tanggal_update_headerkk,
+										t.tgl_masuk  AS tgl_masuk,
+										t1.tgl_approve AS tgl_approve,
+										CASE
+											WHEN t1.tgl_update > t1.tgl_buat THEN t1.tgl_update
+											ELSE t1.tgl_buat
+										END AS tgl_masuk_data_kk,
+										t1.tgl_buat   AS tanggal_buat_data,
+										t1.tgl_update AS tanggal_update_data
+									FROM db_qc.tbl_tq_nokk t
+									LEFT JOIN db_qc.tbl_tq_test t1 ON t1.id_nokk = t.id
+									WHERE
+										(t.operator IS NOT NULL AND t.shift IS NOT NULL AND t.gshift IS NOT NULL)
+										AND t1.tgl_approve IS NULL
+								) AS t
+								WHERE $whereSQL
+								GROUP BY t.gshift
+							";
+							return execCountByShiftSqlsrv($con_db_qc_sqlsrv, $sql, $params);
+						}
 
-					function getCountLot($con, $start_date, $stop_date, $Shift, $GShift, $Proses)
-							{
-								$params = [];
-								$whereSQL = buildQCWhere($params, $start_date, $stop_date, $Shift, $GShift, $Proses);
+						function getCountTesting($con_db_qc_sqlsrv, $start_date, $stop_date, $Shift, $GShift, $Proses)
+						{
+							$params = [];
+							$whereSQL = buildQCWhere($params, $start_date, $stop_date, $Shift, $GShift, $Proses);
 
-								$sql = "SELECT
-											t.gshift,
-											COUNT(*) AS total
-										FROM
-												(
-												SELECT
-													t.operator,
-													t.shift,
-													t.gshift,
-													t.tgl_update as tanggal_update_headerkk,
-													t.tgl_masuk as tanggal_masuk_kk,
-													t1.tgl_approve as tgl_masuk,
-													CASE
-														WHEN t1.tgl_update > t1.tgl_buat THEN t1.tgl_update
-														ELSE t1.tgl_buat
-													END AS tgl_masuk_data_kk,
-													t1.tgl_buat as tanggal_buat_data,
-													t1.tgl_update as tanggal_update_data
-												FROM
-													tbl_tq_nokk t
-												LEFT JOIN tbl_tq_test t1 ON
-													t1.id_nokk = t.id
-												WHERE
-													(t.operator is not null
-													AND t.shift is not null
-													AND t.gshift is not null)
-											) AS t
-										WHERE $whereSQL
-										GROUP BY t.gshift
-								";
+							$sql = " SELECT t.gshift, COUNT(*) AS total
+								FROM (
+									SELECT
+										t.operator,
+										t.shift,
+										t.gshift,
+										t.tgl_update AS tanggal_update_headerkk,
+										t.tgl_masuk  AS tgl_masuk,
+										t1.tgl_approve AS tgl_approve,
+										CASE
+											WHEN t1.tgl_update > t1.tgl_buat THEN t1.tgl_update
+											ELSE t1.tgl_buat
+										END AS tgl_masuk_data_kk,
+										t1.tgl_buat   AS tanggal_buat_data,
+										t1.tgl_update AS tanggal_update_data
+									FROM db_qc.tbl_tq_nokk t
+									LEFT JOIN db_qc.tbl_tq_test t1 ON t1.id_nokk = t.id
+									WHERE
+										(t.operator IS NOT NULL AND t.shift IS NOT NULL AND t.gshift IS NOT NULL)
+										AND (t1.tgl_buat IS NULL OR t1.tgl_update IS NULL)
+								) AS t
+								WHERE $whereSQL
+								GROUP BY t.gshift
+							";
+							return execCountByShiftSqlsrv($con_db_qc_sqlsrv, $sql, $params);
+						}
 
-								$stmt = mysqli_prepare($con, $sql);
-								$types = str_repeat('s', count($params));
-								mysqli_stmt_bind_param($stmt, $types, ...$params);
-								mysqli_stmt_execute($stmt);
-								$res = mysqli_stmt_get_result($stmt);
-
-								$data = ['A'=>0,'B'=>0,'C'=>0,'NON'=>0];
-								while ($r = mysqli_fetch_assoc($res)) {
-									$data[$r['gshift']] = (int)$r['total'];
-								}
-								return $data;
-							}
-
-					function getCountLotNa($con, $start_date, $stop_date, $Shift, $GShift, $Proses)
-							{
-								$params = [];
-								$whereSQL = buildQCWhere($params, $start_date, $stop_date, $Shift, $GShift, $Proses);
-
-								$sql = "SELECT
-											t.gshift,
-											COUNT(*) AS total
-										FROM
-												(
-												SELECT
-													t.operator,
-													t.shift,
-													t.gshift,
-													t.tgl_update as tanggal_update_headerkk,
-													t.tgl_masuk as tgl_masuk,
-													t1.tgl_approve as tgl_approve,
-													CASE
-														WHEN t1.tgl_update > t1.tgl_buat THEN t1.tgl_update
-														ELSE t1.tgl_buat
-													END AS tgl_masuk_data_kk,
-													t1.tgl_buat as tanggal_buat_data,
-													t1.tgl_update as tanggal_update_data
-												FROM
-													tbl_tq_nokk t
-												LEFT JOIN tbl_tq_test t1 ON
-													t1.id_nokk = t.id
-												WHERE
-													(t.operator is not null
-													AND t.shift is not null
-													AND t.gshift is not null)
-													AND t1.tgl_approve IS NULL
-											) AS t
-										WHERE $whereSQL
-										GROUP BY t.gshift
-								";
-
-								$stmt = mysqli_prepare($con, $sql);
-								$types = str_repeat('s', count($params));
-								mysqli_stmt_bind_param($stmt, $types, ...$params);
-								mysqli_stmt_execute($stmt);
-								$res = mysqli_stmt_get_result($stmt);
-
-								$data = ['A'=>0,'B'=>0,'C'=>0,'NON'=>0];
-								while ($r = mysqli_fetch_assoc($res)) {
-									$data[$r['gshift']] = (int)$r['total'];
-								}
-								return $data;
-							}
-
-					function getCountTesting($con, $start_date, $stop_date, $Shift, $GShift, $Proses)
-							{
-								$params = [];
-								$whereSQL = buildQCWhere($params, $start_date, $stop_date, $Shift, $GShift, $Proses);
-
-								$sql = "SELECT
-											t.gshift,
-											COUNT(*) AS total
-										FROM
-												(
-												SELECT
-													t.operator,
-													t.shift,
-													t.gshift,
-													t.tgl_update as tanggal_update_headerkk,
-													t.tgl_masuk as tgl_masuk,
-													t1.tgl_approve as tgl_approve,
-													CASE
-														WHEN t1.tgl_update > t1.tgl_buat THEN t1.tgl_update
-														ELSE t1.tgl_buat
-													END AS tgl_masuk_data_kk,
-													t1.tgl_buat as tanggal_buat_data,
-													t1.tgl_update as tanggal_update_data
-												FROM
-													tbl_tq_nokk t
-												LEFT JOIN tbl_tq_test t1 ON
-													t1.id_nokk = t.id
-												WHERE
-													(t.operator is not null
-													AND t.shift is not null
-													AND t.gshift is not null)
-													AND (t1.tgl_buat IS NULL or t1.tgl_update IS NULL)
-											) AS t
-										WHERE $whereSQL
-										GROUP BY t.gshift
-								";
-
-								$stmt = mysqli_prepare($con, $sql);
-								$types = str_repeat('s', count($params));
-								mysqli_stmt_bind_param($stmt, $types, ...$params);
-								mysqli_stmt_execute($stmt);
-								$res = mysqli_stmt_get_result($stmt);
-
-								$data = ['A'=>0,'B'=>0,'C'=>0,'NON'=>0];
-								while ($r = mysqli_fetch_assoc($res)) {
-									$data[$r['gshift']] = (int)$r['total'];
-								}
-								return $data;
-							}
-
-					function getRangkumanQC($con, $start_date, $stop_date, $Shift, $GShift, $Proses)
+						function getRangkumanQC($con_db_qc_sqlsrv, $start_date, $stop_date, $Shift, $GShift, $Proses)
 						{
 							return [
-								'kain_masuk' => getQCCountByShift(
-									$con, $start_date, $stop_date, $Shift, $GShift, $Proses
-								),
-
-								'testing_selesai' => getCountTest(
-									$con, $start_date, $stop_date, $Shift, $GShift, $Proses
-								),
-
-								'lot_approved' => getCountLot(
-									$con, $start_date, $stop_date, $Shift, $GShift, $Proses
-								),
-
-								'lot_not_approved' => getCountLotNa(
-									$con, $start_date, $stop_date, $Shift, $GShift, $Proses
-								),
-
-								'testing_not_start' => getCountTesting(
-									$con, $start_date, $stop_date, $Shift, $GShift, $Proses
-								),
-
-								// 'testing_masuk' => getQCCountByShift(
-								// 	$con, "t.status_testing = 'MASUK'",
-								// 	$start_date, $stop_date, $Shift, $GShift, $Proses
-								// ),
-
-								// 'testing_selesai' => getQCCountByShift(
-								// 	$con, "t.status_testing = 'SELESAI'",
-								// 	$start_date, $stop_date, $Shift, $GShift, $Proses
-								// ),
-
-								// 'lot_approved' => getQCCountByShift(
-								// 	$con, "t.status_lot = 'APPROVED'",
-								// 	$start_date, $stop_date, $Shift, $GShift, $Proses
-								// )
+								'kain_masuk' => getQCCountByShift($con_db_qc_sqlsrv, $start_date, $stop_date, $Shift, $GShift, $Proses),
+								'testing_selesai' => getCountTest($con_db_qc_sqlsrv, $start_date, $stop_date, $Shift, $GShift, $Proses),
+								'lot_approved' => getCountLot($con_db_qc_sqlsrv, $start_date, $stop_date, $Shift, $GShift, $Proses),
+								'lot_not_approved' => getCountLotNa($con_db_qc_sqlsrv, $start_date, $stop_date, $Shift, $GShift, $Proses),
+								'testing_not_start' => getCountTesting($con_db_qc_sqlsrv, $start_date, $stop_date, $Shift, $GShift, $Proses),
 							];
 						}
-				?>
+					?>
 				<table class="table table-bordered table-striped" style="width: 100%;">
 					<thead class="bg-red">
 						<tr>
@@ -487,7 +420,7 @@ include "koneksi.php";
 						</tr>
 					</thead>
 					<tbody>
-						<?php $rangkuman = getRangkumanQC($con, $start_date, $stop_date, $Shift, $GShift, $Proses);
+						<?php $rangkuman = getRangkumanQC($con_db_qc_sqlsrv, $start_date, $stop_date, $Shift, $GShift, $Proses);
 							foreach (['A','B','C','NON'] as $s): ?>
 						<tr>
 							<td align="center"><b><?= $s ?></b></td>
@@ -612,228 +545,193 @@ include "koneksi.php";
 						</thead>
 						<tbody>
 							<?php
-							$no = 1;
-							$query2 = "SELECT t.* FROM db_qc.tbl_tq_nokk t WHERE t.tgl_masuk between '$start_date' and '$stop_date' $Wshift $WGshift $WProses ORDER BY t.tgl_masuk ASC";
-							$qry1 = mysqli_query($con, $query2);
-							$totOk = 0;
-							$totTk = 0;
-							$totPr = 0;
-							$totOkQ = 0;
-							$totTkQ = 0;
-							$totPrQ = 0;
-							$totOkY = 0;
-							$totTkY = 0;
-							$totPrY = 0;
-							$totF = 0;
-							$totO = 0;
-							$totPS = 0;
-							$totFQ = 0;
-							$totOQ = 0;
-							$totPSQ = 0;
-							$totFY = 0;
-							$totOY = 0;
-							$totPSY = 0;
-							$okRol = 0;
-							$okQty = 0;
-							$okYrd = 0;
-							$TkRol = 0;
-							$TkQty = 0;
-							$TkYrd = 0;
-							$PrRol = 0;
-							$PrQty = 0;
-							$PrYrd = 0;
-							$FRol = 0;
-							$FQty = 0;
-							$FYrd = 0;
-							$ORol = 0;
-							$OQty = 0;
-							$OYrd = 0;
-							$PSRol = 0;
-							$PSQty = 0;
-							$PSYrd = 0;
-							while ($row1 = mysqli_fetch_array($qry1)) {
-								$hourdiff = (int) $row1['waktu'] - (int) $row1['istirahat'];
-								?>
-								<tr valign="top" bgcolor="<?php echo $bgcolor; ?>">
-									<td align="center">
-										<?php echo $no; ?>
-									</td>
-									<td align="left">
-										<?php echo $row1['pelanggan']; ?>
-									</td>
-									<td>
-										<?php echo $row1['no_order']; ?>
-									</td>
-									<td>
-										<?php echo $row1['jenis_kain']; ?>
-									</td>
-									<td align="left">
-										<?php echo $row1['warna']; ?>
-									</td>
-									<td align="center">
-										<?php echo $row1['tgl_delivery']; ?>
-									</td>
-									<td align="center">
-										<?php echo $row1['lot']; ?>
-									</td>
-									<td align="center">
-										<?php echo $row1['no_item']; ?>
-									</td>
-									<td align="center">
-										<?php echo $row1['personil']; ?>
-									</td>
-									<td align="center">
-										<?php echo $row1['no_mesin']; ?>
-									</td>
-									<td align="center">
-										<?php if ($row1['jml_rol'] > 0) { ?>
-											<a data-pk="<?php echo $row1['idins']; ?>"
-												data-value="<?php echo $row1['jml_rol']; ?>" class="jml_roll_inspeksi"
-												href="javascript:void(0)">
-												<?php echo $row1['jml_rol']; ?>
-											</a>
-										<?php } else { ?>
-											<a data-pk="<?php echo $row1['id_schedule']; ?>"
-												data-value="<?php echo $row1['rol']; ?>" class="jml_roll_inspeksi2"
-												href="javascript:void(0)">
-												<?php echo $row1['rol']; ?>
-											</a>
-										<?php } ?>
-									</td>
-									<td align="center">
-										<?php if ($row1['jml_rol'] > 0) { ?>
-											<a data-pk="<?php echo $row1['idins']; ?>" data-value="<?php echo $row1['qty']; ?>" class="qty_inspeksi"
-												href="javascript:void(0)">
-												<?php echo $row1['qty']; ?>
-											</a>
-										<?php } else { ?>
-											<a data-pk="<?php echo $row1['id_schedule']; ?>" data-value="<?php echo $row1['bruto']; ?>" class="qty_inspeksi2"
-												href="javascript:void(0)">
-												<?php echo $row1['bruto']; ?>
-											</a>
-										<?php } ?>
-									</td>
-									<td align="center">
-										<?php if ($row1['yard'] > 0) { ?>
-											<a data-pk="<?php echo $row1['idins']; ?>" data-value="<?php echo $row1['yard']; ?>" class="jml_yard_inspeksi"
-												href="javascript:void(0)">
-												<?php echo $row1['yard']; ?>
-											</a>
-										<?php } else { ?>
-											<a data-pk="<?php echo $row1['id_schedule']; ?>" data-value="<?php echo $row1['pjng_order']; ?>" class="jml_yard_inspeksi2"
-												href="javascript:void(0)">
-												<?php echo $row1['pjng_order']; ?>
-											</a>
-										<?php } ?>
-									</td>
-									<td align="center">
-										<?php echo $hourdiff; ?>
-									</td>
-									<td align="center">
-										<?php echo $row1['tgl_mulai']; ?>
-									</td>
-									<td align="center">
-										<?php echo $row1['tgl_stop']; ?>
-									</td>
-									<td align="center">
-										<?php if ($hourdiff > 0) {
-											echo round($row1['yard'] / $hourdiff, 2);
-										} else {
-											echo "0";
-										} ?>
-									</td>
-									<td>
-										<?php echo $row1['no_test']; ?>
-									</td>
-									<td>
-										<?php echo $row1['nokk']; ?>
-									</td>
-									<td>
-										<a href="javascript:void(0)"
-										class="nodemand-link"
-										data-nodemand="<?php echo htmlspecialchars(trim($row1['nodemand'])); ?>">
-											<?php echo htmlspecialchars($row1['nodemand']); ?>
-										</a>
-									</td>
-									<td><a href="#" onclick="confirm_del('HapusIns-<?php echo $row1['idins'] ?>');" class="btn btn-xs btn-danger <?php if ($_SESSION['akses'] == "biasa" or $_SESSION['lvl_id'] != "INSPEKSI") {
-										   echo "disabled";
-									   } ?>"><i class="fa fa-trash"></i></a></td>
-								</tr>
+								$no = 1;
+								$query2 = " SELECT t.*
+									FROM db_qc.tbl_tq_nokk t
+									WHERE t.tgl_masuk BETWEEN ? AND ?
+									$Wshift $WGshift $WProses
+									ORDER BY t.tgl_masuk ASC
+								";
+
+								$params2 = [$start_date, $stop_date];
+
+								// eksekusi sqlsrv
+								$qry1 = sqlsrv_query($con_db_qc_sqlsrv, $query2, $params2);
+								if ($qry1 === false) {
+									echo "<tr><td colspan='21'><pre>" . print_r(sqlsrv_errors(), true) . "</pre></td></tr>";
+								} else {
+									$totOk = 0; $totTk = 0; $totPr = 0;
+									$totOkQ = 0; $totTkQ = 0; $totPrQ = 0;
+									$totOkY = 0; $totTkY = 0; $totPrY = 0;
+									$totF = 0; $totO = 0; $totPS = 0;
+									$totFQ = 0; $totOQ = 0; $totPSQ = 0;
+									$totFY = 0; $totOY = 0; $totPSY = 0;
+
+									$okRol = 0; $okQty = 0; $okYrd = 0;
+									$TkRol = 0; $TkQty = 0; $TkYrd = 0;
+									$PrRol = 0; $PrQty = 0; $PrYrd = 0;
+									$FRol = 0; $FQty = 0; $FYrd = 0;
+									$ORol = 0; $OQty = 0; $OYrd = 0;
+									$PSRol = 0; $PSQty = 0; $PSYrd = 0;
+
+									while ($row1 = sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)) {
+										$waktu = (int)($row1['waktu'] ?? 0);
+										$istirahat = (int)($row1['istirahat'] ?? 0);
+										$hourdiff = $waktu - $istirahat;
+										$tgl_delivery = $row1['tgl_delivery'];
+										if ($tgl_delivery instanceof DateTime) $tgl_delivery = $tgl_delivery->format('Y-m-d H:i:s');
+										$tgl_mulai = $row1['tgl_mulai'];
+										if ($tgl_mulai instanceof DateTime) $tgl_mulai = $tgl_mulai->format('Y-m-d H:i:s');
+										$tgl_stop = $row1['tgl_stop'];
+										if ($tgl_stop instanceof DateTime) $tgl_stop = $tgl_stop->format('Y-m-d H:i:s');
+							?>
+										<tr valign="top" bgcolor="<?php echo $bgcolor; ?>">
+											<td align="center"><?php echo $no; ?></td>
+											<td align="left"><?php echo $row1['pelanggan']; ?></td>
+											<td><?php echo $row1['no_order']; ?></td>
+											<td><?php echo $row1['jenis_kain']; ?></td>
+											<td align="left"><?php echo $row1['warna']; ?></td>
+											<td align="center"><?php echo $tgl_delivery; ?></td>
+											<td align="center"><?php echo $row1['lot']; ?></td>
+											<td align="center"><?php echo $row1['no_item']; ?></td>
+											<td align="center"><?php echo $row1['personil']; ?></td>
+											<td align="center"><?php echo $row1['no_mesin']; ?></td>
+
+											<td align="center">
+												<?php if (($row1['jml_rol'] ?? 0) > 0) { ?>
+													<a data-pk="<?php echo $row1['idins']; ?>"
+													data-value="<?php echo $row1['jml_rol']; ?>"
+													class="jml_roll_inspeksi"
+													href="javascript:void(0)">
+														<?php echo $row1['jml_rol']; ?>
+													</a>
+												<?php } else { ?>
+													<a data-pk="<?php echo $row1['id_schedule']; ?>"
+													data-value="<?php echo $row1['rol']; ?>"
+													class="jml_roll_inspeksi2"
+													href="javascript:void(0)">
+														<?php echo $row1['rol']; ?>
+													</a>
+												<?php } ?>
+											</td>
+
+											<td align="center">
+												<?php if (($row1['jml_rol'] ?? 0) > 0) { ?>
+													<a data-pk="<?php echo $row1['idins']; ?>"
+													data-value="<?php echo $row1['qty']; ?>"
+													class="qty_inspeksi"
+													href="javascript:void(0)">
+														<?php echo $row1['qty']; ?>
+													</a>
+												<?php } else { ?>
+													<a data-pk="<?php echo $row1['id_schedule']; ?>"
+													data-value="<?php echo $row1['bruto']; ?>"
+													class="qty_inspeksi2"
+													href="javascript:void(0)">
+														<?php echo $row1['bruto']; ?>
+													</a>
+												<?php } ?>
+											</td>
+
+											<td align="center">
+												<?php if (($row1['yard'] ?? 0) > 0) { ?>
+													<a data-pk="<?php echo $row1['idins']; ?>"
+													data-value="<?php echo $row1['yard']; ?>"
+													class="jml_yard_inspeksi"
+													href="javascript:void(0)">
+														<?php echo $row1['yard']; ?>
+													</a>
+												<?php } else { ?>
+													<a data-pk="<?php echo $row1['id_schedule']; ?>"
+													data-value="<?php echo $row1['pjng_order']; ?>"
+													class="jml_yard_inspeksi2"
+													href="javascript:void(0)">
+														<?php echo $row1['pjng_order']; ?>
+													</a>
+												<?php } ?>
+											</td>
+
+											<td align="center"><?php echo $hourdiff; ?></td>
+											<td align="center"><?php echo $tgl_mulai; ?></td>
+											<td align="center"><?php echo $tgl_stop; ?></td>
+
+											<td align="center">
+												<?php
+												$yard = (float)($row1['yard'] ?? 0);
+												echo ($hourdiff > 0) ? round($yard / $hourdiff, 2) : "0";
+												?>
+											</td>
+
+											<td><?php echo $row1['no_test']; ?></td>
+											<td><?php echo $row1['nokk']; ?></td>
+											<td>
+												<a href="javascript:void(0)"
+												class="nodemand-link"
+												data-nodemand="<?php echo htmlspecialchars(trim((string)$row1['nodemand'])); ?>">
+													<?php echo htmlspecialchars((string)$row1['nodemand']); ?>
+												</a>
+											</td>
+
+											<td>
+												<a href="#" onclick="confirm_del('HapusIns-<?php echo $row1['idins'] ?>');"
+												class="btn btn-xs btn-danger <?php
+													if ($_SESSION['akses'] == "biasa" || $_SESSION['lvl_id'] != "INSPEKSI") echo "disabled";
+												?>">
+													<i class="fa fa-trash"></i>
+												</a>
+											</td>
+										</tr>
 								<?php
-								if ($row1['proses'] == "Inspect Finish" and $row1['status_produk'] == "1") {
-									$okRol = (int) $row1['jml_rol'];
-									$okQty = (int) $row1['qty'];
-									$okYrd = (int) $row1['yard'];
-								} else {
-									$okRol = 0;
-									$okQty = 0;
-									$okYrd = 0;
+										if ($row1['proses'] == "Inspect Finish" && $row1['status_produk'] == "1") {
+											$okRol = (int)($row1['jml_rol'] ?? 0);
+											$okQty = (int)($row1['qty'] ?? 0);
+											$okYrd = (int)($row1['yard'] ?? 0);
+										} else { $okRol=0; $okQty=0; $okYrd=0; }
+
+										if ($row1['proses'] == "Inspect Finish" && $row1['status_produk'] == "2") {
+											$TkRol = (int)($row1['jml_rol'] ?? 0);
+											$TkQty = (int)($row1['qty'] ?? 0);
+											$TkYrd = (int)($row1['yard'] ?? 0);
+										} else { $TkRol=0; $TkQty=0; $TkYrd=0; }
+
+										if ($row1['proses'] == "Inspect Finish" && $row1['status_produk'] == "3") {
+											$PrRol = (int)($row1['jml_rol'] ?? 0);
+											$PrQty = (int)($row1['qty'] ?? 0);
+											$PrYrd = (int)($row1['yard'] ?? 0);
+										} else { $PrRol=0; $PrQty=0; $PrYrd=0; }
+
+										if ($row1['proses'] == "Inspect Finish" && ($row1['status_produk'] == "1" || $row1['status_produk'] == "2")) {
+											$FRol = (int)($row1['jml_rol'] ?? 0);
+											$FQty = (int)($row1['qty'] ?? 0);
+											$FYrd = (int)($row1['yard'] ?? 0);
+										} else { $FRol=0; $FQty=0; $FYrd=0; }
+
+										if ($row1['proses'] == "Inspect Oven") {
+											$ORol = (int)($row1['jml_rol'] ?? 0);
+											$OQty = (int)($row1['qty'] ?? 0);
+											$OYrd = (int)($row1['yard'] ?? 0);
+										} else { $ORol=0; $OQty=0; $OYrd=0; }
+
+										if ($row1['proses'] == "Pisah") {
+											$PSRol = (int)($row1['jml_rol'] ?? 0);
+											$PSQty = (int)($row1['qty'] ?? 0);
+											$PSYrd = (int)($row1['yard'] ?? 0);
+										} else { $PSRol=0; $PSQty=0; $PSYrd=0; }
+
+										$totOk += $okRol; $totTk += $TkRol; $totPr += $PrRol;
+										$totOkQ += $okQty; $totTkQ += $TkQty; $totPrQ += $PrQty;
+										$totOkY += $okYrd; $totTkY += $TkYrd; $totPrY += $PrYrd;
+
+										$totF += $FRol; $totO += $ORol; $totPS += $PSRol;
+										$totFQ += $FQty; $totOQ += $OQty; $totPSQ += $PSQty;
+										$totFY += $FYrd; $totOY += $OYrd; $totPSY += $PSYrd;
+
+										$no++;
+									}
+
+									sqlsrv_free_stmt($qry1);
 								}
-								if ($row1['proses'] == "Inspect Finish" and $row1['status_produk'] == "2") {
-									$TkRol = (int) $row1['jml_rol'];
-									$TkQty = (int) $row1['qty'];
-									$TkYrd = (int) $row1['yard'];
-								} else {
-									$TkRol = 0;
-									$TkQty = 0;
-									$TkYrd = 0;
-								}
-								if ($row1['proses'] == "Inspect Finish" and $row1['status_produk'] == "3") {
-									$PrRol = (int) $row1['jml_rol'];
-									$PrQty = (int) $row1['qty'];
-									$PrYrd = (int) $row1['yard'];
-								} else {
-									$PrRol = 0;
-									$PrQty = 0;
-									$PrYrd = 0;
-								}
-								if ($row1['proses'] == "Inspect Finish" and ($row1['status_produk'] == "1" or $row1['status_produk'] == "2")) {
-									$FRol = (int) $row1['jml_rol'];
-									$FQty = (int) $row1['qty'];
-									$FYrd = (int) $row1['yard'];
-								} else {
-									$FRol = 0;
-									$FQty = 0;
-									$FYrd = 0;
-								}
-								if ($row1['proses'] == "Inspect Oven") {
-									$ORol = (int) $row1['jml_rol'];
-									$OQty = (int) $row1['qty'];
-									$OYrd = (int) $row1['yard'];
-								} else {
-									$ORol = 0;
-									$OQty = 0;
-									$OYrd = 0;
-								}
-								if ($row1['proses'] == "Pisah") {
-									$PSRol = (int) $row1['jml_rol'];
-									$PSQty = (int) $row1['qty'];
-									$PSYrd = (int) $row1['yard'];
-								} else {
-									$PSRol = 0;
-									$PSQty = 0;
-									$PSYrd = 0;
-								}
-								$totOk = $totOk + $okRol;
-								$totTk = $totTk + $TkRol;
-								$totPr = $totPr + $PrRol;
-								$totOkQ = $totOkQ + $okQty;
-								$totTkQ = $totTkQ + $TkQty;
-								$totPrQ = $totPrQ + $PrQty;
-								$totOkY = $totOkY + $okYrd;
-								$totTkY = $totTkY + $TkYrd;
-								$totPrY = $totPrY + $PrYrd;
-								$totF = $totF + $FRol;
-								$totO = $totO + $ORol;
-								$totPS = $totPS + $PSRol;
-								$totFQ = $totFQ + $FQty;
-								$totOQ = $totOQ + $OQty;
-								$totPSQ = $totPSQ + $PSQty;
-								$totFY = $totFY + $FYrd;
-								$totOY = $totOY + $FYrd;
-								$totPSY = $totPSY + $PSYrd;
-								$no++;
-							} ?>
+							?>
 						</tbody>
 						<tfoot>
 							<tr valign="top" bgcolor="<?php echo $bgcolor; ?>">
