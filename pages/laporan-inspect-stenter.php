@@ -17,10 +17,9 @@
 	{
 		include "koneksi.php";
 		$format = date("ymd");
-		$sql = mysqli_query($con, "SELECT nokk FROM tbl_schedule WHERE substr(nokk,1,6) like '%" . $format . "%' ORDER BY nokk DESC LIMIT 1 ") or die(mysqli_error($con));
-		$d = mysqli_num_rows($sql);
-		if ($d > 0) {
-			$r = mysqli_fetch_array($sql);
+		$sql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 nokk FROM db_qc.tbl_schedule WHERE SUBSTRING(nokk,1,6) like '%" . $format . "%' ORDER BY nokk DESC ") or die(sqlserver_errors());
+		$r = sqlsrv_fetch_array($sql,SQLSRV_FETCH_ASSOC);
+		if ($r) {
 			$d = $r['nokk'];
 			$str = substr($d, 6, 2);
 			$Urut = (int) $str;
@@ -237,14 +236,20 @@
 	$stmt1r = db2_exec($conn1, $sqlroll, array('cursor' => DB2_SCROLLABLE));
 	$rowr = db2_fetch_assoc($stmt1r);
 
-	$sqlCek = mysqli_query($con, "SELECT * FROM tbl_schedule WHERE nodemand='$nodemand' ORDER BY id DESC LIMIT 1");
-	$cek = mysqli_num_rows($sqlCek);
-	$rcek = mysqli_fetch_array($sqlCek);
-	// echo "SELECT * FROM tbl_schedule WHERE nokk='$nodemand' ORDER BY id DESC LIMIT 1 ||";
+	$sqlCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_schedule WHERE nodemand=? ORDER BY id DESC",[$nodemand]);
+	$cek = 0;
+	$rcek = sqlsrv_fetch_array($sqlCek,SQLSRV_FETCH_ASSOC);
+	if($rcek){
+		$cek++;
+	}
+	// echo "SELECT * FROM db_qc.tbl_schedule WHERE nokk='$nodemand' ORDER BY id DESC LIMIT 1 ||";
 
-	$sqlCek1 = mysqli_query($con, "SELECT * FROM tbl_schedule WHERE nodemand='$nodemand' AND not status='selesai' ORDER BY id DESC LIMIT 1");
-	$cek1 = mysqli_num_rows($sqlCek1);
-
+	$sqlCek1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_schedule WHERE nodemand=? AND not status='selesai' ORDER BY id DESC",[$nodemand]);
+	$cek1 = 0;
+	$rcek1 = sqlsrv_fetch_array($sqlCek1,SQLSRV_FETCH_ASSOC);
+	if($rcek1){
+		$cek1++;
+	}
 
 	$sqlDB21  = " SELECT DISTINCT 
 					x.INITIALUSERPRIMARYQUANTITY AS KG_BAGIKAIN 
@@ -481,8 +486,8 @@
 							<select class="form-control select2" data-placeholder="Pilih Personil" name="operator" id="operator" required>
 								<option value="" disabled selected>Pilih Personil</option>
 								<?php
-								$qCek1 = mysqli_query($con, "SELECT user FROM tbl_user_stenter ORDER BY user ASC");
-								while ($dCek1 = mysqli_fetch_array($qCek1)) { ?>
+								$qCek1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT [user] FROM db_qc.tbl_user_stenter ORDER BY [user] ASC");
+								while ($dCek1 = sqlsrv_fetch_array($qCek1,SQLSRV_FETCH_ASSOC)) { ?>
 									<option value="<?php echo $dCek1['user']; ?>"><?php echo $dCek1['user']; ?></option>
 								<?php } ?>
 							</select>
@@ -584,8 +589,7 @@
 	
 	<?php
 		if (isset($_POST['simpan_operator']) && $_POST['simpan_operator'] == "Simpan") {
-			$sqlData1 = mysqli_query($con, "INSERT INTO tbl_user_stenter SET 
-				user='$_POST[user]'");
+			$sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_user_stenter ([user]) VALUES (?) ",[$_POST['user']]) ;
 			if ($sqlData1) {
 				echo "<script>swal({
 		title: 'Data Telah Tersimpan',   
@@ -604,55 +608,36 @@
 <?php
 if (isset($_POST['save'])) {
     // Escape special characters in input data
-    $nokk = mysqli_real_escape_string($con, $_POST['nokk']);
-    $nodemand = mysqli_real_escape_string($con, $_POST['nodemand']);
-    $langganan = mysqli_real_escape_string($con, $_POST['langganan']);
-    $buyer = mysqli_real_escape_string($con, $_POST['buyer']);
-    $no_order = mysqli_real_escape_string($con, $_POST['no_order']);
-    $jenis_kain = mysqli_real_escape_string($con, $_POST['jenis_kain']);
-    $warna = mysqli_real_escape_string($con, $_POST['warna']);
-    $no_mc = mysqli_real_escape_string($con, $_POST['no_mc']);
-    $bruto = mysqli_real_escape_string($con, $_POST['bruto']);
-    $no_hanger = mysqli_real_escape_string($con, $_POST['no_hanger']);
-    $no_item = mysqli_real_escape_string($con, $_POST['no_item']);
-    $status = mysqli_real_escape_string($con, $_POST['status']);
-    $catatan = mysqli_real_escape_string($con, $_POST['catatan']);
-    $no_po = mysqli_real_escape_string($con, $_POST['no_po']);
-    $lebar = mysqli_real_escape_string($con, $_POST['lebar']);
-    $gramasi = mysqli_real_escape_string($con, $_POST['gramasi']);
-    $operator = mysqli_real_escape_string($con, $_POST['operator']);
-    $roll = mysqli_real_escape_string($con, $_POST['roll']);
-    $no_warna = mysqli_real_escape_string($con, $_POST['no_warna']);
-    $shift = mysqli_real_escape_string($con, $_POST['shift']);
-    $proses = mysqli_real_escape_string($con, $_POST['proses']);
-    $gerobak = mysqli_real_escape_string($con, $_POST['gerobak']);
+    $nokk = $_POST['nokk'];
+    $nodemand = $_POST['nodemand'];
+    $langganan = $_POST['langganan'];
+    $buyer = $_POST['buyer'];
+    $no_order = $_POST['no_order'];
+    $jenis_kain = $_POST['jenis_kain'];
+    $warna = $_POST['warna'];
+    $no_mc = $_POST['no_mc'];
+    $bruto = $_POST['bruto'];
+    $no_hanger = $_POST['no_hanger'];
+    $no_item = $_POST['no_item'];
+    $status = $_POST['status'];
+    $catatan = $_POST['catatan'];
+    $no_po = $_POST['no_po'];
+    $lebar = $_POST['lebar'];
+    $gramasi = $_POST['gramasi'];
+    $operator = $_POST['operator'];
+    $roll = $_POST['roll'];
+    $no_warna = $_POST['no_warna'];
+    $shift = $_POST['shift'];
+    $proses = $_POST['proses'];
+    $gerobak = $_POST['gerobak'];
 
-    // Insert data into tbl_lap_stenter
-    $sqlData = mysqli_query($con, "INSERT INTO tbl_lap_stenter SET
-        nokk='$nokk',
-        nodemand='$nodemand',
-        langganan='$langganan',
-        buyer='$buyer',
-        no_order='$no_order',
-        jenis_kain='$jenis_kain',
-        warna='$warna',
-        no_mc='$no_mc',
-        bruto='$bruto',
-        no_hanger='$no_hanger',
-        no_item='$no_item',
-        status='$status',
-        catatan='$catatan',
-        no_po='$no_po',
-        lebar='$lebar',
-        gramasi='$gramasi',
-        operator='$operator',
-        roll='$roll',
-        no_warna='$no_warna',
-        shift='$shift',
-        proses='$proses',
-		gerobak='$gerobak',
-        tanggal_buat=NOW()
-    ");
+    // Insert data into db_qc.tbl_lap_stenter
+    $sqlData = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_lap_stenter 
+        (nokk,nodemand,langganan,buyer,no_order,jenis_kain,warna,no_mc,bruto,no_hanger,no_item,[status],catatan,no_po,lebar,
+        gramasi,operator,roll,no_warna,shift,proses,gerobak,tanggal_buat) VALUES 
+        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",
+        [$nokk,$nodemand,$langganan,$buyer,$no_order,$jenis_kain,$warna,$no_mc,$bruto,$no_hanger,$no_item,$status,$catatan,$no_po,$lebar
+        ,$gramasi,$operator,$roll,$no_warna,$shift,$proses,$gerobak]);
 
     if ($sqlData) {
         echo "<script>swal({
@@ -665,7 +650,7 @@ if (isset($_POST['save'])) {
             }
         });</script>";
     } else {
-        echo "<script>alert('Gagal menyimpan data ke tbl_lap_stenter: " . mysqli_error($con) . "');</script>";
+        echo "<script>alert('Gagal menyimpan data ke db_qc.tbl_lap_stenter: " . sqlserver_errors() . "');</script>";
     }
 }
 ?>

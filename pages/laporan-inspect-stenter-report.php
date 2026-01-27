@@ -174,18 +174,27 @@ if (strlen($jamAr) == 5) {
                         $data_stenter_total=array();
                         $query_lap="SELECT
                                 l.shift,
-                                SUM(IF(l.proses = 'Fin Jadi' AND l.status = 'OK' ,l.bruto,0)) AS `sts_total_ok`,
-                                SUM(IF(l.proses = 'Fin Jadi' AND l.status = 'Reject' ,l.bruto,0)) AS `sts_total_reject`,
-                                SUM(IF(l.proses <> 'Fin Jadi' ,l.bruto,0)) AS `dalam_proses`
+                                SUM(CASE
+									WHEN l.proses = 'Fin Jadi' AND l.status = 'OK' THEN l.bruto
+									ELSE 0
+								END) as sts_total_ok,
+                                SUM(CASE
+									WHEN l.proses = 'Fin Jadi' AND l.status = 'Reject' THEN l.bruto
+									ELSE 0
+								END) as sts_total_reject,
+                                SUM(CASE
+									WHEN l.proses <> 'Fin Jadi' THEN l.bruto
+									ELSE 0
+								END) as dalam_proses
                             FROM
-                                tbl_lap_stenter l
+                                db_qc.tbl_lap_stenter l
                             WHERE 
                                 $stanter_shift
                                 l.tanggal_buat BETWEEN '$start_date' AND '$stop_date'
                             GROUP BY l.shift
                             ORDER BY l.shift";
-                        $q_lap_stenter = mysqli_query($con, $query_lap);
-                        while ($rowSt = mysqli_fetch_array($q_lap_stenter)) {
+                        $q_lap_stenter = sqlsrv_query($con_db_qc_sqlsrv, $query_lap);
+                        while ($rowSt = sqlsrv_fetch_array($q_lap_stenter,SQLSRV_FETCH_ASSOC)) {
                             $data_stenter[$rowSt['shift']]['sts_total_ok']=$rowSt['sts_total_ok'];
                             $data_stenter[$rowSt['shift']]['sts_total_reject']=$rowSt['sts_total_reject'];
                             $data_stenter[$rowSt['shift']]['dalam_proses']=$rowSt['dalam_proses'];
@@ -265,20 +274,20 @@ if (strlen($jamAr) == 5) {
                 <?php
                 if ($_POST['shift'] == 'ALL') {
                     $qryb = "SELECT
-                            *
+                            *,CONVERT(VARCHAR(19),tanggal_buat) tanggal_buat
                         FROM
-                            tbl_lap_stenter
+                            db_qc.tbl_lap_stenter
                         WHERE
                             tanggal_buat BETWEEN '$start_date' AND '$stop_date'";
                 } else {
                     $qryb = "SELECT
-                            *
+                            *,CONVERT(VARCHAR(19),tanggal_buat) tanggal_buat
                         FROM
-                            tbl_lap_stenter
+                            db_qc.tbl_lap_stenter
                         WHERE
                             tanggal_buat BETWEEN '$start_date' AND '$stop_date' AND shift = '$shift'";
                 }
-                $stmt1 = mysqli_query($con, $qryb);
+                $stmt1 = sqlsrv_query($con_db_qc_sqlsrv, $qryb);
                 if ($stmt1) {
                 ?>
 
@@ -317,7 +326,7 @@ if (strlen($jamAr) == 5) {
                             <tbody>
                                 <?php
                                 $no = 1;
-                                while ($row = mysqli_fetch_assoc($stmt1)) {
+                                while ($row = sqlsrv_fetch_array($stmt1,SQLSRV_FETCH_ASSOC)) {
                                 ?>
                                     <tr>
                                         <td><?php echo $no; ?></td>
@@ -368,7 +377,7 @@ if (strlen($jamAr) == 5) {
                     </div>
                 <?php
                 } else {
-                    echo "Query execution failed: " . mysqli_error($con);
+                    echo "Query execution failed: " . sqlserver_errors();
                 }
                 ?>
             </div>
