@@ -2,9 +2,9 @@
 ini_set("error_reporting", 1);
 session_start();
 $id = $_GET['id'];
-$sqlCek = mysqli_query($con, "SELECT * FROM tbl_ncp_qcf_now WHERE id='$id' ORDER BY id DESC LIMIT 1");
-$cek = mysqli_num_rows($sqlCek);
-$rcek = mysqli_fetch_array($sqlCek);
+$sqlCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_ncp_qcf_now WHERE id='$id' ORDER BY id DESC");
+$cek = sqlsrv_has_rows($sqlCek);
+$rcek = sqlsrv_fetch_array($sqlCek, SQLSRV_FETCH_ASSOC);
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
 	<div class="box box-info">
@@ -27,25 +27,24 @@ $rcek = mysqli_fetch_array($sqlCek);
 					<?php
 						//Ambil data dari db_dying
 						//$nokk=$_GET[nokk];
-						$con1 = mysqli_connect("10.0.0.10", "dit", "4dm1n", "db_dying");
-						$qry1 = mysqli_query($con1, "SELECT 
-														a.no_mesin, 
-														b.g_shift, 
-														b.colorist 
-													FROM 
-														tbl_schedule a 
-													LEFT JOIN tbl_montemp b ON a.id=b.id_schedule 
+						$qry1 = sqlsrv_query($con_db_dying_sqlsrv, "SELECT TOP 1
+														a.no_mesin,
+														b.g_shift,
+														b.colorist
+													FROM
+														db_dying.tbl_schedule a
+													LEFT JOIN db_dying.tbl_montemp b ON a.id=b.id_schedule
 													WHERE a.nokk='$_POST[nokk]' and a.proses='Celup Greige'
-													ORDER BY a.id DESC LIMIT 1");
+													ORDER BY a.id DESC");
 						if ($qry1 === FALSE) {
-							die(mysqli_error()); // TODO: better error handling
+							die(print_r(sqlsrv_errors(), true)); // TODO: better error handling
 						}
-						$dtDye = mysqli_fetch_array($qry1);
-						$cDye = mysqli_num_rows($qry1);
+						$dtDye = sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC);
+						$cDye = $dtDye ? 1 : 0;
 
-						$qryHC = mysqli_query($con1, "SELECT * FROM tbl_hasilcelup WHERE nokk='" . $_POST['nokk'] . "' and proses='Celup Greige' ORDER BY id DESC LIMIT 1");
-						$dtHC = mysqli_fetch_array($qryHC);
-						$cHC = mysqli_num_rows($qryHC);
+						$qryHC = sqlsrv_query($con_db_dying_sqlsrv, "SELECT TOP 1 * FROM db_dying.tbl_hasilcelup WHERE nokk='" . $_POST['nokk'] . "' and proses='Celup Greige' ORDER BY id DESC");
+						$dtHC = sqlsrv_fetch_array($qryHC, SQLSRV_FETCH_ASSOC);
+						$cHC = $dtHC ? 1 : 0;
 					?>
 					<div class="form-group">
 						<label for="nokk" class="col-sm-2 control-label">No KK</label>
@@ -62,7 +61,7 @@ $rcek = mysqli_fetch_array($sqlCek);
 					<div class="col-sm-2">
 						<div class="input-group date">
 							<div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-							<input name="tgl_rencana" type="text" class="form-control pull-right" id="datepicker" placeholder="0000-00-00" value="<?php echo $rcek['tgl_rencana']; ?>" autocomplete="off" />
+							<input name="tgl_rencana" type="text" class="form-control pull-right" id="datepicker" placeholder="0000-00-00" value="<?php echo $rcek['tgl_rencana'] ? date_format($rcek['tgl_rencana'], 'Y-m-d') : ''; ?>" autocomplete="off" />
 						</div>
 					</div>
 				</div>
@@ -71,7 +70,7 @@ $rcek = mysqli_fetch_array($sqlCek);
 					<div class="col-sm-2">
 						<div class="input-group date">
 							<div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-							<input name="tgl_kembali_qcf" type="text" class="form-control pull-right" id="datepicker2" placeholder="0000-00-00" value="<?php echo $rcek['tgl_kembali_qcf']; ?>" autocomplete="off" />
+							<input name="tgl_kembali_qcf" type="text" class="form-control pull-right" id="datepicker2" placeholder="0000-00-00" value="<?php echo $rcek['tgl_kembali_qcf'] ? date_format($rcek['tgl_kembali_qcf'], 'Y-m-d') : ''; ?>" autocomplete="off" />
 						</div>
 					</div>
 				</div>
@@ -129,12 +128,11 @@ $rcek = mysqli_fetch_array($sqlCek);
 								<?php
 								//$conn=mysqli_connect("10.0.0.10","dit","4dm1n");
 								//$db2=mysqli_select_db("db_qc",$conn)or die("Gagal Koneksi ke db qc");
-								$conn = mysqli_connect("10.0.0.10", "dit", "4dm1n", "db_qc");
 								$dtArr = trim($rcek['penyelesaian']);
 								$data = explode(",", $dtArr);
-								$qCek1 = mysqli_query($conn, "SELECT nama FROM tbl_masalah_ncp WHERE jenis='Penyelesaian' ORDER BY nama ASC");
+								$qCek1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_masalah_ncp WHERE jenis='Penyelesaian' ORDER BY nama ASC");
 								$i = 0;
-								while ($dCek1 = mysqli_fetch_array($qCek1)) { ?>
+								while ($dCek1 = sqlsrv_fetch_array($qCek1, SQLSRV_FETCH_ASSOC)) { ?>
 									<option value="<?php echo $dCek1['nama']; ?>" <?php if ($dCek1['nama'] == $data[0] or $dCek1['nama'] == $data[1] or $dCek1['nama'] == $data[2] or $dCek1['nama'] == $data[3] or $dCek1['nama'] == $data[4] or $dCek1['nama'] == $data[5]) {
 																						echo "SELECTED";
 																					} ?>><?php echo $dCek1['nama']; ?></option>
@@ -149,8 +147,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 						<div class="col-sm-2">
 							<div class="input-group">
 								<select class="form-control" name="ke" id="ke">
-									<?php $q_data_ke			= mysqli_query($condye, "SELECT * FROM tbl_ke ORDER BY id ASC"); ?>
-									<?php while ($row_data_ke	= mysqli_fetch_array($q_data_ke)) { ?>
+									<?php $q_data_ke			= sqlsrv_query($con_db_dying_sqlsrv, "SELECT * FROM db_dying.tbl_ke ORDER BY id ASC"); ?>
+									<?php while ($row_data_ke	= sqlsrv_fetch_array($q_data_ke, SQLSRV_FETCH_ASSOC)) { ?>
 										<option value="<?= $row_data_ke['ke']; ?>" <?php if($rcek['data_ke'] == $row_data_ke['ke']){ echo "SELECTED"; } ?>><?= $row_data_ke['ke']; ?></option>
 									<?php } ?>
 								</select>
@@ -161,8 +159,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 						<div class="col-sm-2">
 							<div class="input-group">
 								<select class="form-control" name="acc_perbaikan" id="acc_perbaikan">
-								<?php $q_namacolorist			= mysqli_query($condye, "SELECT * FROM tbl_nama_colorist ORDER BY id ASC"); ?>
-									<?php while ($row_namacolorist	= mysqli_fetch_array($q_namacolorist)) { ?>
+								<?php $q_namacolorist			= sqlsrv_query($con_db_dying_sqlsrv, "SELECT * FROM db_dying.tbl_nama_colorist ORDER BY id ASC"); ?>
+									<?php while ($row_namacolorist	= sqlsrv_fetch_array($q_namacolorist, SQLSRV_FETCH_ASSOC)) { ?>
 										<option value="<?= $row_namacolorist['nama_colorist']; ?>" <?php if($rcek['nama_colorist'] == $row_namacolorist['nama_colorist']){ echo 'SELECTED'; } ?>><?= $row_namacolorist['nama_colorist']; ?></option>
 									<?php } ?>
 								</select>
@@ -320,8 +318,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 								<select class="form-control select2" name="acc" id="acc">
 									<option value="">Pilih</option>
 									<?php
-									$qrytj = mysqli_query($conn, "SELECT nama FROM tbl_tjawab_ncp ORDER BY nama ASC");
-									while ($rtj = mysqli_fetch_array($qrytj)) {
+									$qrytj = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_tjawab_ncp ORDER BY nama ASC");
+									while ($rtj = sqlsrv_fetch_array($qrytj, SQLSRV_FETCH_ASSOC)) {
 									?>
 										<option value="<?php echo $rtj['nama']; ?>" <?php if ($rcek['penanggung_jawab'] == $rtj['nama']) {
 																						echo "SELECTED";
@@ -339,8 +337,8 @@ $rcek = mysqli_fetch_array($sqlCek);
 								<select class="form-control select2" name="penanggung_jawab" id="penanggung_jawab">
 									<option value="">Pilih</option>
 									<?php
-									$qrytj = mysqli_query($conn, "SELECT nama FROM tbl_tjawab_ncp ORDER BY nama ASC");
-									while ($rtj = mysqli_fetch_array($qrytj)) {
+									$qrytj = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_tjawab_ncp ORDER BY nama ASC");
+									while ($rtj = sqlsrv_fetch_array($qrytj, SQLSRV_FETCH_ASSOC)) {
 									?>
 										<option value="<?php echo $rtj['nama']; ?>" <?php if ($rcek['penanggung_jawab'] == $rtj['nama']) {
 																						echo "SELECTED";
@@ -487,9 +485,9 @@ if ($_POST['save'] == "Simpan") {
 	if ($rcek['tgl_terima'] != "") {
 		$tglTrima = " ";
 	} else {
-		$tglTrima = " tgl_terima=now(), ";
+		$tglTrima = " tgl_terima=GETDATE(), ";
 	}
-	$sqlData = mysqli_query($conn, "UPDATE tbl_ncp_qcf_now SET 
+	$sqlData = sqlsrv_query($con_db_qc_sqlsrv, "UPDATE db_qc.tbl_ncp_qcf_now SET 
 									$tglRC
 									$tglKQC
 									$tglTrima
@@ -616,8 +614,7 @@ if ($_POST['save'] == "Simpan") {
 </div>
 <?php
 if ($_POST['simpan_penyelesaian'] == "Simpan") {
-	$sqlData1 = mysqli_query($conn, "INSERT INTO tbl_masalah_ncp SET 
-		  nama='" . $_POST['penyelesaian'] . "',jenis='Penyelesaian'");
+	$sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_masalah_ncp (nama, jenis) VALUES ('" . $_POST['penyelesaian'] . "', 'Penyelesaian')");
 	if ($sqlData1) {
 		echo "<script>swal({
 				title: 'Data Telah Tersimpan',   
@@ -631,7 +628,7 @@ if ($_POST['simpan_penyelesaian'] == "Simpan") {
 				});</script>";
 	}
 }elseif($_POST['simpan_data_ke'] == 'Simpan'){
-	$sqlData1 = mysqli_query($condye, "INSERT INTO tbl_ke SET ke='$_POST[data_ke]'");
+	$sqlData1 = sqlsrv_query($con_db_dying_sqlsrv, "INSERT INTO db_dying.tbl_ke (ke) VALUES ('$_POST[data_ke]')");
 	if ($sqlData1) {
 	echo "<script>swal({
 			title: 'Data Telah Tersimpan',   
@@ -645,7 +642,7 @@ if ($_POST['simpan_penyelesaian'] == "Simpan") {
 			});</script>";
 	}
 }elseif($_POST['simpan_nama_colorist'] == 'Simpan'){
-	$sqlData1 = mysqli_query($condye, "INSERT INTO tbl_nama_colorist SET nama_colorist='$_POST[nama_colorist]'");
+	$sqlData1 = sqlsrv_query($con_db_dying_sqlsrv, "INSERT INTO db_dying.tbl_nama_colorist (nama_colorist) VALUES ('$_POST[nama_colorist]')");
 	if ($sqlData1) {
 	echo "<script>swal({
 			title: 'Data Telah Tersimpan',   
@@ -691,8 +688,7 @@ if ($_POST['simpan_penyelesaian'] == "Simpan") {
 </div>
 <?php
 if ($_POST['simpan_penanggung_jawab'] == "Simpan") {
-	$sqlData2 = mysqli_query($conn, "INSERT INTO tbl_tjawab_ncp SET 
-		  nama='" . $_POST['penanggung_jawab'] . "',dept='DYE'");
+	$sqlData2 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_tjawab_ncp (nama, dept) VALUES ('" . $_POST['penanggung_jawab'] . "', 'DYE')");
 	if ($sqlData2) {
 		echo "<script>swal({
 				title: 'Data Telah Tersimpan',   

@@ -4,9 +4,9 @@ session_start();
 include "koneksi.php";
 $id = $_GET['id'];
 
-$sqlCek = mysqli_query($con, "SELECT * FROM tbl_ncp_qcf_now WHERE id='$id' ORDER BY id DESC LIMIT 1");
-$cek = mysqli_num_rows($sqlCek);
-$r = mysqli_fetch_array($sqlCek);
+$sqlCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_ncp_qcf_now WHERE id='$id' ORDER BY id DESC");
+$r = sqlsrv_fetch_array($sqlCek);
+$cek = $r['total_rows'] ?? 0;
 //$pos=posisi($r['nokk']);
 //$selesai=selesai($r['nokk']);
 ?>
@@ -31,17 +31,17 @@ $r = mysqli_fetch_array($sqlCek);
 						<div class="input-group date">
 							<div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
 							<input name="tgl_kembali" type="text" class="form-control pull-right" id="datepicker"
-								placeholder="0000-00-00" value="<?php if ($r['tgl_kembali'] != NULL) {
-									echo $r['tgl_kembali'];
-								} else {
-									echo $r['tgl_kembali_qcf'];
+								placeholder="0000-00-00" value="<?php if ($r['tgl_kembali']) {
+									echo date_format($r['tgl_kembali'], 'Y-m-d');
+								} elseif ($r['tgl_kembali_qcf']) {
+									echo date_format($r['tgl_kembali_qcf'], 'Y-m-d');
 								} ?>" <?php if ($r['sts_kembali'] == "Y") {
 									 echo "disabled";
 								 } ?> />
 							<input name="tgl_kembali1" type="hidden" class="form-control pull-right" placeholder=""
-								value="<?php echo $r['tgl_kembali']; ?>" />
+								value="<?php echo $r['tgl_kembali'] ? date_format($r['tgl_kembali'], 'Y-m-d') : ''; ?>" />
 							<input name="tgl_selesai" type="hidden" class="form-control pull-right" placeholder=""
-								value="<?php echo $r['tgl_selesai']; ?>" />
+								value="<?php echo $r['tgl_selesai'] ? date_format($r['tgl_selesai'], 'Y-m-d') : ''; ?>" />
 							<input name="tgl_selesai1" type="hidden" class="form-control pull-right" placeholder=""
 								value="<?php echo $selesai; ?>" />
 						</div>
@@ -59,10 +59,10 @@ $r = mysqli_fetch_array($sqlCek);
 							value="<?php echo $r['sts_kembali']; ?>" />
 					</div>
 					<div class="col-sm-2">
-						<?php if ($r['tgl_kembali'] != "") {
-							echo "<span class='label label-warning'>Tgl Kembali Ke QCF : $r[tgl_kembali_qcf]</span>";
+						<?php if ($r['tgl_kembali']) {
+							echo "<span class='label label-warning'>Tgl Kembali Ke QCF : " . ($r['tgl_kembali_qcf'] ? date_format($r['tgl_kembali_qcf'], 'Y-m-d') : '') . "</span>";
 						} else {
-							echo "<span class='label label-warning blink_me'>Tgl Kembali Ke QCF : $r[tgl_kembali_qcf]</span>";
+							echo "<span class='label label-warning blink_me'>Tgl Kembali Ke QCF : " . ($r['tgl_kembali_qcf'] ? date_format($r['tgl_kembali_qcf'], 'Y-m-d') : '') . "</span>";
 						} ?>
 					</div>
 				</div>
@@ -72,7 +72,7 @@ $r = mysqli_fetch_array($sqlCek);
 						<div class="input-group date">
 							<div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
 							<input name="tgl_serah" type="text" class="form-control pull-right" id="datepicker1"
-								placeholder="0000-00-00" value="<?php echo $r['tgl_serah']; ?>" />
+								placeholder="0000-00-00" value="<?php echo $r['tgl_serah'] ? date_format($r['tgl_serah'], 'Y-m-d') : ''; ?>" />
 						</div>
 					</div>
 					<?php if ($cek > 0) { ?>
@@ -89,7 +89,7 @@ $r = mysqli_fetch_array($sqlCek);
 		<div class="col-sm-2">
 		  <div class="input-group date">
 			<div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-			<input name="tgl_selesai" type="text" class="form-control pull-right" id="datepicker2" placeholder="0000-00-00" value="<?php echo $r['tgl_selesai']; ?>"/>
+			<input name="tgl_selesai" type="text" class="form-control pull-right" id="datepicker2" placeholder="0000-00-00" value="<?php echo $r['tgl_selesai'] ? date_format($r['tgl_selesai'], 'Y-m-d') : ''; ?>"/>
 		  </div>
 		</div>
 		<div class="col-sm-2">
@@ -275,50 +275,50 @@ $r = mysqli_fetch_array($sqlCek);
 if ($_POST['save'] == "Simpan") {
 	if ($_POST) {
 		extract($_POST);
-		$idt = mysqli_real_escape_string($con, $_POST['id']);
-		$sts = mysqli_real_escape_string($con, $_POST['sts']);
-		$peninjau = mysqli_real_escape_string($con, $_POST['disposisi']);
-		$catat = mysqli_real_escape_string($con, $_POST['catat']);
-		$ck1 = mysqli_real_escape_string($con, $_POST['ck1']);
-		$ck2 = mysqli_real_escape_string($con, $_POST['ck2']);
-		$ck3 = mysqli_real_escape_string($con, $_POST['ck3']);
-		$ck4 = mysqli_real_escape_string($con, $_POST['ck4']);
+		$idt = $_POST['id'];
+		$sts = $_POST['sts'];
+		$peninjau = $_POST['disposisi'];
+		$catat = $_POST['catat'];
+		$ck1 = $_POST['ck1'];
+		$ck2 = $_POST['ck2'];
+		$ck3 = $_POST['ck3'];
+		$ck4 = $_POST['ck4'];
 		if ($_POST['tgl_kembali'] != "") {
-			$tkembali = " `tgl_kembali`='$_POST[tgl_kembali]', ";
+			$tkembali = " tgl_kembali='$_POST[tgl_kembali]', ";
 		} else {
-			$tkembali = " `tgl_kembali`='$_POST[tgl_kembali1]',";
+			$tkembali = " tgl_kembali='$_POST[tgl_kembali1]',";
 		}
 		if ($_POST['tgl_serah'] != "") {
-			$tserah = " `tgl_serah`='$_POST[tgl_serah]', ";
+			$tserah = " tgl_serah='$_POST[tgl_serah]', ";
 		} else {
-			$tserah = " `tgl_serah`=null, ";
+			$tserah = " tgl_serah=null, ";
 		}
 		//if($_POST[tgl_selesai]!=""){$tselesai=" `tgl_selesai`='$_POST[tgl_selesai]', ";}else{ $tselesai=" `tgl_selesai`=null,";}
 		if ($_POST['tgl_selesai1'] != NULL) {
-			$tselesai = " `tgl_selesai`='$_POST[tgl_selesai1]', ";
+			$tselesai = " tgl_selesai='$_POST[tgl_selesai1]', ";
 		} else if ($_POST['tgl_selesai'] == NULL and ($_POST['sts'] == "OK" or $_POST['sts'] == "BS" or $_POST['sts'] == "Cancel" or $_POST['sts'] == "Disposisi")) {
-			$tselesai = " `tgl_selesai`=now(), ";
+			$tselesai = " tgl_selesai=GETDATE(), ";
 		}
 		if ($_POST['ck1av'] != "") {
-			$sts_kembali = " `sts_kembali`='$_POST[ck1av]', ";
+			$sts_kembali = " sts_kembali='$_POST[ck1av]', ";
 		} else {
-			$sts_kembali = " `sts_kembali`='$_POST[ck1av1]',";
+			$sts_kembali = " sts_kembali='$_POST[ck1av1]',";
 		}
-		$sqlupdate = mysqli_query($con, "UPDATE `tbl_ncp_qcf_now` SET
-					`status`='$sts',
-					`peninjau_akhir`='$peninjau',
-					`catat_verify`='$catat',
-					`ck1`='$ck1',
-					`ck2`='$ck2',
-					`ck3`='$ck3',
-					`ck4`='$ck4',
-					`disposisiqc`='$_POST[disposisiqc]',
+		$sqlupdate = sqlsrv_query($con_db_qc_sqlsrv, "UPDATE db_qc.tbl_ncp_qcf_now SET
+					status='$sts',
+					peninjau_akhir='$peninjau',
+					catat_verify='$catat',
+					ck1='$ck1',
+					ck2='$ck2',
+					ck3='$ck3',
+					ck4='$ck4',
+					disposisiqc='$_POST[disposisiqc]',
 					$tkembali
 					$tserah
 					$tselesai
 					$sts_kembali
-					`tgl_update`=now()
-					WHERE `id`='$idt' LIMIT 1");
+					tgl_update=GETDATE()
+					WHERE id='$idt'");
 		//echo " <script>window.location='?p=Batas-Produksi';</script>";
 		echo "<script>swal({
 	  title: 'Data Telah diUbah',
@@ -335,15 +335,12 @@ if ($_POST['save'] == "Simpan") {
 <div class="modal fade modal-3d-slit" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
 	aria-hidden="true">
 	<?php
-	//$con=mysqli_connect("10.0.0.10","dit","4dm1n");
-//$db=mysqli_select_db("db_qc",$con)or die("Gagal Koneksi");
-//include "../tgl_indo.php";
 	if ($_GET['id'] != "") {
-		$qry = mysqli_query($con, "SELECT * FROM tbl_ncp_qcf_now WHERE id='$_GET[id]'");
+		$qry = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_ncp_qcf_now WHERE id='$_GET[id]'");
 	} else {
-		$qry = mysqli_query($con, "SELECT * FROM tbl_ncp_qcf_now WHERE no_ncp='$_GET[no_ncp]'");
+		$qry = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_ncp_qcf_now WHERE no_ncp='$_GET[no_ncp]'");
 	}
-	$d = mysqli_fetch_array($qry);
+	$d = sqlsrv_fetch_array($qry, SQLSRV_FETCH_ASSOC);
 	?>
 	<div class="modal-dialog" style="width: 85%;">
 		<form action="" method="post" enctype="multipart/form-data" name="form2" id="form2">
@@ -392,7 +389,7 @@ if ($_POST['save'] == "Simpan") {
 	  <td colspan="5" align="center"><font size="-1"><strong>No. NCP: <?php echo $d['no_ncp']; ?></strong></font></td>
 	</tr>
 	<tr>
-	  <td colspan="2" align="left">TANGGAL: <?php echo tanggal_indo($d['tgl_buat'], true); ?></td>
+	  <td colspan="2" align="left">TANGGAL: <?php echo $d['tgl_buat'] ? tanggal_indo(date_format($d['tgl_buat'], 'Y-m-d'), true) : ''; ?></td>
 		<td colspan="4" align="right">&nbsp;</td>
 	</tr>
 	<tr>
@@ -825,12 +822,8 @@ if ($_POST['send'] == "send") {
 		$isi = str_replace("'", "''", $_POST['editor1']);
 		$kirim = $_POST['untuk'];
 		$ncpNew = $d['no_ncp'] . " " . $d['dept'] . "" . $d['revisi'] . " " . $d['salinan'];
-		$sqlmail = mysqli_query($con, "INSERT INTO tbl_email_ncp SET
-	no_ncp='$ncpNew',
-	isi='$isi',
-	kirim_ke='$kirim',
-	tgl_kirim=now(),
-	jam_kirim=now()");
+		$sqlmail = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_email_ncp (no_ncp, isi, kirim_ke, tgl_kirim, jam_kirim) VALUES
+	('$ncpNew', '$isi', '$kirim', GETDATE(), GETDATE())");
 	}
 }
 ?>
