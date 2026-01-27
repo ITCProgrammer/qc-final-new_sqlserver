@@ -28,14 +28,14 @@ include "koneksi.php";
 	$Buyer = isset($_POST['buyer']) ? $_POST['buyer'] : '';
 	$Item = isset($_POST['no_item']) ? $_POST['no_item'] : '';
 	if (strlen($jamA) == 5) {
-		$start_date = $Awal . ' ' . $jamA;
+		$start_date = $Awal . ' ' . $jamA.":00";
 	} else {
-		$start_date = $Awal . ' 0' . $jamA;
+		$start_date = $Awal . ' 0' . $jamA.":00";
 	}
 	if (strlen($jamAr) == 5) {
-		$stop_date = $Akhir . ' ' . $jamAr;
+		$stop_date = $Akhir . ' ' . $jamAr.":59";
 	} else {
-		$stop_date = $Akhir . ' 0' . $jamAr;
+		$stop_date = $Akhir . ' 0' . $jamAr.":59";
 	}
 	?>
 	<div class="row">
@@ -142,8 +142,8 @@ include "koneksi.php";
 								<select name="proses" class="form-control select2" id="proses" style="width: 100%">
 									<option value="">Pilih</option>
 									<?php
-									$sqlKap = mysqli_query($con, "SELECT proses FROM tbl_proses ORDER BY proses ASC");
-									while ($rK = mysqli_fetch_array($sqlKap)) {
+									$sqlKap = sqlsrv_query($con_db_qc_sqlsrv, "SELECT proses FROM db_qc.tbl_proses ORDER BY proses ASC");
+									while ($rK = sqlsrv_fetch_array($sqlKap,SQLSRV_FETCH_ASSOC)) {
 										?>
 										<option value="<?php echo $rK['proses']; ?>" <?php if ($Proses == $rK['proses']) {
 											   echo "SELECTED";
@@ -159,8 +159,8 @@ include "koneksi.php";
 								<select name="buyer" class="form-control select2" id="buyer" style="width: 100%">
 									<option value="">Pilih</option>
 									<?php
-									$sqlBuyer = mysqli_query($con, "SELECT buyer FROM tbl_schedule  GROUP BY buyer");
-									while ($rBy = mysqli_fetch_array($sqlBuyer)) {
+									$sqlBuyer = sqlsrv_query($con_db_qc_sqlsrv, "SELECT buyer FROM db_qc.tbl_schedule  GROUP BY buyer");
+									while ($rBy = sqlsrv_fetch_array($sqlBuyer,SQLSRV_FETCH_ASSOC)) {
 										?>
 										<option value="<?php echo $rBy['buyer']; ?>" <?php if ($Buyer == $rBy['buyer']) {
 											   echo "SELECTED";
@@ -271,29 +271,61 @@ include "koneksi.php";
 						} else {
 							$WItem = " ";
 						}
-						$qry1 = mysqli_query($con, "SELECT
+						$qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
 	COUNT(DISTINCT a.personil) as inspektor,
 	sum( a.qty ) AS bruto,
 	sum( a.yard ) AS panjang,
-  b.g_shift,
-  	SUM(IF(c.status_produk = '1' AND (b.proses='Inspect Finish' OR b.proses='Inspect Packing' OR b.proses='Inspect White' OR b.proses='Inspect Qty Kecil'),a.qty,0)) AS `sts_ok`,
-	SUM(IF(c.status_produk = '2' AND (b.proses='Inspect Finish' OR b.proses='Inspect Packing' OR b.proses='Inspect White' OR b.proses='Inspect Qty Kecil'),a.qty,0)) AS `sts_x`,	
-	SUM(IF(c.status_produk = '3' AND (b.proses='Inspect Finish' OR b.proses='Inspect Packing' OR b.proses='Inspect White' OR b.proses='Inspect Qty Kecil'),a.qty,0)) AS `sts_pr`,
-	sum(if(b.proses='Inspect Finish',a.qty,0)) as `sts_fin`,
-	sum(if(b.proses='Inspect Oven',a.qty,0)) as `sts_oven`,	
-	sum(if(b.proses='Pisah',a.qty,0)) as `sts_pisah`,
-	sum(if(b.proses='Perbaikan' OR b.proses='Perbaikan Grade' OR b.proses='Tandai Defect' OR b.proses='Inspect Ulang (Setelah Perbaikan)',a.qty,0)) as `sts_perbaikan`,
-	sum(if(b.proses='Kragh',a.qty,0)) as `sts_kragh`,
-	sum(a.qty) as `sts_tot`,
-	sum(a.yard) as `sts_yard`
+  	b.g_shift,
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN c.status_produk = '1' AND (b.proses='Inspect Finish' OR b.proses='Inspect Packing' OR b.proses='Inspect White' OR b.proses='Inspect Qty Kecil') THEN a.qty
+			ELSE 0
+		END)) sts_ok,
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN c.status_produk = '2' AND (b.proses='Inspect Finish' OR b.proses='Inspect Packing' OR b.proses='Inspect White' OR b.proses='Inspect Qty Kecil') THEN a.qty
+			ELSE 0
+		END)) sts_x,
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN c.status_produk = '3' AND (b.proses='Inspect Finish' OR b.proses='Inspect Packing' OR b.proses='Inspect White' OR b.proses='Inspect Qty Kecil') THEN a.qty
+			ELSE 0
+		END)) sts_pr,
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN b.proses='Inspect Finish' THEN a.qty
+			ELSE 0
+		END)) sts_fin,
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN b.proses='Inspect Oven' THEN a.qty
+			ELSE 0
+		END)) sts_oven,
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN b.proses='Pisah' THEN a.qty
+			ELSE 0
+		END)) sts_pisah,	
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN b.proses='Perbaikan' OR b.proses='Perbaikan Grade' OR b.proses='Tandai Defect' OR b.proses='Inspect Ulang (Setelah Perbaikan)' THEN a.qty
+			ELSE 0
+		END)) sts_perbaikan,	
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN b.proses='Kragh' THEN a.qty
+			ELSE 0
+		END)) sts_kragh,
+	sum(a.qty) as sts_tot,
+	sum(a.yard) as sts_yard
 FROM
-	tbl_inspection a 
-INNER JOIN tbl_schedule b ON a.id_schedule = b.id
-INNER JOIN tbl_gerobak c ON c.id_schedule = b.id
+	db_qc.tbl_inspection a 
+INNER JOIN db_qc.tbl_schedule b ON a.id_schedule = b.id
+INNER JOIN db_qc.tbl_gerobak c ON c.id_schedule = b.id
 WHERE
     $Wshift $WGshift $WProses
-	DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-	AND '$stop_date' and a.`status`='selesai'
+	a.tgl_update BETWEEN '$start_date' 
+	AND '$stop_date' and a.status='selesai'
 GROUP BY b.g_shift	");
 						$totOKS = 0;
 						$totXS = 0;
@@ -314,7 +346,7 @@ GROUP BY b.g_shift	");
 						$pPb = 0;
 						$pKr = 0;
 						$pT = 0;
-						while ($row1 = mysqli_fetch_array($qry1)) {
+						while ($row1 = sqlsrv_fetch_array($qry1,SQLSRV_FETCH_ASSOC)) {
 							?>
 							<tr valign="top" bgcolor="<?php echo $bgcolor; ?>">
 								<td align="center">
@@ -475,16 +507,16 @@ GROUP BY b.g_shift	");
 							<td align="center">&nbsp;</td>
 						</tr>
 						<?php
-						//						$qrySI = mysqli_query($con, "SELECT SUM(bruto) AS kg, COUNT(*) AS sisa_kk FROM tbl_schedule WHERE NOT STATUS = 'selesai' AND `status`='antri mesin' AND NOT proses='Perbaikan'");
-						$qrySI = mysqli_query($con, "SELECT SUM(bruto) AS kg, COUNT(*) AS sisa_kk FROM tbl_schedule WHERE NOT STATUS = 'selesai' AND NOT proses='Perbaikan' ");
-						$rSI = mysqli_fetch_array($qrySI);
-						$qrySPR = mysqli_query($con, "SELECT COUNT(*) AS kk_pr, SUM(a.bruto-b.qty) AS qty_pr
-			FROM tbl_schedule a 
-			LEFT JOIN tbl_inspection b ON a.id=b.id_schedule
-			LEFT JOIN tbl_gerobak c ON a.id=c.id_schedule 
-			WHERE DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
+						//						$qrySI = sqlsrv_query($con_db_qc_sqlsrv, "SELECT SUM(bruto) AS kg, COUNT(*) AS sisa_kk FROM tbl_schedule WHERE NOT STATUS = 'selesai' AND `status`='antri mesin' AND NOT proses='Perbaikan'");
+						$qrySI = sqlsrv_query($con_db_qc_sqlsrv, "SELECT SUM(bruto) AS kg, COUNT(*) AS sisa_kk FROM db_qc.tbl_schedule WHERE NOT STATUS = 'selesai' AND NOT proses='Perbaikan' ");
+						$rSI = sqlsrv_fetch_array($qrySI,SQLSRV_FETCH_ASSOC);
+						$qrySPR = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) AS kk_pr, SUM(a.bruto-b.qty) AS qty_pr
+			FROM db_qc.tbl_schedule a 
+			LEFT JOIN db_qc.tbl_inspection b ON a.id=b.id_schedule
+			LEFT JOIN db_qc.tbl_gerobak c ON a.id=c.id_schedule 
+			WHERE a.tgl_update BETWEEN '$start_date' 
 			AND '$stop_date' AND a.status='selesai' AND c.status_produk = '3'");
-						$rSPR = mysqli_fetch_array($qrySPR);
+						$rSPR = sqlsrv_fetch_array($qrySPR,SQLSRV_FETCH_ASSOC);
 						?>
 						<tr valign="top" bgcolor="<?php echo $bgcolor; ?>">
 							<td align="center" colspan="3">SISA SIAP INSPECT</td>
@@ -519,8 +551,8 @@ GROUP BY b.g_shift	");
 							</td>
 						</tr>
 						<?php
-						$qrySP = mysqli_query($con, "SELECT SUM(bruto) AS kg, COUNT(*) AS sisa_kk FROM tbl_schedule WHERE NOT STATUS = 'selesai' AND `status`='antri mesin' AND proses='Perbaikan'");
-						$rSP = mysqli_fetch_array($qrySP);
+						$qrySP = sqlsrv_query($con_db_qc_sqlsrv, "SELECT SUM(bruto) AS kg, COUNT(*) AS sisa_kk FROM db_qc.tbl_schedule WHERE NOT STATUS = 'selesai' AND [status]='antri mesin' AND proses='Perbaikan'");
+						$rSP = sqlsrv_fetch_array($qrySP,SQLSRV_FETCH_ASSOC);
 						?>
 						<tr valign="top" bgcolor="<?php echo $bgcolor; ?>">
 							<td align="center" colspan="3">SISA SIAP INSPECT PERBAIKAN</td>
@@ -554,7 +586,7 @@ GROUP BY b.g_shift	");
 				<div class="box-header with-border">
 					<h3 class="box-title">Data Inspeksi</h3><br>
 					<?php if ($_POST['awal'] != "") { ?><b>Periode:
-							<?php echo $start_date . " to " . $stop_date ?>
+							<?php echo substr($start_date,0,-3) . " to " . substr($stop_date,0,-3) ?>
 						</b>
 					<?php } ?>
 					<?php if ($_POST['awal'] != "") { ?>
@@ -658,7 +690,7 @@ GROUP BY b.g_shift	");
 							<?php
 							$no = 1;
 
-							$qry1 = mysqli_query($con, "SELECT
+							$qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
 																	a.id as idins,
 																	b.id as id_schedule,
 																	a.catatan,
@@ -672,66 +704,52 @@ GROUP BY b.g_shift	");
 																	b.warna,
 																	b.lot,
 																	b.no_item,
-																	b.tgl_delivery,
+																	CONVERT(VARCHAR(10),b.tgl_delivery) tgl_delivery,
 																	b.no_mesin,
 																	b.bruto,
 																	b.rol,
 																	a.jml_rol,
 																	a.qty,
-																	if(a.jml_rol>0,CONCAT(a.jml_rol,'x',a.qty),CONCAT(b.rol,'x',b.bruto)) as qty_bruto,
+																	CASE
+																		WHEN TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) > 0.00 THEN CONCAT(a.jml_rol,'x',a.qty)
+																		ELSE CONCAT(b.rol,'x',b.bruto)
+																	END as qty_bruto,
 																	a.yard,
 																	b.pjng_order,
-																	b.tgl_mulai,
-																	b.tgl_stop,
+																	CONVERT(VARCHAR(19),b.tgl_mulai) tgl_mulai,
+																	CONVERT(VARCHAR(19),b.tgl_stop) tgl_stop,
 																	b.istirahat,
 																	b.lembap_fin,
 																	b.lembap_qcf,
 																	b.nokk,
 																	b.nodemand,
-																	b.qty_loss,
+																	CONVERT(VARCHAR(50),b.qty_loss) qty_loss,
 																	b.note_loss,
 																	a.catatan,
-																	TIMESTAMPDIFF(
-																	MINUTE,
-																	b.tgl_mulai,b.tgl_stop) as waktu,
+																	DATEDIFF(Minute,b.tgl_mulai,b.tgl_stop) as waktu,
 																	b.proses,
-																	c.status_produk,
-																	IF
-																	( c.status_produk = '1', 'OK', IF(c.status_produk = '2', 'TK','PR')) AS sts,
-																IF
-																	(
-																	NOT c.no_gerobak6 = '',
-																	CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3, '+', no_gerobak4, '+', no_gerobak5, '+', no_gerobak6 ),
-																IF
-																	(
-																	NOT c.no_gerobak5 = '',
-																	CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3, '+', no_gerobak4, '+', no_gerobak5 ),
-																IF
-																	(
-																	NOT c.no_gerobak4 = '',
-																	CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3, '+', no_gerobak4 ),
-																IF
-																	(
-																	NOT c.no_gerobak3 = '',
-																	CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3 ),
-																IF
-																	(
-																	NOT c.no_gerobak2 = '',
-																	CONCAT( no_gerobak1, '+', no_gerobak2 ),
-																IF
-																	( NOT c.no_gerobak1 = '', c.no_gerobak1, '' ) 
-																	) 
-																	) 
-																	) 
-																	) 
-																	) AS no_grobak 
+																	c.status_produk,	
+																	CASE
+																		WHEN c.status_produk = '1' THEN 'OK'
+																		WHEN c.status_produk = '2' THEN 'TK'
+																		ELSE 'PR'
+																	END as sts,
+																	CASE
+																		WHEN NOT c.no_gerobak6 = '' THEN CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3, '+', no_gerobak4, '+', no_gerobak5, '+', no_gerobak6 )
+																		WHEN NOT c.no_gerobak5 = '' THEN CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3, '+', no_gerobak4, '+', no_gerobak5 )
+																		WHEN NOT c.no_gerobak4 = '' THEN CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3, '+', no_gerobak4 )
+																		WHEN NOT c.no_gerobak3 = '' THEN CONCAT( no_gerobak1, '+', no_gerobak2, '+', no_gerobak3 )         
+																		WHEN NOT c.no_gerobak2 = '' THEN CONCAT( no_gerobak1, '+', no_gerobak2 )      
+																		WHEN NOT c.no_gerobak1 = '' THEN c.no_gerobak1  
+																		ELSE ''
+																	END as no_grobak
 																FROM
-																	tbl_inspection a
-																	INNER JOIN tbl_schedule b ON a.id_schedule = b.id
-																	INNER JOIN tbl_gerobak c ON c.id_schedule = b.id
+																	db_qc.tbl_inspection a
+																	INNER JOIN db_qc.tbl_schedule b ON a.id_schedule = b.id
+																	INNER JOIN db_qc.tbl_gerobak c ON c.id_schedule = b.id
 																WHERE
-																	$Wshift $WGshift $WProses a.`status`='selesai' and
-																	DATE_FORMAT( a.tgl_buat, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
+																	$Wshift $WGshift $WProses a.status='selesai' and
+																	a.tgl_buat BETWEEN '$start_date' 
 																	AND '$stop_date' $WBuyer $WItem
 																ORDER BY
 																	a.id ASC");
@@ -771,7 +789,7 @@ GROUP BY b.g_shift	");
 							$PSRol = 0;
 							$PSQty = 0;
 							$PSYrd = 0;
-							while ($row1 = mysqli_fetch_array($qry1)) {
+							while ($row1 = sqlsrv_fetch_array($qry1,SQLSRV_FETCH_ASSOC)) {
 								$hourdiff = (int) $row1['waktu'] - (int) $row1['istirahat'];
 								?>
 								<tr valign="top" bgcolor="<?php echo $bgcolor; ?>">

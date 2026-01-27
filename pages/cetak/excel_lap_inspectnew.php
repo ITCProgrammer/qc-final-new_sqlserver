@@ -20,14 +20,14 @@ $Proses	= isset($_GET['proses']) ? $_GET['proses'] : '';
 $jamA	= isset($_GET['jam_awal']) ? $_GET['jam_awal'] : '';
 $jamAr	= isset($_GET['jam_akhir']) ? $_GET['jam_akhir'] : '';
 if(strlen($jamA)==5){
-	$start_date = $Awal.' '.$jamA;
+	$start_date = $Awal.' '.$jamA.":00";
 }else{ 
-	$start_date = $Awal.' 0'.$jamA;
+	$start_date = $Awal.' 0'.$jamA.":00";
 }	
 if(strlen($jamAr)==5){
-	$stop_date  = $Akhir.' '.$jamAr;
+	$stop_date  = $Akhir.' '.$jamAr.":59";
 }else{ 
-	$stop_date  = $Akhir.' 0'.$jamAr;
+	$stop_date  = $Akhir.' 0'.$jamAr.":59";
 }
 if($_GET['shift']=="ALL"){		
     $Wshift=" ";	
@@ -60,28 +60,28 @@ if($_GET['shift']=="ALL"){
                 <th colspan="4" align="center" bgcolor="#92D050">Sopian S</th>
             </tr>
             <?php 
-            $sqlsa=mysqli_query($con,"SELECT
-            sum( a.jml_rol) as roll_sa,
+            $sqlsa=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' and b.g_shift ='A' and (b.t_jawab='Leader 1' or b.t_jawab='Leader 2' or b.t_jawab='Leader 3')");
-            $rowsa=mysqli_fetch_array($sqlsa);
-			$sqlsaLpA=mysqli_query($con,"
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' and b.g_shift ='A' and (b.t_jawab='Leader 1' or b.t_jawab='Leader 2' or b.t_jawab='Leader 3')");
+            $rowsa=sqlsrv_fetch_array($sqlsa,SQLSRV_FETCH_ASSOC);
+			$sqlsaLpA=sqlsrv_query($con_db_qc_sqlsrv,"
 			SELECT
-				SUM(jml_roll) as roll,
+				SUM(TRY_CAST(COALESCE(jml_roll,'0') AS  NUMERIC(5, 2))) as roll,
 				SUM(bruto) as bruto,
 				SUM(netto) as netto,
 				SUM(panjang) as panjang
 			FROM
-				tbl_lap_inspeksi
+				db_qc.tbl_lap_inspeksi
 			WHERE
 				tgl_update BETWEEN '$Awal' AND '$Akhir'
-				AND `inspektor` = 'PACKING A'
-				AND `dept`='PACKING' ");
-            $rowsaLpA=mysqli_fetch_array($sqlsaLpA);
+				AND inspektor = 'PACKING A'
+				AND dept='PACKING' ");
+            $rowsaLpA=sqlsrv_fetch_array($sqlsaLpA,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <th colspan="2" align="left">Akumulasi Inspeksi Shift A</th>
@@ -91,15 +91,15 @@ if($_GET['shift']=="ALL"){
                 <th align="center">&nbsp;</th>
             </tr>
             <?php 
-            $sqlsaL1=mysqli_query($con,"SELECT
-            sum( a.jml_rol) as roll_sa,
+            $sqlsaL1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' and b.t_jawab='Leader 1' and b.g_shift ='A' ");
-            $rowsaL1=mysqli_fetch_array($sqlsaL1);
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' and b.t_jawab='Leader 1' and b.g_shift ='A' ");
+            $rowsaL1=sqlsrv_fetch_array($sqlsaL1,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="right" colspan="6">&nbsp;</td>
@@ -124,20 +124,20 @@ if($_GET['shift']=="ALL"){
                 <th align="center">Keterangan</th>
             </tr>
 			<?php
-			$sqlsaL1=mysqli_query($con,"SELECT
-            b.no_mesin,
+			$sqlsaL1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            max(b.no_mesin) no_mesin,
 			a.personil,
-            sum( a.jml_rol) as roll_sa,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' 
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' 
 			AND b.t_jawab='Leader 1' and b.g_shift ='A'			
 			group by a.personil
-			order by b.no_mesin ASC");
-			while($rsaL1=mysqli_fetch_array($sqlsaL1)){
+			order by max(b.no_mesin) ASC");
+			while($rsaL1=sqlsrv_fetch_array($sqlsaL1,SQLSRV_FETCH_ASSOC)){
 			?>
             <tr>
               <td align="center" class="table-list1"><?php echo $rsaL1['no_mesin'];?></td>
@@ -160,15 +160,15 @@ if($_GET['shift']=="ALL"){
                 <td align="right" colspan="6">&nbsp;</td>
             </tr>
             <?php 
-            $sqlsaL2=mysqli_query($con,"SELECT
-            sum( a.jml_rol) as roll_sa,
+            $sqlsaL2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' and b.t_jawab='Leader 2' and b.g_shift ='A' ");
-            $rowsaL2=mysqli_fetch_array($sqlsaL2);
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' and b.t_jawab='Leader 2' and b.g_shift ='A' ");
+            $rowsaL2=sqlsrv_fetch_array($sqlsaL2,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td colspan="2" align="left">Leader 2</td>
@@ -190,20 +190,20 @@ if($_GET['shift']=="ALL"){
                 <td align="center">Keterangan</td>
             </tr>
 			<?php
-			$sqlsaL3=mysqli_query($con,"SELECT
-            b.no_mesin,
+			$sqlsaL3=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            max(b.no_mesin) no_mesin,
 			a.personil,
-            sum( a.jml_rol) as roll_sa,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' 
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' 
 			AND b.t_jawab='Leader 2' and b.g_shift ='A'			
 			group by a.personil
-			order by b.no_mesin ASC");
-			while($rsaL3=mysqli_fetch_array($sqlsaL3)){
+			order by max(b.no_mesin) ASC");
+			while($rsaL3=sqlsrv_fetch_array($sqlsaL3,SQLSRV_FETCH_ASSOC)){
 			?>
             <tr>
               <td align="center" class="table-list1"><?php echo $rsaL3['no_mesin'];?></td>
@@ -222,15 +222,15 @@ if($_GET['shift']=="ALL"){
                 <td colspan="4" align="center" bgcolor="#B4C6E7">Handri</td>
             </tr>
             <?php 
-            $sqlsaL3=mysqli_query($con,"SELECT
-            sum( a.jml_rol) as roll_sa,
+            $sqlsaL3=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' and b.t_jawab='Leader 3' and b.g_shift ='A' ");
-            $rowsaL3=mysqli_fetch_array($sqlsaL3);
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' and b.t_jawab='Leader 3' and b.g_shift ='A' ");
+            $rowsaL3=sqlsrv_fetch_array($sqlsaL3,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td colspan="2" align="left">Akumulasi Hasil Inspeksi</td>
@@ -248,20 +248,20 @@ if($_GET['shift']=="ALL"){
                 <td align="center">Keterangan</td>
             </tr>
 			<?php
-			$sqlsaL3=mysqli_query($con,"SELECT
-            b.no_mesin,
+			$sqlsaL3=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            max(b.no_mesin) no_mesin,
 			a.personil,
-            sum( a.jml_rol) as roll_sa,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' 
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' 
 			AND b.t_jawab='Leader 3' and b.g_shift ='A'			
 			group by a.personil
-			order by b.no_mesin ASC");
-			while($rsaL3=mysqli_fetch_array($sqlsaL3)){
+			order by max(b.no_mesin) ASC");
+			while($rsaL3=sqlsrv_fetch_array($sqlsaL3,SQLSRV_FETCH_ASSOC)){
 			?>
             <tr>
               <td align="center" class="table-list1"><?php echo $rsaL3['no_mesin'];?></td>
@@ -280,19 +280,19 @@ if($_GET['shift']=="ALL"){
                 <td colspan="4" align="center" bgcolor="#B4C6E7">Andriana</td>
             </tr>
             <?php 
-            $sqlsaLp=mysqli_query($con,"
+            $sqlsaLp=sqlsrv_query($con_db_qc_sqlsrv,"
 SELECT
-	SUM(jml_roll) as roll,
+	SUM(TRY_CAST(COALESCE(jml_roll,'0') AS  NUMERIC(5, 2))) as roll,
 	SUM(bruto) as bruto,
 	SUM(netto) as netto,
 	SUM(panjang) as panjang
 FROM
-	tbl_lap_inspeksi
+	db_qc.tbl_lap_inspeksi
 WHERE
 	tgl_update BETWEEN '$Awal' AND '$Akhir'
-	AND `inspektor` = 'PACKING A'
-	AND `dept`='PACKING' ");
-            $rowsaLp=mysqli_fetch_array($sqlsaLp);
+	AND inspektor = 'PACKING A'
+	AND dept='PACKING' ");
+            $rowsaLp=sqlsrv_fetch_array($sqlsaLp,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td colspan="2" align="left">Akumulasi Hasil Inspeksi</td>
@@ -310,22 +310,22 @@ WHERE
                 <td align="center">Keterangan</td>
             </tr>
 			<?php
-			$sqlsaLp=mysqli_query($con," SELECT 
+			$sqlsaLp=sqlsrv_query($con_db_qc_sqlsrv," SELECT 
 			operator,no_mc 
-			FROM tbl_lap_inspeksi
+			FROM db_qc.tbl_lap_inspeksi
             WHERE tgl_update BETWEEN '$Awal' AND '$Akhir'  
-			AND `inspektor`='PACKING A' 
-			AND `dept`='PACKING' 
+			AND inspektor='PACKING A' 
+			AND dept='PACKING' 
 			GROUP BY operator,no_mc ");
-			while($rsaLp=mysqli_fetch_array($sqlsaLp)){
+			while($rsaLp=sqlsrv_fetch_array($sqlsaLp,SQLSRV_FETCH_ASSOC)){
 			//QTY KECIL
-                    $qryKecil=mysqli_query($con,"SELECT SUM(jml_roll) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM tbl_lap_inspeksi
-                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' AND `inspektor`='PACKING A' AND `dept`='PACKING' AND operator='$rsaLp[operator]' AND no_mc='$rsaLp[no_mc]' AND ket_qty='Quantity Kecil'");
-                    $rowKecil=mysqli_fetch_array($qryKecil);
+                    $qryKecil=sqlsrv_query($con_db_qc_sqlsrv,"SELECT SUM(TRY_CAST(COALESCE(jml_roll,'0') AS  NUMERIC(5, 2))) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM db_qc.tbl_lap_inspeksi
+                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' AND inspektor='PACKING A' AND dept='PACKING' AND operator='$rsaLp[operator]' AND no_mc='$rsaLp[no_mc]' AND ket_qty='Quantity Kecil'");
+                    $rowKecil=sqlsrv_fetch_array($qryKecil,SQLSRV_FETCH_ASSOC);
                     //QTY BESAR
-                    $qryBesar=mysqli_query($con,"SELECT SUM(jml_roll) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM tbl_lap_inspeksi
-                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' AND `inspektor`='PACKING A' AND `dept`='PACKING' AND operator='$rsaLp[operator]' AND no_mc='$rsaLp[no_mc]' AND ket_qty='Quantity Besar'");
-                    $rowBesar=mysqli_fetch_array($qryBesar);
+                    $qryBesar=sqlsrv_query($con_db_qc_sqlsrv,"SELECT SUM(TRY_CAST(COALESCE(jml_roll,'0') AS  NUMERIC(5, 2))) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM db_qc.tbl_lap_inspeksi
+                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' AND inspektor='PACKING A' AND dept='PACKING' AND operator='$rsaLp[operator]' AND no_mc='$rsaLp[no_mc]' AND ket_qty='Quantity Besar'");
+                    $rowBesar=sqlsrv_fetch_array($qryBesar,SQLSRV_FETCH_ASSOC);
 					$sqlop="SELECT x.LONGDESCRIPTION FROM DB2ADMIN.INITIALS x
 							WHERE CODE ='".$rsaLp['operator']."'"; 
                     $stmt1=db2_exec($conn1,$sqlop, array('cursor'=>DB2_SCROLLABLE));
@@ -373,28 +373,28 @@ WHERE
                 <th colspan="4" align="center" bgcolor="#92D050">Ali Mulhakim</th>
             </tr>
             <?php 
-            $sqlsb=mysqli_query($con,"SELECT
-            sum( a.jml_rol) as roll_sa,
+            $sqlsb=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' and b.g_shift ='B' and (b.t_jawab='Leader 1' or b.t_jawab='Leader 2' or b.t_jawab='Leader 3')");
-            $rowsb=mysqli_fetch_array($sqlsb);
-			$sqlsaLpB=mysqli_query($con,"
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' and b.g_shift ='B' and (b.t_jawab='Leader 1' or b.t_jawab='Leader 2' or b.t_jawab='Leader 3')");
+            $rowsb=sqlsrv_fetch_array($sqlsb,SQLSRV_FETCH_ASSOC);
+			$sqlsaLpB=sqlsrv_query($con_db_qc_sqlsrv,"
 			SELECT
-				SUM(jml_roll) as roll,
+				SUM(TRY_CAST(COALESCE(jml_roll,'0') AS  NUMERIC(5, 2))) as roll,
 				SUM(bruto) as bruto,
 				SUM(netto) as netto,
 				SUM(panjang) as panjang
 			FROM
-				tbl_lap_inspeksi
+				db_qc.tbl_lap_inspeksi
 			WHERE
 				tgl_update BETWEEN '$Awal' AND '$Akhir'
-				AND `inspektor` = 'PACKING B'
-				AND `dept`='PACKING' ");
-            $rowsaLpB=mysqli_fetch_array($sqlsaLpB);
+				AND inspektor = 'PACKING B'
+				AND dept='PACKING' ");
+            $rowsaLpB=sqlsrv_fetch_array($sqlsaLpB,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <th colspan="2" align="left">Akumulasi Inspeksi Shift B</th>
@@ -411,15 +411,15 @@ WHERE
                 <th colspan="4" align="center" bgcolor="#FFFF00">Yusuf</th>
             </tr>
             <?php 
-            $sqlsbL1=mysqli_query($con,"SELECT
-            sum( a.jml_rol) as roll_sa,
+            $sqlsbL1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' and b.t_jawab='Leader 1' and b.g_shift ='B' ");
-            $rowsbL1=mysqli_fetch_array($sqlsbL1);
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' and b.t_jawab='Leader 1' and b.g_shift ='B' ");
+            $rowsbL1=sqlsrv_fetch_array($sqlsbL1,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <th colspan="2" align="left">Akumulasi Hasil Inspeksi</th>
@@ -437,20 +437,20 @@ WHERE
                 <th align="center">Keterangan</th>
             </tr>
 			<?php
-			$sqlsbL1=mysqli_query($con,"SELECT
-            b.no_mesin,
+			$sqlsbL1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            max(b.no_mesin) no_mesin,
 			a.personil,
-            sum( a.jml_rol) as roll_sa,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' 
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' 
 			AND b.t_jawab='Leader 1' and b.g_shift ='B'
 			group by a.personil
-			order by b.no_mesin ASC");
-			while($rsbL1=mysqli_fetch_array($sqlsbL1)){
+			order by max(b.no_mesin) ASC");
+			while($rsbL1=sqlsrv_fetch_array($sqlsbL1,SQLSRV_FETCH_ASSOC)){
 			?>	
             <tr>
               <td align="center" class="table-list1"><?php echo $rsbL1['no_mesin'];?></td>
@@ -473,15 +473,15 @@ WHERE
                 <td align="right" colspan="6">&nbsp;</td>
             </tr>
             <?php 
-            $sqlsbL2=mysqli_query($con,"SELECT
-            sum( a.jml_rol) as roll_sa,
+            $sqlsbL2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' and b.t_jawab='Leader 2' and b.g_shift ='B' ");
-            $rowsbL2=mysqli_fetch_array($sqlsbL2);
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' and b.t_jawab='Leader 2' and b.g_shift ='B' ");
+            $rowsbL2=sqlsrv_fetch_array($sqlsbL2,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td colspan="2" align="left">Leader 2</td>
@@ -503,20 +503,20 @@ WHERE
                 <td align="center">Keterangan</td>
             </tr>
 			<?php
-			$sqlsbL2=mysqli_query($con,"SELECT
-            b.no_mesin,
+			$sqlsbL2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            max(b.no_mesin) no_mesin,
 			a.personil,
-            sum( a.jml_rol) as roll_sa,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' 
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' 
 			AND b.t_jawab='Leader 2' and b.g_shift ='B'
 			group by a.personil
-			order by b.no_mesin ASC");
-			while($rsbL2=mysqli_fetch_array($sqlsbL2)){
+			order by max(b.no_mesin) ASC");
+			while($rsbL2=sqlsrv_fetch_array($sqlsbL2,SQLSRV_FETCH_ASSOC)){
 			?>
             <tr>
               <td align="center" class="table-list1"><?php echo $rsbL2['no_mesin'];?></td>
@@ -535,15 +535,15 @@ WHERE
                 <td colspan="4" align="center" bgcolor="#B4C6E7">Dodi</td>
             </tr>
             <?php 
-            $sqlsbL3=mysqli_query($con,"SELECT
-            sum( a.jml_rol) as roll_sa,
+            $sqlsbL3=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' and b.t_jawab='Leader 3' and b.g_shift ='B' ");
-            $rowsbL3=mysqli_fetch_array($sqlsbL3);
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' and b.t_jawab='Leader 3' and b.g_shift ='B' ");
+            $rowsbL3=sqlsrv_fetch_array($sqlsbL3,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td colspan="2" align="left">Akumulasi Hasil Inspeksi</td>
@@ -561,20 +561,20 @@ WHERE
                 <td align="center">Keterangan</td>
             </tr>
 			<?php
-			$sqlsbL3=mysqli_query($con,"SELECT
-            b.no_mesin,
+			$sqlsbL3=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            max(b.no_mesin) no_mesin,
 			a.personil,
-            sum( a.jml_rol) as roll_sa,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' 
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' 
 			AND b.t_jawab='Leader 3' and b.g_shift ='B'
 			group by a.personil
-			order by b.no_mesin ASC");
-			while($rsbL3=mysqli_fetch_array($sqlsbL3)){
+			order by max(b.no_mesin) ASC");
+			while($rsbL3=sqlsrv_fetch_array($sqlsbL3,SQLSRV_FETCH_ASSOC)){
 			?>
             <tr>
               <td align="center" class="table-list1"><?php echo $rsbL3['no_mesin'];?></td>
@@ -593,19 +593,19 @@ WHERE
                 <td colspan="4" align="center" bgcolor="#B4C6E7">Aris S</td>
             </tr>
             <?php 
-            $sqlsbLp=mysqli_query($con,"
+            $sqlsbLp=sqlsrv_query($con_db_qc_sqlsrv,"
 SELECT
-	SUM(jml_roll) as roll,
+	SUM(TRY_CAST(COALESCE(jml_roll,'0') AS  NUMERIC(5, 2))) as roll,
 	SUM(bruto) as bruto,
 	SUM(netto) as netto,
 	SUM(panjang) as panjang
 FROM
-	tbl_lap_inspeksi
+	db_qc.tbl_lap_inspeksi
 WHERE
 	tgl_update BETWEEN '$Awal' AND '$Akhir'
-	AND `inspektor` = 'PACKING B'
-	AND `dept`='PACKING' ");
-            $rowsbLp=mysqli_fetch_array($sqlsbLp);
+	AND inspektor = 'PACKING B'
+	AND dept='PACKING' ");
+            $rowsbLp=sqlsrv_fetch_array($sqlsbLp,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td colspan="2" align="left">Akumulasi Hasil Inspeksi</td>
@@ -623,22 +623,22 @@ WHERE
                 <td align="center">Keterangan</td>
             </tr>
 			<?php
-			$sqlsbLp=mysqli_query($con," SELECT 
+			$sqlsbLp=sqlsrv_query($con_db_qc_sqlsrv," SELECT 
 			operator,no_mc 
-			FROM tbl_lap_inspeksi
+			FROM db_qc.tbl_lap_inspeksi
             WHERE tgl_update BETWEEN '$Awal' AND '$Akhir'  
-			AND `inspektor`='PACKING B' 
-			AND `dept`='PACKING' 
+			AND inspektor='PACKING B' 
+			AND dept='PACKING' 
 			GROUP BY operator,no_mc ");
-			while($rsbLp=mysqli_fetch_array($sqlsbLp)){
+			while($rsbLp=sqlsrv_fetch_array($sqlsbLp,SQLSRV_FETCH_ASSOC)){
 			//QTY KECIL
-                    $qryKecil=mysqli_query($con,"SELECT SUM(jml_roll) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM tbl_lap_inspeksi
-                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' AND `inspektor`='PACKING B' AND `dept`='PACKING' AND operator='$rsbLp[operator]' AND no_mc='$rsbLp[no_mc]' AND ket_qty='Quantity Kecil'");
-                    $rowKecil=mysqli_fetch_array($qryKecil);
+                    $qryKecil=sqlsrv_query($con_db_qc_sqlsrv,"SELECT SUM(TRY_CAST(COALESCE(jml_roll,'0') AS  NUMERIC(5, 2))) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM db_qc.tbl_lap_inspeksi
+                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' AND inspektor='PACKING B' AND dept='PACKING' AND operator='$rsbLp[operator]' AND no_mc='$rsbLp[no_mc]' AND ket_qty='Quantity Kecil'");
+                    $rowKecil=sqlsrv_fetch_array($qryKecil,SQLSRV_FETCH_ASSOC);                    
                     //QTY BESAR
-                    $qryBesar=mysqli_query($con,"SELECT SUM(jml_roll) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM tbl_lap_inspeksi
-                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' AND `inspektor`='PACKING B' AND `dept`='PACKING' AND operator='$rsbLp[operator]' AND no_mc='$rsbLp[no_mc]' AND ket_qty='Quantity Besar'");
-                    $rowBesar=mysqli_fetch_array($qryBesar);
+                    $qryBesar=sqlsrv_query($con_db_qc_sqlsrv,"SELECT SUM(TRY_CAST(COALESCE(jml_roll,'0') AS  NUMERIC(5, 2))) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM db_qc.tbl_lap_inspeksi
+                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' AND inspektor='PACKING B' AND dept='PACKING' AND operator='$rsbLp[operator]' AND no_mc='$rsbLp[no_mc]' AND ket_qty='Quantity Besar'");
+                    $rowBesar=sqlsrv_fetch_array($qryBesar,SQLSRV_FETCH_ASSOC);
 					$sqlop="SELECT x.LONGDESCRIPTION FROM DB2ADMIN.INITIALS x
 							WHERE CODE ='".$rsbLp['operator']."'"; 
                     $stmt1=db2_exec($conn1,$sqlop, array('cursor'=>DB2_SCROLLABLE));
@@ -678,28 +678,28 @@ WHERE
                 <th colspan="4" align="center" bgcolor="#92D050">Heryanto</th>
             </tr>
             <?php 
-            $sqlsc=mysqli_query($con,"SELECT
-            sum( a.jml_rol) as roll_sa,
+            $sqlsc=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' and b.g_shift ='C' and (b.t_jawab='Leader 1' or b.t_jawab='Leader 2' or b.t_jawab='Leader 3')");
-            $rowsc=mysqli_fetch_array($sqlsc);
-			$sqlsaLpC=mysqli_query($con,"
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' and b.g_shift ='C' and (b.t_jawab='Leader 1' or b.t_jawab='Leader 2' or b.t_jawab='Leader 3')");
+            $rowsc=sqlsrv_fetch_array($sqlsc,SQLSRV_FETCH_ASSOC);
+			$sqlsaLpC=sqlsrv_query($con_db_qc_sqlsrv,"
 			SELECT
-				SUM(jml_roll) as roll,
+				SUM(TRY_CAST(COALESCE(jml_roll,'0') AS  NUMERIC(5, 2))) as roll,
 				SUM(bruto) as bruto,
 				SUM(netto) as netto,
 				SUM(panjang) as panjang
 			FROM
-				tbl_lap_inspeksi
+				db_qc.tbl_lap_inspeksi
 			WHERE
 				tgl_update BETWEEN '$Awal' AND '$Akhir'
-				AND `inspektor` = 'PACKING C'
-				AND `dept`='PACKING' ");
-            $rowsaLpC=mysqli_fetch_array($sqlsaLpC);
+				AND inspektor = 'PACKING C'
+				AND dept='PACKING' ");
+            $rowsaLpC=sqlsrv_fetch_array($sqlsaLpC,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <th colspan="2" align="left">Akumulasi Inspeksi Shift C</th>
@@ -716,15 +716,15 @@ WHERE
                 <th colspan="4" align="center" bgcolor="#FFFF00">Heru</th>
             </tr>
             <?php 
-            $sqlscL1=mysqli_query($con,"SELECT
-            sum( a.jml_rol) as roll_sa,
+            $sqlscL1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' and b.t_jawab='Leader 1' and b.g_shift ='C' ");
-            $rowscL1=mysqli_fetch_array($sqlscL1);
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' and b.t_jawab='Leader 1' and b.g_shift ='C' ");
+            $rowscL1=sqlsrv_fetch_array($sqlscL1,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <th colspan="2" align="left">Akumulasi Hasil Inspeksi</th>
@@ -742,20 +742,20 @@ WHERE
                 <th align="center">Keterangan</th>
             </tr>
             <?php
-			$sqlscL1=mysqli_query($con,"SELECT
-            b.no_mesin,
+			$sqlscL1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            max(b.no_mesin) no_mesin,
 			a.personil,
-            sum( a.jml_rol) as roll_sa,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' 
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' 
 			AND b.t_jawab='Leader 1' and b.g_shift ='C'
 			group by a.personil
-			order by b.no_mesin ASC");
-			while($rscL1=mysqli_fetch_array($sqlscL1)){
+			order by max(b.no_mesin) ASC");
+			while($rscL1=sqlsrv_fetch_array($sqlscL1,SQLSRV_FETCH_ASSOC)){
 			?>	
             <tr>
               <td align="center" class="table-list1"><?php echo $rscL1['no_mesin'];?></td>
@@ -782,15 +782,15 @@ WHERE
                 <td colspan="4" align="center" bgcolor="#FFE699">A.Safei</td>
             </tr>
             <?php 
-            $sqlscL2=mysqli_query($con,"SELECT
-            sum( a.jml_rol) as roll_sa,
+            $sqlscL2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' and b.t_jawab='Leader 2' and b.g_shift ='C' ");
-            $rowscL2=mysqli_fetch_array($sqlscL2);
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' and b.t_jawab='Leader 2' and b.g_shift ='C' ");
+            $rowscL2=sqlsrv_fetch_array($sqlscL2,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td colspan="2" align="left">Akumulasi Hasil Inspeksi</td>
@@ -808,20 +808,20 @@ WHERE
                 <td align="center">Keterangan</td>
             </tr>
 			<?php
-			$sqlscL2=mysqli_query($con,"SELECT
-            b.no_mesin,
+			$sqlscL2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            max(b.no_mesin) no_mesin,
 			a.personil,
-            sum( a.jml_rol) as roll_sa,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' 
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' 
 			AND b.t_jawab='Leader 2' and b.g_shift ='C'
 			group by a.personil
-			order by b.no_mesin ASC");
-			while($rscL2=mysqli_fetch_array($sqlscL2)){
+			order by max(b.no_mesin) ASC");
+			while($rscL2=sqlsrv_fetch_array($sqlscL2,SQLSRV_FETCH_ASSOC)){
 			?>	
             <tr>
               <td align="center" class="table-list1"><?php echo $rscL2['no_mesin'];?></td>
@@ -840,15 +840,15 @@ WHERE
                 <td colspan="4" align="center" bgcolor="#B4C6E7">Junaedi</td>
             </tr>
             <?php 
-            $sqlscL3=mysqli_query($con,"SELECT
-            sum( a.jml_rol) as roll_sa,
+            $sqlscL3=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' and b.t_jawab='Leader 3' and b.g_shift ='C' ");
-            $rowscL3=mysqli_fetch_array($sqlscL3);
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' and b.t_jawab='Leader 3' and b.g_shift ='C' ");
+            $rowscL3=sqlsrv_fetch_array($sqlscL3,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td colspan="2" align="left">Akumulasi Hasil Inspeksi</td>
@@ -866,20 +866,20 @@ WHERE
                 <td align="center">Keterangan</td>
             </tr>
 			<?php
-			$sqlscL3=mysqli_query($con,"SELECT
-            b.no_mesin,
+			$sqlscL3=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            max(b.no_mesin) no_mesin,
 			a.personil,
-            sum( a.jml_rol) as roll_sa,
+            sum( TRY_CAST(COALESCE(a.jml_rol,'0') AS  NUMERIC(5, 2)) ) as roll_sa,
             sum( a.qty ) AS bruto_sa,
             sum( a.yard ) AS panjang_sa
             from db_qc.tbl_inspection a left join 
             db_qc.tbl_schedule b on a.id_schedule = b.id
-            where DATE_FORMAT( a.tgl_update, '%Y-%m-%d %H:%i' ) BETWEEN '$start_date' 
-            AND '$stop_date' and a.`status`='selesai' 
+            where a.tgl_update BETWEEN '$start_date' 
+            AND '$stop_date' and a.status='selesai' 
 			AND b.t_jawab='Leader 3' and b.g_shift ='C'
 			group by a.personil
-			order by b.no_mesin ASC");
-			while($rscL3=mysqli_fetch_array($sqlscL3)){
+			order by max(b.no_mesin) ASC");
+			while($rscL3=sqlsrv_fetch_array($sqlscL3,SQLSRV_FETCH_ASSOC)){
 			?>
             <tr>
               <td align="center" class="table-list1"><?php echo $rscL3['no_mesin'];?></td>
@@ -898,19 +898,19 @@ WHERE
                 <td colspan="4" align="center" bgcolor="#B4C6E7">Kharis M</td>
             </tr>
             <?php 
-            $sqlscLp=mysqli_query($con,"
+            $sqlscLp=sqlsrv_query($con_db_qc_sqlsrv,"
 SELECT
-	SUM(jml_roll) as roll,
+	SUM(TRY_CAST(COALESCE(jml_roll,'0') AS  NUMERIC(5, 2))) as roll,
 	SUM(bruto) as bruto,
 	SUM(netto) as netto,
 	SUM(panjang) as panjang
 FROM
-	tbl_lap_inspeksi
+	db_qc.tbl_lap_inspeksi
 WHERE
 	tgl_update BETWEEN '$Awal' AND '$Akhir'
-	AND `inspektor` = 'PACKING C'
-	AND `dept`='PACKING' ");
-            $rowscLp=mysqli_fetch_array($sqlscLp);
+	AND inspektor = 'PACKING C'
+	AND dept='PACKING' ");
+            $rowscLp=sqlsrv_fetch_array($sqlscLp,SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td colspan="2" align="left">Akumulasi Hasil Inspeksi</td>
@@ -928,22 +928,22 @@ WHERE
                 <td align="center">Keterangan</td>
             </tr>
 			<?php
-			$sqlscLp=mysqli_query($con," SELECT 
+			$sqlscLp=sqlsrv_query($con_db_qc_sqlsrv," SELECT 
 			operator,no_mc 
-			FROM tbl_lap_inspeksi
+			FROM db_qc.tbl_lap_inspeksi
             WHERE tgl_update BETWEEN '$Awal' AND '$Akhir'  
-			AND `inspektor`='PACKING C' 
-			AND `dept`='PACKING' 
+			AND inspektor='PACKING C' 
+			AND dept='PACKING' 
 			GROUP BY operator,no_mc ");
-			while($rscLp=mysqli_fetch_array($sqlscLp)){
+			while($rscLp=sqlsrv_fetch_array($sqlscLp,SQLSRV_FETCH_ASSOC)){
 			//QTY KECIL
-                    $qryKecil=mysqli_query($con,"SELECT SUM(jml_roll) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM tbl_lap_inspeksi
-                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' AND `inspektor`='PACKING C' AND `dept`='PACKING' AND operator='$rscLp[operator]' AND no_mc='$rscLp[no_mc]' AND ket_qty='Quantity Kecil'");
-                    $rowKecil=mysqli_fetch_array($qryKecil);
+                    $qryKecil=sqlsrv_query($con_db_qc_sqlsrv,"SELECT SUM(TRY_CAST(COALESCE(jml_roll,'0') AS  NUMERIC(5, 2))) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM db_qc.tbl_lap_inspeksi
+                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' AND inspektor='PACKING C' AND dept='PACKING' AND operator='$rscLp[operator]' AND no_mc='$rscLp[no_mc]' AND ket_qty='Quantity Kecil'");
+                    $rowKecil=sqlsrv_fetch_array($qryKecil,SQLSRV_FETCH_ASSOC);
                     //QTY BESAR
-                    $qryBesar=mysqli_query($con,"SELECT SUM(jml_roll) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM tbl_lap_inspeksi
-                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' AND `inspektor`='PACKING C' AND `dept`='PACKING' AND operator='$rscLp[operator]' AND no_mc='$rscLp[no_mc]' AND ket_qty='Quantity Besar'");
-                    $rowBesar=mysqli_fetch_array($qryBesar);
+                    $qryBesar=sqlsrv_query($con_db_qc_sqlsrv,"SELECT SUM(TRY_CAST(COALESCE(jml_roll,'0') AS  NUMERIC(5, 2))) as roll, SUM(bruto) AS bruto, SUM(netto) AS netto, SUM(panjang) AS panjang FROM db_qc.tbl_lap_inspeksi
+                    WHERE tgl_update BETWEEN '$Awal' AND '$Akhir' AND inspektor='PACKING C' AND dept='PACKING' AND operator='$rscLp[operator]' AND no_mc='$rscLp[no_mc]' AND ket_qty='Quantity Besar'");
+                    $rowBesar=sqlsrv_fetch_array($qryBesar,SQLSRV_FETCH_ASSOC);
 					$sqlop="SELECT x.LONGDESCRIPTION FROM DB2ADMIN.INITIALS x
 							WHERE CODE ='".$rscLp['operator']."'"; 
                     $stmt1=db2_exec($conn1,$sqlop, array('cursor'=>DB2_SCROLLABLE));
