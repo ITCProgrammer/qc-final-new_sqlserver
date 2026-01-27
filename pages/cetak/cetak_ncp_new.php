@@ -4,12 +4,12 @@ session_start();
 include "../../koneksi.php";
 include "../../tgl_indo.php";
 if ($_GET['id'] != "") {
-	$qry = mysqli_query($con, "SELECT * FROM tbl_ncp_qcf_now WHERE id='$_GET[id]'");
+	$qry = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_ncp_qcf_now WHERE id='$_GET[id]'");
 } else {
-	$qry = mysqli_query($con, "SELECT * FROM tbl_ncp_qcf_now WHERE no_ncp='$_GET[no_ncp]' and dept='$_GET[dept]' and nokk='$_GET[nokk]' ORDER BY revisi DESC ");
-	//$qry=mysqli_query($con,"SELECT * FROM tbl_ncp_qcf_now WHERE no_ncp='$_GET[no_ncp]' and dept='$_GET[dept]' and nokk='$_GET[nokk]' and revisi='$_GET[revisi]' ORDER BY revisi DESC ");	
+	$qry = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_ncp_qcf_now WHERE no_ncp='$_GET[no_ncp]' and dept='$_GET[dept]' and nokk='$_GET[nokk]' ORDER BY revisi DESC ");
+	//$qry=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM tbl_ncp_qcf_now WHERE no_ncp='$_GET[no_ncp]' and dept='$_GET[dept]' and nokk='$_GET[nokk]' and revisi='$_GET[revisi]' ORDER BY revisi DESC ");	
 }
-$d = mysqli_fetch_array($qry);
+$d = sqlsrv_fetch_array($qry);
 if ($d['nokk_salinan'] != "") {
 	$nokk1 = $d['nokk_salinan'];
 } else {
@@ -103,7 +103,7 @@ if ($d['m_proses'] != "") {
 	<table border="0" width="100%">
 		<tbody>
 			<tr>
-				<td colspan="2" align="left">TANGGAL: <?php echo tanggal_indo($d['tgl_buat'], true); ?></td>
+				<td colspan="2" align="left">TANGGAL: <?php echo tanggal_indo(date_format($d['tgl_buat'], "d/m/y"), true); ?></td>
 				<td colspan="4" align="right">&nbsp;</td>
 			</tr>
 			<tr>
@@ -343,8 +343,8 @@ if ($d['m_proses'] != "") {
 		</tbody>
 	</table>
 	<?php
-	$qryckw = mysqli_query($con, "SELECT * FROM tbl_cocok_warna_dye WHERE `dept`='QCF' AND nokk='$nokk1' ORDER BY id DESC");
-	$rowckw = mysqli_fetch_array($qryckw);
+	$qryckw = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_cocok_warna_dye WHERE dept='QCF' AND nokk='$nokk1' ORDER BY id DESC");
+	$rowckw = sqlsrv_fetch_array($qryckw);
 	?>
 	<table border="0" width="100%">
 		<tbody>

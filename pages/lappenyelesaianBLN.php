@@ -76,9 +76,9 @@ include "koneksi.php";
             </thead>
             <tbody>
               <?php
-              $qrydef = mysqli_query($con, " SELECT rincian,sum(berat) as kg from tbl_ncp_qcf_now 
+              $qrydef = sqlsrv_query($con_db_qc_sqlsrv, " SELECT rincian,sum(berat) as kg from db_qc.tbl_ncp_qcf_now 
 			WHERE $WKategori no_ncp LIKE '".$Tahun."/".$Bulan."/%' GROUP BY rincian  ");
-              while($rd = mysqli_fetch_array($qrydef)) {
+              while($rd = sqlsrv_fetch_array($qrydef)) {
                 if($rd['rincian'] != "") {
                   $slsai = $rd['rincian'];
                 } else {
@@ -135,10 +135,10 @@ include "koneksi.php";
             </thead>
             <tbody>
               <?php
-              $qryBASelesai = mysqli_query($con, "SELECT dept,sum(berat) as kg FROM tbl_ncp_qcf_now
-			WHERE $WKategori no_ncp LIKE '".$Tahun."/".$Bulan."/%' and 
-			(isnull(rincian) or rincian='') group by dept");
-              while($rBAS = mysqli_fetch_array($qryBASelesai)) {
+              $qryBASelesai = sqlsrv_query($con_db_qc_sqlsrv, "SELECT dept,sum(berat) as kg FROM db_qc.tbl_ncp_qcf_now
+			WHERE $WKategori no_ncp LIKE '".$Tahun."/".$Bulan."/%' AND 
+			(rincian IS NULL OR rincian='') group by dept");
+              while($rBAS = sqlsrv_fetch_array($qryBASelesai)) {
                 ?>
                 <tr valign="top">
                   <td align="center">

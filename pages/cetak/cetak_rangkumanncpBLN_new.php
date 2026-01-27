@@ -12,8 +12,10 @@ $Bulan = $_GET['bulan'];
 $Dept = $_GET['dept'];
 $Kategori = $_GET['kategori'];
 $Cancel = $_GET['cancel'];
-$qTgl = mysqli_query($con, "SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl = mysqli_fetch_array($qTgl);
+$qTgl   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+            CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg;");
+$rTgl   = sqlsrv_fetch_array($qTgl);
 if($Awal != "") {
 	$tgl = substr($Awal, 0, 10);
 	$jam = $Awal;
@@ -142,18 +144,18 @@ if($Kategori == "ALL") {
 	$Wkategori = " ncp_hitung='tidak' AND ";
 }
 if($Cancel != "1") {
-	$sts = " AND NOT `status`='Cancel' ";
+	$sts = " AND NOT status='Cancel' ";
 } else {
 	$sts = "  ";
 }
 
-$qryTotNNCP = mysqli_query($con, " SELECT count(x.no_ncp) as tot FROM
-(SELECT no_ncp FROM tbl_ncp_qcf_now WHERE $Wdept $Wkategori 
+$qryTotNNCP = sqlsrv_query($con_db_qc_sqlsrv, " SELECT count(x.no_ncp) as tot FROM
+(SELECT no_ncp FROM db_qc.tbl_ncp_qcf_now WHERE $Wdept $Wkategori 
 no_ncp LIKE '".$Tahun."/".$Bulan."/%'  $sts GROUP BY no_ncp) x ");
-$rNNCP = mysqli_fetch_array($qryTotNNCP);
-$qryTotNCP = mysqli_query($con, " SELECT COUNT(no_ncp) as tot,max(revisi) as revisi FROM tbl_ncp_qcf_now WHERE $Wdept $Wkategori 
+$rNNCP = sqlsrv_fetch_array($qryTotNNCP);
+$qryTotNCP = sqlsrv_query($con_db_qc_sqlsrv, " SELECT COUNT(no_ncp) as tot,max(revisi) as revisi FROM db_qc.tbl_ncp_qcf_now WHERE $Wdept $Wkategori 
 no_ncp LIKE '".$Tahun."/".$Bulan."/%'  $sts  ");
-$rNCP = mysqli_fetch_array($qryTotNCP);
+$rNCP = sqlsrv_fetch_array($qryTotNCP);
 ?>
 
 <body>
@@ -347,20 +349,20 @@ $rNCP = mysqli_fetch_array($qryTotNCP);
 						<?php
 						function JmlNCP($revisi, $Aw, $Ak, $Wk, $St, $dept) {
 							include "../../koneksi.php";
-							$qryk1T = mysqli_query($con, "SELECT count(x.revisi) as jmlkk FROM
-	(SELECT dept,no_ncp,revisi FROM tbl_ncp_qcf_now WHERE $Wk 
+							$qryk1T = sqlsrv_query($con_db_qc_sqlsrv, "SELECT count(x.revisi) as jmlkk FROM
+	(SELECT dept,no_ncp,revisi FROM db_qc.tbl_ncp_qcf_now WHERE $Wk 
 	no_ncp LIKE '".$Aw."/".$Ak."/%' $St 
 	) x 
 	WHERE x.revisi='$revisi' and x.dept='$dept'
 	GROUP BY x.revisi");
-							$rowk1T = mysqli_fetch_array($qryk1T);
+							$rowk1T = sqlsrv_fetch_array($qryk1T);
 							$jmlkk = round($rowk1T['jmlkk']);
 							return $jmlkk;
 						}
 						$no = 1;
-						$qry1 = mysqli_query($con, "SELECT dept FROM tbl_ncp_qcf_now WHERE $Wdept $Wkategori 
+						$qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT dept FROM db_qc.tbl_ncp_qcf_now WHERE $Wdept $Wkategori 
 	no_ncp LIKE '".$Tahun."/".$Bulan."/%' $sts GROUP BY dept");
-						while($row1 = mysqli_fetch_array($qry1)) {
+						while($row1 = sqlsrv_fetch_array($qry1)) {
 							$k1x = JmlNCP("1", $Tahun, $Bulan, $Wkategori, $sts, $row1['dept']);
 							$k2x = JmlNCP("2", $Tahun, $Bulan, $Wkategori, $sts, $row1['dept']);
 							$k3x = JmlNCP("3", $Tahun, $Bulan, $Wkategori, $sts, $row1['dept']);
@@ -734,13 +736,13 @@ $rNCP = mysqli_fetch_array($qryTotNCP);
 							<td width="81" style="text-align: center">TOTAL KK</td>
 							<td width="40" style="text-align: center">%</td>
 						</tr>
-						<?php $qry1ncp = mysqli_query($con, "SELECT revisi,count(x.revisi) as jmlkk,dept,no_ncp  FROM
-	(SELECT dept,no_ncp,max(revisi) as revisi FROM tbl_ncp_qcf_now WHERE $Wdept $Wkategori
+						<?php $qry1ncp = sqlsrv_query($con_db_qc_sqlsrv, "SELECT revisi,count(x.revisi) as jmlkk,max(dept) as dept,max(no_ncp) as no_ncp  FROM
+	(SELECT max(dept) as dept,no_ncp,max(revisi) as revisi FROM db_qc.tbl_ncp_qcf_now WHERE $Wdept $Wkategori
 	no_ncp LIKE '".$Tahun."/".$Bulan."/%' $sts
 	group by no_ncp) x 
 	GROUP BY x.revisi");
 						$tKK = 0;
-						while($row1ncp = mysqli_fetch_array($qry1ncp)) { ?>
+						while($row1ncp = sqlsrv_fetch_array($qry1ncp)) { ?>
 							<tr>
 								<td style="text-align: center">
 									<?php echo $row1ncp['revisi']."X"; ?>

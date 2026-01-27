@@ -12,8 +12,10 @@ $Bulan = $_GET['bulan'];
 $Dept = $_GET['dept'];
 $Kategori = $_GET['kategori'];
 $Cancel = $_GET['cancel'];
-$qTgl = mysqli_query($con, "SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl = mysqli_fetch_array($qTgl);
+$qTgl   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+            CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+            CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg;");
+$rTgl   = sqlsrv_fetch_array($qTgl);
 if($Awal != "") {
   $tgl = substr($Awal, 0, 10);
   $jam = $Awal;
@@ -213,15 +215,15 @@ if($Awal != "") {
             } else {
               $sts = "  ";
             }
-            $qry1 = mysqli_query($con, "SELECT * FROM tbl_ncp_qcf_now WHERE $Wdept $Wkategori no_ncp LIKE '".$Tahun."/".$Bulan."/%' $sts ORDER BY  no_ncp_gabungan ASC");
-            while($row1 = mysqli_fetch_array($qry1)) {
+            $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_ncp_qcf_now WHERE $Wdept $Wkategori no_ncp LIKE '".$Tahun."/".$Bulan."/%' $sts ORDER BY  no_ncp_gabungan ASC");
+            while($row1 = sqlsrv_fetch_array($qry1)) {
               ?>
               <tr valign="top">
                 <td align="center">
                   <?php echo $no; ?>
                 </td>
                 <td align="center">
-                  <?php echo date("d/m/y", strtotime($row1['tgl_buat'])); ?>
+                  <?php echo date_format($row1['tgl_buat'], "d/m/y"); ?>
                 </td>
                 <td align="center">
                   <?php echo strtoupper($row1['no_ncp_gabungan']); ?>
@@ -276,12 +278,12 @@ if($Awal != "") {
                 </td>
                 <td align="center">
                   <?php if($row1['tgl_rencana'] != "") {
-                    echo date("d/m/y", strtotime($row1['tgl_rencana']));
+                    echo date_format($row1['tgl_rencana'], "d/m/y");
                   } ?>
                 </td>
                 <td align="center">
                   <?php if($row1['tgl_selesai'] != "") {
-                    echo date("d/m/y", strtotime($row1['tgl_selesai']));
+                    echo date_format($row1['tgl_selesai'], "d/m/y");
                   } ?>
                 </td>
                 <td align="left">
