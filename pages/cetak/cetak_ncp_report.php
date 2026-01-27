@@ -1,8 +1,8 @@
 <?php
-header("Content-type: application/octet-stream");
-header("Content-Disposition: attachment; filename=Laporan-Baru-NCP-".substr($_GET['awal'],0,10).".xls");//ganti nama sesuai keperluan
-header("Pragma: no-cache");
-header("Expires: 0");
+// header("Content-type: application/octet-stream");
+// header("Content-Disposition: attachment; filename=Laporan-Baru-NCP-".substr($_GET['awal'],0,10).".xls");//ganti nama sesuai keperluan
+// header("Pragma: no-cache");
+// header("Expires: 0");
 
 include "../../koneksi.php";
 include "../../tgl_indo.php";
@@ -43,19 +43,20 @@ if ($Kategori == "ALL") {
 }
 
 if ($Cancel != "1") {
-  $sts = " AND NOT `status`='Cancel' ";
+  $sts = " AND NOT status='Cancel' ";
 } else {
   $sts = "  ";
 }
 
-$queryTotalNCP = mysqli_query($con, "select
+$queryTotalNCP = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
                                         sum(berat) as total_ncp_all_dept
                                       from
-                                        tbl_ncp_qcf_now
+                                        db_qc.tbl_ncp_qcf_now
                                       where
-                                        DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) between '$start_date' and '$stop_date'
+                                        TRY_CAST(tgl_buat AS DATETIME) between '$start_date' and '$stop_date'
                                         $Wdept $Wkategori $sts ");
-$rowTotalNcp = mysqli_fetch_assoc($queryTotalNCP);
+                                        
+$rowTotalNcp = sqlsrv_fetch_array($queryTotalNCP);
 ?>
 
 <!DOCTYPE html>
@@ -76,21 +77,34 @@ $rowTotalNcp = mysqli_fetch_assoc($queryTotalNCP);
           <td colspan="2"><strong>Total NCP:</strong> <?= number_format($rowTotalNcp['total_ncp_all_dept'], 2, ",", ".") ?></td>
         </tr>
         <?php
-        $queryDept = mysqli_query($con, "select
+        $queryDept = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
                                           dept,
                                           sum(berat) as total_berat_dept
                                         from
-                                          tbl_ncp_qcf_now
+                                          db_qc.tbl_ncp_qcf_now
                                         where
-                                          DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) between '$start_date' and '$stop_date'
+                                          TRY_CAST(tgl_buat AS DATETIME) between '$start_date' and '$stop_date'
+                                          $Wdept $Wkategori $sts
+                                        group by
+                                          dept
+                                        order by
+                                          total_berat_dept desc");
+        $queryDeptNumRows = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
+                                          dept,
+                                          sum(berat) as total_berat_dept,
+                                          COUNT(*) OVER() AS total_rows 
+                                        from
+                                          db_qc.tbl_ncp_qcf_now
+                                        where
+                                          TRY_CAST(tgl_buat AS DATETIME) between '$start_date' and '$stop_date'
                                           $Wdept $Wkategori $sts
                                         group by
                                           dept
                                         order by
                                           total_berat_dept desc");
 
-        $jumlah = mysqli_num_rows($queryDept);
-        ;
+        $resultJumlah = sqlsrv_fetch_array($queryDeptNumRows);
+        $jumlah = $resultJumlah['total_rows'];
         $num = 1;
         for ($i = 1; $i <= ceil($jumlah / 4); $i++) {
           ?>
@@ -101,7 +115,7 @@ $rowTotalNcp = mysqli_fetch_assoc($queryTotalNCP);
             <?php
             for ($j = 0; $j < 4; $j++) {
               if ($num <= $jumlah) {
-                $row = mysqli_fetch_assoc($queryDept);
+                $row = sqlsrv_fetch_array($queryDept);
                 ?>
                 <td>&nbsp;</td>
                 <td style="vertical-align: top;">
@@ -118,14 +132,14 @@ $rowTotalNcp = mysqli_fetch_assoc($queryTotalNCP);
                     </thead>
                     <tbody>
                       <?php
-                      $queryMasalahPerDept = mysqli_query($con, "select
-                                            dept,
+                      $queryMasalahPerDept = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
+                                            MAX(dept) as dept,
                                             masalah_dominan,
                                             SUM(berat) as berat
                                           from
-                                            tbl_ncp_qcf_now
+                                            db_qc.tbl_ncp_qcf_now
                                           where
-                                            DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) between '$start_date' and '$stop_date'
+                                            TRY_CAST(tgl_buat AS DATETIME) between '$start_date' and '$stop_date'
                                             $Wkategori $sts
                                             and dept = '$row[dept]'
                                           group by
@@ -133,7 +147,7 @@ $rowTotalNcp = mysqli_fetch_assoc($queryTotalNCP);
                                           order by
                                             berat desc");
                       $total = 0;
-                      while ($row2 = mysqli_fetch_assoc($queryMasalahPerDept)) {
+                      while ($row2 = sqlsrv_fetch_array($queryMasalahPerDept)) {
                         ?>
                         <tr>
                           <td><?= $row2['masalah_dominan'] ?></td>
@@ -170,20 +184,19 @@ $rowTotalNcp = mysqli_fetch_assoc($queryTotalNCP);
           <td>&nbsp;</td>
           <td colspan="3">
             <?php
-            $queryDept = mysqli_query($con, "select
-                    group_concat(distinct dept) as dept
+            $queryDept = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 5
+                    STRING_AGG(dept, ',') as dept
                   from
-                    tbl_ncp_qcf_now
+                    db_qc.tbl_ncp_qcf_now
                   where
-                    DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) between '$start_date' and '$stop_date'
+                    TRY_CAST(tgl_buat AS DATETIME) between '$start_date' and '$stop_date'
                     $Wdept $Wkategori $sts
                   group by
                     masalah_dominan
                   order by
-                    sum(berat) desc
-                  limit 5");
+                    sum(berat) desc");
             $deptTop5 = [];
-            while ($row = mysqli_fetch_assoc($queryDept)) {
+            while ($row = sqlsrv_fetch_array($queryDept)) {
               $deptTop5[] = $row['dept'];
             }
             // Menggabungkan array menjadi string dengan implode
@@ -218,22 +231,21 @@ $rowTotalNcp = mysqli_fetch_assoc($queryTotalNCP);
                 ) AS $dept,";
                 }
 
-                $queryTop5 = mysqli_query($con, "select
+                $queryTop5 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 5
                                 masalah_dominan,
                                 $sql
                                 sum(berat) as total_berat
                               from
-                                tbl_ncp_qcf_now
+                                db_qc.tbl_ncp_qcf_now
                               where
-                                DATE_FORMAT( tgl_buat, '%Y-%m-%d %H:%i' ) between '$start_date' and '$stop_date'
+                                TRY_CAST(tgl_buat AS DATETIME) between '$start_date' and '$stop_date'
                                 $Wdept $Wkategori $sts
                               group by
                                 masalah_dominan
                               order by
-                                total_berat desc
-                              limit 5");
+                                total_berat desc");
 
-                while ($rowTop5 = mysqli_fetch_assoc($queryTop5)) {
+                while ($rowTop5 = sqlsrv_fetch_array($queryTop5)) {
                   ?>
                   <tr>
                     <td><strong><?= $rowTop5['masalah_dominan'] ?></strong></td>

@@ -21,6 +21,16 @@ if (!function_exists('p')) {
     }
   }
 }
+
+if (!function_exists('sqlsrv_fetch_all_assoc')) {
+    function sqlsrv_fetch_all_assoc($stmt) {
+        $rows = [];
+        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+}
 ?>
 <?php
 date_default_timezone_set('Asia/Jakarta');
