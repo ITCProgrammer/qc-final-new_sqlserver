@@ -104,9 +104,9 @@ $nodemand=$_GET['nodemand'];
 	$d_netto		= db2_fetch_assoc($sql_netto);
 // NOW
 
-$sqlCek=mysqli_query($con,"SELECT * FROM tbl_nsp_qcf WHERE nodemand='$nodemand' ORDER BY id DESC LIMIT 1");
-$cek=mysqli_num_rows($sqlCek);
-$rcek=mysqli_fetch_array($sqlCek);
+$sqlCek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_nsp_qcf WHERE nodemand='$nodemand' ORDER BY id DESC");
+$cek=sqlsrv_has_rows($sqlCek) ? 1 : 0;
+$rcek=sqlsrv_fetch_array($sqlCek, SQLSRV_FETCH_ASSOC);
 ?>	
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
  <div class="box box-info">
@@ -290,31 +290,33 @@ if($_POST['save']=="Simpan"){
 	  $po=str_replace("'","''",$_POST['no_po']);
 	  $ket=str_replace("'","''",$_POST['ket']);
 	  $lot=trim($_POST['lot']);
-  	  $sqlData=mysqli_query($con,"INSERT INTO tbl_nsp_qcf SET 
-		  nokk='$_POST[nokk]',
-		  nodemand='$_POST[nodemand]',
-		  langganan='$_POST[pelanggan]',
-		  buyer='$_POST[buyer]',
-		  no_order='$_POST[no_order]',
-		  no_hanger='$_POST[no_hanger]',
-		  no_item='$_POST[no_item]',
-		  po='$po',
-		  po_rajut='$_POST[po_rajut]',
-		  supp_rajut='$_POST[supp_rajut]',
-		  jenis_kain='$jns',
-		  lebar='$_POST[lebar]',
-		  gramasi='$_POST[grms]',
-		  lot='$lot',
-		  rol='$_POST[rol]',
-		  warna='$warna',
-		  no_warna='$nowarna',
-		  berat='$_POST[berat]',
-		  dept='$_POST[dept]',
-		  peninjau_awal='$_POST[peninjau_awal]',
-		  ket='$ket',
-		  tgl_buat=now(),
-		  tgl_update=now()");	 	  
-	  
+	  $lebar = intval($_POST['lebar']);
+	  $grms = intval($_POST['grms']);
+	  $rol = intval($_POST['rol']);
+  	  $sqlData=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_nsp_qcf (nokk, nodemand, langganan, buyer, no_order, no_hanger, no_item, po, po_rajut, supp_rajut, jenis_kain, lebar, gramasi, lot, rol, warna, no_warna, berat, dept, peninjau_awal, ket, tgl_buat, tgl_update) VALUES (
+		  '$_POST[nokk]',
+		  '$_POST[nodemand]',
+		  '$_POST[pelanggan]',
+		  '$_POST[buyer]',
+		  '$_POST[no_order]',
+		  '$_POST[no_hanger]',
+		  '$_POST[no_item]',
+		  '$po',
+		  '$_POST[po_rajut]',
+		  '$_POST[supp_rajut]',
+		  '$jns',
+		  $lebar,
+		  $grms,
+		  '$lot',
+		  $rol,
+		  '$warna',
+		  '$nowarna',
+		  '$_POST[berat]',
+		  '$_POST[dept]',
+		  '$_POST[peninjau_awal]',
+		  '$ket',
+		  GETDATE(),
+		  GETDATE())");	 	  
 		if($sqlData){			
 			echo "<script>swal({
   title: 'Data Tersimpan',   
@@ -346,14 +348,14 @@ if($_POST['save']=="Ubah"){
 				    
 			}
         } 
-  	  $sqlData=mysqli_query($con,"UPDATE tbl_nsp_qcf SET 
+  	  $sqlData=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_nsp_qcf SET 
 		  rol='$_POST[rol]',
 		  berat='$_POST[berat]',
 		  po='$po',
 		  lot='$lot',
 		  peninjau_awal='$_POST[peninjau_awal]',
 		  ket='$ket',
-		  tgl_update=now()
+		  tgl_update=GETDATE()
 		  WHERE nodemand='$nodemand'");	 	  
 	  
 		if($sqlData){	

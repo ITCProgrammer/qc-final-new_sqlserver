@@ -4,9 +4,9 @@ session_start();
 include "../../koneksi.php";
 include "../../tgl_indo.php";
 if($_GET['nokk']!=""){
-$qry=mysqli_query($con,"SELECT * FROM tbl_nsp_qcf WHERE nokk='$_GET[nokk]'");
+$qry=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_nsp_qcf WHERE nokk='$_GET[nokk]'");
 }
-$d=mysqli_fetch_array($qry);
+$d=sqlsrv_fetch_array($qry);
 //RMP Benang
 if(strpos($d['rmp_benang'],"Horizontal")>-1){
 	$rmpBng1="x";
