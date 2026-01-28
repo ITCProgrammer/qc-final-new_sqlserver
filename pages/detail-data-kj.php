@@ -2,29 +2,20 @@
 ini_set("error_reporting", 1);
 session_start();
 include("../koneksi.php");
-    $qryCek=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE `id`='$_GET[id]'");
-    $rCek=mysqli_fetch_array($qryCek);
+    $qryCek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_qcf WHERE id='$_GET[id]'");
+    $rCek=sqlsrv_fetch_array($qryCek, SQLSRV_FETCH_ASSOC);
     if (isset($_POST['save'])) {
-        $qry1=mysqli_query($con,"INSERT INTO tbl_qcf_detail SET
-		`id_qcf`='$_GET[id]',
-		`persen`='$_POST[prsn]',
-		`masalah`='$_POST[masalah]',
-		`dept`='$_POST[dept]'
-		");
+        $qry1=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_qcf_detail (id_qcf, persen, masalah, dept) VALUES ('$_GET[id]', '$_POST[prsn]', '$_POST[masalah]', '$_POST[dept]')");
         
     }
 	if (isset($_POST['tambah'])) {
 		$mslh=strtoupper($_POST['mslh']);
-        $qry1=mysqli_query($con,"INSERT INTO tbl_masalah SET
-		`nama`='$mslh'
-		");
+        $qry1=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_masalah (nama) VALUES ('$mslh')");
         
     }
 	if (isset($_POST['tambah1'])) {
 		$dept=strtoupper($_POST['dept1']);
-        $qry1=mysqli_query($con,"INSERT INTO tbl_dept SET
-		`nama`='$dept'
-		");
+        $qry1=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_dept (nama) VALUES ('$dept')");
         
     }
 ?>
@@ -51,8 +42,8 @@ include("../koneksi.php");
           <select name="dept" class="form-control" id="dept" required>
             <option value="">-PILIH-</option>
 			<?php 
-			  $sql1=mysqli_query($con,"SELECT * FROM tbl_dept ORDER BY nama ASC");
-			while($r1=mysqli_fetch_array($sql1)){	
+			  $sql1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_dept ORDER BY nama ASC");
+			while($r1=sqlsrv_fetch_array($sql1, SQLSRV_FETCH_ASSOC)){	
 			?>  
 			<option value="<?php echo $r1['nama'];?>"><?php echo $r1['nama'];?></option>
 			<?php } ?>  
@@ -66,8 +57,8 @@ include("../koneksi.php");
 		  <select name="masalah" class="form-control" id="masalah" required>
             <option value="">-PILIH-</option>
 			<?php 
-			  $sql2=mysqli_query($con,"SELECT * FROM tbl_masalah ORDER BY nama ASC");
-			while($r2=mysqli_fetch_array($sql2)){	
+			  $sql2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_masalah ORDER BY nama ASC");
+			while($r2=sqlsrv_fetch_array($sql2, SQLSRV_FETCH_ASSOC)){
 			?>  
 			<option value="<?php echo $r2['nama'];?>"><?php echo $r2['nama'];?></option>
 			<?php } ?>   
@@ -82,7 +73,7 @@ include("../koneksi.php");
       <div class="col-sm-2">
         <button type="submit" class="btn btn-block btn-social btn-linkedin" name="save" style="width: 60%">Add <i class="fa fa-plus-circle"></i></button>
       </div>
-      <a href="InputDataKJ-<?php echo $rCek['nokk'];?>" class="btn btn-default pull-right"><span class="fa fa-arrow-circle-left "></span> Kembali</a>
+      <a href="InputDataKJNew-<?php echo $rCek['nokk'];?>" class="btn btn-default pull-right"><span class="fa fa-arrow-circle-left "></span> Kembali</a>
     </div>
     <!-- /.box-footer -->
 
@@ -109,8 +100,8 @@ include("../koneksi.php");
           </thead>
           <tbody>
             <?php
-  $sql=mysqli_query($con,"SELECT * FROM tbl_qcf_detail WHERE id_qcf='$_GET[id]'");
-  while ($r=mysqli_fetch_array($sql)) {
+  $sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_qcf_detail WHERE id_qcf='$_GET[id]'");
+  while ($r=sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
       $no++;
       $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
       ?>
@@ -165,8 +156,8 @@ include("../koneksi.php");
 			   <tbody>
 			   <?php 
 				   $no1=1;
-				   $sqldept=mysqli_query($con,"SELECT * FROM tbl_dept ORDER BY nama ASC");
-				   while($rd=mysqli_fetch_array($sqldept)){
+				   $sqldept=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_dept ORDER BY nama ASC");
+				   while($rd=sqlsrv_fetch_array($sqldept, SQLSRV_FETCH_ASSOC)){
 			   ?>
 				<tr>
 				  <td><?php echo $rd['nama']; ?></td>
@@ -213,8 +204,8 @@ include("../koneksi.php");
 			   <tbody>
 				<?php 
 				   $no2=1;
-				   $sqlmslh=mysqli_query($con,"SELECT * FROM tbl_masalah ORDER BY nama ASC");
-				   while($rm=mysqli_fetch_array($sqlmslh)){
+				   $sqlmslh=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_masalah ORDER BY nama ASC");
+				   while($rm=sqlsrv_fetch_array($sqlmslh, SQLSRV_FETCH_ASSOC)){
 			   ?>   
 				<tr>
 				  <td><?php echo $rm['nama'];?></td>

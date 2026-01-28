@@ -4,7 +4,7 @@ session_start();
 include("../koneksi.php");
     $modal_id=$_GET['id'];
 	$id=$_GET['idr'];
-    $modal=mysqli_query($con,"DELETE FROM tbl_masalah WHERE id='$modal_id' ");
+    $modal=sqlsrv_query($con_db_qc_sqlsrv,"DELETE FROM db_qc.tbl_masalah WHERE id='$modal_id' ");
     if ($modal) {
         echo "<script>window.location='./DetailData-$id';</script>";
     } else {
