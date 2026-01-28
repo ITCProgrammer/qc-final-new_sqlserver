@@ -233,7 +233,7 @@ function tampil2(){
 }
 </script>
 <?php
-$table_name = 'tbl_std_tq_fl';
+$table_name = 'db_qc.tbl_std_tq_fl';
 ini_set("error_reporting", 1);
 session_start();
 include"koneksi.php";
@@ -245,9 +245,14 @@ $noitem = $explode[0];
 $pelanggan = $explode[1] ; 
 
 
-$qry=mysqli_query($con,"SELECT * FROM $table_name WHERE no_item='$noitem'");
-$cek=mysqli_num_rows($qry); 
-$r=mysqli_fetch_array($qry);
+$qry = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT * FROM $table_name WHERE no_item = ?",
+    array($noitem)
+);
+
+$r   = ($qry ? sqlsrv_fetch_array($qry, SQLSRV_FETCH_ASSOC) : false);
+$cek = ($r ? 1 : 0);
 ?>	
 <?php 
 
@@ -260,7 +265,7 @@ if($_POST['save']=="save"){
 	$dirUpload = "dist/img-visualbrand/";
 	// pindahkan file
     $terupload_cover = move_uploaded_file($namaSementara_vbg, $dirUpload.$namaFile_vbg);
-    $sqlKK=mysqli_query($con,"UPDATE tbl_tq_fl SET
+    $sqlKK=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE tbl_tq_fl SET
 	`pic_vbg`='$file_vbg',
     `season`='$_POST[season]',
     `style`='$_POST[style]'
@@ -283,7 +288,7 @@ if($_POST['save']=="save"){
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form0" id="form0">
     <div class="box box-success" style="width: 98%;">
         <div class="box-header with-border">
-            <h3 class="box-title">Standart FL <?=$pelanggan?></h3>
+            <h3 class="box-title">Standart FL here <?=$pelanggan?></h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse" ><i class="fa fa-minus"></i></button>
             </div>
@@ -986,64 +991,66 @@ if($_POST['save']=="save"){
  $redirect_url = "StdTQFL-".$noitem."00000".$pelanggan;
  
  
-if($_POST['physical_save']=="save" and $cek>0){
-	$sqlPHY=mysqli_query($con,"UPDATE $table_name SET
-		  `flamability`='$_POST[flamability]',
-          `bow`='$_POST[bow]',
-          `skew`='$_POST[skew]',
-          `snag_mace1`='$_POST[snag_mace1]',
-          `snag_mace2`='$_POST[snag_mace2]',
-          `snag_mace3`='$_POST[snag_mace3]',
-          `snag_mace4`='$_POST[snag_mace4]',
-          `snag_mace5`='$_POST[snag_mace5]',
-          `snag_mace6`='$_POST[snag_mace6]',
-          `burst_str`='$_POST[burst_str]',
-          `growth1`='$_POST[growth1]',
-          `growth2`='$_POST[growth2]',
-          `fibercontent1`='$_POST[fibercontent1]',
-          `fibercontent2`='$_POST[fibercontent2]',
-          `fibercontent3`='$_POST[fibercontent3]',
-          `pillr_tumble1`='$_POST[pillr_tumble1]',
-          `pillr_tumble2`='$_POST[pillr_tumble2]',
-          `pillr_tumble3`='$_POST[pillr_tumble3]',
-          `pillr_tumble4`='$_POST[pillr_tumble4]',
-          `snag_pod1`='$_POST[snag_pod1]',
-          `snag_pod2`='$_POST[snag_pod2]',
-          `thickness1`='$_POST[thickness1]',
-          `thickness2`='$_POST[thickness2]',
-          `appearance1`='$_POST[appearance1]',
-          `appearance2`='$_POST[appearance2]',
-          `pill_locus1`='$_POST[pill_locus1]',
-          `pill_locus2`='$_POST[pill_locus2]',
-          `f_count1`='$_POST[f_count1]',
-          `f_count2`='$_POST[f_count2]',
-          `f_weight`='$_POST[f_weight]',
-          `f_width`='$_POST[f_width]',
-          `shrinkage1`='$_POST[shrinkage1]',
-          `shrinkage2`='$_POST[shrinkage2]',
-          `spirality1`='$_POST[spirality1]',
-          `spirality2`='$_POST[spirality2]',
-          `abration1`='$_POST[abration1]',
-          `abration2`='$_POST[abration2]',
-          `stretch1`='$_POST[stretch1]',
-          `stretch2`='$_POST[stretch2]',
-          `stretch3`='$_POST[stretch3]',
-          `stretch4`='$_POST[stretch4]',
-          `stretch5`='$_POST[stretch5]',
-          `stretch6`='$_POST[stretch6]',
-          `recovery1`='$_POST[recovery1]',
-          `recovery2`='$_POST[recovery2]',
-          `recovery3`='$_POST[recovery3]',
-          `recovery4`='$_POST[recovery4]',
-          `recovery5`='$_POST[recovery5]',
-          `recovery6`='$_POST[recovery6]',
-          `heat_shrinkage1`='$_POST[heat_shrinkage1]',
-          `heat_shrinkage2`='$_POST[heat_shrinkage2]',
-          `tgl_update`=now(),
-          `pelanggan` = '$pelanggan',
-          `ip`='$_SERVER[REMOTE_ADDR]'
-        WHERE `no_item`='$noitem'");
-       
+if ($_POST['physical_save'] == "save" and $cek > 0) {
+
+    $sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, " UPDATE $table_name SET
+            flamability    = '$_POST[flamability]',
+            bow            = '$_POST[bow]',
+            skew           = '$_POST[skew]',
+            snag_mace1     = '$_POST[snag_mace1]',
+            snag_mace2     = '$_POST[snag_mace2]',
+            snag_mace3     = '$_POST[snag_mace3]',
+            snag_mace4     = '$_POST[snag_mace4]',
+            snag_mace5     = '$_POST[snag_mace5]',
+            snag_mace6     = '$_POST[snag_mace6]',
+            burst_str      = '$_POST[burst_str]',
+            growth1        = '$_POST[growth1]',
+            growth2        = '$_POST[growth2]',
+            fibercontent1  = '$_POST[fibercontent1]',
+            fibercontent2  = '$_POST[fibercontent2]',
+            fibercontent3  = '$_POST[fibercontent3]',
+            pillr_tumble1  = '$_POST[pillr_tumble1]',
+            pillr_tumble2  = '$_POST[pillr_tumble2]',
+            pillr_tumble3  = '$_POST[pillr_tumble3]',
+            pillr_tumble4  = '$_POST[pillr_tumble4]',
+            snag_pod1      = '$_POST[snag_pod1]',
+            snag_pod2      = '$_POST[snag_pod2]',
+            thickness1     = '$_POST[thickness1]',
+            thickness2     = '$_POST[thickness2]',
+            appearance1    = '$_POST[appearance1]',
+            appearance2    = '$_POST[appearance2]',
+            pill_locus1    = '$_POST[pill_locus1]',
+            pill_locus2    = '$_POST[pill_locus2]',
+            f_count1       = '$_POST[f_count1]',
+            f_count2       = '$_POST[f_count2]',
+            f_weight       = '$_POST[f_weight]',
+            f_width        = '$_POST[f_width]',
+            shrinkage1     = '$_POST[shrinkage1]',
+            shrinkage2     = '$_POST[shrinkage2]',
+            spirality1     = '$_POST[spirality1]',
+            spirality2     = '$_POST[spirality2]',
+            abration1      = '$_POST[abration1]',
+            abration2      = '$_POST[abration2]',
+            stretch1       = '$_POST[stretch1]',
+            stretch2       = '$_POST[stretch2]',
+            stretch3       = '$_POST[stretch3]',
+            stretch4       = '$_POST[stretch4]',
+            stretch5       = '$_POST[stretch5]',
+            stretch6       = '$_POST[stretch6]',
+            recovery1      = '$_POST[recovery1]',
+            recovery2      = '$_POST[recovery2]',
+            recovery3      = '$_POST[recovery3]',
+            recovery4      = '$_POST[recovery4]',
+            recovery5      = '$_POST[recovery5]',
+            recovery6      = '$_POST[recovery6]',
+            heat_shrinkage1= '$_POST[heat_shrinkage1]',
+            heat_shrinkage2= '$_POST[heat_shrinkage2]',
+            tgl_update     = GETDATE(),
+            pelanggan      = '$pelanggan',
+            ip             = '$_SERVER[REMOTE_ADDR]'
+        WHERE no_item = '$noitem'
+    ");
+
         if($sqlPHY){
             echo "<script>swal({
     title: 'Data Standart Physical Telah Tersimpan',
@@ -1067,64 +1074,124 @@ if($_POST['physical_save']=="save" and $cek>0){
     }
     });</script>";
     }
-}else if($_POST['physical_save']=="save"){
-    $sqlPHY=mysqli_query($con,"INSERT INTO $table_name SET
-            `no_item`='$noitem',
-            `flamability`='$_POST[flamability]',
-          `bow`='$_POST[bow]',
-          `skew`='$_POST[skew]',
-          `snag_mace1`='$_POST[snag_mace1]',
-          `snag_mace2`='$_POST[snag_mace2]',
-          `snag_mace3`='$_POST[snag_mace3]',
-          `snag_mace4`='$_POST[snag_mace4]',
-          `snag_mace5`='$_POST[snag_mace5]',
-          `snag_mace6`='$_POST[snag_mace6]',
-          `burst_str`='$_POST[burst_str]',
-          `growth1`='$_POST[growth1]',
-          `growth2`='$_POST[growth2]',
-          `fibercontent1`='$_POST[fibercontent1]',
-          `fibercontent2`='$_POST[fibercontent2]',
-          `fibercontent3`='$_POST[fibercontent3]',
-          `pillr_tumble1`='$_POST[pillr_tumble1]',
-          `pillr_tumble2`='$_POST[pillr_tumble2]',
-          `pillr_tumble3`='$_POST[pillr_tumble3]',
-          `pillr_tumble4`='$_POST[pillr_tumble4]',
-          `snag_pod1`='$_POST[snag_pod1]',
-          `snag_pod2`='$_POST[snag_pod2]',
-          `thickness1`='$_POST[thickness1]',
-          `thickness2`='$_POST[thickness2]',
-          `appearance1`='$_POST[appearance1]',
-          `appearance2`='$_POST[appearance2]',
-          `pill_locus1`='$_POST[pill_locus1]',
-          `pill_locus2`='$_POST[pill_locus2]',
-          `f_count1`='$_POST[f_count1]',
-          `f_count2`='$_POST[f_count2]',
-          `f_weight`='$_POST[f_weight]',
-          `f_width`='$_POST[f_width]',
-          `shrinkage1`='$_POST[shrinkage1]',
-          `shrinkage2`='$_POST[shrinkage2]',
-          `spirality1`='$_POST[spirality1]',
-          `spirality2`='$_POST[spirality2]',
-          `abration1`='$_POST[abration1]',
-          `abration2`='$_POST[abration2]',
-          `stretch1`='$_POST[stretch1]',
-          `stretch2`='$_POST[stretch2]',
-          `stretch3`='$_POST[stretch3]',
-          `stretch4`='$_POST[stretch4]',
-          `stretch5`='$_POST[stretch5]',
-          `stretch6`='$_POST[stretch6]',
-          `recovery1`='$_POST[recovery1]',
-          `recovery2`='$_POST[recovery2]',
-          `recovery3`='$_POST[recovery3]',
-          `recovery4`='$_POST[recovery4]',
-          `recovery5`='$_POST[recovery5]',
-          `recovery6`='$_POST[recovery6]',
-          `heat_shrinkage1`='$_POST[heat_shrinkage1]',
-          `heat_shrinkage2`='$_POST[heat_shrinkage2]',
-          `tgl_buat`=now(),
-          `tgl_update`=now(),
-          `pelanggan` = '$pelanggan',
-          `ip`='$_SERVER[REMOTE_ADDR]'");
+} else if ($_POST['physical_save'] == "save") {
+    $sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, " INSERT INTO $table_name (
+            no_item,
+            flamability,
+            bow,
+            skew,
+            snag_mace1,
+            snag_mace2,
+            snag_mace3,
+            snag_mace4,
+            snag_mace5,
+            snag_mace6,
+            burst_str,
+            growth1,
+            growth2,
+            fibercontent1,
+            fibercontent2,
+            fibercontent3,
+            pillr_tumble1,
+            pillr_tumble2,
+            pillr_tumble3,
+            pillr_tumble4,
+            snag_pod1,
+            snag_pod2,
+            thickness1,
+            thickness2,
+            appearance1,
+            appearance2,
+            pill_locus1,
+            pill_locus2,
+            f_count1,
+            f_count2,
+            f_weight,
+            f_width,
+            shrinkage1,
+            shrinkage2,
+            spirality1,
+            spirality2,
+            abration1,
+            abration2,
+            stretch1,
+            stretch2,
+            stretch3,
+            stretch4,
+            stretch5,
+            stretch6,
+            recovery1,
+            recovery2,
+            recovery3,
+            recovery4,
+            recovery5,
+            recovery6,
+            heat_shrinkage1,
+            heat_shrinkage2,
+            tgl_buat,
+            tgl_update,
+            pelanggan,
+            ip
+        ) VALUES (
+            '$noitem',
+            '$_POST[flamability]',
+            '$_POST[bow]',
+            '$_POST[skew]',
+            '$_POST[snag_mace1]',
+            '$_POST[snag_mace2]',
+            '$_POST[snag_mace3]',
+            '$_POST[snag_mace4]',
+            '$_POST[snag_mace5]',
+            '$_POST[snag_mace6]',
+            '$_POST[burst_str]',
+            '$_POST[growth1]',
+            '$_POST[growth2]',
+            '$_POST[fibercontent1]',
+            '$_POST[fibercontent2]',
+            '$_POST[fibercontent3]',
+            '$_POST[pillr_tumble1]',
+            '$_POST[pillr_tumble2]',
+            '$_POST[pillr_tumble3]',
+            '$_POST[pillr_tumble4]',
+            '$_POST[snag_pod1]',
+            '$_POST[snag_pod2]',
+            '$_POST[thickness1]',
+            '$_POST[thickness2]',
+            '$_POST[appearance1]',
+            '$_POST[appearance2]',
+            '$_POST[pill_locus1]',
+            '$_POST[pill_locus2]',
+            '$_POST[f_count1]',
+            '$_POST[f_count2]',
+            '$_POST[f_weight]',
+            '$_POST[f_width]',
+            '$_POST[shrinkage1]',
+            '$_POST[shrinkage2]',
+            '$_POST[spirality1]',
+            '$_POST[spirality2]',
+            '$_POST[abration1]',
+            '$_POST[abration2]',
+            '$_POST[stretch1]',
+            '$_POST[stretch2]',
+            '$_POST[stretch3]',
+            '$_POST[stretch4]',
+            '$_POST[stretch5]',
+            '$_POST[stretch6]',
+            '$_POST[recovery1]',
+            '$_POST[recovery2]',
+            '$_POST[recovery3]',
+            '$_POST[recovery4]',
+            '$_POST[recovery5]',
+            '$_POST[recovery6]',
+            '$_POST[heat_shrinkage1]',
+            '$_POST[heat_shrinkage2]',
+            GETDATE(),
+            GETDATE(),
+            '$pelanggan',
+            '$_SERVER[REMOTE_ADDR]'
+        )
+    ");
+
     if($sqlPHY){
             echo "<script>swal({
     title: 'Data Standart Physical Telah Tersimpan',
@@ -1149,28 +1216,30 @@ if($_POST['physical_save']=="save" and $cek>0){
     });</script>";
     }
 }
-if($_POST['functional_save']=="save" and $cek>0){
-    $sqlFPH=mysqli_query($con,"UPDATE $table_name SET
-    `wick1`='$_POST[wick1]',
-    `wick2`='$_POST[wick2]',
-    `wick3`='$_POST[wick3]',
-    `wick4`='$_POST[wick4]',
-    `water_repp1`='$_POST[water_repp1]',
-    `water_repp2`='$_POST[water_repp2]',
-    `water_repp3`='$_POST[water_repp3]',
-    `absorbency1`='$_POST[absorbency1]',
-    `absorbency2`='$_POST[absorbency2]',
-    `absorbency3`='$_POST[absorbency3]',
-    `absorbency4`='$_POST[absorbency4]',
-    `ph`='$_POST[ph]',
-    `dry_time1`='$_POST[dry_time1]',
-    `dry_time2`='$_POST[dry_time2]',
-    `soil1`='$_POST[soil1]',
-    `soil2`='$_POST[soil2]',
-    `tgl_update`=now(),
-    `pelanggan` = '$pelanggan',
-    `ip`='$_SERVER[REMOTE_ADDR]'
-    WHERE `no_item`='$noitem'");
+if ($_POST['functional_save'] == "save" and $cek > 0) {
+    $sqlFPH = sqlsrv_query($con_db_qc_sqlsrv, " UPDATE $table_name SET
+            wick1        = '$_POST[wick1]',
+            wick2        = '$_POST[wick2]',
+            wick3        = '$_POST[wick3]',
+            wick4        = '$_POST[wick4]',
+            water_repp1  = '$_POST[water_repp1]',
+            water_repp2  = '$_POST[water_repp2]',
+            water_repp3  = '$_POST[water_repp3]',
+            absorbency1  = '$_POST[absorbency1]',
+            absorbency2  = '$_POST[absorbency2]',
+            absorbency3  = '$_POST[absorbency3]',
+            absorbency4  = '$_POST[absorbency4]',
+            ph           = '$_POST[ph]',
+            dry_time1    = '$_POST[dry_time1]',
+            dry_time2    = '$_POST[dry_time2]',
+            soil1        = '$_POST[soil1]',
+            soil2        = '$_POST[soil2]',
+            tgl_update   = GETDATE(),
+            pelanggan    = '$pelanggan',
+            ip           = '$_SERVER[REMOTE_ADDR]'
+        WHERE no_item = '$noitem'
+    ");
+
     if($sqlFPH){
         echo "<script>swal({
     title: 'Data Standart Functional Telah Tersimpan',
@@ -1194,29 +1263,31 @@ if($_POST['functional_save']=="save" and $cek>0){
     }
     });</script>";
     }
-}else if($_POST['functional_save']=="save"){
-    $sqlFPH=mysqli_query($con,"INSERT INTO $table_name SET
-    `no_item`='$noitem',
-    `wick1`='$_POST[wick1]',
-    `wick2`='$_POST[wick2]',
-    `wick3`='$_POST[wick3]',
-    `wick4`='$_POST[wick4]',
-    `water_repp1`='$_POST[water_repp1]',
-    `water_repp2`='$_POST[water_repp2]',
-    `water_repp3`='$_POST[water_repp3]',
-    `absorbency1`='$_POST[absorbency1]',
-    `absorbency2`='$_POST[absorbency2]',
-    `absorbency3`='$_POST[absorbency3]',
-    `absorbency4`='$_POST[absorbency4]',
-    `ph`='$_POST[ph]',
-    `dry_time1`='$_POST[dry_time1]',
-    `dry_time2`='$_POST[dry_time2]',
-    `soil1`='$_POST[soil1]',
-    `soil2`='$_POST[soil2]',
-    `tgl_buat`=now(),
-    `tgl_update`=now(),
-    `pelanggan` = '$pelanggan',
-    `ip`='$_SERVER[REMOTE_ADDR]'");
+} else if ($_POST['functional_save'] == "save") {
+    $sqlFPH = sqlsrv_query($con_db_qc_sqlsrv, " INSERT INTO $table_name (
+            no_item,
+            wick1, wick2, wick3, wick4,
+            water_repp1, water_repp2, water_repp3,
+            absorbency1, absorbency2, absorbency3, absorbency4,
+            ph,
+            dry_time1, dry_time2,
+            soil1, soil2,
+            tgl_buat, tgl_update,
+            pelanggan,
+            ip
+        ) VALUES (
+            '$noitem',
+            '$_POST[wick1]', '$_POST[wick2]', '$_POST[wick3]', '$_POST[wick4]',
+            '$_POST[water_repp1]', '$_POST[water_repp2]', '$_POST[water_repp3]',
+            '$_POST[absorbency1]', '$_POST[absorbency2]', '$_POST[absorbency3]', '$_POST[absorbency4]',
+            '$_POST[ph]',
+            '$_POST[dry_time1]', '$_POST[dry_time2]',
+            '$_POST[soil1]', '$_POST[soil2]',
+            GETDATE(), GETDATE(),
+            '$pelanggan',
+            '$_SERVER[REMOTE_ADDR]'
+        )
+    ");
     if($sqlFPH){
         echo "<script>swal({
     title: 'Data Standart Functional Telah Tersimpan',
@@ -1242,64 +1313,65 @@ if($_POST['functional_save']=="save" and $cek>0){
     }
 }
 if($_POST['colorfastness_save']=="save" and $cek>0){
-    $sqlCLR=mysqli_query($con,"UPDATE $table_name SET
-    `wash1`='$_POST[wash1]',
-    `wash2`='$_POST[wash2]',
-    `wash3`='$_POST[wash3]',
-    `wash4`='$_POST[wash4]',
-    `wash5`='$_POST[wash5]',
-    `wash6`='$_POST[wash6]',
-    `wash7`='$_POST[wash7]',
-    `wash8`='$_POST[wash8]',
-    `water1`='$_POST[water1]',
-    `water2`='$_POST[water2]',
-    `water3`='$_POST[water3]',
-    `water4`='$_POST[water4]',
-    `water5`='$_POST[water5]',
-    `water6`='$_POST[water6]',
-    `water7`='$_POST[water7]',
-    `water8`='$_POST[water8]',
-    `acid1`='$_POST[acid1]',
-    `acid2`='$_POST[acid2]',
-    `acid3`='$_POST[acid3]',
-    `acid4`='$_POST[acid4]',
-    `acid5`='$_POST[acid5]',
-    `acid6`='$_POST[acid6]',
-    `acid7`='$_POST[acid7]',
-    `acid8`='$_POST[acid8]',
-    `alkaline1`='$_POST[alkaline1]',
-    `alkaline2`='$_POST[alkaline2]',
-    `alkaline3`='$_POST[alkaline3]',
-    `alkaline4`='$_POST[alkaline4]',
-    `alkaline5`='$_POST[alkaline5]',
-    `alkaline6`='$_POST[alkaline6]',
-    `alkaline7`='$_POST[alkaline7]',
-    `alkaline8`='$_POST[alkaline8]',
-    `crock1`='$_POST[crock1]',
-    `crock2`='$_POST[crock2]',
-    `phenolic`='$_POST[phenolic]',
-    `light`='$_POST[light]',
-    `cm_oven1`='$_POST[cm_oven1]',
-    `cm_oven2`='$_POST[cm_oven2]',
-    `cm1`='$_POST[cm1]',
-    `cm2`='$_POST[cm2]',
-    `light_pers1`='$_POST[light_pers1]',
-    `light_pers2`='$_POST[light_pers2]',
-    `saliva`='$_POST[saliva]',
-    `chlorin`='$_POST[chlorin]',
-    `non_chlorin`='$_POST[non_chlorin]',
-    `dye_tf1`='$_POST[dye_tf1]',
-    `dye_tf2`='$_POST[dye_tf2]',
-    `dye_tf3`='$_POST[dye_tf3]',
-    `dye_tf4`='$_POST[dye_tf4]',
-    `dye_tf5`='$_POST[dye_tf5]',
-    `dye_tf6`='$_POST[dye_tf6]',
-    `dye_tf7`='$_POST[dye_tf7]',
-    `dye_tf8`='$_POST[dye_tf8]',
-    `tgl_update`=now(),
-    `pelanggan` = '$pelanggan',
-    `ip`='$_SERVER[REMOTE_ADDR]'
-    WHERE `no_item`='$noitem'");
+    $sqlCLR = sqlsrv_query($con_db_qc_sqlsrv, " UPDATE $table_name SET
+            wash1='$_POST[wash1]',
+            wash2='$_POST[wash2]',
+            wash3='$_POST[wash3]',
+            wash4='$_POST[wash4]',
+            wash5='$_POST[wash5]',
+            wash6='$_POST[wash6]',
+            wash7='$_POST[wash7]',
+            wash8='$_POST[wash8]',
+            water1='$_POST[water1]',
+            water2='$_POST[water2]',
+            water3='$_POST[water3]',
+            water4='$_POST[water4]',
+            water5='$_POST[water5]',
+            water6='$_POST[water6]',
+            water7='$_POST[water7]',
+            water8='$_POST[water8]',
+            acid1='$_POST[acid1]',
+            acid2='$_POST[acid2]',
+            acid3='$_POST[acid3]',
+            acid4='$_POST[acid4]',
+            acid5='$_POST[acid5]',
+            acid6='$_POST[acid6]',
+            acid7='$_POST[acid7]',
+            acid8='$_POST[acid8]',
+            alkaline1='$_POST[alkaline1]',
+            alkaline2='$_POST[alkaline2]',
+            alkaline3='$_POST[alkaline3]',
+            alkaline4='$_POST[alkaline4]',
+            alkaline5='$_POST[alkaline5]',
+            alkaline6='$_POST[alkaline6]',
+            alkaline7='$_POST[alkaline7]',
+            alkaline8='$_POST[alkaline8]',
+            crock1='$_POST[crock1]',
+            crock2='$_POST[crock2]',
+            phenolic='$_POST[phenolic]',
+            light='$_POST[light]',
+            cm_oven1='$_POST[cm_oven1]',
+            cm_oven2='$_POST[cm_oven2]',
+            cm1='$_POST[cm1]',
+            cm2='$_POST[cm2]',
+            light_pers1='$_POST[light_pers1]',
+            light_pers2='$_POST[light_pers2]',
+            saliva='$_POST[saliva]',
+            chlorin='$_POST[chlorin]',
+            non_chlorin='$_POST[non_chlorin]',
+            dye_tf1='$_POST[dye_tf1]',
+            dye_tf2='$_POST[dye_tf2]',
+            dye_tf3='$_POST[dye_tf3]',
+            dye_tf4='$_POST[dye_tf4]',
+            dye_tf5='$_POST[dye_tf5]',
+            dye_tf6='$_POST[dye_tf6]',
+            dye_tf7='$_POST[dye_tf7]',
+            dye_tf8='$_POST[dye_tf8]',
+            tgl_update=GETDATE(),
+            pelanggan='$pelanggan',
+            ip='$_SERVER[REMOTE_ADDR]'
+        WHERE no_item='$noitem'
+    ");
     if($sqlCLR){
         echo "<script>swal({
     title: 'Data Standart Colorfastness Telah Tersimpan',
@@ -1324,65 +1396,33 @@ if($_POST['colorfastness_save']=="save" and $cek>0){
     });</script>";
     }
     }else if($_POST['colorfastness_save']=="save"){
-    $sqlCLR=mysqli_query($con,"INSERT INTO $table_name SET
-    `no_item`='$noitem',
-    `wash1`='$_POST[wash1]',
-    `wash2`='$_POST[wash2]',
-    `wash3`='$_POST[wash3]',
-    `wash4`='$_POST[wash4]',
-    `wash5`='$_POST[wash5]',
-    `wash6`='$_POST[wash6]',
-    `wash7`='$_POST[wash7]',
-    `wash8`='$_POST[wash8]',
-    `water1`='$_POST[water1]',
-    `water2`='$_POST[water2]',
-    `water3`='$_POST[water3]',
-    `water4`='$_POST[water4]',
-    `water5`='$_POST[water5]',
-    `water6`='$_POST[water6]',
-    `water7`='$_POST[water7]',
-    `water8`='$_POST[water8]',
-    `acid1`='$_POST[acid1]',
-    `acid2`='$_POST[acid2]',
-    `acid3`='$_POST[acid3]',
-    `acid4`='$_POST[acid4]',
-    `acid5`='$_POST[acid5]',
-    `acid6`='$_POST[acid6]',
-    `acid7`='$_POST[acid7]',
-    `acid8`='$_POST[acid8]',
-    `alkaline1`='$_POST[alkaline1]',
-    `alkaline2`='$_POST[alkaline2]',
-    `alkaline3`='$_POST[alkaline3]',
-    `alkaline4`='$_POST[alkaline4]',
-    `alkaline5`='$_POST[alkaline5]',
-    `alkaline6`='$_POST[alkaline6]',
-    `alkaline7`='$_POST[alkaline7]',
-    `alkaline8`='$_POST[alkaline8]',
-    `crock1`='$_POST[crock1]',
-    `crock2`='$_POST[crock2]',
-    `phenolic`='$_POST[phenolic]',
-    `light`='$_POST[light]',
-    `cm_oven1`='$_POST[cm_oven1]',
-    `cm_oven2`='$_POST[cm_oven2]',
-    `cm1`='$_POST[cm1]',
-    `cm2`='$_POST[cm2]',
-    `light_pers1`='$_POST[light_pers1]',
-    `light_pers2`='$_POST[light_pers2]',
-    `saliva`='$_POST[saliva]',
-    `chlorin`='$_POST[chlorin]',
-    `non_chlorin`='$_POST[non_chlorin]',
-    `dye_tf1`='$_POST[dye_tf1]',
-    `dye_tf2`='$_POST[dye_tf2]',
-    `dye_tf3`='$_POST[dye_tf3]',
-    `dye_tf4`='$_POST[dye_tf4]',
-    `dye_tf5`='$_POST[dye_tf5]',
-    `dye_tf6`='$_POST[dye_tf6]',
-    `dye_tf7`='$_POST[dye_tf7]',
-    `dye_tf8`='$_POST[dye_tf8]',
-    `tgl_buat`=now(),
-    `tgl_update`=now(),
-    `pelanggan` = '$pelanggan',
-    `ip`='$_SERVER[REMOTE_ADDR]'");
+    $sqlCLR = sqlsrv_query($con_db_qc_sqlsrv, " INSERT INTO $table_name (
+            no_item,
+            wash1,wash2,wash3,wash4,wash5,wash6,wash7,wash8,
+            water1,water2,water3,water4,water5,water6,water7,water8,
+            acid1,acid2,acid3,acid4,acid5,acid6,acid7,acid8,
+            alkaline1,alkaline2,alkaline3,alkaline4,alkaline5,alkaline6,alkaline7,alkaline8,
+            crock1,crock2,phenolic,light,
+            cm_oven1,cm_oven2,cm1,cm2,
+            light_pers1,light_pers2,
+            saliva,chlorin,non_chlorin,
+            dye_tf1,dye_tf2,dye_tf3,dye_tf4,dye_tf5,dye_tf6,dye_tf7,dye_tf8,
+            tgl_buat,tgl_update,pelanggan,ip
+        ) VALUES (
+            '$noitem',
+            '$_POST[wash1]','$_POST[wash2]','$_POST[wash3]','$_POST[wash4]','$_POST[wash5]','$_POST[wash6]','$_POST[wash7]','$_POST[wash8]',
+            '$_POST[water1]','$_POST[water2]','$_POST[water3]','$_POST[water4]','$_POST[water5]','$_POST[water6]','$_POST[water7]','$_POST[water8]',
+            '$_POST[acid1]','$_POST[acid2]','$_POST[acid3]','$_POST[acid4]','$_POST[acid5]','$_POST[acid6]','$_POST[acid7]','$_POST[acid8]',
+            '$_POST[alkaline1]','$_POST[alkaline2]','$_POST[alkaline3]','$_POST[alkaline4]','$_POST[alkaline5]','$_POST[alkaline6]','$_POST[alkaline7]','$_POST[alkaline8]',
+            '$_POST[crock1]','$_POST[crock2]','$_POST[phenolic]','$_POST[light]',
+            '$_POST[cm_oven1]','$_POST[cm_oven2]','$_POST[cm1]','$_POST[cm2]',
+            '$_POST[light_pers1]','$_POST[light_pers2]',
+            '$_POST[saliva]','$_POST[chlorin]','$_POST[non_chlorin]',
+            '$_POST[dye_tf1]','$_POST[dye_tf2]','$_POST[dye_tf3]','$_POST[dye_tf4]','$_POST[dye_tf5]','$_POST[dye_tf6]','$_POST[dye_tf7]','$_POST[dye_tf8]',
+            GETDATE(),GETDATE(),'$pelanggan','$_SERVER[REMOTE_ADDR]'
+        )
+    ");
+
     if($sqlCLR){
         echo "<script>swal({
     title: 'Data Standart Colorfastness Telah Tersimpan',
