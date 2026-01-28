@@ -4,22 +4,24 @@ session_start();
 include "koneksi.php";
 $nodemand = $_GET['nodemand'];
 $no_test = $_GET['no_test'];
-$qry = mysqli_query($con, "SELECT a.*, a.id AS idkk, b.* From tbl_tq_nokk a INNER JOIN tbl_master_test b ON a.no_test=b.no_testmaster WHERE no_test='$no_test' order by a.id desc limit 1");
-$cekd = mysqli_num_rows($qry);
-$rd = mysqli_fetch_array($qry);
-
+$qry = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 a.*, a.id AS idkk, b.* From db_qc.tbl_tq_nokk a INNER JOIN db_qc.tbl_master_test b ON a.no_test=b.no_testmaster WHERE no_test=? order by a.id desc ",[$no_test]);
+$cekd = 0;
+$rd = sqlsrv_fetch_array($qry,SQLSRV_FETCH_ASSOC);
+if($rd){
+    $cekd++;
+}
 //penambahan pengecekan ketabel nokk demand 
 $id_nokk = $rd['idkk'];
 $nodemand = $rd['nodemand'];
-$nokk_demand_sql = mysqli_query($con, "SELECT * FROM tbl_tq_nokk_demand WHERE id_nokk = '$id_nokk' and id_nokk > 0  ORDER BY id DESC LIMIT 1");
-$nokk_demand_data = mysqli_num_rows($nokk_demand_sql);
+$nokk_demand_sql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_tq_nokk_demand WHERE id_nokk = '$id_nokk' and id_nokk > 0  ORDER BY id DESC ");
+$r_nokk_demand=sqlsrv_fetch_array($nokk_demand_sql,SQLSRV_FETCH_ASSOC);
 $array_no_demand_other2 = [];
 $array_no_demand_other3_4 = [];
 $array_no_demand_other5_6 = [];
 $array_no_demand_other_no = 2;
-if ($nokk_demand_data > 0) {
-    $id_nokk = mysqli_fetch_array($nokk_demand_sql)['id_nokk'];
-    $demand_other = mysqli_query($con, "SELECT * FROM tbl_tq_nokk_demand WHERE id_nokk = '$id_nokk' ORDER BY id ");
+if ($r_nokk_demand) {
+    $id_nokk = $r_nokk_demand['id_nokk'];
+    $demand_other = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_tq_nokk_demand WHERE id_nokk = '$id_nokk' ORDER BY id ");
 
     while ($datas = mysqli_fetch_assoc($demand_other)) {
 
@@ -39,18 +41,27 @@ if ($nokk_demand_data > 0) {
 
 ?>    
 <?php
-$sqlCek1 = mysqli_query($con, "SELECT *,
-	CONCAT_WS(' ',fc_note,ph_note, abr_note, bas_note, dry_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,wick_note,wick_note,absor_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note,wash_note,water_note,acid_note,alkaline_note,crock_note,phenolic_note,cm_printing_note,cm_dye_note,light_note,light_pers_note,saliva_note,h_shrinkage_note,fibre_note,pilll_note,soil_note,apperss_note,bleeding_note,chlorin_note,dye_tf_note,humidity_note,odour_note,curling_note) AS note_g FROM tbl_tq_test WHERE id_nokk='$rd[idkk]' ORDER BY id DESC LIMIT 1");
-$cek1 = mysqli_num_rows($sqlCek1);
-$rcek1 = mysqli_fetch_array($sqlCek1);
-$sqlCekR = mysqli_query($con, "SELECT *,
-	CONCAT_WS(' ',rfc_note,rph_note, rabr_note, rbas_note, rdry_note, rfla_note, rfwe_note, rfwi_note, rburs_note,rrepp_note,rwick_note,rabsor_note,rapper_note,rfiber_note,rpillb_note,rpillm_note,rpillr_note,rthick_note,rgrowth_note,rrecover_note,rstretch_note,rsns_note,rsnab_note,rsnam_note,rsnap_note,rwash_note,rwater_note,racid_note,ralkaline_note,rcrock_note,rphenolic_note,rcm_printing_note,rcm_dye_note,rlight_note,rlight_pers_note,rsaliva_note,rh_shrinkage_note,rfibre_note,rpilll_note,rsoil_note,rapperss_note,rbleeding_note,rchlorin_note,rdye_tf_note,rhumidity_note,rodour_note,rcurling_note) AS rnote_g FROM tbl_tq_randomtest WHERE no_item='$rd[no_item]' OR no_hanger='$rd[no_hanger]'");
-$cekR = mysqli_num_rows($sqlCekR);
-$rcekR = mysqli_fetch_array($sqlCekR);
-$sqlCekD = mysqli_query($con, "SELECT *,
-	CONCAT_WS(' ',dfc_note,dph_note, dabr_note, dbas_note, ddry_note, dfla_note, dfwe_note, dfwi_note, dburs_note,drepp_note,dwick_note,dabsor_note,dapper_note,dfiber_note,dpillb_note,dpillm_note,dpillr_note,dthick_note,dgrowth_note,drecover_note,dstretch_note,dsns_note,dsnab_note,dsnam_note,dsnap_note,dwash_note,dwater_note,dacid_note,dalkaline_note,dcrock_note,dphenolic_note,dcm_printing_note,dcm_dye_note,dlight_note,dlight_pers_note,dsaliva_note,dh_shrinkage_note,dfibre_note,dpilll_note,dsoil_note,dapperss_note,dbleeding_note,dchlorin_note,ddye_tf_note,dhumidity_note,dodour_note,dcurling_note) AS dnote_g FROM tbl_tq_disptest WHERE id_nokk='$rd[idkk]' ORDER BY id DESC LIMIT 1");
-$cekD = mysqli_num_rows($sqlCekD);
-$rcekD = mysqli_fetch_array($sqlCekD);
+$sqlCek1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 *,CONVERT(VARCHAR(19),tgl_buat) tgl_buat,
+	CONCAT_WS(' ',fc_note,ph_note, abr_note, bas_note, dry_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,wick_note,wick_note,absor_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note,wash_note,water_note,acid_note,alkaline_note,crock_note,phenolic_note,cm_printing_note,cm_dye_note,light_note,light_pers_note,saliva_note,h_shrinkage_note,fibre_note,pilll_note,soil_note,apperss_note,bleeding_note,chlorin_note,dye_tf_note,humidity_note,odour_note,curling_note) AS note_g FROM db_qc.tbl_tq_test WHERE id_nokk='$rd[idkk]' ORDER BY id DESC ");
+$cek1 = 0;
+$rcek1 = sqlsrv_fetch_array($sqlCek1,SQLSRV_FETCH_ASSOC);
+if($rcek1){
+    $cek1++;
+}
+$sqlCekR = sqlsrv_query($con_db_qc_sqlsrv, "SELECT *,
+	CONCAT_WS(' ',rfc_note,rph_note, rabr_note, rbas_note, rdry_note, rfla_note, rfwe_note, rfwi_note, rburs_note,rrepp_note,rwick_note,rabsor_note,rapper_note,rfiber_note,rpillb_note,rpillm_note,rpillr_note,rthick_note,rgrowth_note,rrecover_note,rstretch_note,rsns_note,rsnab_note,rsnam_note,rsnap_note,rwash_note,rwater_note,racid_note,ralkaline_note,rcrock_note,rphenolic_note,rcm_printing_note,rcm_dye_note,rlight_note,rlight_pers_note,rsaliva_note,rh_shrinkage_note,rfibre_note,rpilll_note,rsoil_note,rapperss_note,rbleeding_note,rchlorin_note,rdye_tf_note,rhumidity_note,rodour_note,rcurling_note) AS rnote_g FROM db_qc.tbl_tq_randomtest WHERE no_item='$rd[no_item]' OR no_hanger='$rd[no_hanger]'");
+$cekR = 0;
+$rcekR = sqlsrv_fetch_array($sqlCekR,SQLSRV_FETCH_ASSOC);
+if($rcekR){
+    $cekR++;
+}
+$sqlCekD = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 *,
+	CONCAT_WS(' ',dfc_note,dph_note, dabr_note, dbas_note, ddry_note, dfla_note, dfwe_note, dfwi_note, dburs_note,drepp_note,dwick_note,dabsor_note,dapper_note,dfiber_note,dpillb_note,dpillm_note,dpillr_note,dthick_note,dgrowth_note,drecover_note,dstretch_note,dsns_note,dsnab_note,dsnam_note,dsnap_note,dwash_note,dwater_note,dacid_note,dalkaline_note,dcrock_note,dphenolic_note,dcm_printing_note,dcm_dye_note,dlight_note,dlight_pers_note,dsaliva_note,dh_shrinkage_note,dfibre_note,dpilll_note,dsoil_note,dapperss_note,dbleeding_note,dchlorin_note,ddye_tf_note,dhumidity_note,dodour_note,dcurling_note) AS dnote_g FROM db_qc.tbl_tq_disptest WHERE id_nokk='$rd[idkk]' ORDER BY id DESC ");
+$cekD = 0;
+$rcekD = sqlsrv_fetch_array($sqlCekD,SQLSRV_FETCH_ASSOC);
+if($rcekD){
+    $cekD++;
+}
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form0" id="form0">
 <div class="box box-info" style="width: 98%;">
@@ -175,14 +186,14 @@ $rcekD = mysqli_fetch_array($sqlCekD);
                         </thead>
                         <tbody>
                                 <?php
-                                $sql = "SELECT a.*, b.*, c.*, d.spirality_status From tbl_tq_nokk a 
-                                INNER JOIN tbl_master_test b ON a.no_test=b.no_testmaster
-                                INNER JOIN tbl_tq_test c ON a.id=c.id_nokk
-								LEFT JOIN tbl_tq_test_2 d on (c.id_nokk = d.id_nokk)
-                                WHERE a.no_test='$no_test' order by a.id desc limit 1";
-                                $result = mysqli_query($con, $sql);
+                                $sql = "SELECT TOP 1 a.*, b.*, c.*, d.spirality_status From db_qc.tbl_tq_nokk a 
+                                INNER JOIN db_qc.tbl_master_test b ON a.no_test=b.no_testmaster
+                                INNER JOIN db_qc.tbl_tq_test c ON a.id=c.id_nokk
+								LEFT JOIN db_qc.tbl_tq_test_2 d on (CONVERT(VARCHAR(20),c.id_nokk) = d.id_nokk)
+                                WHERE a.no_test=? order by a.id desc";
+                                $result = sqlsrv_query($con_db_qc_sqlsrv, $sql,[$no_test]);
                                 $no = "1";
-                                while ($row = mysqli_fetch_array($result)) {
+                                while ($row = sqlsrv_fetch_array($result,SQLSRV_FETCH_ASSOC)) {
                                     $detail = explode(",", $row['physical']);
                                     $detail2 = explode(",", $row['functional']);
                                     $detail3 = explode(",", $row['colorfastness']);
@@ -3645,12 +3656,12 @@ if ($_POST['status_save'] == "save" and $_POST['status'] == "") {
     }
   });</script>";
 } else if ($_POST['status_save'] == "save" and $cek1 > 0) {
-    $sqlST = mysqli_query($con, "UPDATE tbl_tq_test SET
-	`status`='$_POST[status]',
-    `approve`='$_SESSION[nama1]',
-    `tgl_approve`=now(),
-	`tgl_update`=now()
-    WHERE `id_nokk`='$rd[idkk]'
+    $sqlST = sqlsrv_query($con_db_qc_sqlsrv, "UPDATE db_qc.tbl_tq_test SET
+	[status]='$_POST[status]',
+    approve='$_SESSION[nama1]',
+    tgl_approve=CURRENT_TIMESTAMP,
+	tgl_update=CURRENT_TIMESTAMP
+    WHERE id_nokk='$rd[idkk]'
 	");
     if ($sqlST) {
         echo "<script>swal({
@@ -3665,14 +3676,9 @@ if ($_POST['status_save'] == "save" and $_POST['status'] == "") {
 });</script>";
     }
 } else if ($_POST['status_save'] == "save") {
-    $sqlST = mysqli_query($con, "INSERT tbl_tq_test SET
-	`id_nokk`='$rd[idkk]',
-	`status`='$_POST[status]',
-    `approve`='$_SESSION[nama1]',
-	`tgl_buat`=now(),
-  `tgl_approve`=now(),
-	`tgl_update`=now()    
-	");
+    $sqlST = sqlsrv_query($con_db_qc_sqlsrv, "INSERT db_qc.tbl_tq_test 
+    (id_nokk,[status],approve,tgl_buat,tgl_approve,tgl_update) VALUES
+    ('$rd[idkk]','$_POST[status]','$_SESSION[nama1]',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP ) ");
     if ($sqlST) {
         echo "<script>swal({
   title: 'Status save',   
