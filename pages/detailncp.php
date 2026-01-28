@@ -24,10 +24,10 @@ include("../koneksi.php");
       <th style="text-align: center" scope="col">Masalah Utama</th>
       <th style="text-align: center" scope="col">DemandNo</th>
       </tr>
-	<?php $qCek=mysqli_query($con,"SELECT tgl_buat,no_ncp_gabungan,masalah,masalah_dominan,nodemand FROM tbl_ncp_qcf_now WHERE reg_no='$modal_id'");
-					while($dCek=mysqli_fetch_array($qCek)){ ?>  
+	<?php $qCek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT tgl_buat,no_ncp_gabungan,masalah,masalah_dominan,nodemand FROM db_qc.tbl_ncp_qcf_now WHERE reg_no='$modal_id'");
+					while($dCek=sqlsrv_fetch_array($qCek)){ ?>  
     <tr>
-      <td><?php echo $dCek['tgl_buat']; ?></td>
+      <td><?php echo date_format($dCek['tgl_buat'], 'Y-m-d'); ?></td>
       <td><?php echo $dCek['no_ncp_gabungan']; ?></td>
       <td style="text-align: left"><?php echo $dCek['masalah']; ?></td>
       <td style="text-align: left"><?php echo $dCek['masalah_dominan']; ?></td>

@@ -110,7 +110,7 @@ if ($d['m_proses'] != "") {
 	<table border="0" width="100%">
 		<tbody>
 			<tr>
-				<td colspan="2" align="left">TANGGAL: <?php echo tanggal_indo(date_format($d['tgl_buat'], 'Y-m-d'), true); ?></td>
+				<td colspan="2" align="left">TANGGAL: <?php if (!empty($d['tgl_buat'])) { echo tanggal_indo(date_format($d['tgl_buat'], 'Y-m-d'), true); } ?></td>
 				<td colspan="4" align="right">&nbsp;</td>
 			</tr>
 			<tr>
