@@ -565,7 +565,7 @@ include "koneksi.php";
                     </button>
                 </div>
                 <div class="modal-body">
-                    Apakah Anda yakin ingin Reject Bon Penghubung QC ini here?
+                    Apakah Anda yakin ingin Reject Bon Penghubung QC ini?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="confirmReject">REJECT</button>
@@ -603,7 +603,7 @@ include "koneksi.php";
                     </button>
                 </div>
                 <div class="modal-body">
-                    Apakah Anda yakin ingin mengapprove Bon Penghubung QC ini here?
+                    Apakah Anda yakin ingin mengapprove Bon Penghubung QC ini?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="confirmApprove">APPROVE</button>
