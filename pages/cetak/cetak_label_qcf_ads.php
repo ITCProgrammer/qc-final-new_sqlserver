@@ -5,11 +5,11 @@ include "../../koneksi.php";
 //--
 $idkk=$_REQUEST['idkk'];
 $act=$_GET['g'];
-$data=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE nodemand='$idkk' ORDER BY id DESC LIMIT 1");
-$cekr=mysqli_num_rows($data);
-$r=mysqli_fetch_array($data);
-$data1=mysqli_query($con,"SELECT * FROM tbl_lbl_availability WHERE nodemand='$idkk' ORDER BY id DESC LIMIT 1");
-$r1=mysqli_fetch_array($data1);
+$data=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_qcf WHERE nodemand='$idkk' ORDER BY id DESC");
+$cekr=sqlsrv_has_rows($data) ? 1 : 0;
+$r=sqlsrv_fetch_array($data, SQLSRV_FETCH_ASSOC);
+$data1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_lbl_availability WHERE nodemand='$idkk' ORDER BY id DESC");
+$r1=sqlsrv_fetch_array($data1, SQLSRV_FETCH_ASSOC);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -67,7 +67,7 @@ $r1=mysqli_fetch_array($data1);
         </tr>
         <tr>
           <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
-	border-left:0px #000000 solid; border-right:0px #000000 solid;"><span style="font-size:9px;"><?php echo date('d-M-Y');?> | Qty Yard : <?php if($cekr>0){echo $r['panjang'];}else{echo $r1['qty_yard'];}?> | Season : <?php if($cekr>0){echo $r['season'];}else{echo $r1['season'];}?></span></td>
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><span style="font-size:9px;"><?php echo date('d-M-Y');?> | Qty Yard : <?php if($cekr>0){echo $r['panjang'];}else{echo number_format($r1['qty_yard'], 2);}?> | Season : <?php if($cekr>0){echo $r['season'];}else{echo $r1['season'];}?></span></td>
           </tr>
           <tr>
           <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
@@ -109,7 +109,7 @@ $r1=mysqli_fetch_array($data1);
         </tr>
         <tr>
           <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
-	border-left:0px #000000 solid; border-right:0px #000000 solid;"><span style="font-size:9px;"><?php echo date('d-M-Y');?> | Qty Yard : <?php if($cekr>0){echo $r['panjang'];}else{echo $r1['qty_yard'];}?> | Season : <?php if($cekr>0){echo $r['season'];}else{echo $r1['season'];}?></span></td>
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><span style="font-size:9px;"><?php echo date('d-M-Y');?> | Qty Yard : <?php if($cekr>0){echo $r['panjang'];}else{echo number_format($r1['qty_yard'], 2);}?> | Season : <?php if($cekr>0){echo $r['season'];}else{echo $r1['season'];}?></span></td>
         </tr>
         <tr>
           <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
@@ -151,7 +151,7 @@ $r1=mysqli_fetch_array($data1);
         </tr>
         <tr>
           <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
-	border-left:0px #000000 solid; border-right:0px #000000 solid;"><span style="font-size:9px;"><?php echo date('d-M-Y');?> | Qty Yard : <?php if($cekr>0){echo $r['panjang'];}else{echo $r1['qty_yard'];}?> | Season : <?php if($cekr>0){echo $r['season'];}else{echo $r1['season'];}?></span></td>
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><span style="font-size:9px;"><?php echo date('d-M-Y');?> | Qty Yard : <?php if($cekr>0){echo $r['panjang'];}else{echo number_format($r1['qty_yard'], 2);}?> | Season : <?php if($cekr>0){echo $r['season'];}else{echo $r1['season'];}?></span></td>
         </tr>
         <tr>
           <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;

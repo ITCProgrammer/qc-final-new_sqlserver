@@ -104,13 +104,9 @@ $nodemand = $_GET['nodemand'];
 	$d_netto		= db2_fetch_assoc($sql_netto);
 // NOW
 
-// $sqlCek=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE nodemand='$nodemand' ORDER BY id DESC LIMIT 1");
-// $cek=mysqli_num_rows($sqlCek);
-// $rcek=mysqli_fetch_array($sqlCek);
-
-$sqlCek1 = mysqli_query($con, "SELECT * FROM tbl_lbl_availability WHERE nodemand='$nodemand' ORDER BY id DESC LIMIT 1");
-$cek1 = mysqli_num_rows($sqlCek1);
-$rcek1 = mysqli_fetch_array($sqlCek1);
+$sqlCek1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_lbl_availability WHERE nodemand='$nodemand' ORDER BY id DESC");
+$cek1 = sqlsrv_has_rows($sqlCek1) ? 1 : 0;
+$rcek1 = sqlsrv_fetch_array($sqlCek1, SQLSRV_FETCH_ASSOC);
 
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1" target="_blank">
@@ -207,7 +203,7 @@ $rcek1 = mysqli_fetch_array($sqlCek1);
 					<div class="col-sm-4">
 						<div class="input-group">
 							<input name="qty_yard" type="text" class="form-control" id="qty_yard" value="<?php if ($cek1 > 0) {
-																												echo $rcek1['qty_yard'];
+																												echo ($rcek1['qty_yard'] ? number_format($rcek1['qty_yard'], 2) : '0.00');
 																											} else {
 																												echo round($dt_ITXVIEWKK['QTY_PACKING_YARD'], 2);
 																											} ?>" placeholder="0.00" required>
@@ -345,8 +341,6 @@ $rcek1 = mysqli_fetch_array($sqlCek1);
 </div>
 <?php
 if ($_POST['save'] == "save" and $cek > 0) {
-	//   $con=mysqli_connect("10.0.0.10","dit","4dm1n");
-	//   $db=mysqli_select_db("db_qc",$con)or die("Gagal Koneksi");		
 	if (isset($_POST['availability'])) {
 		// Retrieving each selected option 
 		foreach ($_POST['availability'] as $index => $subject1) {
@@ -357,9 +351,9 @@ if ($_POST['save'] == "save" and $cek > 0) {
 			}
 		}
 	}
-	$sqlData = mysqli_query($con, "UPDATE tbl_qcf SET 
-		  `availability`='$av1',
-		  `tgl_update`=now()
+	$sqlData = sqlsrv_query($con_db_qc_sqlsrv, "UPDATE db_qc.tbl_qcf SET 
+		  availability='$av1',
+		  tgl_update=GETDATE()
 		  WHERE nodemand='$_POST[nodemand]'");
 
 	if ($sqlData) {
@@ -377,8 +371,6 @@ if ($_POST['save'] == "save" and $cek > 0) {
 });</script>";
 	}
 } else if ($_POST['save'] == "save" and $cek1 == 0) {
-	// $con=mysqli_connect("10.0.0.10","dit","4dm1n");
-	// $db=mysqli_select_db("db_qc",$con)or die("Gagal Koneksi");
 	if (isset($_POST['availability'])) {
 		// Retrieving each selected option 
 		foreach ($_POST['availability'] as $index => $subject2) {
@@ -389,34 +381,21 @@ if ($_POST['save'] == "save" and $cek > 0) {
 			}
 		}
 	}
-	$no_order = mysqli_real_escape_string($con, $_POST['no_order']);
-	$no_po = mysqli_real_escape_string($con, $_POST['no_po']);
-	$no_hanger = mysqli_real_escape_string($con, $_POST['no_hanger']);
-	$no_item = mysqli_real_escape_string($con, $_POST['no_item']);
-	$pelanggan = mysqli_real_escape_string($con, $_POST['pelanggan']);
-	$jenis_kain = mysqli_real_escape_string($con, $_POST['jns_kain']);
-	$warna = mysqli_real_escape_string($con, $_POST['warna']);
-	$no_warna = mysqli_real_escape_string($con, $_POST['no_warna']);
-	$lot = mysqli_real_escape_string($con, $_POST['lot']);
-	$sqlData1 = mysqli_query($con, "INSERT INTO tbl_lbl_availability SET 
-			`nodemand`='$_POST[nodemand]',
-			`nokk`='$_POST[nokk]',
-			`no_order`='$no_order',
-			`pelanggan`='$pelanggan',
-			`no_po`='$no_po',
-			`no_hanger`='$no_hanger',
-			`no_item`='$no_item',
-			`jenis_kain`='$jenis_kain',
-			`lebar`='$_POST[lebar]',
-			`gramasi`='$_POST[grms]',
-			`warna`='$warna',
-			`no_warna`='$no_warna',
-			`lot`='$lot',
-			`qty_yard`='$_POST[qty_yard]',
-			`season`='$_POST[season]',
-		  	`availability`='$av2',
-			`nokk_legacy`='$_POST[nokk_legacy]',
-		  	`tgl_update`=now()");
+	$no_order = $_POST['no_order'];
+	$no_po = $_POST['no_po'];
+	$no_hanger = $_POST['no_hanger'];
+	$no_item = $_POST['no_item'];
+	$pelanggan = $_POST['pelanggan'];
+	$jenis_kain = $_POST['jns_kain'];
+	$warna = $_POST['warna'];
+	$no_warna = $_POST['no_warna'];
+	$lot = $_POST['lot'];
+	$sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_lbl_availability 
+		(nodemand, nokk, no_order, pelanggan, no_po, no_hanger, no_item, jenis_kain, 
+		 lebar, gramasi, warna, no_warna, lot, qty_yard, season, availability, nokk_legacy, tgl_update)
+		VALUES 
+		('$_POST[nodemand]', '$_POST[nokk]', '$no_order', '$pelanggan', '$no_po', '$no_hanger', '$no_item', '$jenis_kain', 
+		 '$_POST[lebar]', '$_POST[grms]', '$warna', '$no_warna', '$lot', '$_POST[qty_yard]', '$_POST[season]', '$av2', '$_POST[nokk_legacy]', GETDATE())");
 
 	if ($sqlData1) {
 
@@ -443,18 +422,17 @@ if ($_POST['save'] == "save" and $cek > 0) {
 		}
 	}
 	$ip = $_SERVER['REMOTE_ADDR'];
-	$sqlUpdate1 = mysqli_query($con, "UPDATE tbl_lbl_availability SET 
-			`nokk`='$_POST[nokk]',
-			`lot`='$_POST[lot]',
-			`no_hanger`='$_POST[no_hanger]',
-			`no_item`='$_POST[no_item]',
-			`lot`='$_POST[lot]',
-			`season`='$_POST[season]',
-			`nokk_legacy`='$_POST[nokk_legacy]',
-			`availability`='$av2',
-			`ip`= '$ip',
-			`tgl_update`=now()
-			WHERE `nodemand`='$_GET[nodemand]'");
+	$sqlUpdate1 = sqlsrv_query($con_db_qc_sqlsrv, "UPDATE db_qc.tbl_lbl_availability SET 
+			nokk='$_POST[nokk]',
+			lot='$_POST[lot]',
+			no_hanger='$_POST[no_hanger]',
+			no_item='$_POST[no_item]',
+			season='$_POST[season]',
+			nokk_legacy='$_POST[nokk_legacy]',
+			availability='$av2',
+			ip='$ip',
+			tgl_update=GETDATE()
+			WHERE nodemand='$_GET[nodemand]'");
 
 	if ($sqlUpdate1) {
 

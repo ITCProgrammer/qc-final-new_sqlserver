@@ -5,11 +5,11 @@
   //--
   $idkk=$_REQUEST['idkk'];
   $act=$_GET['g'];
-  $data=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE nodemand='$idkk' ORDER BY id DESC LIMIT 1");
-  $cekr=mysqli_num_rows($data);
-  $r=mysqli_fetch_array($data);
-  $data1=mysqli_query($con,"SELECT * FROM tbl_lbl_availability WHERE nodemand='$idkk' ORDER BY id DESC LIMIT 1");
-  $r1=mysqli_fetch_array($data1);
+  $data=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_qcf WHERE nodemand='$idkk' ORDER BY id DESC");
+  $cekr=sqlsrv_has_rows($data) ? 1 : 0;
+  $r=sqlsrv_fetch_array($data, SQLSRV_FETCH_ASSOC);
+  $data1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_lbl_availability WHERE nodemand='$idkk' ORDER BY id DESC");
+  $r1=sqlsrv_fetch_array($data1, SQLSRV_FETCH_ASSOC);
 
   $sqlcetaklabel = "SELECT 
                           i.DEAMAND AS DEMAND,
