@@ -19,9 +19,9 @@ session_start();
 <?php
 include "koneksi.php";
 $id = $_GET['id'];
-$query = "SELECT * FROM tbl_conform_qc WHERE id ='$id'";
-$result = mysqli_query($con, $query);
-$row1 = mysqli_fetch_assoc($result);
+$query = "SELECT * FROM db_qc.tbl_conform_qc WHERE id ='$id'";
+$result = sqlsrv_query($con_db_qc_sqlsrv, $query);
+$row1 = sqlsrv_fetch_array($result);
 // echo"<pre>";
 // echo print_r($row1);
 // echo"</pre>";
@@ -57,40 +57,23 @@ if (isset($_POST['update']) && $_POST['update'] == "update" && isset($_GET['id']
     if ($namaFile_foto) move_uploaded_file($namaSementara_foto, $dirUpload . $namaFile_foto);
     if ($namaFile_foto2) move_uploaded_file($namaSementara_foto2, $dirUpload . $namaFile_foto2);
     if ($namaFile_foto3) move_uploaded_file($namaSementara_foto3, $dirUpload . $namaFile_foto3);
-    $qry1 = mysqli_query($con, "UPDATE tbl_conform_qc SET
-        -- `no_demand`='$_POST[no_demand]',
-        -- `prod_order`='$_POST[prod_order]',
-        -- `langganan`='$_POST[langganan]',
-        -- `buyer`='$_POST[buyer]',
-        -- `no_po`='$_POST[no_po]',
-        -- `no_order`='$_POST[no_order]',
-        -- `no_item`='$_POST[no_item]',
-        -- `article_group`='$_POST[article_group]',
-        -- `article_code`='$_POST[article_code]',
-        -- `jenis_kain`='$_POST[jenis_kain]',
-        -- `lebar`='$_POST[lebar]',
-        -- `gramasi`='$_POST[gramasi]',
-        -- `warna`='$_POST[warna]',
-        -- `qty_kg`='$_POST[qty_kg]',
-        -- `qty_yard`='$_POST[qty_yard]',
-        -- `ext_ref`='$_POST[ext_ref]',
-        -- `int_ref`='$_POST[int_ref]',
-        `masalah`='$_POST[masalah]',
-        `keputusan`='$keputusan',
-        `pejabat1`='$_POST[pejabat1]',
-        `pejabat2`='$_POST[pejabat2]',
-        `pejabat3`='$_POST[pejabat3]',
-        `produksi`='$_POST[produksi]',
-        `marketing`='$_POST[marketing]',
-        `file_foto`='$file_foto',
-        `file_foto2`='$file_foto2',
-        `file_foto3`='$file_foto3',
-        `tgl_update`=now(),
-        `no_hanger`='$_POST[no_hanger]',
-        `lot`='$_POST[lot]',
-        `tgl_conform`='$_POST[tgl_conform]',
-        `tgl_mkt_terima`='$_POST[tgl_mkt_terima]',
-        `tgl_feedback`='$_POST[tgl_feedback]'
+    $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "UPDATE db_qc.tbl_conform_qc SET 
+        masalah='$_POST[masalah]',
+        keputusan='$keputusan',
+        pejabat1='$_POST[pejabat1]',
+        pejabat2='$_POST[pejabat2]',
+        pejabat3='$_POST[pejabat3]',
+        produksi='$_POST[produksi]',
+        marketing='$_POST[marketing]',
+        file_foto='$file_foto',
+        file_foto2='$file_foto2',
+        file_foto3='$file_foto3',
+        tgl_update=GETDATE(),
+        no_hanger='$_POST[no_hanger]',
+        lot='$_POST[lot]',
+        tgl_conform='$_POST[tgl_conform]',
+        tgl_mkt_terima='$_POST[tgl_mkt_terima]',
+        tgl_feedback='$_POST[tgl_feedback]'
         WHERE id='$id'");
     if ($qry1) {
         echo "<script>swal({
@@ -107,9 +90,9 @@ if (isset($_POST['update']) && $_POST['update'] == "update" && isset($_GET['id']
 ?>
 <?php
 include "koneksi.php";
-$sqldis = mysqli_query($con, " SELECT * FROM tbl_conform_qc WHERE no_demand='$no_demand' ORDER BY tgl_buat ASC");
-$cekdis = mysqli_num_rows($sqldis);
-$rdis = mysqli_fetch_array($sqldis);
+$sqldis = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_conform_qc WHERE no_demand='$no_demand' ORDER BY tgl_buat ASC");
+$cekdis = sqlsrv_has_rows($sqldis) ? 1 : 0;
+$rdis = sqlsrv_fetch_array($sqldis, SQLSRV_FETCH_ASSOC);
 ?>
 <div class="box box-info">
 	<form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1">
@@ -199,8 +182,8 @@ $rdis = mysqli_fetch_array($sqldis);
 							<select class="form-control select2" name="masalah" id="masalah">
 								<option value="">Pilih</option>
 								<?php
-								$qrym = mysqli_query($con, "SELECT masalah FROM tbl_masalah_conform ORDER BY masalah ASC");
-								while ($rm = mysqli_fetch_array($qrym)) {
+							$qrym = sqlsrv_query($con_db_qc_sqlsrv, "SELECT masalah FROM db_qc.tbl_masalah_conform ORDER BY masalah ASC");
+							while ($rm = sqlsrv_fetch_array($qrym, SQLSRV_FETCH_ASSOC)) {
 									$selected = ($row1['masalah'] == $rm['masalah']) ? 'selected' : '';
 								?>
 									<option value="<?php echo $rm['masalah']; ?>" <?php echo $selected; ?>><?php echo $rm['masalah']; ?></option>
@@ -219,8 +202,8 @@ $rdis = mysqli_fetch_array($sqldis);
 							<select class="form-control select2" name="pejabat1" id="pejabat1">
 								<option value="">Pilih</option>
 								<?php
-								$qryp = mysqli_query($con, "SELECT nama FROM tbl_jabatan_qc ORDER BY nama ASC");
-								while ($rp = mysqli_fetch_array($qryp)) {
+							$qryp = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_jabatan_qc ORDER BY nama ASC");
+							while ($rp = sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)) {
 									$selected = ($row1['pejabat1'] == $rp['nama']) ? 'selected' : '';
 								?>
 									<option value="<?php echo $rp['nama']; ?>" <?php echo $selected; ?>><?php echo $rp['nama']; ?></option>
@@ -240,8 +223,8 @@ $rdis = mysqli_fetch_array($sqldis);
 							<select class="form-control select2" name="pejabat2" id="pejabat2">
 								<option value="">Pilih</option>
 								<?php
-								$qryp = mysqli_query($con, "SELECT nama FROM tbl_jabatan_qc ORDER BY nama ASC");
-								while ($rp = mysqli_fetch_array($qryp)) {
+							$qryp = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_jabatan_qc ORDER BY nama ASC");
+							while ($rp = sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)) {
 									$selected = ($row1['pejabat2'] == $rp['nama']) ? 'selected' : '';
 								?>
 									<option value="<?php echo $rp['nama']; ?>" <?php echo $selected; ?>><?php echo $rp['nama']; ?></option>
@@ -260,8 +243,8 @@ $rdis = mysqli_fetch_array($sqldis);
 							<select class="form-control select2" name="pejabat3" id="pejabat3">
 								<option value="">Pilih</option>
 								<?php
-								$qryp = mysqli_query($con, "SELECT nama FROM tbl_jabatan_qc ORDER BY nama ASC");
-								while ($rp = mysqli_fetch_array($qryp)) {
+								$qryp = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_jabatan_qc ORDER BY nama ASC");
+								while ($rp = sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)) {
 									$selected = ($row1['pejabat3'] == $rp['nama']) ? 'selected' : '';
 								?>
 									<option value="<?php echo $rp['nama']; ?>" <?php echo $selected; ?>><?php echo $rp['nama']; ?></option>
@@ -280,8 +263,8 @@ $rdis = mysqli_fetch_array($sqldis);
 							<select class="form-control select2" name="produksi" id="produksi">
 								<option value="">Pilih</option>
 								<?php
-								$qrypr = mysqli_query($con, "SELECT nama FROM tbl_personil_produksi_conform ORDER BY nama ASC");
-								while ($rpr = mysqli_fetch_array($qrypr)) {
+							$qrypr = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_personil_produksi_conform ORDER BY nama ASC");
+							while ($rpr = sqlsrv_fetch_array($qrypr, SQLSRV_FETCH_ASSOC)) {
 									$selected = ($row1['produksi'] == $rpr['nama']) ? 'selected' : '';
 								?>
 									<option value="<?php echo $rpr['nama']; ?>" <?php echo $selected; ?>><?php echo $rpr['nama']; ?></option>
@@ -300,8 +283,8 @@ $rdis = mysqli_fetch_array($sqldis);
 							<select class="form-control select2" name="marketing" id="marketing">
 								<option value="">Pilih</option>
 								<?php
-								$qrypm = mysqli_query($con, "SELECT nama FROM tbl_personil_mkt ORDER BY nama ASC");
-								while ($rpm = mysqli_fetch_array($qrypm)) {
+							$qrypm = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_personil_mkt ORDER BY nama ASC");
+							while ($rpm = sqlsrv_fetch_array($qrypm, SQLSRV_FETCH_ASSOC)) {
 									$selected = ($row1['marketing'] == $rpm['nama']) ? 'selected' : '';
 								?>
 									<option value="<?php echo $rpm['nama']; ?>" <?php echo $selected; ?>><?php echo $rpm['nama']; ?></option>
@@ -316,19 +299,19 @@ $rdis = mysqli_fetch_array($sqldis);
 				<div class="form-group">
 					<label for="tgl_conform" class="col-sm-2 control-label">Tgl Conform</label>
 					<div class="col-sm-4">
-						<input name="tgl_conform" type="date" class="form-control" id="tgl_conform" value="<?php echo $row1['tgl_conform']; ?>">
+						<input name="tgl_conform" type="date" class="form-control" id="tgl_conform" value="<?php echo ($row1['tgl_conform'] ? date_format($row1['tgl_conform'], 'Y-m-d') : ''); ?>">
 					</div>
 				</div>
 				<div class="form-group">
 					<label for="tgl_mkt_terima" class="col-sm-2 control-label">Tgl MKT Terima</label>
 					<div class="col-sm-4">
-						<input name="tgl_mkt_terima" type="date" class="form-control" id="tgl_mkt_terima" value="<?php echo $row1['tgl_mkt_terima']; ?>">
+						<input name="tgl_mkt_terima" type="date" class="form-control" id="tgl_mkt_terima" value="<?php echo ($row1['tgl_mkt_terima'] ? date_format($row1['tgl_mkt_terima'], 'Y-m-d') : ''); ?>">
 					</div>
 				</div>
 				<div class="form-group">
 					<label for="tgl_feedback" class="col-sm-2 control-label">Tgl Feedback</label>
 					<div class="col-sm-4">
-						<input name="tgl_feedback" type="date" class="form-control" id="tgl_feedback" value="<?php echo $row1['tgl_feedback']; ?>">
+						<input name="tgl_feedback" type="date" class="form-control" id="tgl_feedback" value="<?php echo ($row1['tgl_feedback'] ? date_format($row1['tgl_feedback'], 'Y-m-d') : ''); ?>">
 					</div>
 				</div>
 				<div class="form-group">
@@ -383,8 +366,7 @@ $rdis = mysqli_fetch_array($sqldis);
 	<?php
 	if ($_POST['simpan_pejabat'] == "Simpan") {
 		$nama = strtoupper($_POST['nama']);
-		$sqlData1 = mysqli_query($con, "INSERT INTO tbl_jabatan_qc SET 
-		  nama='$nama'");
+		$sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_jabatan_qc (nama) VALUES ('$nama')");
 		if ($sqlData1) {
 			echo "<script>swal({
                 title: 'Data Telah Tersimpan',   
@@ -432,8 +414,7 @@ $rdis = mysqli_fetch_array($sqldis);
 	<?php
 	if ($_POST['simpan_personil'] == "Simpan") {
 		$nama = strtoupper($_POST['nama']);
-		$sqlData1 = mysqli_query($con, "INSERT INTO tbl_personil_produksi_conform SET 
-		  nama='$nama'");
+		$sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_personil_produksi_conform (nama) VALUES ('$nama')");
 		if ($sqlData1) {
 			echo "<script>swal({
                 title: 'Data Telah Tersimpan',   
@@ -481,8 +462,7 @@ $rdis = mysqli_fetch_array($sqldis);
 	<?php
 	if ($_POST['simpan_mkt'] == "Simpan") {
 		$nama = strtoupper($_POST['nama']);
-		$sqlData1 = mysqli_query($con, "INSERT INTO tbl_personil_mkt SET 
-		  nama='$nama'");
+		$sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_personil_mkt (nama) VALUES ('$nama')");
 		if ($sqlData1) {
 			echo "<script>swal({
                             title: 'Data Telah Tersimpan',   
@@ -529,8 +509,7 @@ $rdis = mysqli_fetch_array($sqldis);
 	<?php
 	if ($_POST['simpan_masalah'] == "Simpan") {
 		$masalah = strtoupper($_POST['masalah_dominan']);
-		$sqlData1 = mysqli_query($con, "INSERT INTO tbl_masalah_conform SET 
-		  masalah='$masalah'");
+		$sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_masalah_conform (masalah) VALUES ('$masalah')");
 		if ($sqlData1) {
 			echo "<script>swal({
                 title: 'Data Telah Tersimpan',   

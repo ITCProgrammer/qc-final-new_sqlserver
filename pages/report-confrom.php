@@ -207,7 +207,7 @@ include "koneksi.php";
               if ($Awal != '' || $Demand != '' || $Lot != '' || $Order != '' || $Langganan != '' || $PO != '' || $ArticleGrup != '' || $ArticleCode != '' || $Warna != '') {
                 $Where = " AND 1=1 ";
                 if ($Awal != '') {
-                  $Where .= " AND DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' ";
+                  $Where .= " AND TRY_CAST( tgl_buat AS DATE ) BETWEEN '$Awal' AND '$Akhir' ";
                 }
                 if ($Demand != '') {
                   $Where .= " AND no_demand LIKE '%$Demand%' ";
@@ -234,12 +234,12 @@ include "koneksi.php";
                   $Where .= " AND warna LIKE '%$Warna%' ";
                 }
 
-                $sql = "SELECT * FROM tbl_conform_qc WHERE 1=1 $Where ORDER BY no_demand ASC";
+                $sql = "SELECT * FROM db_qc.tbl_conform_qc WHERE 1=1 $Where ORDER BY no_demand ASC";
               } else {
-                $sql = "SELECT * FROM tbl_conform_qc WHERE 1=0";
+                $sql = "SELECT * FROM db_qc.tbl_conform_qc WHERE 1=0";
               }
-              $sqlData1 = mysqli_query($con, $sql);
-              while ($row1 = mysqli_fetch_array($sqlData1)) {
+              $sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, $sql);
+              while ($row1 = sqlsrv_fetch_array($sqlData1)) {
                 $noorder = str_replace("/", "&", $row1['no_order']);
               ?>
                 <tr bgcolor="<?php echo $bgcolor; ?>">
@@ -271,9 +271,9 @@ include "koneksi.php";
                   <td align="center"><?php echo $row1['pejabat3']; ?></td>
                   <td align="center"><?php echo $row1['produksi']; ?></td>
                   <td align="center"><?php echo $row1['marketing']; ?></td>
-                  <td align="center"><?php echo ($row1['tgl_conform']); ?></td>
-                  <td align="center"><?php echo $row1['tgl_mkt_terima']; ?></td>
-                  <td align="center"><?php echo $row1['tgl_feedback']; ?></td>
+                  <td align="center"><?php echo ($row1['tgl_conform'] ? date_format($row1['tgl_conform'], 'd-m-Y') : ''); ?></td>
+                  <td align="center"><?php echo ($row1['tgl_mkt_terima'] ? date_format($row1['tgl_mkt_terima'], 'd-m-Y') : ''); ?></td>
+                  <td align="center"><?php echo ($row1['tgl_feedback'] ? date_format($row1['tgl_feedback'], 'd-m-Y') : ''); ?></td>
                   <td align="center"><?php echo $row1['keputusan']; ?></td>
                   <td align="center"><a href="#" class="gambarconform" id="<?php echo $row1['file_foto']; ?>"><?php echo $row1['file_foto']; ?></a></td>
                   <!-- <td align="center"><a href="#" class="btn btn-danger btn-xs <?php if ($_SESSION['akses'] == 'biasa' or $row1['file_foto'] == NULL or $row1['file_foto'] == "") {
