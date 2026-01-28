@@ -222,11 +222,20 @@ $rd = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
         </td>
         <td>No Warna : <?= $rd['no_warna'];?></td>
         <td colspan="1" align="left">
-          <?= $rcek1['tgl_buat']->format('Y-m-d') ?>
+            <?php
+              $tgl = $rcek1['tgl_buat'] ?? null;
+              if ($tgl instanceof DateTime) {
+                  echo $tgl->format('Y-m-d H:i:s');
+              } elseif (!empty($tgl)) {
+                  echo date('Y-m-d H:i:s', strtotime($tgl));
+              } else {
+                  echo '-';
+              }
+            ?>
         </td>
       </tr>
       <tr>
-        <td colspan="1" align="left">Roll x Bruto : <?php echo $rd['rol'] . ' x '.$rd['berat'] ; ?></td>
+        <td colspan="1" align="left">Roll x Bruto : <?php echo $rd['rol'].' x '.number_format((float)($rd['berat'] ?? 0), 2, '.', ''); ?></td>
         <td>Proses : <?php echo $rd['proses_fin']; ?></td>
         <td colspan="1" align="left">&nbsp;</td>
       </tr>
