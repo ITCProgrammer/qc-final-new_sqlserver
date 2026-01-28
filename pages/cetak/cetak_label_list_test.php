@@ -54,23 +54,22 @@ $singkatan = [
 
 $idkk = $_REQUEST['idkk'];
 
-$data = mysqli_query($con, "select
+$data = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1
                               b.physical,
                               b.functional,
                               b.colorfastness
                             from
-                              tbl_tq_nokk a
+                              db_qc.tbl_tq_nokk a
                             left join
-                              tbl_master_test b
+                              db_qc.tbl_master_test b
                               on
                               a.no_test = b.no_testmaster
                             where
-                              a.nodemand = '$idkk'
+                              a.nodemand = ?
                             order by
-                              a.id desc
-                            limit 1");
+                              a.id desc",[$idkk]);
 
-$row = mysqli_fetch_array($data);
+$row = sqlsrv_fetch_array($data,SQLSRV_FETCH_ASSOC);
 
 $detail = explode(",", rtrim($row['physical'], ','));
 $detail1 = explode(",", rtrim($row['functional'], ','));

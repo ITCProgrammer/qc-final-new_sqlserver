@@ -8,16 +8,16 @@ include "../../koneksi.php";
 //$idkk=$_GET['idkk'];
 $idkk = $_REQUEST['idkk'];
 $act = $_GET['g'];
-$data = mysqli_query($con, "SELECT * FROM tbl_tq_nokk WHERE nodemand='$idkk' ORDER BY id DESC LIMIT 1");
-$r = mysqli_fetch_array($data);
+$data = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 *,CONVERT(VARCHAR(19),tgl_masuk) tgl_masuk,CONVERT(VARCHAR(19),tgl_update) tgl_update FROM db_qc.tbl_tq_nokk WHERE nodemand=? ORDER BY id DESC",[$idkk]);
+$r = sqlsrv_fetch_array($data,SQLSRV_FETCH_ASSOC);
 
 
 $id_nokk = $r['id'];
-$nokk_demand_sql = mysqli_query($con, "select nodemand, sort_by from tbl_tq_nokk_demand where id_nokk = '$id_nokk' order by sort_by  ");
+$nokk_demand_sql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nodemand, sort_by FROM db_qc.tbl_tq_nokk_demand WHERE id_nokk = ? order by sort_by  ",[$id_nokk]);
 
 $array_demand_2_3 = [];
 $array_demand_4_5_6 = [];
-while ($datas = mysqli_fetch_assoc($nokk_demand_sql)) {
+while ($datas = sqlsrv_fetch_array($nokk_demand_sql,SQLSRV_FETCH_ASSOC)) {
   if ($datas['sort_by'] <= 3) {
     $array_demand_2_3[] = ' / ' . $datas['nodemand'];
   } else {

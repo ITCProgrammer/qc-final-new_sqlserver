@@ -239,14 +239,14 @@ $rowdb21 = db2_fetch_assoc($stmt1);
 
 function autono_test()
 {
-	include"koneksi.php";
+	include "koneksi.php";
 	date_default_timezone_set('Asia/Jakarta');
     $bln= date("Ym");
     $today= date("Ymd");
-    $sqlnotes = mysqli_query($con,"SELECT no_test FROM tbl_tq_nokk WHERE substr(no_test,1,6) like '%".$bln."%' ORDER BY no_test DESC LIMIT 1") or die(mysqli_error());
-    $dt=mysqli_num_rows($sqlnotes);
-    if ($dt>0) {
-        $rd=mysqli_fetch_array($sqlnotes);
+    $sqlnotes = sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 no_test FROM db_qc.tbl_tq_nokk WHERE SUBSTRING(no_test,1,6) like '%".$bln."%' ORDER BY no_test DESC") or die(p(sqlsrv_errors()));
+    $dt=0;
+    $rd=sqlsrv_fetch_array($sqlnotes,SQLSRV_FETCH_ASSOC);
+    if ($rd) {
         $dt=$rd['no_test'];
         $strd=substr($dt, 8, 4);
         $Urutd = (int)$strd;
@@ -264,9 +264,12 @@ function autono_test()
     return $no2;
 }
 
-$sqlCek=mysqli_query($con,"SELECT a.*,b.hangtag FROM tbl_tq_nokk a LEFT JOIN tbl_master_hangtag b ON a.no_item = b.no_item WHERE nodemand='$nodemand' ORDER BY id DESC LIMIT 1");
-$cek=mysqli_num_rows($sqlCek);
-$rcek=mysqli_fetch_array($sqlCek);
+$sqlCek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 a.*,b.hangtag FROM db_qc.tbl_tq_nokk a LEFT JOIN db_qc.tbl_master_hangtag b ON a.no_item = b.no_item WHERE nodemand=? ORDER BY id DESC",[$nodemand]);
+$cek=0;
+$rcek=sqlsrv_fetch_array($sqlCek,SQLSRV_FETCH_ASSOC);
+if($rcek){
+	$cek++;
+}
 $no_tes=$rcek['no_test']+1;
 $no_order= isset($_POST['no_order']) ? $_POST['no_order'] : '';
 $pelanggan1= isset($_POST['pelanggan']) ? $_POST['pelanggan'] : '';
@@ -292,8 +295,8 @@ $area= isset($_POST['area']) ? $_POST['area'] : '';
 
 //$con1=mysqli_connect("10.0.0.10","dit","4dm1n");
 //$db1=mysqli_select_db("db_finishing",$con1)or die("Gagal Koneksi ke finishing");
-//$qryFin=mysqli_query("SELECT * FROM tbl_produksi WHERE nokk='$nokk' ORDER BY id DESC LIMIT 1");
-//$dtFin=mysqli_fetch_array($qryFin);
+//$qryFin=mysqli_query("SELECT * FROM db_qc.tbl_produksi WHERE nokk='$nokk' ORDER BY id DESC LIMIT 1");
+//$dtFin=sqlsrv_fetch_array($qryFin,SQLSRV_FETCH_ASSOC);
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form0" id="form0">
  <div class="box box-info">
@@ -571,13 +574,20 @@ $area= isset($_POST['area']) ? $_POST['area'] : '';
 <?php
 $noitem= isset($_POST['no_itemtest']) ? $_POST['no_itemtest'] : '';
 $buyer= isset($_POST['buyer']) ? $_POST['buyer'] : '';
-$sqlCek1=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',fc_note,ph_note, abr_note, bas_note, dry_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,wick_note,wick_note,absor_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note) AS note_g FROM tbl_tq_test WHERE id_nokk='$rcek[id]' ORDER BY id DESC LIMIT 1");
-$cek1=mysqli_num_rows($sqlCek1);
-$rcek1=mysqli_fetch_array($sqlCek1);
+$sqlCek1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT  TOP 1 *,
+	CONCAT_WS(' ',fc_note,ph_note, abr_note, bas_note, dry_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,wick_note,wick_note,absor_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note) AS note_g FROM db_qc.tbl_tq_test WHERE id_nokk='$rcek[id]' ORDER BY id DESC");
+$cek1=0;
+$rcek1=sqlsrv_fetch_array($sqlCek1,SQLSRV_FETCH_ASSOC);
+if($rcek1){
+	$cek1++;
+}
 
-$sqlcekNoTes=mysqli_query($con,"SELECT * FROM tbl_tq_nokk WHERE no_test='$_POST[no_test]'");
-$cekNoTes=mysqli_num_rows($sqlcekNoTes);
+$sqlcekNoTes=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_tq_nokk WHERE no_test=? ",[$_POST['no_test']]);
+$cekNoTes=0;
+$rcekNoTes=sqlsrv_fetch_array($sqlcekNoTes,SQLSRV_FETCH_ASSOC);
+if($rcekNoTes){
+	$cekNoTes++;
+}
 ?>
 <?php if($_GET['nodemand']!=""){ ?>
 <div class="box box-success">
@@ -615,16 +625,16 @@ $cekNoTes=mysqli_num_rows($sqlcekNoTes);
 <div class="col-md-12">
 <!-- Custom Tabs -->
 				<?php
-					$qMB=mysqli_query($con,"SELECT * FROM tbl_masterbuyer_test WHERE buyer='$_POST[buyer]'");
-					$cekMB=mysqli_num_rows($qMB);
+					$qMB=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_masterbuyer_test WHERE buyer=? ",[$_POST['buyer']]);
+					$cekMB=0;
 					
-                if($cekMB>0){
-                    while($dMB=mysqli_fetch_array($qMB)){
+                    while($dMB=sqlsrv_fetch_array($qMB,SQLSRV_FETCH_ASSOC)){
+					$cekMB++;
                     $detail=explode(",",$dMB['physical']);
                     $detail1=explode(",",$dMB['functional']);
                     $detail2=explode(",",$dMB['colorfastness']);
 				?>
-				<form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
+				<!-- <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1"> -->
                      <div class="form-group">
                         <span class='badge bg-blue'><label for="physical" class="col-sm-2">PHYSICAL</label></span>
                      </div>
@@ -761,10 +771,10 @@ $cekNoTes=mysqli_num_rows($sqlcekNoTes);
 						</label>
 					</div>
                     <?php } ?>
-				</form>
+				<!-- </form> -->
                 
-                <?php }else{ ?>
-                    <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
+                <?php if($cekMB==0){ ?>
+                    <!-- <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1"> -->
                      <div class="form-group">
                         <span class='badge bg-blue'><label for="physical" class="col-sm-2">PHYSICAL</label></span>
                      </div>
@@ -900,7 +910,7 @@ $cekNoTes=mysqli_num_rows($sqlcekNoTes);
 						<label><input type="checkbox" class="minimal" name="colorfastness[]" value="FIBER SHEDDING"> Fiber Shedding &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 						</label>
 					</div>
-				</form>
+				<!-- </form> -->
 			<?php } ?>
 </div>
 <!-- /.col -->
@@ -929,8 +939,8 @@ $cekNoTes=mysqli_num_rows($sqlcekNoTes);
 
 function no_demand_insert($no_demand_urutan,$sortby,$id_nokk) {
 	if ($no_demand_urutan !='') {
-		include"koneksi.php";
-		$sql_no_demand =mysqli_query($con,"INSERT INTO tbl_tq_nokk_demand (id, id_nokk,nodemand,sort_by) VALUES (NULL, '$id_nokk','$no_demand_urutan','$sortby')");				
+		include "koneksi.php";
+		$sql_no_demand =sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_nokk_demand (id_nokk,nodemand,sort_by) VALUES ('$id_nokk','$no_demand_urutan','$sortby')");				
 	}
 }
 
@@ -969,10 +979,9 @@ function nourut()
 {
 	include"koneksi.php";
     $format = date("ym");
-    $sql=mysqli_query($con,"SELECT no_id FROM tbl_tq_nokk WHERE substr(no_id,1,4) like '%".$format."%' ORDER BY no_id DESC LIMIT 1 ") or die(mysqli_error());
-    $d=mysqli_num_rows($sql);
-    if ($d>0) {
-        $r=mysqli_fetch_array($sql);
+    $sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 no_id FROM db_qc.tbl_tq_nokk WHERE SUBSTRING(CONVERT(VARCHAR(10), no_id),1,4) like '%".$format."%' ORDER BY no_id DESC") or die(p(sqlsrv_errors()));
+    $r=sqlsrv_fetch_array($sql,SQLSRV_FETCH_ASSOC);
+    if ($r) {
         $d=$r['no_id'];
         $str=substr($d, 4, 4);
         $Urut = (int)$str;
@@ -995,10 +1004,10 @@ function autono_test_save()
 	date_default_timezone_set('Asia/Jakarta');
     $bln= date("Ym");
     $today= date("Ymd");
-    $sqlnotes = mysqli_query($con,"SELECT no_test FROM tbl_tq_nokk WHERE substr(no_test,1,6) like '%".$bln."%' ORDER BY no_test DESC LIMIT 1") or die(mysqli_error());
-    $dt=mysqli_num_rows($sqlnotes);
-    if ($dt>0) {
-        $rd=mysqli_fetch_array($sqlnotes);
+    $sqlnotes = sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 no_test FROM db_qc.tbl_tq_nokk WHERE SUBSTRING(no_test,1,6) like '%".$bln."%' ORDER BY no_test DESC") or die(p(sqlsrv_errors)());
+    $dt=0;
+    $rd=sqlsrv_fetch_array($sqlnotes,SQLSRV_FETCH_ASSOC);
+    if ($rd) {
         $dt=$rd['no_test'];
         $strd=substr($dt, 8, 4);
         $Urutd = (int)$strd;
@@ -1048,65 +1057,33 @@ $nourut=nourut();
    		{  
       		$chkc .= $chk3.",";  
    		}  
-  	  $sqlData=mysqli_query($con,"INSERT INTO tbl_tq_nokk SET 
-	  	  no_id='$nourut',	
-		  nokk='$nokk',
-		  nodemand='$_POST[nodemand]',
-		  no_test='$notest',
-		  pelanggan='$_POST[pelanggan]',
-		  no_order='$_POST[no_order]',
-		  no_hanger='$_POST[no_hanger]',
-		  no_item='$_POST[no_item]',
-		  no_po='$po',
-		  jenis_kain='$jns',
-		  lebar='$_POST[lebar]',
-		  gramasi='$_POST[grms]',
-		  berat='$_POST[berat]',
-		  rol='$_POST[rol]',
-		  lot='$lot',
-		  warna='$warna',
-		  no_warna='$nowarna',
-		  tgl_fin=now(),
-		  proses_fin='$_POST[proses]',
-		  suhu='$_POST[suhu]',
-		  tgl_masuk=now(),
-          buyer='$buyer',
-		  development='$_POST[development]',
-		  tgl_target='$target',
-		  season='$season',
-		  kk_legacy='$_POST[kk_legacy]',
-		  lot_legacy='$_POST[lot_legacy]',
-		  ip='$ip',
-		  tgl_update=now(),
-		  area='$_POST[area]'");
+  	  $sqlData=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_nokk
+	  	  (no_id,nokk,nodemand,no_test,pelanggan,no_order,no_hanger,no_item,no_po,jenis_kain,lebar,gramasi,berat,rol,lot,warna,no_warna
+		  ,tgl_fin,proses_fin,suhu,tgl_masuk,buyer,development,tgl_target,season,kk_legacy,lot_legacy,ip,tgl_update,area)
+		  VALUES('$nourut','$nokk','$_POST[nodemand]','$notest','$_POST[pelanggan]','$_POST[no_order]','$_POST[no_hanger]','$_POST[no_item]','$po','$jns',
+		  '$_POST[lebar]','$_POST[grms]','$_POST[berat]','$_POST[rol]','$lot','$warna','$nowarna',CURRENT_TIMESTAMP,'$_POST[proses]','$_POST[suhu]',CURRENT_TIMESTAMP,
+		  '$buyer','$_POST[development]','$target','$season','$_POST[kk_legacy]','$_POST[lot_legacy]','$ip',CURRENT_TIMESTAMP,'$_POST[area]'); SELECT @@IDENTITY as id; ");
 			
 			if ($sqlData) { // if no demand multiplw 
-				$id_nokk = mysqli_insert_id($con);
+			 	$next_result = sqlsrv_next_result($sqlData);
+				$row = sqlsrv_fetch_array($sqlData, SQLSRV_FETCH_ASSOC);
+				$id_nokk = $row["id"];
 				no_demand_insert($_POST['no_demand_2'],2,$id_nokk);
 				no_demand_insert($_POST['no_demand_3'],3,$id_nokk);
 				no_demand_insert($_POST['no_demand_4'],4,$id_nokk);
 				no_demand_insert($_POST['no_demand_5'],5,$id_nokk);
-				no_demand_insert($_POST['no_demand_6'],6,$id_nokk);
-			
+				no_demand_insert($_POST['no_demand_6'],6,$id_nokk);	
 	
-	
-		$sqlData2=mysqli_query($con,"INSERT INTO tbl_master_test SET
+		$sqlData2=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_master_test 
+			(buyer,no_testmaster,physical,functional,colorfastness,tgl_update)
+			VALUES('$buyer','$notest','$chkp','$chkf','$chkc',CURRENT_TIMESTAMP)");
+		$sqlData3=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_masterbuyer_test SET
 			buyer='$buyer',
-			no_testmaster='$notest',
-			physical='$chkp',
-			functional='$chkf',
-			colorfastness='$chkc',
-			tgl_update=now()");
-		$sqlData3=mysqli_query($con,"UPDATE tbl_masterbuyer_test SET
-			buyer='$buyer',
-			physical='$chkp',
-			functional='$chkf',
-			colorfastness='$chkc',
-			tgl_update=now()
-			WHERE buyer='$buyer'");
-
-		
-			
+			,physical='$chkp',
+			,functional='$chkf',
+			,colorfastness='$chkc',
+			,tgl_update=CURRENT_TIMESTAMP
+			WHERE buyer='$buyer'");		
 			
 
 			
@@ -1139,10 +1116,9 @@ $nourut=nourut();
 	{
 		include"koneksi.php";
 		$format = date("ym");
-		$sql=mysqli_query($con,"SELECT no_id FROM tbl_tq_nokk WHERE substr(no_id,1,4) like '%".$format."%' ORDER BY no_id DESC LIMIT 1 ") or die(mysqli_error());
-		$d=mysqli_num_rows($sql);
-		if ($d>0) {
-			$r=mysqli_fetch_array($sql);
+		$sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 no_id FROM db_qc.tbl_tq_nokk WHERE SUBSTRING(CONVERT(VARCHAR(10), no_id),1,4) like '%".$format."%' ORDER BY no_id DESC") or die(p(sqlsrv_errors()));
+		$r=sqlsrv_fetch_array($sql,SQLSRV_FETCH_ASSOC);
+		if ($r) {
 			$d=$r['no_id'];
 			$str=substr($d, 4, 4);
 			$Urut = (int)$str;
@@ -1165,10 +1141,10 @@ $nourut=nourut();
 		date_default_timezone_set('Asia/Jakarta');
 		$bln= date("Ym");
 		$today= date("Ymd");
-		$sqlnotes = mysqli_query($con,"SELECT no_test FROM tbl_tq_nokk WHERE substr(no_test,1,6) like '%".$bln."%' ORDER BY no_test DESC LIMIT 1") or die(mysqli_error());
-		$dt=mysqli_num_rows($sqlnotes);
-		if ($dt>0) {
-			$rd=mysqli_fetch_array($sqlnotes);
+		$sqlnotes = sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 no_test FROM db_qc.tbl_tq_nokk WHERE SUBSTRING(no_test,1,6) like '%".$bln."%' ORDER BY no_test DESC") or die(p(sqlsrv_errors()));
+		$rd=sqlsrv_fetch_array($sqlnotes,SQLSRV_FETCH_ASSOC);
+		if ($rd) {
+			$rd=sqlsrv_fetch_array($sqlnotes,SQLSRV_FETCH_ASSOC);
 			$dt=$rd['no_test'];
 			$strd=substr($dt, 8, 4);
 			$Urutd = (int)$strd;
@@ -1215,51 +1191,19 @@ $nourut=nourut();
         foreach($checkbox3 as $chk3)  
    		{  
       		$chkc .= $chk3.",";  
-   		}   
-  	  $sqlData=mysqli_query($con,"INSERT INTO tbl_tq_nokk SET 
-	  	  no_id='$nourut',	
-		  nokk='$_POST[nokk]',
-		  nodemand='$_POST[nodemand]',
-		  no_test='$notest',
-		  pelanggan='$_POST[pelanggan]',
-		  no_order='$_POST[no_order]',
-		  no_hanger='$_POST[no_hanger]',
-		  no_item='$_POST[no_item]',
-		  no_po='$po',
-		  jenis_kain='$jns',
-		  lebar='$_POST[lebar]',
-		  gramasi='$_POST[grms]',
-		  lot='$lot',
-		  berat='$_POST[berat]',
-		  rol='$_POST[rol]',
-		  warna='$warna',
-		  no_warna='$nowarna',
-		  tgl_fin=now(),
-		  proses_fin='$_POST[proses]',
-		  suhu='$_POST[suhu]',
-		  tgl_masuk=now(),
-          buyer='$buyer',
-		  development='$_POST[development]',
-		  tgl_target='$target',
-		  kk_legacy='$_POST[kk_legacy]',
-		  lot_legacy='$_POST[lot_legacy]',
-		  ip='$ip',
-		  tgl_update=now()");
-		$sqlData1=mysqli_query($con,"INSERT INTO tbl_masterbuyer_test SET
-			buyer='$buyer',
-			physical='$chkp',
-            functional='$chkf',
-            colorfastness='$chkc',
-			tgl_update=now()
-		");
-		$sqlData2=mysqli_query($con,"INSERT INTO tbl_master_test SET
-			buyer='$buyer',
-			no_testmaster='$notest',
-			physical='$chkp',
-            functional='$chkf',
-            colorfastness='$chkc',
-			tgl_update=now()
-		");	 	  
+   		}		
+  	  	$sqlData=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_nokk
+	  	  (no_id,nokk,nodemand,no_test,pelanggan,no_order,no_hanger,no_item,no_po,jenis_kain,lebar,gramasi,lot,berat,rol,warna,no_warna
+		  ,tgl_fin,proses_fin,suhu,tgl_masuk,buyer,development,tgl_target,kk_legacy,lot_legacy,ip,tgl_update)
+		  VALUES('$nourut','$_POST[nokk]','$_POST[nodemand]','$notest','$_POST[pelanggan]','$_POST[no_order]','$_POST[no_hanger]','$_POST[no_item]'
+		  ,'$po','$jns','$_POST[lebar]','$_POST[grms]','$lot','$_POST[berat]','$_POST[rol]','$warna','$nowarna',CURRENT_TIMESTAMP,'$_POST[proses]'
+		  ,'$_POST[suhu]',CURRENT_TIMESTAMP,'$buyer','$_POST[development]','$target','$_POST[kk_legacy]','$_POST[lot_legacy]','$ip',CURRENT_TIMESTAMP);");
+		$sqlData1=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_masterbuyer_test 
+			(buyer,physical,functional,colorfastness,tgl_update)
+			VALUES('$buyer','$chkp','$chkf','$chkc',CURRENT_TIMESTAMP);");
+		$sqlData2=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_master_test 
+			(buyer,no_testmaster,physical,functional,colorfastness,tgl_update)
+			VALUES('$buyer','$notest','$chkp','$chkf','$chkc',CURRENT_TIMESTAMP);");	 	  
 	  
 		if($sqlData2){
 			
@@ -1311,8 +1255,7 @@ $nourut=nourut();
 <?php 
 if($_POST['simpan_season']=="Simpan"){
 	$nama=strtoupper($_POST['nama']);
-	$sqlData1=mysqli_query($con,"INSERT INTO tbl_season_validity SET 
-		  nama='$nama'");
+	$sqlData1=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_season_validity (nama) VALUES ('$nama') ");
 	if($sqlData1){	
 	echo "<script>swal({
   title: 'Data Telah Tersimpan',   
