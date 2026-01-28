@@ -126,13 +126,13 @@ $Langganan	= isset($_POST['langganan']) ? $_POST['langganan'] : '';
 				  else if($PO!=""){ $where.=" WHERE no_po LIKE '$_POST[no_po]%' ";}
 				  else if($Langganan!=""){ $where.=" WHERE pelanggan LIKE '$_POST[langganan]%' ";}	  
 				  else {$where.=" WHERE a.tgl_masuk BETWEEN '$awal' AND '$akhir' ";}
-  $sql=mysqli_query($con,"SELECT a.*, b.tgl_expired_report, b.status, b.penanggung_jawab_fl, b.no_previous_report, b.tgl_previous_report, b.note FROM tbl_tq_first_lot a 
-  INNER JOIN tbl_tq_test_fl b ON a.id=b.id_nokk WHERE a.tgl_masuk BETWEEN '$awal' AND '$akhir' ");
-  while ($r=mysqli_fetch_array($sql)) {
+  $sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.*, b.tgl_expired_report, b.status, b.penanggung_jawab_fl, b.no_previous_report, b.tgl_previous_report, b.note FROM db_qc.tbl_tq_first_lot a 
+  INNER JOIN db_qc.tbl_tq_test_fl b ON a.id=b.id_nokk WHERE a.tgl_masuk BETWEEN '$awal' AND '$akhir' ");
+  while ($r=sqlsrv_fetch_array($sql)) {
       $no++;
       $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
-	  $sqlR=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE nodemand='".$r['nodemand']."'");
-	  $rR=mysqli_fetch_array($sqlR);
+	  $sqlR=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_qcf WHERE nodemand='".$r['nodemand']."'");
+	  $rR=sqlsrv_fetch_array($sqlR);
       ?>
                 <tr bgcolor="<?php echo $bgcolor; ?>">
 				
@@ -140,22 +140,57 @@ $Langganan	= isset($_POST['langganan']) ? $_POST['langganan'] : '';
                   <td align="center"><?php echo $r['nodemand'];?></td>
                   <td align="center"><?php echo $r['lot'];?></td>
                   <td align="center"><?php echo $r['legacy'] ;?></td>
-                  <td align="center"><?php echo $r['tgl_masuk'];?></td>
-				  
-                  <td align="center"><?php echo $r['tgl_target'];?></td>            
+                  <td align="center">
+                    <?php
+                        if (empty($r['tgl_masuk'])) {
+                            echo '0000-00-00';
+                        } elseif ($r['tgl_masuk'] instanceof DateTime) {
+                            echo $r['tgl_masuk']->format('Y-m-d H:i:s');
+                        } else {
+                            echo date('Y-m-d', strtotime($r['tgl_masuk']));
+                        }
+                    ?>
+                  </td>
+                  <td align="center">
+                    <?php
+                      echo ($r['tgl_target'] instanceof DateTime)
+                      ? $r['tgl_target']->format('Y-m-d')
+                      : $r['tgl_target'];
+                    ?>
+                  </td>            
                   <td align="center"><?php  echo $r['pelanggan'];?></td>
                   <td align="center"><?php echo $r['no_order'];?></td>
                   <td align="center"><?php echo $r['no_item'];?></td>
                   <td align="center"><?php echo $r['jenis_kain'];?></td>
 				  
                   <td align="center"><?php echo $r['season'];?></td>
-				          <td align="center"><?php echo $r['tgl_expired_report'];?></td>
+				          <td align="center">
+                    <?php
+                        if (empty($r['tgl_expired_report'])) {
+                            echo '0000-00-00';
+                        } elseif ($r['tgl_expired_report'] instanceof DateTime) {
+                            echo $r['tgl_expired_report']->format('Y-m-d');
+                        } else {
+                            echo date('Y-m-d', strtotime($r['tgl_expired_report']));
+                        }
+                    ?>
+                  </td>
 				          <td align="center"><?php echo $r['status'];?></td>
                   <td align="center"><?php echo $r['warna'];?></td>
                   <td align="center"><?php echo $r['penanggung_jawab_fl'];?></td>
                        
                   <td align="center"><?php echo $r['no_previous_report'];?></td>
-                  <td align="center"><?php echo $r['tgl_previous_report'];?></td>
+                  <td align="center">
+                    <?php
+                        if (empty($r['tgl_previous_report'])) {
+                            echo '0000-00-00';
+                        } elseif ($r['tgl_previous_report'] instanceof DateTime) {
+                            echo $r['tgl_previous_report']->format('Y-m-d');
+                        } else {
+                            echo date('Y-m-d', strtotime($r['tgl_previous_report']));
+                        }
+                    ?>
+                  </td>
                   <td align="center"><?php echo $r['note'];  ;?></td>
                  
                 </tr>

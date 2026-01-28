@@ -7,17 +7,26 @@
 ?>
 <?php 
 include "../../koneksi.php";
-ini_set("error_reporting",1);
+ini_set("error_reporting", 1);
+
 //--
-$idkk=$_REQUEST['idkk'];
-$act=$_GET['g'];
-//-
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg, DATE_FORMAT(now(),'%Y-%m-%d')+ INTERVAL 1 DAY as tgl_besok");
-$rTgl=mysqli_fetch_array($qTgl);
-$Awal=$_GET['awal'];
-$Akhir=$_GET['akhir'];
-         
+$idkk = $_REQUEST['idkk'];
+$act  = $_GET['g'];
+
+//- SQL Server: GETDATE(), CONVERT, DATEADD
+$qTgl = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT 
+        CONVERT(date, GETDATE()) AS tgl_skrg,
+        CONVERT(date, DATEADD(day, 1, GETDATE())) AS tgl_besok"
+);
+
+$rTgl = sqlsrv_fetch_array($qTgl, SQLSRV_FETCH_ASSOC);
+
+$Awal  = $_GET['awal'];
+$Akhir = $_GET['akhir'];
 ?>
+
 <body>
 	
 <strong>Periode: <?php echo $Awal; ?> s/d <?php echo $Akhir;
@@ -473,19 +482,29 @@ $Akhir = date('Y-m-d', strtotime($_GET['akhir'])) . ' 23:59:59';
     </tr> 
 	<?php 
 	$no=1;
-	$query=mysqli_query($con,"SELECT * FROM tbl_tq_first_lot a 
-	INNER JOIN tbl_tq_test_fl b ON a.id=b.id_nokk 
+	$query=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_tq_first_lot a 
+	INNER JOIN db_qc.tbl_tq_test_fl b ON a.id=b.id_nokk 
 	WHERE a.tgl_masuk BETWEEN '$Awal' AND '$Akhir' ORDER BY a.tgl_masuk ASC, a.no_test ASC 
   ");
-	while($r=mysqli_fetch_array($query)){
-	  $sqlR=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE nodemand='".$r['nodemand']."'");
-	  $rR=mysqli_fetch_array($sqlR);
+	while($r=sqlsrv_fetch_array($query)){
+	  $sqlR=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_qcf WHERE nodemand='".$r['nodemand']."'");
+	  $rR=sqlsrv_fetch_array($sqlR);
 	?>
     <tr>
       <td><?php echo $no;?></td>
       <td>'<?php echo $r['nodemand'];?></td>
       <td>'<?php echo $r['nodemand_new'];?></td>
-      <td><?php echo $r['tgl_masuk'];?></td>
+      <td>
+        <?php
+          if (empty($r['tgl_masuk'])) {
+              echo '0000-00-00';
+          } elseif ($r['tgl_masuk'] instanceof DateTime) {
+              echo $r['tgl_masuk']->format('Y-m-d H:i:s');
+          } else {
+              echo date('Y-m-d', strtotime($r['tgl_masuk']));
+          }
+        ?>
+      </td>
       <td><?php echo $r['no_test'];?></td>
       <td><?php echo $r['no_item'];?></td>
       <td><?php echo $r['pelanggan'];?></td>
