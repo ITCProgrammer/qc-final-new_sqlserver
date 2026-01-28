@@ -426,10 +426,10 @@ function renderRow($testName, $aliasTestName, $detailArray, $row, $statColumn, $
                     } ?>"><i class="fa fa-plus-circle"></i> Tambah</a>-->
                     <?php
                         $delay = date('Y-m-d');
-                        $sqldt = mysqli_query($con, "SELECT COUNT(*) as cnt FROM tbl_tq_nokk a
-        LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk
-        WHERE (`status`='' or `status` IS NULL) AND DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN date_sub(now(),INTERVAL 30 DAY) and now() AND tgl_target < '$delay'");
-                        $row = mysqli_fetch_array($sqldt);
+                        $sqldt = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) as cnt FROM db_qc.tbl_tq_nokk a
+        LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk
+        WHERE ([status]='' or [status] IS NULL) AND CONVERT(DATE, tgl_masuk) BETWEEN  DATEADD(day,-30,CURRENT_TIMESTAMP) and CURRENT_TIMESTAMP AND tgl_target < '$delay'");
+                        $row = sqlsrv_fetch_array($sqldt,SQLSRV_FETCH_ASSOC);
                     ?>
                     <div class="alert alert-warning alert-dismissible">
                         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
@@ -505,20 +505,20 @@ function renderRow($testName, $aliasTestName, $detailArray, $row, $statColumn, $
                                 <?php
                                 include ('koneksi.php');
 
-                                    $sqldt = mysqli_query($con, "SELECT a.*, a.id AS idkk, b.* FROM tbl_tq_nokk a
-                                                                LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk
-                                                                WHERE (`status`='' or `status` IS NULL) and DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) between date_sub(now(),INTERVAL 30 DAY) and now()
+                                    $sqldt = sqlsrv_query($con_db_qc_sqlsrv, "SELECT a.*, a.id AS idkk, b.*, CONVERT(VARCHAR(19), tgl_target) AS tgl_target2, CONVERT(VARCHAR(19), tgl_masuk) AS tgl_masuk FROM db_qc.tbl_tq_nokk a
+                                                                LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk
+                                                                WHERE ([status]='' or [status] IS NULL) and CONVERT(DATE, tgl_masuk) between DATEADD(day,-30,CURRENT_TIMESTAMP) and CURRENT_TIMESTAMP
                                                                 ORDER BY tgl_target ASC");
                                     $no = "1";
-                                    while ($rowd = mysqli_fetch_array($sqldt)) {
-                                        $tgltarget = new DateTime($rowd['tgl_target']);
+                                    while ($rowd = sqlsrv_fetch_array($sqldt,SQLSRV_FETCH_ASSOC)) {
+                                        $tgltarget = new DateTime($rowd['tgl_target2']);
                                         $now = new DateTime();
                                         $target = $now->diff($tgltarget);
                                         $delay = $tgltarget->diff($now);
                                         //$nokk = $rowd['nokk'];
                                 
                                         // $TDObjects = [];
-                                        // $qryTest = mysqli_query($con, "select
+                                        // $qryTest = sqlsrv_query($con_db_qc_sqlsrv, "select
                                         //                                     a.*,
                                         //                                     b.*,
                                         //                                     c.*,
@@ -536,7 +536,7 @@ function renderRow($testName, $aliasTestName, $detailArray, $row, $statColumn, $
                                         //                                 order by
                                         //                                     a.id desc
                                         //                                 limit 1");
-                                        // $rowt = mysqli_fetch_assoc($qryTest);
+                                        // $rowt = sqlsrv_fetch_array($qryTest,SQLSRV_FETCH_ASSOC);
 
                                         // $detail = explode(",", $rowt['physical']);
                                         // $detail2 = explode(",", $rowt['functional']);
@@ -599,7 +599,7 @@ function renderRow($testName, $aliasTestName, $detailArray, $row, $statColumn, $
                                             <td align="center"><?php echo $rowd['nokk']; ?></td>
                                             <td align="center"><?php echo $rowd['kk_legacy']; ?></td>
                                             <td align="center"><?php echo $rowd['tgl_masuk']; ?></td>
-                                            <td align="center"><?php echo $rowd['tgl_target']; ?><br>
+                                            <td align="center"><?php echo $rowd['tgl_target2']; ?><br>
                                                 <?php if ($tgltarget > $now) { ?>
                                                     <span class='badge bg-blue'><?php echo $target->d + 1;
                                                     echo " Hari lagi"; ?></span>
