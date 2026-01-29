@@ -15,8 +15,8 @@ ini_set("error_reporting", 1);
 $idkk = $_REQUEST['idkk'];
 $act = $_GET['g'];
 //-
-$qTgl = mysqli_query($con, "SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg, DATE_FORMAT(now(),'%Y-%m-%d')+ INTERVAL 1 DAY as tgl_besok");
-$rTgl = mysqli_fetch_array($qTgl);
+$qTgl = sqlsrv_query($con_db_qc_sqlsrv, "SELECT CONVERT(VARCHAR(10), CURRENT_TIMESTAMP, 120) as tgl_skrg, CONVERT(VARCHAR(10), DATEADD(DAY, 1, CURRENT_TIMESTAMP), 120) as tgl_besok");
+$rTgl = sqlsrv_fetch_array($qTgl, SQLSRV_FETCH_ASSOC);
 $Awal = $_GET['awal'];
 $Akhir = $_GET['akhir'];
 
@@ -892,62 +892,71 @@ $prod_order = isset($_GET['prod_order']) ? $_GET['prod_order'] : null;
     </tr>
     <?php
     $no = 1;
-    $sql = "SELECT *,a.id as idkk, c.bleeding_root
-          FROM tbl_tq_nokk a 
-          JOIN tbl_tq_test b ON (a.id=b.id_nokk) 
-          LEFT JOIN tbl_tq_test_2 c ON (a.id = c.id_nokk)
-          WHERE a.tgl_masuk BETWEEN '$Awal' AND '$Akhir'";
-    //backup 
-    // -- ORDER BY a.tgl_masuk ASC, a.no_test ASC
+    $params = array();
+    $sql = "SELECT *, a.id as idkk, c.bleeding_root
+          FROM db_qc.tbl_tq_nokk a 
+          JOIN db_qc.tbl_tq_test b ON (a.id=TRY_CAST(b.id_nokk AS BIGINT)) 
+          LEFT JOIN db_qc.tbl_tq_test_2 c ON (a.id = TRY_CAST(c.id_nokk AS BIGINT))
+          WHERE CONVERT(date, a.tgl_masuk) BETWEEN CONVERT(date, ?) AND CONVERT(date, ?)";
+    
+    $params[] = $Awal;
+    $params[] = $Akhir;
     
     if (!empty($no_order)) {
-      $sql .= " AND a.no_order = '$no_order'";
+      $sql .= " AND a.no_order = ?";
+      $params[] = (string)$no_order;
     }
     if (!empty($no_po)) {
-      $sql .= " AND a.no_po = '$no_po'";
+      $sql .= " AND a.no_po = ?";
+      $params[] = (string)$no_po;
     }
     if (!empty($hanger)) {
-      $sql .= " AND a.no_hanger = '$hanger'";
+      $sql .= " AND a.no_hanger = ?";
+      $params[] = (string)$hanger;
     }
     if (!empty($development)) {
-      $sql .= " AND a.development = '$development'";
+      $sql .= " AND a.development = ?";
+      $params[] = (string)$development;
     }
     if (!empty($warna)) {
-      $sql .= " AND a.warna = '$warna'";
+      $sql .= " AND a.warna = ?";
+      $params[] = (string)$warna;
     }
     if (!empty($pelanggan)) {
-      $sql .= " AND a.pelanggan like '%$pelanggan%'";
+      $sql .= " AND a.pelanggan LIKE ?";
+      $params[] = '%'.$pelanggan.'%';
     }
 
     if (!empty($demand)) {
-      $sql .= " AND a.nodemand = '$demand' ";
+      $sql .= " AND a.nodemand = ?";
+      $params[] = (string)$demand;
     }
 
     if (!empty($prod_order)) {
-      $sql .= " AND a.lot = '$prod_order' ";
+      $sql .= " AND a.lot = ?";
+      $params[] = (string)$prod_order;
     }
 
     $sql .= " ORDER BY a.tgl_masuk ASC, a.no_test ASC";
 
     //penambahan no demand multiple
     $sql_demand = "SELECT *, a.id as idkk, c.nodemand as nodemand_multiple 
-	  FROM tbl_tq_nokk a 
-	  INNER JOIN tbl_tq_test b ON a.id=b.id_nokk 
-	  join tbl_tq_nokk_demand c on (a.id = c.id_nokk)
-	  WHERE a.tgl_masuk BETWEEN '$Awal' AND '$Akhir' ";
-    $demand_results = mysqli_query($con, $sql_demand);
+	  FROM db_qc.tbl_tq_nokk a 
+	  INNER JOIN db_qc.tbl_tq_test b ON a.id=TRY_CAST(b.id_nokk AS BIGINT) 
+	  JOIN db_qc.tbl_tq_nokk_demand c ON (a.id = TRY_CAST(c.id_nokk AS BIGINT))
+	  WHERE CONVERT(date, a.tgl_masuk) BETWEEN CONVERT(date, ?) AND CONVERT(date, ?)";
+    $demand_results = sqlsrv_query($con_db_qc_sqlsrv, $sql_demand, array($Awal, $Akhir));
 
     $array = [];
-    while ($demand_row = mysqli_fetch_array($demand_results)) {
+    while ($demand_row = sqlsrv_fetch_array($demand_results, SQLSRV_FETCH_ASSOC)) {
       $array[$demand_row['idkk']][] = $demand_row['nodemand_multiple'];
     }
 
-    $query = mysqli_query($con, $sql);
+    $query = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 
-
-    while ($r = mysqli_fetch_array($query)) {
-      $sqlR = mysqli_query($con, "SELECT * FROM tbl_qcf WHERE nodemand='" . $r['nodemand'] . "'");
-      $rR = mysqli_fetch_array($sqlR);
+    while ($r = sqlsrv_fetch_array($query, SQLSRV_FETCH_ASSOC)) {
+      $sqlR = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_qcf WHERE nodemand=?", array($r['nodemand']));
+      $rR = sqlsrv_fetch_array($sqlR, SQLSRV_FETCH_ASSOC);
       ?>
       <tr>
         <td>
@@ -957,7 +966,7 @@ $prod_order = isset($_GET['prod_order']) ? $_GET['prod_order'] : null;
           <?php echo $r['nodemand']; ?>
         </td>
         <td>
-          <?php echo $r['tgl_masuk']; ?>
+          <?php echo ($r['tgl_masuk'] ? $r['tgl_masuk']->format('Y-m-d') : ''); ?>
         </td>
         <td>
           <?php echo $r['no_test']; ?>
@@ -2090,7 +2099,7 @@ $prod_order = isset($_GET['prod_order']) ? $_GET['prod_order'] : null;
               <?php echo $d; ?>
             </td>
             <td>
-              <?php echo $r['tgl_masuk']; ?>
+              <?php echo ($r['tgl_masuk'] ? $r['tgl_masuk']->format('Y-m-d') : ''); ?>
             </td>
             <td>
               <?php echo $r['no_test']; ?>

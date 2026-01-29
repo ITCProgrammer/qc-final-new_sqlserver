@@ -217,66 +217,74 @@ target="_blank" class="btn btn-danger pull-right">Cetak</a>
 				  else if($Langganan!=""){ $where.=" WHERE pelanggan LIKE '$_POST[langganan]%' ";}	  
 				  else {$where.=" WHERE a.tgl_masuk BETWEEN '$_POST[awal]' AND '$_POST[akhir]' ";}
 				  */
+  $params = array();
   $sql = "SELECT *, a.id as idkk 
-  FROM tbl_tq_nokk a 
-  INNER JOIN tbl_tq_test b ON a.id=b.id_nokk 
-  WHERE a.tgl_masuk BETWEEN '$_POST[awal]' AND '$_POST[akhir]' ";
+  FROM db_qc.tbl_tq_nokk a 
+  INNER JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+  WHERE CONVERT(date, a.tgl_masuk) BETWEEN CONVERT(date, ?) AND CONVERT(date, ?)";
+  
+  $params[] = $_POST['awal'];
+  $params[] = $_POST['akhir'];
 
   if (!empty($no_order)) {
-	$sql .= " AND a.no_order = '$no_order'";
+    $sql .= " AND a.no_order = ?";
+    $params[] = $no_order;
   }
   if (!empty($no_po)) {
-	$sql .= " AND a.no_po = '$no_po'";
+    $sql .= " AND a.no_po = ?";
+    $params[] = $no_po;
   }
   if (!empty($hanger)) {
-	$sql .= " AND a.no_hanger = '$hanger'";
+    $sql .= " AND a.no_hanger = ?";
+    $params[] = $hanger;
   }
-if (!empty($development)) {
-    $sql .= " AND a.development = '$development'";
-    }
+  if (!empty($development)) {
+    $sql .= " AND a.development = ?";
+    $params[] = $development;
+  }
   if (!empty($warna)) {
-	$sql .= " AND a.warna = '$warna'";
+    $sql .= " AND a.warna = ?";
+    $params[] = $warna;
   }
   if (!empty($pelanggan)) {
-	$sql .= " AND a.pelanggan like '%$pelanggan%'";
+    $sql .= " AND a.pelanggan LIKE ?";
+    $params[] = '%'.$pelanggan.'%';
   }
-  
   if (!empty($demand)) {
-	$sql .= " AND a.nodemand = '$demand' ";
+    $sql .= " AND a.nodemand = ?";
+    $params[] = $demand;
   }
-  
   if (!empty($prod_order)) {
-	$sql .= " AND a.lot = '$prod_order' ";
+    $sql .= " AND a.lot = ?";
+    $params[] = $prod_order;
   }
   
-  
-  $results=mysqli_query($con,$sql);
+  $results=sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
   
 
   
   
   
   
-  //penambahan no demand multiple
   $sql_demand = "SELECT *, a.id as idkk, c.nodemand as nodemand_multiple  
-  FROM tbl_tq_nokk a 
-  INNER JOIN tbl_tq_test b ON a.id=b.id_nokk 
-  join tbl_tq_nokk_demand c on (a.id = c.id_nokk)
-  WHERE a.tgl_masuk BETWEEN '$_POST[awal]' AND '$_POST[akhir]' ";
+  FROM db_qc.tbl_tq_nokk a 
+  INNER JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+  JOIN db_qc.tbl_tq_nokk_demand c ON (a.id = c.id_nokk)
+  WHERE CONVERT(date, a.tgl_masuk) BETWEEN CONVERT(date, ?) AND CONVERT(date, ?)";
   
-  $demand_results=mysqli_query($con,$sql_demand);
+  $demand_results=sqlsrv_query($con_db_qc_sqlsrv, $sql_demand, array($_POST['awal'], $_POST['akhir']));
   
-$array = [];
-while( $demand_row=mysqli_fetch_array($demand_results) ){ 
-$array[$demand_row['idkk']][] = $demand_row['nodemand_multiple'];
-}
+  $array = [];
+  while($demand_row=sqlsrv_fetch_array($demand_results, SQLSRV_FETCH_ASSOC)){ 
+    $array[$demand_row['idkk']][] = $demand_row['nodemand_multiple'];
+  }
 
 
-  while ($r=mysqli_fetch_array($results)) {
+  while ($r=sqlsrv_fetch_array($results, SQLSRV_FETCH_ASSOC)) {
       $no++;
       $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
-	  $sqlR=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE nodemand='".$r['nodemand']."'");
-	  $rR=mysqli_fetch_array($sqlR);
+      $sqlR=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_qcf WHERE nodemand=?", array($r['nodemand']));
+      $rR=sqlsrv_fetch_array($sqlR, SQLSRV_FETCH_ASSOC);
       ?>
                 <tr bgcolor="<?php echo $bgcolor; ?>">
                   <td align="center">
@@ -285,7 +293,7 @@ $array[$demand_row['idkk']][] = $demand_row['nodemand_multiple'];
 					?>				
                   </td>
                   <td align="center"><?php echo $r['nodemand'];?></td>
-                  <td align="center"><?php echo $r['tgl_masuk'];?></td>
+                  <td align="center"><?php echo ($r['tgl_masuk'] ? date_format($r['tgl_masuk'], 'Y-m-d') : ''); ?></td>
                   <td align="center"><?php echo $r['no_test'];?></td>
                   <td align="center"><?php echo $r['no_item'];?></td>
                   <td><?php echo $r['pelanggan'];?></td>
@@ -310,7 +318,7 @@ $array[$demand_row['idkk']][] = $demand_row['nodemand_multiple'];
 						<?php echo $no; ?>
 					  </td>
 					  <td align="center"><?php echo $d;?></td>
-					  <td align="center"><?php echo $r['tgl_masuk'];?></td>
+					  <td align="center"><?php echo ($r['tgl_masuk'] ? date_format($r['tgl_masuk'], 'Y-m-d') : ''); ?></td>
 					  <td align="center"><?php echo $r['no_test'];?></td>
 					  <td align="center"><?php echo $r['no_item'];?></td>
 					  <td><?php echo $r['pelanggan'];?></td>
