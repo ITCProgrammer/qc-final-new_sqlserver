@@ -155,45 +155,45 @@ $Status	= isset($_POST['sts']) ? $_POST['sts'] : '';
           <tbody>
           <?php
           //Edwin  
-					    $jumlah_edwin1 = mysqli_query($con,"SELECT COUNT(*) as jml_edwin FROM tbl_tq_nokk a
-              LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-              WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Edwin%' AND `status`!=''");
-              $edwin1=mysqli_fetch_array($jumlah_edwin1);
+					    $jumlah_edwin1 = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_edwin FROM db_qc.tbl_tq_nokk a
+              LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+              WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Edwin%' AND [status]!=''");
+              $edwin1=sqlsrv_fetch_array($jumlah_edwin1,SQLSRV_FETCH_ASSOC);
           //Ferry
-					    $jumlah_ferry1 = mysqli_query($con,"SELECT COUNT(*) as jml_ferry FROM tbl_tq_nokk a
-              LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-              WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Ferry%' AND `status`!=''");
-              $ferry1=mysqli_fetch_array($jumlah_ferry1);
+					    $jumlah_ferry1 = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_ferry FROM db_qc.tbl_tq_nokk a
+              LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+              WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Ferry%' AND [status]!=''");
+              $ferry1=sqlsrv_fetch_array($jumlah_ferry1,SQLSRV_FETCH_ASSOC);
           //Janu
-              $jumlah_janu1 = mysqli_query($con,"SELECT COUNT(*) as jml_janu FROM tbl_tq_nokk a
-              LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-              WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Janu%' AND `status`!=''");
-              $janu1=mysqli_fetch_array($jumlah_janu1);
+              $jumlah_janu1 = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_janu FROM db_qc.tbl_tq_nokk a
+              LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+              WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Janu%' AND [status]!=''");
+              $janu1=sqlsrv_fetch_array($jumlah_janu1,SQLSRV_FETCH_ASSOC);
           //Taufik
-              $jumlah_taufik1 = mysqli_query($con,"SELECT COUNT(*) as jml_taufik FROM tbl_tq_nokk a
-              LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-              WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Taufik%' AND `status`!=''");
-              $taufik1=mysqli_fetch_array($jumlah_taufik1);
+              $jumlah_taufik1 = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_taufik FROM db_qc.tbl_tq_nokk a
+              LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+              WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Taufik%' AND [status]!=''");
+              $taufik1=sqlsrv_fetch_array($jumlah_taufik1,SQLSRV_FETCH_ASSOC);
           //Tri
-              // $jumlah_tri1 = mysqli_query($con,"SELECT COUNT(*) as jml_tri FROM tbl_tq_nokk a
-              // LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-              // WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Tri%' AND `status`!=''");
-              // $tri1=mysqli_fetch_array($jumlah_tri1);
+              // $jumlah_tri1 = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_tri FROM db_qc.tbl_tq_nokk a
+              // LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+              // WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Tri%' AND [status]!=''");
+              // $tri1=sqlsrv_fetch_array($jumlah_tri1,SQLSRV_FETCH_ASSOC);
           //Dix
-              $jumlah_dix1 = mysqli_query($con,"SELECT COUNT(*) as jml_dix FROM tbl_tq_nokk a
-              LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-              WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Dix%' AND `status`!=''");
-              $dix1=mysqli_fetch_array($jumlah_dix1);
+              $jumlah_dix1 = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_dix FROM db_qc.tbl_tq_nokk a
+              LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+              WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Dix%' AND [status]!=''");
+              $dix1=sqlsrv_fetch_array($jumlah_dix1,SQLSRV_FETCH_ASSOC);
           //Vivik
-              $jumlah_vivik1 = mysqli_query($con,"SELECT COUNT(*) as jml_vivik FROM tbl_tq_nokk a
-              LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-              WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Vivik%' AND `status`!=''");
-              $vivik1=mysqli_fetch_array($jumlah_vivik1);
+              $jumlah_vivik1 = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_vivik FROM db_qc.tbl_tq_nokk a
+              LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+              WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Vivik%' AND [status]!=''");
+              $vivik1=sqlsrv_fetch_array($jumlah_vivik1,SQLSRV_FETCH_ASSOC);
           //Total
-              $qrytotal = mysqli_query($con,"SELECT COUNT(*) as jml FROM tbl_tq_nokk a
-              LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-              WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve!='' AND `status`!=''");
-              $total=mysqli_fetch_array($qrytotal);
+              $qrytotal = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml FROM db_qc.tbl_tq_nokk a
+              LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+              WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve!='' AND [status]!=''");
+              $total=sqlsrv_fetch_array($qrytotal,SQLSRV_FETCH_ASSOC);
 					?>
           <tr valign="top">
             <td align="center">Edwin Ismunandar</td>
@@ -275,20 +275,21 @@ $Status	= isset($_POST['sts']) ? $_POST['sts'] : '';
           <tbody>
             <?php
       include('koneksi.php');
-      if($Awal!=""){ $Where =" AND DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
+      if($Awal!=""){ $Where =" AND CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' "; }
       if($Leader=="ALL"){ $ldr=" ";}else{$ldr=" AND approve LIKE '$Leader' ";}
-      if($Status=="ALL"){ $sts=" ";}else{$sts=" AND `status` LIKE '$Status' ";}
-        $sqldt=mysqli_query($con,"SELECT a.*, a.id AS idkk, b.* FROM tbl_tq_nokk a
-        LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk
-        WHERE (`status`='Approve' or `status`='Conditional Approve' or `status`='Limit Approve' or `status`='Reject') $ldr $sts $Where
-        ORDER BY tgl_approve ASC");
+      if($Status=="ALL"){ $sts=" ";}else{$sts=" AND [status] LIKE '$Status' ";}
+        $sqldt=sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.*, a.id AS idkk, b.*, CONVERT(VARCHAR(19) ,tgl_masuk) tgl_masuk, CONVERT(VARCHAR(19) ,tgl_target) tgl_target
+        , CONVERT(VARCHAR(19) ,tgl_approve) tgl_approve FROM db_qc.tbl_tq_nokk a
+        LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk
+        WHERE ([status]='Approve' or [status]='Conditional Approve' or [status]='Limit Approve' or [status]='Reject') $ldr $sts $Where
+        ORDER BY b.tgl_approve ASC");
 
-      //$sqldt=mysqli_query("SELECT a.*, a.id AS idkk, b.* FROM tbl_tq_nokk a
-      //LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk
-      //WHERE (`status`='Approve' or `status`='Conditional Approve' or `status`='Limit Approve' or `status`='Reject') and tgl_masuk between date_sub(now(),INTERVAL 30 DAY) and now()
+      //$sqldt=mysqli_query("SELECT a.*, a.id AS idkk, b.* FROM db_qc.tbl_tq_nokk a
+      //LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk
+      //WHERE ([status]='Approve' or [status]='Conditional Approve' or [status]='Limit Approve' or [status]='Reject') and tgl_masuk between date_sub(now(),INTERVAL 30 DAY) and now()
       //ORDER BY tgl_masuk ASC");
       $no="1";
-      while($rowd=mysqli_fetch_array($sqldt)){
+      while($rowd=sqlsrv_fetch_array($sqldt,SQLSRV_FETCH_ASSOC)){
 		 ?>
          <tr>
                   <td align="center" ><?php echo $no;?></td>
@@ -377,52 +378,52 @@ Highcharts.chart('container', {
     series: [{
         name: 'Leader Up',
         data: [<?php 
-					$jumlah_edwin = mysqli_query($con,"SELECT COUNT(*) as jml_edwin FROM tbl_tq_nokk a
-                    LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-                    WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Edwin%' AND `status`!=''");
-                    $edwin=mysqli_fetch_array($jumlah_edwin);
+					$jumlah_edwin = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_edwin FROM db_qc.tbl_tq_nokk a
+                    LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+                    WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Edwin%' AND [status]!=''");
+                    $edwin=sqlsrv_fetch_array($jumlah_edwin,SQLSRV_FETCH_ASSOC);
 					echo $edwin['jml_edwin'];
 					?>, 
 					<?php 
-					$jumlah_ferry = mysqli_query($con,"SELECT COUNT(*) as jml_ferry FROM tbl_tq_nokk a
-                    LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-                    WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Ferry%' AND `status`!=''");
-                    $ferry=mysqli_fetch_array($jumlah_ferry);
+					$jumlah_ferry = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_ferry FROM db_qc.tbl_tq_nokk a
+                    LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+                    WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Ferry%' AND [status]!=''");
+                    $ferry=sqlsrv_fetch_array($jumlah_ferry,SQLSRV_FETCH_ASSOC);
 					echo $ferry['jml_ferry'];
 					?>, 
 					<?php 
-					$jumlah_janu = mysqli_query($con,"SELECT COUNT(*) as jml_janu FROM tbl_tq_nokk a
-                    LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-                    WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Janu%' AND `status`!=''");
-                    $janu=mysqli_fetch_array($jumlah_janu);
+					$jumlah_janu = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_janu FROM db_qc.tbl_tq_nokk a
+                    LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+                    WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Janu%' AND [status]!=''");
+                    $janu=sqlsrv_fetch_array($jumlah_janu,SQLSRV_FETCH_ASSOC);
 					echo $janu['jml_janu'];
 					?>, 
 					<?php 
-					$jumlah_taufik = mysqli_query($con,"SELECT COUNT(*) as jml_taufik FROM tbl_tq_nokk a
-                    LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-                    WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Taufik%' AND `status`!=''");
-                    $taufik=mysqli_fetch_array($jumlah_taufik);
+					$jumlah_taufik = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_taufik FROM db_qc.tbl_tq_nokk a
+                    LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+                    WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Taufik%' AND [status]!=''");
+                    $taufik=sqlsrv_fetch_array($jumlah_taufik,SQLSRV_FETCH_ASSOC);
 					echo $taufik['jml_taufik'];
 					?>,
           //           <?php 
-					// $jumlah_tri = mysqli_query($con,"SELECT COUNT(*) as jml_tri FROM tbl_tq_nokk a
-          //           LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-          //           WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Tri%' AND `status`!=''");
-          //           $tri=mysqli_fetch_array($jumlah_tri);
+					// $jumlah_tri = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_tri FROM db_qc.tbl_tq_nokk a
+          //           LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+          //           WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Tri%' AND [status]!=''");
+          //           $tri=sqlsrv_fetch_array($jumlah_tri,SQLSRV_FETCH_ASSOC);
 					// echo $tri['jml_tri'];
 					// ?>,
                     <?php 
-					$jumlah_dix = mysqli_query($con,"SELECT COUNT(*) as jml_dix FROM tbl_tq_nokk a
-                    LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-                    WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Dix%' AND `status`!=''");
-                    $dix=mysqli_fetch_array($jumlah_dix);
+					$jumlah_dix = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_dix FROM db_qc.tbl_tq_nokk a
+                    LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+                    WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Dix%' AND [status]!=''");
+                    $dix=sqlsrv_fetch_array($jumlah_dix,SQLSRV_FETCH_ASSOC);
 					echo $dix['jml_dix'];
 					?>,
           <?php 
-					$jumlah_vivik = mysqli_query($con,"SELECT COUNT(*) as jml_vivik FROM tbl_tq_nokk a
-                    LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk 
-                    WHERE DATE_FORMAT( tgl_approve, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Vivik%' AND `status`!=''");
-                    $vivik=mysqli_fetch_array($jumlah_vivik);
+					$jumlah_vivik = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_vivik FROM db_qc.tbl_tq_nokk a
+                    LEFT JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk 
+                    WHERE CONVERT(DATE, tgl_approve) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Vivik%' AND [status]!=''");
+                    $vivik=sqlsrv_fetch_array($jumlah_vivik,SQLSRV_FETCH_ASSOC);
 					echo $vivik['jml_vivik'];
 					?>],
 		dataLabels: {
@@ -453,45 +454,45 @@ Highcharts.chart('container', {
                     {
 					label: '',
 					data: [<?php 
-					$jumlah_edwin = mysqli_query($con,"SELECT COUNT(*) as jml_edwin FROM tbl_tq_test 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Edwin%'");
-                    $edwin=mysqli_fetch_array($jumlah_edwin);
+					$jumlah_edwin = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_edwin FROM db_qc.tbl_tq_test 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Edwin%'");
+                    $edwin=sqlsrv_fetch_array($jumlah_edwin,SQLSRV_FETCH_ASSOC);
 					echo $edwin['jml_edwin'];
 					?>, 
 					<?php 
-					$jumlah_ferry = mysqli_query($con,"SELECT COUNT(*) as jml_ferry FROM tbl_tq_test 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Ferry%'");
-                    $ferry=mysqli_fetch_array($jumlah_ferry);
+					$jumlah_ferry = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_ferry FROM db_qc.tbl_tq_test 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Ferry%'");
+                    $ferry=sqlsrv_fetch_array($jumlah_ferry,SQLSRV_FETCH_ASSOC);
 					echo $ferry['jml_ferry'];
 					?>, 
 					<?php 
-					$jumlah_janu = mysqli_query($con,"SELECT COUNT(*) as jml_janu FROM tbl_tq_test 
-          WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Janu%'");
-                    $janu=mysqli_fetch_array($jumlah_janu);
+					$jumlah_janu = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_janu FROM db_qc.tbl_tq_test 
+          WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Janu%'");
+                    $janu=sqlsrv_fetch_array($jumlah_janu,SQLSRV_FETCH_ASSOC);
 					echo $janu['jml_janu'];
 					?>, 
 					<?php 
-					$jumlah_taufik = mysqli_query($con,"SELECT COUNT(*) as jml_taufik FROM tbl_tq_test 
-          WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Taufik%'");
-                    $taufik=mysqli_fetch_array($jumlah_taufik);
+					$jumlah_taufik = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_taufik FROM db_qc.tbl_tq_test 
+          WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Taufik%'");
+                    $taufik=sqlsrv_fetch_array($jumlah_taufik,SQLSRV_FETCH_ASSOC);
 					echo $taufik['jml_taufik'];
 					?>,
           //           <?php 
-					// $jumlah_tri = mysqli_query($con,"SELECT COUNT(*) as jml_tri FROM tbl_tq_test 
-          // WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Tri%'");
-          //           $tri=mysqli_fetch_array($jumlah_tri);
+					// $jumlah_tri = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_tri FROM db_qc.tbl_tq_test 
+          // WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Tri%'");
+          //           $tri=sqlsrv_fetch_array($jumlah_tri,SQLSRV_FETCH_ASSOC);
 					// echo $tri['jml_tri'];
 					// ?>,
                     <?php 
-					$jumlah_dix = mysqli_query($con,"SELECT COUNT(*) as jml_dix FROM tbl_tq_test 
-          WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Dix%'");
-                    $dix=mysqli_fetch_array($jumlah_dix);
+					$jumlah_dix = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_dix FROM db_qc.tbl_tq_test 
+          WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Dix%'");
+                    $dix=sqlsrv_fetch_array($jumlah_dix,SQLSRV_FETCH_ASSOC);
 					echo $dix['jml_dix'];
 					?>,
           <?php 
-					$jumlah_vivik = mysqli_query($con,"SELECT COUNT(*) as jml_vivik FROM tbl_tq_test 
-          WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Vivik%'");
-                    $vivik=mysqli_fetch_array($jumlah_vivik);
+					$jumlah_vivik = sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) as jml_vivik FROM db_qc.tbl_tq_test 
+          WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND approve LIKE '%Vivik%'");
+                    $vivik=sqlsrv_fetch_array($jumlah_vivik,SQLSRV_FETCH_ASSOC);
 					echo $vivik['jml_vivik'];
 					?>
                     ],
