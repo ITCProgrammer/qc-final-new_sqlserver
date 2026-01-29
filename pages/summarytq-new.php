@@ -23,7 +23,7 @@ if ($r_nokk_demand) {
     $id_nokk = $r_nokk_demand['id_nokk'];
     $demand_other = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_tq_nokk_demand WHERE id_nokk = '$id_nokk' ORDER BY id ");
 
-    while ($datas = mysqli_fetch_assoc($demand_other)) {
+    while ($datas = sqlsrv_fetch_array($demand_other,SQLSRV_FETCH_ASSOC)) {
 
         if ($array_no_demand_other_no <= 2) {
             $array_no_demand_other2['main'] = $nodemand;

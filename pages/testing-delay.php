@@ -31,14 +31,14 @@ if (isset($_POST['submit']))
 
 	include "../koneksi.php";
 
-	$sql = "select a.* ,c.spirality_status, b.nodemand,b.no_test, b.pelanggan, b.tgl_masuk
-	from tbl_tq_test a
-	join tbl_tq_nokk b on (a.id_nokk = b.id) 
-	left join tbl_tq_test_2  c on (a.id_nokk = c.id_nokk)
-	where (tgl_masuk between  '$tgl_awal' and '$tgl_akhir' ) 
-	order by b.id DESC "; // Mengambil semua kolom
-	$nokk = mysqli_query($con, $sql);
-	//$results = mysqli_fetch_array($nokk);
+	$sql = "SELECT a.* ,c.spirality_status, b.nodemand,b.no_test, b.pelanggan, CONVERT(VARCHAR(19),b.tgl_masuk) tgl_masuk
+	FROM db_qc.tbl_tq_test a
+	JOIN db_qc.tbl_tq_nokk b ON (a.id_nokk = b.id) 
+	LEFT JOIN db_qc.tbl_tq_test_2  c ON (CONVERT(VARCHAR(20),a.id_nokk) = c.id_nokk)
+	WHERE (tgl_masuk BETWEEN  '$tgl_awal' AND '$tgl_akhir' ) 
+	ORDER by b.id DESC "; // Mengambil semua kolom
+	$nokk = sqlsrv_query($con_db_qc_sqlsrv, $sql);
+	//$results = sqlsrv_fetch_array($nokk,SQLSRV_FETCH_ASSOC);
 	$array_field = array();
 	/*
 	$array_name_status  = [
@@ -49,12 +49,12 @@ if (isset($_POST['submit']))
 	];
 	*/
 
-	$sql_filter = "select * from TBL_TQ_TEST_FILTER";
-	$filter_result = mysqli_query($con, $sql_filter);
+	$sql_filter = "SELECT * FROM db_qc.tbl_tq_test_filter";
+	$filter_result = sqlsrv_query($con_db_qc_sqlsrv, $sql_filter);
 
 	$array_group_jenis = array();
 	$array_test = array();
-	while( $filter_row=mysqli_fetch_assoc($filter_result) ){
+	while( $filter_row=sqlsrv_fetch_array($filter_result,SQLSRV_FETCH_ASSOC) ){
 		$array_name_status[$filter_row['field_name']] = $filter_row['field_status'];
 		$array_group_jenis[$filter_row['field_status']] = $filter_row['field_jenis'];
 		
@@ -69,7 +69,7 @@ if (isset($_POST['submit']))
 
 	$array_detail  = array();
 
-	while( $demand_row=mysqli_fetch_assoc($nokk) ){ 
+	while( $demand_row=sqlsrv_fetch_array($nokk,SQLSRV_FETCH_ASSOC) ){ 
 		$array_detail[$demand_row['id']] = $demand_row['nodemand'].'|'.$demand_row['no_test'].'|'.$demand_row['pelanggan'].'|'.$demand_row['tgl_masuk'];
 		foreach ($demand_row as $fieldName => $fieldValue) { 
 		 if (isset($fieldValue) && !empty($fieldValue)) {
@@ -148,7 +148,7 @@ if (isset($_POST['submit']))
 	    <td><?=$number++?></td>
 		<td><?= date("d M Y H:i", strtotime($explode[3]));?></td>
 		<td><?=$explode[0]?></td>
-		<td> <a target="_blank" href="/qc-final-new/TestingNewNoTes-<?=$explode[1]?>"> <?=$explode[1]?> </a></td>
+		<td> <a target="_blank" href="TestingNewNoTes-<?=$explode[1]?>"> <?=$explode[1]?> </a></td>
 		<td><?=$explode[2]?></td>
 		<td><?php $n = 1; foreach ($data as $detail) { 
 				if ($n>=2) { echo ' / ';}
