@@ -438,12 +438,12 @@ $Prodorder = isset($_POST['prodorder']) ? $_POST['prodorder'] : '';
 	  <select name="now_bulan" required>
 		<option value=""></option>
 		<?php foreach ($bulanArray as $bul_key=>$bul_name) {?>
-		<option value=<?=$bul_key?> > <?=$bul_name?></option>
+		<option value='<?=$bul_key?>' > <?=$bul_name?></option>
 		<?php } ?>
 	  </select>
 	  <select name="now_tahun" required>
 		<?php foreach ($tahun_array as $tahun_name) {?>
-		<option value=<?=$tahun_name?> > <?=$tahun_name?></option>
+		<option value='<?=$tahun_name?>' > <?=$tahun_name?></option>
 		<?php } ?>
 	  </select>
 	  <button type="submit" name="update_qty_order">Update Qty Order Now</button>
@@ -489,8 +489,7 @@ order by a.id desc";
 					panjang_order_now ='$qty_order2'
 					WHERE id='$id'");	
 				*/		
-				$sqlData=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_qcf_qty_order(id,nodemand,berat_order_now,panjang_order_now) values ('$id','$datas','$qty_order1','$qty_order2')");					
-					
+				$sqlData=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_qcf_qty_order(id,nodemand,berat_order_now,panjang_order_now) values (?,?,?,?)",[floatval($id),$datas,floatval($qty_order1),floatval($qty_order2)]);					
 			}
 			
 				
