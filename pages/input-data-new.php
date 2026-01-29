@@ -463,44 +463,44 @@ STOCKTRANSACTION.ORDERCODE";
 $stmt1=db2_exec($conn1,$sqlroll, array('cursor'=>DB2_SCROLLABLE));
 $rowr = db2_fetch_assoc($stmt1);*/
 
-$sqlpack=mysqli_query($con,"SELECT
+$sqlpack=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1
 	tgl_mulai,jam_mulai,jml_netto,netto,panjang,satuan
 FROM
-	`tbl_lap_inspeksi`
+	db_qc.tbl_lap_inspeksi
 WHERE
-	`nodemand` = '$nodemand'
-AND `dept` = 'PACKING'
-ORDER BY id DESC LIMIT 1");
-			$sPack=mysqli_fetch_array($sqlpack);
-		$sqlinsp=mysqli_query($con,"SELECT
+	nodemand = '$nodemand'
+AND dept = 'PACKING'
+ORDER BY id DESC");
+			$sPack=sqlsrv_fetch_array($sqlpack, SQLSRV_FETCH_ASSOC);
+		$sqlinsp=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1
 	tgl_update,jam_mutasi,jml_netto,netto,panjang
 FROM
-	`tbl_lap_inspeksi`
+	db_qc.tbl_lap_inspeksi
 WHERE
-	`nodemand` = '$nodemand'
-AND `dept` = 'INSPEK MEJA'
-ORDER BY id DESC LIMIT 1");
-			$sInsp=mysqli_fetch_array($sqlinsp);
-$sqlwarna=mysqli_query($con,"SELECT
-	tgl_update,jam_update,tgl_cwarna,`status`
+	nodemand = '$nodemand'
+AND dept = 'INSPEK MEJA'
+ORDER BY id DESC");
+			$sInsp=sqlsrv_fetch_array($sqlinsp, SQLSRV_FETCH_ASSOC);
+$sqlwarna=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1
+	tgl_update,jam_update,tgl_cwarna,status
 FROM
-	`tbl_lap_inspeksi`
+	db_qc.tbl_lap_inspeksi
 WHERE
-	`nodemand` = '$nodemand'
-AND `dept` = 'QCF'
-ORDER BY id DESC LIMIT 1");
-			$sWarna=mysqli_fetch_array($sqlwarna);
+	nodemand = '$nodemand'
+AND dept = 'QCF'
+ORDER BY id DESC");
+			$sWarna=sqlsrv_fetch_array($sqlwarna, SQLSRV_FETCH_ASSOC);
 
-$sqlCek=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE nodemand='$nodemand' LIMIT 1");
-$cek=mysqli_num_rows($sqlCek);
+$sqlCek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_qcf WHERE nodemand='$nodemand'");
+$cek=sqlsrv_has_rows($sqlCek) ? 1 : 0;
 
 
 
-$sqlManual=mysqli_query($con,"SELECT * FROM tbl_lap_inspeksi WHERE nodemand='$nodemand' LIMIT 1");
-$cekM=mysqli_fetch_array($sqlManual);
-$rcek=mysqli_fetch_array($sqlCek);
-$sqlD=mysqli_query($con,"SELECT GROUP_CONCAT(CONCAT(persen, '%') SEPARATOR '; ') as persen, GROUP_CONCAT(dept SEPARATOR '; ') as dept FROM tbl_qcf_detail WHERE id_qcf='$rcek[id]'");
-$rcekd=mysqli_fetch_array($sqlD);
+$sqlManual=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_lap_inspeksi WHERE nodemand='$nodemand'");
+$cekM=sqlsrv_fetch_array($sqlManual, SQLSRV_FETCH_ASSOC);
+$rcek=sqlsrv_fetch_array($sqlCek, SQLSRV_FETCH_ASSOC);
+$sqlD=sqlsrv_query($con_db_qc_sqlsrv,"SELECT STRING_AGG(CONCAT(persen, '%'), '; ') as persen, STRING_AGG(dept, '; ') as dept FROM db_qc.tbl_qcf_detail WHERE id_qcf='$rcek[id]'");
+$rcekd=sqlsrv_fetch_array($sqlD, SQLSRV_FETCH_ASSOC);
 ?>	
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
  <div class="box box-info">
@@ -681,7 +681,7 @@ $rcekd=mysqli_fetch_array($sqlD);
                   <div class="col-sm-3">
 					<div class="input-group">  
                     <input name="sisa" type="text" class="form-control" id="sisa" 
-                    value="<?php if($cek>0){echo $rcek['sisa'];}else{echo $rowdb2['TOTAL_KG_SISA'];}?>" placeholder="0.00" style="text-align: right;">
+                    value="<?php if($cek>0){echo ($rcek['sisa'] ? number_format($rcek['sisa'], 2) : '');}else{echo $rowdb2['TOTAL_KG_SISA'];}?>" placeholder="0.00" style="text-align: right;">
 					<span class="input-group-addon">KG</span>
 					</div>		
                   </div>				   
@@ -749,7 +749,7 @@ $rcekd=mysqli_fetch_array($sqlD);
         </div>
 		<font color="red">
 		<?php
-		$tgl_w=substr($sWarna['tgl_cwarna'],0,10);
+		$tgl_w=$sWarna['tgl_cwarna'] ? date_format($sWarna['tgl_cwarna'], 'Y-m-d') : '';
 		if($cek>0){
 		$tgl_warna= new DateTime($rcek['tglcwarna']);
 		$tgl_pack= new DateTime($rcek['tgl_pack']);}else{
@@ -783,7 +783,7 @@ $rcekd=mysqli_fetch_array($sqlD);
         <div class="col-sm-4">
           <div class="input-group date">
             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-            <input name="tglmsk" type="date" class="form-control pull-right" value="<?php if($cek>0){echo $rcek['tgl_masuk'];}?>" required>
+            <input name="tglmsk" type="date" class="form-control pull-right" value="<?php if($cek>0){echo ($rcek['tgl_masuk'] ? date_format($rcek['tgl_masuk'], 'Y-m-d') : '');}?>" required>
           </div>
         </div>
 	  </div>
@@ -822,14 +822,14 @@ $rcekd=mysqli_fetch_array($sqlD);
                   <div class="col-sm-3">
 					<div class="input-group">  
                     <input name="extra" type="text" class="form-control" id="extra" 
-                    value="<?php if($cek>0){echo $rcek['berat_extra'];}?>" placeholder="0.00" style="text-align: right;" >
+                    value="<?php if($cek>0){echo ($rcek['berat_extra'] ? number_format($rcek['berat_extra'], 2) : '');}?>" placeholder="0.00" style="text-align: right;" >
 					<span class="input-group-addon">KG</span>
 					</div>		
                   </div>	
 				<div class="col-sm-4">
 					  <div class="input-group">
                     <input name="extra_p" type="text" class="form-control" id="extra_p" 
-                    value="<?php if($cek>0){echo $rcek['panjang_extra'];}?>" placeholder="0.00" style="text-align: right;" required>
+                    value="<?php if($cek>0){echo ($rcek['panjang_extra'] ? number_format($rcek['panjang_extra'], 2) : '');}?>" placeholder="0.00" style="text-align: right;" required>
 						  <span class="input-group-addon">
 							  <select name="satuan1" style="font-size: 12px;">
 								  <option value="Yard" <?php if($sPack['satuan']=="Yard"){ echo "SELECTED"; }?>>Yard</option>
@@ -845,14 +845,14 @@ $rcekd=mysqli_fetch_array($sqlD);
                   <div class="col-sm-3">
 					<div class="input-group">  
                     <input name="estimasi" type="text" class="form-control" id="estimasi" 
-                    value="<?php if($cek>0){echo $rcek['estimasi'];}?>" placeholder="0.00" style="text-align: right;" >
+                    value="<?php if($cek>0){echo ($rcek['estimasi'] ? number_format($rcek['estimasi'], 2) : '');}?>" placeholder="0.00" style="text-align: right;" >
 					<span class="input-group-addon">KG</span>
 					</div>
                   </div>
 			      <div class="col-sm-4">
 					  <div class="input-group">
                     <input name="estimasi_p" type="text" class="form-control" id="estimasi_p" 
-                    value="<?php if($cek>0){echo $rcek['panjang_estimasi'];}?>" placeholder="0.00" style="text-align: right;" required>
+                    value="<?php if($cek>0){echo ($rcek['panjang_estimasi'] ? number_format($rcek['panjang_estimasi'], 2) : '');}?>" placeholder="0.00" style="text-align: right;" required>
 						  <span class="input-group-addon">
 							  <select name="satuan_est" style="font-size: 12px;">
 								  <option value="Yard" <?php if($sPack['satuan']=="Yard"){ echo "SELECTED"; }?>>Yard</option>
@@ -875,9 +875,9 @@ $rcekd=mysqli_fetch_array($sqlD);
 						<?php
 						$dtArr=$rcek['t_jawab'];	
 						$data = explode(",",$dtArr);
-						$qCek1=mysqli_query($con,"SELECT nama FROM tbl_dept ORDER BY nama ASC");
+						$qCek1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT nama FROM db_qc.tbl_dept ORDER BY nama ASC");
 						$i=0;	
-						while($dCek1=mysqli_fetch_array($qCek1)){ ?>
+						while($dCek1=sqlsrv_fetch_array($qCek1, SQLSRV_FETCH_ASSOC)){ ?>
 						<option value="<?php echo $dCek1['nama'];?>" <?php if($dCek1['nama']==$data[0] or $dCek1['nama']==$data[1] or $dCek1['nama']==$data[2] or $dCek1['nama']==$data[3] or $dCek1['nama']==$data[4] or $dCek1['nama']==$data[5]){echo "SELECTED";} ?>><?php echo $dCek1['nama'];?></option>
 						<?php $i++;} ?>              
 					</select>
@@ -970,7 +970,7 @@ $rcekd=mysqli_fetch_array($sqlD);
 			<?php } ?>
 		  <input type="hidden" value="<?php if($cek>0){echo $rcek['pelanggan'];}else{echo $rowdb2['LANGGANAN']."/".$rowdb20['BUYER'];}?>" name="pelanggan">
 		  <input type="hidden" value="<?php if($cek>0){echo $rcek['no_ko'];}else{echo $rKO['KONo'];}?>" name="no_ko">
-		  <input type="hidden" value="<?php if($cek>0){echo $rcek['tgl_delivery'];}else{echo $rowdb2['DELIVERYDATE'];}?>" name="tgl_delivery">
+		  <input type="hidden" value="<?php if($cek>0){echo ($rcek['tgl_delivery'] ? date_format($rcek['tgl_delivery'], 'Y-m-d') : '');}else{echo $rowdb2['DELIVERYDATE'];}?>" name="tgl_delivery">
 	 
 	 
 	 
@@ -1194,7 +1194,7 @@ $rcekd=mysqli_fetch_array($sqlD);
     <td width="723" valign="top" nowrap>ITEM</td>
     <td width="723" valign="top" nowrap><?php echo $rcek['no_item'];?></td>
     <td width="723" nowrap valign="bottom"><p>DELIVERY KAIN    JADI</p></td>
-    <td width="723" nowrap valign="bottom"><p><?php echo $rcek['tgl_delivery'];?></p></td>
+    <td width="723" nowrap valign="bottom"><p><?php echo ($rcek['tgl_delivery'] ? date_format($rcek['tgl_delivery'], "Y-m-d") : '');?> </p></td>
   </tr>
   <tr>
     <td width="723" nowrap valign="bottom"><p>WARNA</p></td>
@@ -1268,6 +1268,7 @@ if($_POST['send']=="send"){
 			//require 'PHPMailer/PHPMailerAutoload.php';
 			//$mail = new PHPMailer;
 			// Konfigurasi SMTP
+
 			$mail->isSMTP();
 			$mail->Host 		= 'mail.indotaichen.com'; //mail.usmanas.web.id / mail.indotaichen.com
 			$mail->SMTPAuth 	= true;
@@ -1431,22 +1432,18 @@ if($_POST['send']=="send"){
 				// echo 'Pesan telah terkirim';
 				$isi=str_replace("'","''",$_POST['editor1']);
 				$kirim=$qc.$rmp.$knt.$prt.$brs.$rmp.$dye.$fin.$bun.$heri.$polo.$leading.$lulu.$add1." ".$_POST['untuk']." ".$_POST['untuk1']." ".$_POST['untuk2'];
-				$sqlmail=mysqli_query($con,"INSERT INTO tbl_email_bon SET
-				no_bon='$rcek[bpp]',
-				isi='$isi',
-				kirim_ke='$kirim',
-				tgl_kirim=now(),
-				jam_kirim=now()");
+				$sqlmail=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_email_bon (no_bon, isi, kirim_ke, tgl_kirim, jam_kirim)
+				VALUES ('$rcek[bpp]', '$isi', '$kirim', GETDATE(), GETDATE())");
 			}
 	}
 function nobon(){
 		include"koneksi.php";
 		date_default_timezone_set("Asia/Jakarta");
 		$format = date("y");
-		$sql=mysqli_query($con,"SELECT bpp FROM tbl_qcf ORDER BY id DESC LIMIT 1") or die (mysqli_error());
-		$d=mysqli_num_rows($sql);
+		$sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 bpp FROM db_qc.tbl_qcf ORDER BY id DESC") or die (print_r(sqlsrv_errors(), true));
+		$d=sqlsrv_has_rows($sql) ? 1 : 0;
 		if($d>0){
-			$r=mysqli_fetch_array($sql);
+			$r=sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC);
 			$d=$r['bpp'];
 			$str=substr($d,2,5);
 			$Urut = (int)$str;
@@ -1573,9 +1570,9 @@ if($_POST['save']=="save"){
 		// $mail->addAddress('arif.efendi@indotaichen.com', 'Arif Efendi');
 		$mail->addAddress('tobias.sulistiyo@indotaichen.com', 'TOBIAS');
 
-		$user_email = mysqli_query($con, "SELECT * FROM email_user_penghubung WHERE dept='MKT'");
+		$user_email = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.email_user_penghubung WHERE dept='MKT'");
 		$listmail   = [];
-		while ($data_email = mysqli_fetch_array($user_email)) {
+		while ($data_email = sqlsrv_fetch_array($user_email, SQLSRV_FETCH_ASSOC)) {
 			if (stripos($_POST['pelanggan'], $data_email['sales_detail']) !== false) {
 				$listmail[] = $data_email;
 				$mail->addAddress($data_email['email'], $data_email['user']);
@@ -1614,7 +1611,7 @@ if($_POST['save']=="save"){
 				$salesDetail = $det['sales_detail'];
 			}
 		}
-		$insert_to = mysqli_query($con, "INSERT INTO tbl_bonpenghubung_mail SET nodemand='$_POST[nodemand]', mail_to='$emailList', team='$salesDetail', status_approve=0, `status`=1");
+		$insert_to = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_bonpenghubung_mail (nodemand, mail_to, team, status_approve, status) VALUES ('$_POST[nodemand]', '$emailList', '$salesDetail', 0, 1)");
 		$mail->send();
 	  } else {
 		$penghubung_masalah    =  '';
@@ -1701,92 +1698,114 @@ if($_POST['save']=="save"){
 	$tglmsk = $_POST['tglmsk'] ? $_POST['tglmsk'] : date('Y-m-d');
 
 	if ($uploadOk && move_uploaded_file($_FILES["upload_file"]["tmp_name"], $targetFile)) {
-  	  	$sqlData	=	mysqli_query($con,"INSERT INTO tbl_qcf SET 
-														nokk='$_POST[nokk]',
-														nodemand='$_POST[nodemand]',
-														bpp='$nou',
-														pelanggan='$_POST[pelanggan]',
-														no_order='$_POST[no_order]',
-														no_hanger='$_POST[no_hanger]',
-														no_item='$_POST[no_item]',
-														no_po='$po',
-														no_ko='$_POST[no_ko]',
-														jenis_kain='$jns',
-														styl='$styl',
-														berat_order='$_POST[qty1]',
-														panjang_order='$_POST[qty2]',
-														satuan_order='$_POST[satuan1]',
-														rol_bruto='$_POST[qty3]',
-														berat_bruto='$_POST[qty4]',
-														lebar='$_POST[lebar]',
-														gramasi='$_POST[grms]',
-														lebar_ins='$_POST[inslebar]',
-														gramasi_ins='$_POST[insgrms]',
-														lebar_fin='$_POST[finlebar]',
-														gramasi_fin='$_POST[fingrms]',
-														susut_p='$_POST[pp]',
-														susut_l='$_POST[pl]',
-														susut_s='$_POST[ps]',
-														berat_extra='$_POST[extra]',
-														panjang_extra='$_POST[extra_p]',
-														estimasi='$_POST[estimasi]',
-														panjang_estimasi='$_POST[estimasi_p]',
-														lot='$lot',
-														rol='$_POST[rol]',
-														warna='$warna',
-														no_warna='$nowarna',
-														cek_warna='$cekwarna',
-														netto='$_POST[netto]',
-														panjang='$_POST[panjang]',
-														satuan='$_POST[satuan2]',
-														lot_legacy='$_POST[lot_legacy]',
-														sisa='$_POST[sisa]',
-														tgl_masuk='$tglmsk',
-														tgl_pack='$_POST[tglpk]',
-														jam_pack='$_POST[jam_pack]',
-														tglcwarna='$_POST[tglcwarna]',
-														jam_cwarna='$_POST[jam_cwarna]',
-														tgl_ins='$_POST[tglins]',
-														tgl_fin='$_POST[tglfin]',
-														tgl_delivery='$_POST[tgl_delivery]',
-														qty_mslh='$_POST[qty_mslh]',
-														rol_mslh='$_POST[rol_mslh]',
-														t_jawab='$multijawab',
-														persen='$persen',
-														sts_pbon='$sts_pbon',
-														sts_nodelay='$sts_nodelay',
-														sts_tembakdok='$sts_tembakdok',
-														masalah='$masalah',
-														ket='$ket1',
-														sales='$sales',
-														tgl_update=now(),
-														penghubung_masalah = '$penghubung_masalah',
-														penghubung_keterangan = '$penghubung_keterangan',
-														advice1          = '$advice1',
-														penghubung_roll1 = '$penghubung_roll1',
-														penghubung_roll2 = '$penghubung_roll2',
-														penghubung_roll3 = '$penghubung_roll3',
-														penghubung_dep = '$penghubung_dep',
-														penghubung_dep_persen = '$penghubung_dep_persen',
-														
-														penghubung2_masalah = '$penghubung2_masalah',
-														penghubung2_keterangan = '$penghubung2_keterangan',
-														advice2           = '$advice2',
-														penghubung2_roll1 = '$penghubung2_roll1',
-														penghubung2_roll2 = '$penghubung2_roll2',
-														penghubung2_roll3 = '$penghubung2_roll3',
-														penghubung2_dep = '$penghubung2_dep',
-														penghubung2_dep_persen = '$penghubung2_dep_persen',
-														
-														penghubung3_masalah = '$penghubung3_masalah',
-														penghubung3_keterangan = '$penghubung3_keterangan',
-														advice3           = '$advice3',
-														penghubung3_roll1 = '$penghubung3_roll1',
-														penghubung3_roll2 = '$penghubung3_roll2',
-														penghubung3_roll3 = '$penghubung3_roll3',
-														penghubung3_dep = '$penghubung3_dep',
-														penghubung3_dep_persen = '$penghubung3_dep_persen',
-														file_upload='$finalFileName'");	 	  
+		// Prepare parameterized query untuk INSERT dengan file upload
+		$sql = "INSERT INTO db_qc.tbl_qcf 
+			(nokk,nodemand,bpp,pelanggan,no_order,no_hanger,no_item,no_po,no_ko,jenis_kain,styl,
+			berat_order,panjang_order,satuan_order,rol_bruto,berat_bruto,lebar,gramasi,lebar_ins,gramasi_ins,lebar_fin,
+			gramasi_fin,susut_p,susut_l,susut_s,berat_extra,panjang_extra,estimasi,panjang_estimasi,lot,rol,warna,no_warna,
+			cek_warna,netto,panjang,satuan,lot_legacy,sisa,tgl_masuk,tgl_pack,jam_pack,tglcwarna,jam_cwarna,tgl_ins,
+			tgl_fin,tgl_delivery,qty_mslh,rol_mslh,t_jawab,persen,sts_pbon,sts_nodelay,sts_tembakdok,masalah,ket,sales,
+			tgl_update,penghubung_masalah,penghubung_keterangan,advice1,penghubung_roll1,penghubung_roll2,penghubung_roll3,penghubung_dep,
+			penghubung_dep_persen,penghubung2_masalah,penghubung2_keterangan,advice2,penghubung2_roll1,penghubung2_roll2,penghubung2_roll3,
+			penghubung2_dep,penghubung2_dep_persen,penghubung3_masalah,penghubung3_keterangan,advice3,penghubung3_roll1,penghubung3_roll2,
+			penghubung3_roll3,penghubung3_dep,penghubung3_dep_persen,file_upload)
+			VALUES (?,?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,?,
+			?,?,?)";
+
+		$params = [
+			$_POST['nokk'],
+			$_POST['nodemand'],
+			$nou,
+			$_POST['pelanggan'],
+			$_POST['no_order'],
+			$_POST['no_hanger'],
+			$_POST['no_item'],
+			$po,
+			$_POST['no_ko'],
+			$jns,
+			$styl,
+			$_POST['qty1'],
+			$_POST['qty2'],
+			$_POST['satuan1'],
+			$_POST['qty3'],
+			$_POST['qty4'],
+			$_POST['lebar'],
+			$_POST['grms'],
+			$_POST['inslebar'],
+			$_POST['insgrms'],
+			$_POST['finlebar'],
+			$_POST['fingrms'],
+			$_POST['pp'],
+			$_POST['pl'],
+			$_POST['ps'],
+			$_POST['extra'],
+			$_POST['extra_p'],
+			$_POST['estimasi'],
+			$_POST['estimasi_p'],
+			$lot,
+			$_POST['rol'],
+			$warna,
+			$nowarna,
+			$cekwarna,
+			$_POST['netto'],
+			$_POST['panjang'],
+			$_POST['satuan2'],
+			$_POST['lot_legacy'],
+			$_POST['sisa'],
+			$tglmsk,
+			$_POST['tglpk'],
+			$_POST['jam_pack'],
+			$_POST['tglcwarna'],
+			$_POST['jam_cwarna'],
+			$_POST['tglins'],
+			$_POST['tglfin'],
+			$_POST['tgl_delivery'],
+			$_POST['qty_mslh'],
+			$_POST['rol_mslh'],
+			$multijawab,
+			$persen,
+			$sts_pbon,
+			$sts_nodelay,
+			$sts_tembakdok,
+			$masalah,
+			$ket1,
+			$sales,
+			date('Y-m-d H:i:s'),
+			$penghubung_masalah,
+			$penghubung_keterangan,
+			$advice1,
+			$penghubung_roll1,
+			$penghubung_roll2,
+			$penghubung_roll3,
+			$penghubung_dep,
+			$penghubung_dep_persen,
+			$penghubung2_masalah,
+			$penghubung2_keterangan,
+			$advice2,
+			$penghubung2_roll1,
+			$penghubung2_roll2,
+			$penghubung2_roll3,
+			$penghubung2_dep,
+			$penghubung2_dep_persen,
+			$penghubung3_masalah,
+			$penghubung3_keterangan,
+			$advice3,
+			$penghubung3_roll1,
+			$penghubung3_roll2,
+			$penghubung3_roll3,
+			$penghubung3_dep,
+			$penghubung3_dep_persen,
+			$finalFileName
+		];
+
+		$sqlData = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 	  
 		if($sqlData){
 			echo "<script>swal({
@@ -1801,91 +1820,113 @@ if($_POST['save']=="save"){
 				});</script>";
 		}
 	}else{
-		$sqlData	=	mysqli_query($con,"INSERT INTO tbl_qcf SET 
-														nokk='$_POST[nokk]',
-														nodemand='$_POST[nodemand]',
-														bpp='$nou',
-														pelanggan='$_POST[pelanggan]',
-														no_order='$_POST[no_order]',
-														no_hanger='$_POST[no_hanger]',
-														no_item='$_POST[no_item]',
-														no_po='$po',
-														no_ko='$_POST[no_ko]',
-														jenis_kain='$jns',
-														styl='$styl',
-														berat_order='$_POST[qty1]',
-														panjang_order='$_POST[qty2]',
-														satuan_order='$_POST[satuan1]',
-														rol_bruto='$_POST[qty3]',
-														berat_bruto='$_POST[qty4]',
-														lebar='$_POST[lebar]',
-														gramasi='$_POST[grms]',
-														lebar_ins='$_POST[inslebar]',
-														gramasi_ins='$_POST[insgrms]',
-														lebar_fin='$_POST[finlebar]',
-														gramasi_fin='$_POST[fingrms]',
-														susut_p='$_POST[pp]',
-														susut_l='$_POST[pl]',
-														susut_s='$_POST[ps]',
-														berat_extra='$_POST[extra]',
-														panjang_extra='$_POST[extra_p]',
-														estimasi='$_POST[estimasi]',
-														panjang_estimasi='$_POST[estimasi_p]',
-														lot='$lot',
-														rol='$_POST[rol]',
-														warna='$warna',
-														no_warna='$nowarna',
-														cek_warna='$cekwarna',
-														netto='$_POST[netto]',
-														panjang='$_POST[panjang]',
-														satuan='$_POST[satuan2]',
-														lot_legacy='$_POST[lot_legacy]',
-														sisa='$_POST[sisa]',
-														tgl_masuk='$tglmsk',
-														tgl_pack='$_POST[tglpk]',
-														jam_pack='$_POST[jam_pack]',
-														tglcwarna='$_POST[tglcwarna]',
-														jam_cwarna='$_POST[jam_cwarna]',
-														tgl_ins='$_POST[tglins]',
-														tgl_fin='$_POST[tglfin]',
-														tgl_delivery='$_POST[tgl_delivery]',
-														qty_mslh='$_POST[qty_mslh]',
-														rol_mslh='$_POST[rol_mslh]',
-														t_jawab='$multijawab',
-														persen='$persen',
-														sts_pbon='$sts_pbon',
-														sts_nodelay='$sts_nodelay',
-														sts_tembakdok='$sts_tembakdok',
-														masalah='$masalah',
-														ket='$ket1',
-														sales='$sales',
-														tgl_update=now(),
-														penghubung_masalah = '$penghubung_masalah',
-														penghubung_keterangan = '$penghubung_keterangan',
-														advice1          = '$advice1',
-														penghubung_roll1 = '$penghubung_roll1',
-														penghubung_roll2 = '$penghubung_roll2',
-														penghubung_roll3 = '$penghubung_roll3',
-														penghubung_dep = '$penghubung_dep',
-														penghubung_dep_persen = '$penghubung_dep_persen',
-														
-														penghubung2_masalah = '$penghubung2_masalah',
-														penghubung2_keterangan = '$penghubung2_keterangan',
-														advice2           = '$advice2',
-														penghubung2_roll1 = '$penghubung2_roll1',
-														penghubung2_roll2 = '$penghubung2_roll2',
-														penghubung2_roll3 = '$penghubung2_roll3',
-														penghubung2_dep = '$penghubung2_dep',
-														penghubung2_dep_persen = '$penghubung2_dep_persen',
-														
-														penghubung3_masalah = '$penghubung3_masalah',
-														penghubung3_keterangan = '$penghubung3_keterangan',
-														advice3           = '$advice3',
-														penghubung3_roll1 = '$penghubung3_roll1',
-														penghubung3_roll2 = '$penghubung3_roll2',
-														penghubung3_roll3 = '$penghubung3_roll3',
-														penghubung3_dep = '$penghubung3_dep',
-														penghubung3_dep_persen = '$penghubung3_dep_persen'");	 	  
+		// Prepare parameterized query untuk INSERT tanpa file upload
+		$sql = "INSERT INTO db_qc.tbl_qcf 
+			(nokk,nodemand,bpp,pelanggan,no_order,no_hanger,no_item,no_po,no_ko,jenis_kain,styl,
+			berat_order,panjang_order,satuan_order,rol_bruto,berat_bruto,lebar,gramasi,lebar_ins,gramasi_ins,lebar_fin,
+			gramasi_fin,susut_p,susut_l,susut_s,berat_extra,panjang_extra,estimasi,panjang_estimasi,lot,rol,warna,no_warna,
+			cek_warna,netto,panjang,satuan,lot_legacy,sisa,tgl_masuk,tgl_pack,jam_pack,tglcwarna,jam_cwarna,tgl_ins,
+			tgl_fin,tgl_delivery,qty_mslh,rol_mslh,t_jawab,persen,sts_pbon,sts_nodelay,sts_tembakdok,masalah,ket,sales,
+			tgl_update,penghubung_masalah,penghubung_keterangan,advice1,penghubung_roll1,penghubung_roll2,penghubung_roll3,penghubung_dep,
+			penghubung_dep_persen,penghubung2_masalah,penghubung2_keterangan,advice2,penghubung2_roll1,penghubung2_roll2,penghubung2_roll3,
+			penghubung2_dep,penghubung2_dep_persen,penghubung3_masalah,penghubung3_keterangan,advice3,penghubung3_roll1,penghubung3_roll2,
+			penghubung3_roll3,penghubung3_dep,penghubung3_dep_persen)
+			VALUES (?,?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,
+			?,?,?,?,?,?,?,?,?,?,?,
+			?,?,?)";
+
+		$params = [
+			$_POST['nokk'],
+			$_POST['nodemand'],
+			$nou,
+			$_POST['pelanggan'],
+			$_POST['no_order'],
+			$_POST['no_hanger'],
+			$_POST['no_item'],
+			$po,
+			$_POST['no_ko'],
+			$jns,
+			$styl,
+			$_POST['qty1'],
+			$_POST['qty2'],
+			$_POST['satuan1'],
+			$_POST['qty3'],
+			$_POST['qty4'],
+			$_POST['lebar'],
+			$_POST['grms'],
+			$_POST['inslebar'],
+			$_POST['insgrms'],
+			$_POST['finlebar'],
+			$_POST['fingrms'],
+			$_POST['pp'],
+			$_POST['pl'],
+			$_POST['ps'],
+			$_POST['extra'],
+			$_POST['extra_p'],
+			$_POST['estimasi'],
+			$_POST['estimasi_p'],
+			$lot,
+			$_POST['rol'],
+			$warna,
+			$nowarna,
+			$cekwarna,
+			$_POST['netto'],
+			$_POST['panjang'],
+			$_POST['satuan2'],
+			$_POST['lot_legacy'],
+			$_POST['sisa'],
+			$tglmsk,
+			$_POST['tglpk'],
+			$_POST['jam_pack'],
+			$_POST['tglcwarna'],
+			$_POST['jam_cwarna'],
+			$_POST['tglins'],
+			$_POST['tglfin'],
+			$_POST['tgl_delivery'],
+			$_POST['qty_mslh'],
+			$_POST['rol_mslh'],
+			$multijawab,
+			$persen,
+			$sts_pbon,
+			$sts_nodelay,
+			$sts_tembakdok,
+			$masalah,
+			$ket1,
+			$sales,
+			date('Y-m-d H:i:s'),
+			$penghubung_masalah,
+			$penghubung_keterangan,
+			$advice1,
+			$penghubung_roll1,
+			$penghubung_roll2,
+			$penghubung_roll3,
+			$penghubung_dep,
+			$penghubung_dep_persen,
+			$penghubung2_masalah,
+			$penghubung2_keterangan,
+			$advice2,
+			$penghubung2_roll1,
+			$penghubung2_roll2,
+			$penghubung2_roll3,
+			$penghubung2_dep,
+			$penghubung2_dep_persen,
+			$penghubung3_masalah,
+			$penghubung3_keterangan,
+			$advice3,
+			$penghubung3_roll1,
+			$penghubung3_roll2,
+			$penghubung3_roll3,
+			$penghubung3_dep,
+			$penghubung3_dep_persen
+		];
+
+		$sqlData = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 	  
 		if($sqlData){
 			echo "<script>swal({
@@ -1899,7 +1940,7 @@ if($_POST['save']=="save"){
 				}
 				});</script>";
 		}else{
-			$errorMsg = mysqli_error($con);
+			$errorMsg = implode(", ", sqlsrv_errors());
 			echo "<script>swal({
 				title: 'Gagal Menyimpan Data',   
 				text: 'Terjadi kesalahan saat menyimpan data ke database.\\nError: " . addslashes($errorMsg) . "',
@@ -2009,8 +2050,8 @@ if($_POST['update']=="update"){
 		
 		$penghubung3_dep_persen =  $_POST['penghubung3_dep_persen'];
 		
-		$cek_data_email = mysqli_query($con, "SELECT * FROM tbl_bonpenghubung_mail WHERE nodemand='$_POST[nodemand]' LIMIT 1");
-		$cek_mail=mysqli_num_rows($cek_data_email);
+		$cek_data_email = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_bonpenghubung_mail WHERE nodemand='$_POST[nodemand]'");
+		$cek_mail=sqlsrv_has_rows($cek_data_email) ? 1 : 0;
 		if ($cek_mail < 1 && (!empty($penghubung_masalah) || !empty($penghubung2_masalah) || !empty($penghubung3_masalah))) {
 			require 'C:/xampp/htdocs/QC-Final-New/vendor/autoload.php';
 		$mail = new PHPMailer\PHPMailer\PHPMailer();
@@ -2028,9 +2069,9 @@ if($_POST['update']=="update"){
 		// $mail->addAddress('arif.efendi@indotaichen.com', 'Arif Efendi');
 		$mail->addAddress('tobias.sulistiyo@indotaichen.com', 'TOBIAS');
 
-		$user_email = mysqli_query($con, "SELECT * FROM email_user_penghubung WHERE dept='MKT'");
+		$user_email = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.email_user_penghubung WHERE dept='MKT'");
 		$listmail   = [];
-		while ($data_email = mysqli_fetch_array($user_email)) {
+		while ($data_email = sqlsrv_fetch_array($user_email, SQLSRV_FETCH_ASSOC)) {
 			if (stripos($_POST['pelanggan'], $data_email['sales_detail']) !== false) {
 				$listmail[] = $data_email;
 				$mail->addAddress($data_email['email'], $data_email['user']);
@@ -2069,7 +2110,7 @@ if($_POST['update']=="update"){
 				$salesDetail = $det['sales_detail'];
 			}
 		}
-		$insert_to = mysqli_query($con, "INSERT INTO tbl_bonpenghubung_mail SET nodemand='$_POST[nodemand]', mail_to='$emailList', team='$salesDetail', status_approve=0, `status`=1");
+		$insert_to = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_bonpenghubung_mail (nodemand, mail_to, team, status_approve, status) VALUES ('$_POST[nodemand]', '$emailList', '$salesDetail', 0, 1)");
 		$mail->send();
 		$warna=str_replace("'","''",$_POST['warna']);
 			$nowarna=str_replace("'","''",$_POST['no_warna']);	
@@ -2091,90 +2132,107 @@ if($_POST['update']=="update"){
 			if($_POST['sts_pbon']=="1"){$sts_pbon="1";}else{ $sts_pbon="0";}
 			if($_POST['sts_nodelay']=="1"){$sts_nodelay="1";}else{ $sts_nodelay="0";}
 			if($_POST['sts_tembakdok']=="1"){$sts_tembakdok="1";}else{ $sts_tembakdok="0";}
-			$sqlData=mysqli_query($con,"UPDATE tbl_qcf SET 
-				pelanggan='$_POST[pelanggan]',
-				no_order='$_POST[no_order]',
-				no_hanger='$_POST[no_hanger]',
-				no_item='$_POST[no_item]',
-				no_po='$po',
-				no_ko='$_POST[no_ko]',
-				jenis_kain='$jns',
-				styl='$styl',
-				berat_order='$_POST[qty1]',
-				panjang_order='$_POST[qty2]',
-				satuan_order='$_POST[satuan1]',
-				rol_bruto='$_POST[qty3]',
-				berat_bruto='$_POST[qty4]',
-				lebar='$_POST[lebar]',
-				gramasi='$_POST[grms]',
-				lebar_ins='$_POST[inslebar]',
-				gramasi_ins='$_POST[insgrms]',
-				lebar_fin='$_POST[finlebar]',
-				gramasi_fin='$_POST[fingrms]',
-				susut_p='$_POST[pp]',
-				susut_l='$_POST[pl]',
-				susut_s='$_POST[ps]',
-				berat_extra='$_POST[extra]',
-				panjang_extra='$_POST[extra_p]',
-				estimasi='$_POST[estimasi]',
-				panjang_estimasi='$_POST[estimasi_p]',
-				lot='$lot',
-				rol='$_POST[rol]',
-				warna='$warna',
-				no_warna='$nowarna',
-				cek_warna='$cekwarna',
-				netto='$_POST[netto]',
-				panjang='$_POST[panjang]',
-				satuan='$_POST[satuan2]',
-				sisa='$_POST[sisa]',
-				tgl_masuk='$tglmsk',
-				tgl_pack='$_POST[tglpk]',
-				jam_pack='$_POST[jam_pack]',
-				tglcwarna='$_POST[tglcwarna]',
-				jam_cwarna='$_POST[jam_cwarna]',
-				tgl_ins='$_POST[tglins]',
-				tgl_fin='$_POST[tglfin]',
-				tgl_delivery='$_POST[tgl_delivery]',
-				qty_mslh='$_POST[qty_mslh]',
-				rol_mslh='$_POST[rol_mslh]',
-				t_jawab='$multijawab',
-				persen='$persen',
-				sts_pbon='$sts_pbon',
-				sts_nodelay='$sts_nodelay',
-				sts_tembakdok='$sts_tembakdok',
-				masalah='$masalah',
-				ket='$ket1',
-				sales='$sales',
-				tgl_update=now(),
-				penghubung_masalah = '$penghubung_masalah',
-				penghubung_keterangan = '$penghubung_keterangan',
-				advice1          = '$advice1',
-				penghubung_roll1 = '$penghubung_roll1',
-				penghubung_roll2 = '$penghubung_roll2',
-				penghubung_roll3 = '$penghubung_roll3',
-				penghubung_dep = '$penghubung_dep',
-				penghubung_dep_persen = '$penghubung_dep_persen',
+			$sql = "UPDATE db_qc.tbl_qcf SET 
+				pelanggan=?,
+				no_order=?,
+				no_hanger=?,
+				no_item=?,
+				no_po=?,
+				no_ko=?,
+				jenis_kain=?,
+				styl=?,
+				berat_order=?,
+				panjang_order=?,
+				satuan_order=?,
+				rol_bruto=?,
+				berat_bruto=?,
+				lebar=?,
+				gramasi=?,
+				lebar_ins=?,
+				gramasi_ins=?,
+				lebar_fin=?,
+				gramasi_fin=?,
+				susut_p=?,
+				susut_l=?,
+				susut_s=?,
+				berat_extra=?,
+				panjang_extra=?,
+				estimasi=?,
+				panjang_estimasi=?,
+				lot=?,
+				rol=?,
+				warna=?,
+				no_warna=?,
+				cek_warna=?,
+				netto=?,
+				panjang=?,
+				satuan=?,
+				sisa=?,
+				tgl_masuk=?,
+				tgl_pack=?,
+				jam_pack=?,
+				tglcwarna=?,
+				jam_cwarna=?,
+				tgl_ins=?,
+				tgl_fin=?,
+				tgl_delivery=?,
+				qty_mslh=?,
+				rol_mslh=?,
+				t_jawab=?,
+				persen=?,
+				sts_pbon=?,
+				sts_nodelay=?,
+				sts_tembakdok=?,
+				masalah=?,
+				ket=?,
+				sales=?,
+				tgl_update=GETDATE(),
+				penghubung_masalah = ?,
+				penghubung_keterangan = ?,
+				advice1          = ?,
+				penghubung_roll1 = ?,
+				penghubung_roll2 = ?,
+				penghubung_roll3 = ?,
+				penghubung_dep = ?,
+				penghubung_dep_persen = ?,
 				
-				penghubung2_masalah = '$penghubung2_masalah',
-				penghubung2_keterangan = '$penghubung2_keterangan',
-				advice2           = '$advice2',
-				penghubung2_roll1 = '$penghubung2_roll1',
-				penghubung2_roll2 = '$penghubung2_roll2',
-				penghubung2_roll3 = '$penghubung2_roll3',
-				penghubung2_dep = '$penghubung2_dep',
-				penghubung2_dep_persen = '$penghubung2_dep_persen',
+				penghubung2_masalah = ?,
+				penghubung2_keterangan = ?,
+				advice2           = ?,
+				penghubung2_roll1 = ?,
+				penghubung2_roll2 = ?,
+				penghubung2_roll3 = ?,
+				penghubung2_dep = ?,
+				penghubung2_dep_persen = ?,
 				
-				penghubung3_masalah = '$penghubung3_masalah',
-				penghubung3_keterangan = '$penghubung3_keterangan',
-				advice3           = '$advice3',
-				penghubung3_roll1 = '$penghubung3_roll1',
-				penghubung3_roll2 = '$penghubung3_roll2',
-				penghubung3_roll3 = '$penghubung3_roll3',
-				penghubung3_dep = '$penghubung3_dep',
-				penghubung3_dep_persen = '$penghubung3_dep_persen'
+				penghubung3_masalah = ?,
+				penghubung3_keterangan = ?,
+				advice3           = ?,
+				penghubung3_roll1 = ?,
+				penghubung3_roll2 = ?,
+				penghubung3_roll3 = ?,
+				penghubung3_dep = ?,
+				penghubung3_dep_persen = ?
 				
-				WHERE nodemand='$_POST[nodemand]' ");	 	  
-			
+				WHERE nodemand=?";
+			$params = array(
+				$_POST['pelanggan'], $_POST['no_order'], $_POST['no_hanger'], $_POST['no_item'], $po, $_POST['no_ko'], 
+				$jns, $styl, $_POST['qty1'], $_POST['qty2'], $_POST['satuan1'], $_POST['qty3'], $_POST['qty4'], 
+				$_POST['lebar'], $_POST['grms'], $_POST['inslebar'], $_POST['insgrms'], $_POST['finlebar'], $_POST['fingrms'],
+				$_POST['pp'], $_POST['pl'], $_POST['ps'], $_POST['extra'], $_POST['extra_p'], $_POST['estimasi'], $_POST['estimasi_p'],
+				$lot, $_POST['rol'], $warna, $nowarna, $cekwarna, $_POST['netto'], $_POST['panjang'], $_POST['satuan2'], $_POST['sisa'],
+				$tglmsk, $_POST['tglpk'], $_POST['jam_pack'], $_POST['tglcwarna'], $_POST['jam_cwarna'], $_POST['tglins'], $_POST['tglfin'], 
+				$_POST['tgl_delivery'], $_POST['qty_mslh'], $_POST['rol_mslh'], $multijawab, $_POST['persen'], $sts_pbon, $sts_nodelay, 
+				$sts_tembakdok, $masalah, $ket1, $sales,
+				$penghubung_masalah, $penghubung_keterangan, $advice1, $penghubung_roll1, $penghubung_roll2, $penghubung_roll3, 
+				$penghubung_dep, $penghubung_dep_persen,
+				$penghubung2_masalah, $penghubung2_keterangan, $advice2, $penghubung2_roll1, $penghubung2_roll2, $penghubung2_roll3,
+				$penghubung2_dep, $penghubung2_dep_persen,
+				$penghubung3_masalah, $penghubung3_keterangan, $advice3, $penghubung3_roll1, $penghubung3_roll2, $penghubung3_roll3,
+				$penghubung3_dep, $penghubung3_dep_persen,
+				$_POST['nodemand']
+			);
+			$sqlData=sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 				if($sqlData){
 					// echo "<script>alert('Data Telah DiUbah');</script>";
 					// echo "<script>swal('Data Telah DiUbah!', 'You clicked the button!', 'success');</script>";
@@ -2211,91 +2269,171 @@ if($_POST['update']=="update"){
 			if($_POST['sts_pbon']=="1"){$sts_pbon="1";}else{ $sts_pbon="0";}
 			if($_POST['sts_nodelay']=="1"){$sts_nodelay="1";}else{ $sts_nodelay="0";}
 			if($_POST['sts_tembakdok']=="1"){$sts_tembakdok="1";}else{ $sts_tembakdok="0";}
-			$sqlData=mysqli_query($con,"UPDATE tbl_qcf SET 
-				pelanggan='$_POST[pelanggan]',
-				no_order='$_POST[no_order]',
-				no_hanger='$_POST[no_hanger]',
-				no_item='$_POST[no_item]',
-				no_po='$po',
-				no_ko='$_POST[no_ko]',
-				jenis_kain='$jns',
-				styl='$styl',
-				berat_order='$_POST[qty1]',
-				panjang_order='$_POST[qty2]',
-				satuan_order='$_POST[satuan1]',
-				rol_bruto='$_POST[qty3]',
-				berat_bruto='$_POST[qty4]',
-				lebar='$_POST[lebar]',
-				gramasi='$_POST[grms]',
-				lebar_ins='$_POST[inslebar]',
-				gramasi_ins='$_POST[insgrms]',
-				lebar_fin='$_POST[finlebar]',
-				gramasi_fin='$_POST[fingrms]',
-				susut_p='$_POST[pp]',
-				susut_l='$_POST[pl]',
-				susut_s='$_POST[ps]',
-				berat_extra='$_POST[extra]',
-				panjang_extra='$_POST[extra_p]',
-				estimasi='$_POST[estimasi]',
-				panjang_estimasi='$_POST[estimasi_p]',
-				lot='$lot',
-				rol='$_POST[rol]',
-				warna='$warna',
-				no_warna='$nowarna',
-				cek_warna='$cekwarna',
-				netto='$_POST[netto]',
-				panjang='$_POST[panjang]',
-				satuan='$_POST[satuan2]',
-				sisa='$_POST[sisa]',
-				tgl_masuk='$tglmsk',
-				tgl_pack='$_POST[tglpk]',
-				jam_pack='$_POST[jam_pack]',
-				tglcwarna='$_POST[tglcwarna]',
-				jam_cwarna='$_POST[jam_cwarna]',
-				tgl_ins='$_POST[tglins]',
-				tgl_fin='$_POST[tglfin]',
-				tgl_delivery='$_POST[tgl_delivery]',
-				qty_mslh='$_POST[qty_mslh]',
-				rol_mslh='$_POST[rol_mslh]',
-				t_jawab='$multijawab',
-				persen='$persen',
-				sts_pbon='$sts_pbon',
-				sts_nodelay='$sts_nodelay',
-				sts_tembakdok='$sts_tembakdok',
-				masalah='$masalah',
-				ket='$ket1',
-				sales='$sales',
-				tgl_update=now(),
-				penghubung_masalah = '$penghubung_masalah',
-				penghubung_keterangan = '$penghubung_keterangan',
-				advice1          = '$advice1',
-				penghubung_roll1 = '$penghubung_roll1',
-				penghubung_roll2 = '$penghubung_roll2',
-				penghubung_roll3 = '$penghubung_roll3',
-				penghubung_dep = '$penghubung_dep',
-				penghubung_dep_persen = '$penghubung_dep_persen',
-				
-				penghubung2_masalah = '$penghubung2_masalah',
-				penghubung2_keterangan = '$penghubung2_keterangan',
-				advice2           = '$advice2',
-				penghubung2_roll1 = '$penghubung2_roll1',
-				penghubung2_roll2 = '$penghubung2_roll2',
-				penghubung2_roll3 = '$penghubung2_roll3',
-				penghubung2_dep = '$penghubung2_dep',
-				penghubung2_dep_persen = '$penghubung2_dep_persen',
-				
-				penghubung3_masalah = '$penghubung3_masalah',
-				penghubung3_keterangan = '$penghubung3_keterangan',
-				advice3           = '$advice3',
-				penghubung3_roll1 = '$penghubung3_roll1',
-				penghubung3_roll2 = '$penghubung3_roll2',
-				penghubung3_roll3 = '$penghubung3_roll3',
-				penghubung3_dep = '$penghubung3_dep',
-				penghubung3_dep_persen = '$penghubung3_dep_persen'
-				
-				WHERE nodemand='$_POST[nodemand]' ");	 	  
-			
-				if($sqlData){
+		
+		// Prepare UPDATE dengan bind parameters
+		$sql = "UPDATE db_qc.tbl_qcf SET 
+			pelanggan=?,
+			no_order=?,
+			no_hanger=?,
+			no_item=?,
+			no_po=?,
+			no_ko=?,
+			jenis_kain=?,
+			styl=?,
+			berat_order=?,
+			panjang_order=?,
+			satuan_order=?,
+			rol_bruto=?,
+			berat_bruto=?,
+			lebar=?,
+			gramasi=?,
+			lebar_ins=?,
+			gramasi_ins=?,
+			lebar_fin=?,
+			gramasi_fin=?,
+			susut_p=?,
+			susut_l=?,
+			susut_s=?,
+			berat_extra=?,
+			panjang_extra=?,
+			estimasi=?,
+			panjang_estimasi=?,
+			lot=?,
+			rol=?,
+			warna=?,
+			no_warna=?,
+			cek_warna=?,
+			netto=?,
+			panjang=?,
+			satuan=?,
+			sisa=?,
+			tgl_masuk=?,
+			tgl_pack=?,
+			jam_pack=?,
+			tglcwarna=?,
+			jam_cwarna=?,
+			tgl_ins=?,
+			tgl_fin=?,
+			tgl_delivery=?,
+			qty_mslh=?,
+			rol_mslh=?,
+			t_jawab=?,
+			persen=?,
+			sts_pbon=?,
+			sts_nodelay=?,
+			sts_tembakdok=?,
+			masalah=?,
+			ket=?,
+			sales=?,
+			tgl_update=GETDATE(),
+			penghubung_masalah=?,
+			penghubung_keterangan=?,
+			advice1=?,
+			penghubung_roll1=?,
+			penghubung_roll2=?,
+			penghubung_roll3=?,
+			penghubung_dep=?,
+			penghubung_dep_persen=?,
+			penghubung2_masalah=?,
+			penghubung2_keterangan=?,
+			advice2=?,
+			penghubung2_roll1=?,
+			penghubung2_roll2=?,
+			penghubung2_roll3=?,
+			penghubung2_dep=?,
+			penghubung2_dep_persen=?,
+			penghubung3_masalah=?,
+			penghubung3_keterangan=?,
+			advice3=?,
+			penghubung3_roll1=?,
+			penghubung3_roll2=?,
+			penghubung3_roll3=?,
+			penghubung3_dep=?,
+			penghubung3_dep_persen=?
+			WHERE nodemand=?";
+		
+		$params = [
+			$_POST['pelanggan'],
+			$_POST['no_order'],
+			$_POST['no_hanger'],
+			$_POST['no_item'],
+			$po,
+			$_POST['no_ko'],
+			$jns,
+			$styl,
+			$_POST['qty1'],
+			$_POST['qty2'],
+			$_POST['satuan1'],
+			$_POST['qty3'],
+			$_POST['qty4'],
+			$_POST['lebar'],
+			$_POST['grms'],
+			$_POST['inslebar'],
+			$_POST['insgrms'],
+			$_POST['finlebar'],
+			$_POST['fingrms'],
+			$_POST['pp'],
+			$_POST['pl'],
+			$_POST['ps'],
+			$_POST['extra'],
+			$_POST['extra_p'],
+			$_POST['estimasi'],
+			$_POST['estimasi_p'],
+			$lot,
+			$_POST['rol'],
+			$warna,
+			$nowarna,
+			$cekwarna,
+			$_POST['netto'],
+			$_POST['panjang'],
+			$_POST['satuan2'],
+			$_POST['sisa'],
+			$tglmsk,
+			$_POST['tglpk'],
+			$_POST['jam_pack'],
+			$_POST['tglcwarna'],
+			$_POST['jam_cwarna'],
+			$_POST['tglins'],
+			$_POST['tglfin'],
+			$_POST['tgl_delivery'],
+			$_POST['qty_mslh'],
+			$_POST['rol_mslh'],
+			$multijawab,
+			$persen,
+			$sts_pbon,
+			$sts_nodelay,
+			$sts_tembakdok,
+			$masalah,
+			$ket1,
+			$sales,
+			$penghubung_masalah,
+			$penghubung_keterangan,
+			$advice1,
+			$penghubung_roll1,
+			$penghubung_roll2,
+			$penghubung_roll3,
+			$penghubung_dep,
+			$penghubung_dep_persen,
+			$penghubung2_masalah,
+			$penghubung2_keterangan,
+			$advice2,
+			$penghubung2_roll1,
+			$penghubung2_roll2,
+			$penghubung2_roll3,
+			$penghubung2_dep,
+			$penghubung2_dep_persen,
+			$penghubung3_masalah,
+			$penghubung3_keterangan,
+			$advice3,
+			$penghubung3_roll1,
+			$penghubung3_roll2,
+			$penghubung3_roll3,
+			$penghubung3_dep,
+			$penghubung3_dep_persen,
+			$_POST['nodemand']
+		];
+		
+		$sqlData = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 					// echo "<script>alert('Data Telah DiUbah');</script>";
 					// echo "<script>swal('Data Telah DiUbah!', 'You clicked the button!', 'success');</script>";
 					// echo "<script>window.location.href='?p=Input-Data';</script>";
@@ -2312,5 +2450,4 @@ if($_POST['update']=="update"){
 		}
 
 	}
-}
 ?>

@@ -18,8 +18,8 @@
 			<option value="Grade B">Grade B</option>
 			<option value="Grade C">Grade C</option>
 			<?php 
-							$qrym=mysqli_query($con,"SELECT masalah FROM tbl_masalah_aftersales ORDER BY masalah ASC");
-							while($rm=mysqli_fetch_array($qrym)){
+							$qrym=sqlsrv_query($con_db_qc_sqlsrv,"SELECT masalah FROM db_qc.tbl_masalah_aftersales ORDER BY masalah ASC");
+							while($rm=sqlsrv_fetch_array($qrym)){
 							?>
 							<option value="<?php echo $rm['masalah'];?>" <?php if($rcek['masalah_dominan']==$rm['masalah']){echo "SELECTED";}?>><?php echo $rm['masalah'];?></option>	
 			<?php }?>	
@@ -85,13 +85,13 @@
 						<?php
 						$dtArr=$rcek['t_jawab'];	
 						$data = explode(",",$dtArr);
-						$qCek1=mysqli_query($con,"SELECT nama FROM tbl_dept ORDER BY nama ASC");
+						$qCek1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT nama FROM db_qc.tbl_dept ORDER BY nama ASC");
 						$i=0; 
 						?>
 						
 						 
 						<?php 
-						while($dCek1=mysqli_fetch_array($qCek1)){ 
+						while($dCek1=sqlsrv_fetch_array($qCek1)){ 
 						if ( in_array($dCek1['nama'],$arrayA) ) {
 							$seletectedpenghubung = 'selected';
 						} else {
