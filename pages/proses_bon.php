@@ -13,9 +13,9 @@ $mail = new PHPMailer(true);
 ini_set("error_reporting", 1);
 include"koneksi.php";
 $id=$_GET['id'];
-$sqlCek=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE id='$id' ORDER BY id DESC LIMIT 1");
-$cek=mysqli_num_rows($sqlCek);
-$rcek=mysqli_fetch_array($sqlCek);
+$sqlCek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_qcf WHERE id=? ORDER BY id DESC", array($id));
+$cek=sqlsrv_has_rows($sqlCek) ? 1 : 0;
+$rcek=sqlsrv_fetch_array($sqlCek, SQLSRV_FETCH_ASSOC);
 ?>	
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
     <div class="box box-info">
@@ -285,9 +285,7 @@ if($_POST['save']=="Simpan"){
     }
 
 
-    $sqlData=mysqli_query($con,"UPDATE tbl_qcf SET 
-		  sts_aksi='$_POST[sts_aksi]'
-		  WHERE id='$id'");	 	  
+    $sqlData=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_qcf SET sts_aksi=? WHERE id=?", array($_POST['sts_aksi'], $id));	 	  
 	  
 		if($sqlData){	
             echo "<script>swal({

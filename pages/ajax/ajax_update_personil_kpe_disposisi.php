@@ -11,7 +11,7 @@
     if (isset($_SESSION['usrid']) && isset($_POST['status'])) {
          $id = intval($_POST['id_dt']);
         if($_POST['status']=="update_personil" && $id != 0){
-           $update = "UPDATE tbl_aftersales_now 
+           $update = "UPDATE db_qc.tbl_aftersales_now 
                  SET personil =? ,
                  personil2 = ? ,
                  personil3 = ? ,
@@ -23,10 +23,9 @@
                  pejabat =? ,
                  status_penghubung =?,
                  sts_qc =? 
-                 WHERE id = ? LIMIT 1";
-            $confirm=mysqli_prepare( $con, $update );
-            mysqli_stmt_bind_param($confirm, "ssssssssssss", $_POST['personil'], $_POST['personil2'], $_POST['personil3'], $_POST['personil4'], $_POST['personil5'], $_POST['personil6'], $_POST['shift'], $_POST['shift2'], $_POST['pejabat'], $_POST['hitung'], $_POST['sts_qc'],$id );
-            if(mysqli_stmt_execute($confirm)){ 
+                 WHERE id = ?";
+            $confirm = sqlsrv_query($con_db_qc_sqlsrv, $update, array($_POST['personil'], $_POST['personil2'], $_POST['personil3'], $_POST['personil4'], $_POST['personil5'], $_POST['personil6'], $_POST['shift'], $_POST['shift2'], $_POST['pejabat'], $_POST['hitung'], $_POST['sts_qc'], $id));
+            if($confirm){ 
                 $arr_all_personil=array();
                 if($_POST['personil']!=""){
                     $arr_all_personil[]=$_POST['personil'];
@@ -58,7 +57,8 @@
             }
             else {
                 $response->setSuccess(false);
-                $response->addMessage("Gagal Update Personil & Shift : ".mysqli_error($con));
+                $errors = sqlsrv_errors();
+                $response->addMessage("Gagal Update Personil & Shift : ".(is_array($errors) ? $errors[0]['message'] : "Unknown error"));
                 $response->send();
             }
         } 

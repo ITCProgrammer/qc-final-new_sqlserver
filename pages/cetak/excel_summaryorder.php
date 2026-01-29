@@ -52,13 +52,49 @@ $Proses=$_GET['proses'];
     </tr>
 	<?php 
 	$no=1;
-    if($Awal!=""){ $Where =" AND DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
-    if($Proses!=""){ $prs=" AND sts_aksi='$Proses' ";}else{$prs=" ";}
-    if($Awal!="" or $Order!="" or $Warna!="" or $Hanger!="" or $Item!="" or $PO!="" or $Langganan!=""){
-        $query=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE sts_pbon='1' AND no_order LIKE '%$Order%' AND no_po LIKE '%$PO%' AND no_hanger LIKE '%$Hanger%' AND no_item LIKE '%$Item%' AND warna LIKE '%$Warna%' AND pelanggan LIKE '%$Langganan%' $Where $prs ORDER BY id ASC ");
-    }else{
-        $query=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE sts_pbon='1' AND no_order LIKE '$Order' AND no_po LIKE '$PO' AND no_hanger LIKE '$Hanger%' AND no_item LIKE '$Item' AND warna LIKE '$Warna' AND pelanggan LIKE '$Langganan' $Where $prs ORDER BY id ASC");
+    // Build dynamic WHERE clause with bind parameters
+    $baseSql = "SELECT * FROM db_qc.tbl_qcf WHERE sts_pbon='1'";
+    $params = array();
+    
+    // Add filters with LIKE pattern
+    $baseSql .= " AND no_order LIKE ?";
+    $params[] = '%' . $Order . '%';
+    
+    $baseSql .= " AND no_po LIKE ?";
+    $params[] = '%' . $PO . '%';
+    
+    $baseSql .= " AND no_hanger LIKE ?";
+    $params[] = '%' . $Hanger . '%';
+    
+    $baseSql .= " AND no_item LIKE ?";
+    $params[] = '%' . $Item . '%';
+    
+    $baseSql .= " AND warna LIKE ?";
+    $params[] = '%' . $Warna . '%';
+    
+    $baseSql .= " AND pelanggan LIKE ?";
+    $params[] = '%' . $Langganan . '%';
+    
+    // Add date range filter - if no date provided, query returns 0 rows
+    if($Awal!="" && $Akhir!=""){
+        $baseSql .= " AND CONVERT(date, tgl_masuk) BETWEEN ? AND ?";
+        $params[] = $Awal;
+        $params[] = $Akhir;
+    } else {
+        // No date filter provided - force query to return 0 rows
+        $baseSql .= " AND 1=0";
     }
+    
+    // Add proses filter if selected
+    if($Proses!=""){
+        $baseSql .= " AND sts_aksi = ?";
+        $params[] = $Proses;
+    }
+    
+    $baseSql .= " ORDER BY id ASC";
+    
+    $query = sqlsrv_query($con_db_qc_sqlsrv, $baseSql, $params);
+    
     $troll=0;
     $tnetto=0;
     $tpanjang=0;
@@ -67,7 +103,7 @@ $Proses=$_GET['proses'];
     $tpextra=0;
     $t_est=0;
     $tpest=0;
-	while($r=mysqli_fetch_array($query)){
+	while($r=sqlsrv_fetch_array($query, SQLSRV_FETCH_ASSOC)){
         $dtArr=$r['t_jawab'];
         $data = explode(",",$dtArr);
         $dtArr1=$r['persen'];
@@ -77,7 +113,7 @@ $Proses=$_GET['proses'];
       <td><?php echo $no;?></td>
       <td><?php echo $r['sts_aksi'];?></td>
       <td><?php echo $r['editor'];?></td>
-      <td><?php echo $r['tgl_masuk'];?></td>
+      <td><?php echo ($r['tgl_masuk'] ? date_format($r['tgl_masuk'], 'Y-m-d') : ''); ?></td>
       <td><?php echo $r['bpp'];?></td>
       <td><?php echo $r['sales'];?></td>
       <td><?php if($r['sts_tembakdok']!='0'){echo "Tembak Dokumen";}else{echo " ";}?></td>

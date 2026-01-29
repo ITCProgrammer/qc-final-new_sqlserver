@@ -12,10 +12,10 @@ $Awal=$_GET['awal'];
 $Akhir=$_GET['akhir'];
 $GShift=$_GET['shft'];
 $Subdept=$_GET['subdept'];
-$TotalKirim=$_GET['total'];
-$TotalLot=$_GET['total_lot'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$TotalKirim=(float)$_GET['total'];
+$TotalLot=(float)$_GET['total_lot'];
+$qTgl = sqlsrv_query($con_db_qc_sqlsrv, "SELECT CONVERT(VARCHAR(10),CURRENT_TIMESTAMP,120) as tgl_skrg,CONVERT(VARCHAR(8),CURRENT_TIMESTAMP,108) as jam_skrg");
+$rTgl = sqlsrv_fetch_array($qTgl,SQLSRV_FETCH_ASSOC);
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -148,43 +148,35 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
             </thead>
             <tbody>
             <?php
-            $qry=mysqli_query($con,"SELECT DISTINCT(solusi) FROM tbl_aftersales_now WHERE
-            DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' 
-            AND '$Akhir' AND (solusi!=NULL OR solusi!='') ");
+            $qry=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT(solusi) FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ?", array($Awal, $Akhir));
             $total_dqc=0;
             $total_lqc=0;
             $total_pro=0;
             $tcase_dqc=0;
             $tcase_lqc=0;
             $tcase_pro=0;
-            while($r=mysqli_fetch_array($qry)){
-                $qryDisQC=mysqli_query($con,"SELECT COUNT(*) AS jml_dqc, SUM(qty_claim) as qty_claim_dqc FROM tbl_aftersales_now WHERE
-                DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' 
-                AND '$Akhir' AND sts_disposisiqc='1' AND solusi='$r[solusi]'");
-                $rDisQC=mysqli_fetch_array($qryDisQC);
-                $qryLolosQC=mysqli_query($con,"SELECT COUNT(*) AS jml_lqc, SUM(qty_claim) as qty_claim_lqc FROM tbl_aftersales_now WHERE
-                DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' 
-                AND '$Akhir' AND sts='1' AND solusi='$r[solusi]'");
-                $rLolosQC=mysqli_fetch_array($qryLolosQC);
-                $qryPro=mysqli_query($con,"SELECT COUNT(*) AS jml_pro, SUM(qty_claim) as qty_claim_pro FROM tbl_aftersales_now WHERE
-                DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' 
-                AND '$Akhir' AND sts_disposisipro='1' AND solusi='$r[solusi]'");
-                $rPro=mysqli_fetch_array($qryPro);
+            while($r=sqlsrv_fetch_array($qry, SQLSRV_FETCH_ASSOC)){
+                $qryDisQC=sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) AS jml_dqc, SUM(qty_claim) as qty_claim_dqc FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? AND sts_disposisiqc='1' AND solusi=?", array($Awal, $Akhir, $r['solusi']));
+                $rDisQC=sqlsrv_fetch_array($qryDisQC, SQLSRV_FETCH_ASSOC);
+                $qryLolosQC=sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) AS jml_lqc, SUM(qty_claim) as qty_claim_lqc FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? AND sts='1' AND solusi=?", array($Awal, $Akhir, $r['solusi']));
+                $rLolosQC=sqlsrv_fetch_array($qryLolosQC, SQLSRV_FETCH_ASSOC);
+                $qryPro=sqlsrv_query($con_db_qc_sqlsrv,"SELECT COUNT(*) AS jml_pro, SUM(qty_claim) as qty_claim_pro FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? AND sts_disposisipro='1' AND solusi=?", array($Awal, $Akhir, $r['solusi']));
+                $rPro=sqlsrv_fetch_array($qryPro, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left"><?php echo $r['solusi'];?></td>
                 <td align="center"><?php if($rLolosQC['qty_claim_lqc']!=""){echo $rLolosQC['qty_claim_lqc'];}else{echo "0.00";}?></td>
-                <td align="center"><?php echo number_format(($rLolosQC['qty_claim_lqc']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($rLolosQC['qty_claim_lqc'] && $TotalKirim ? number_format(((float)$rLolosQC['qty_claim_lqc']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rLolosQC['jml_lqc'];?></td>
-                <td align="center"><?php echo number_format(($rLolosQC['jml_lqc']/$TotalLot)*100,2)." %";?></td>
+                <td align="center"><?php echo ($rLolosQC['jml_lqc'] && $TotalLot ? number_format(((float)$rLolosQC['jml_lqc']/$TotalLot)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php if($rDisQC['qty_claim_dqc']!=""){echo $rDisQC['qty_claim_dqc'];}else{echo "0.00";}?></td>
-                <td align="center"><?php echo number_format(($rDisQC['qty_claim_dqc']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($rDisQC['qty_claim_dqc'] && $TotalKirim ? number_format(((float)$rDisQC['qty_claim_dqc']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rDisQC['jml_dqc'];?></td>
-                <td align="center"><?php echo number_format(($rDisQC['jml_dqc']/$TotalLot)*100,2)." %";?></td>
+                <td align="center"><?php echo ($rDisQC['jml_dqc'] && $TotalLot ? number_format(((float)$rDisQC['jml_dqc']/$TotalLot)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php if($rPro['qty_claim_pro']!=""){echo $rPro['qty_claim_pro'];}else{echo "0.00";}?></td>
-                <td align="center"><?php echo number_format(($rPro['qty_claim_pro']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($rPro['qty_claim_pro'] && $TotalKirim ? number_format(((float)$rPro['qty_claim_pro']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rPro['jml_pro'];?></td>
-                <td align="center"><?php echo number_format(($rPro['jml_pro']/$TotalLot)*100,2)." %";?></td>
+                <td align="center"><?php echo ($rPro['jml_pro'] && $TotalLot ? number_format(((float)$rPro['jml_pro']/$TotalLot)*100,2)." %" : "0.00 %");?></td>
             </tr>
             <?php $total_dqc=$total_dqc+$rDisQC['qty_claim_dqc'];
             $total_pro=$total_pro+$rPro['qty_claim_pro'];
@@ -195,17 +187,17 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
              <tr>
                 <td align="left"><strong>TOTAL</strong></td>
                 <td align="center"><strong><?php echo number_format($total_lqc,2); ?></strong></td>
-                <td align="center"><strong><?php echo number_format(($total_lqc/$TotalKirim)*100,2)." %";?></strong></td>
+                <td align="center"><strong><?php echo ($TotalKirim ? number_format(((float)$total_lqc/$TotalKirim)*100,2)." %" : "0.00 %");?></strong></td>
                 <td align="center"><strong><?php echo $tcase_lqc." Kasus"; ?></strong></td>
-                <td align="center"><strong><?php echo number_format(($tcase_lqc/$TotalLot)*100,2)." %";?></strong></td>
+                <td align="center"><strong><?php echo ($TotalLot ? number_format(((float)$tcase_lqc/$TotalLot)*100,2)." %" : "0.00 %");?></strong></td>
                 <td align="center"><strong><?php echo number_format($total_dqc,2); ?></strong></td>
-                <td align="center"><strong><?php echo number_format(($total_dqc/$TotalKirim)*100,2)." %";?></strong></td>
+                <td align="center"><strong><?php echo ($TotalKirim ? number_format(((float)$total_dqc/$TotalKirim)*100,2)." %" : "0.00 %");?></strong></td>
                 <td align="center"><strong><?php echo $tcase_dqc." Kasus"; ?></strong></td>
-                <td align="center"><strong><?php echo number_format(($tcase_dqc/$TotalLot)*100,2)." %";?></strong></td>
+                <td align="center"><strong><?php echo ($TotalLot ? number_format(((float)$tcase_dqc/$TotalLot)*100,2)." %" : "0.00 %");?></strong></td>
                 <td align="center"><strong><?php echo number_format($total_pro,2); ?></strong></td>
-                <td align="center"><strong><?php echo number_format(($total_pro/$TotalKirim)*100,2)." %";?></strong></td>
+                <td align="center"><strong><?php echo ($TotalKirim ? number_format(((float)$total_pro/$TotalKirim)*100,2)." %" : "0.00 %");?></strong></td>
                 <td align="center"><strong><?php echo $tcase_pro." Kasus"; ?></strong></td>
-                <td align="center"><strong><?php echo number_format(($tcase_pro/$TotalLot)*100,2)." %";?></strong></td>
+                <td align="center"><strong><?php echo ($TotalLot ? number_format(((float)$tcase_pro/$TotalLot)*100,2)." %" : "0.00 %");?></strong></td>
             </tr>
             <tr>
                 <td align="left"><strong>TOTAL KIRIM</strong></td>

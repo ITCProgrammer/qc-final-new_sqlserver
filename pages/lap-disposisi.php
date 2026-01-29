@@ -246,21 +246,52 @@ $Langganan = isset($_POST['langganan']) ? $_POST['langganan'] : '';
         "disposisi"=>"Disposisi",
         "lolos"=>"Lolos"
       ];
-	    if($Awal!=""){ $Where =" AND DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND sts_revdis='0' "; }
-        if($GShift=="ALL" or $GShift==""){$shft=" ";}else{$shft=" AND (shift LIKE '$GShift' OR shift2 LIKE '$GShift') ";}
-        //if($GShift1=="ALL"){ $shft1=" ";}else{$shft1=" AND shift2 LIKE '$GShift1' ";}
-        if($Subdept!=""){ $subdpt=" AND subdept='$Subdept' "; }else{$subdpt=" ";}
-        if($sts_disposisi=="1"){ $disposisi =" AND sts_disposisiqc='1' "; }else{$disposisi = " ";}
-        if($sts_lolos=="1"){ $lolos =" AND sts='1' "; }else{$lolos = " ";}
-        if($sts_disposisipro=="1"){ $disposisi_pro =" AND sts_disposisipro='1' "; }else{$disposisi_pro = " ";}
-        if($sts_nego=="1"){ $nego =" AND sts_nego='1' "; }else{$nego = " ";}
-      if($Awal!="" or $GShift!="" or $Subdept!="" or $sts_disposisi=="1" or $sts_lolos=="1" or $sts_disposisipro=="1" or $sts_nego=="1" or $Langganan!=""){
-        $sql1=mysqli_query($con,"SELECT * FROM tbl_aftersales_now WHERE langganan LIKE '%$Langganan%' $Where $shft $subdpt $disposisi $lolos $disposisi_pro $nego ORDER BY id ASC") or die(mysqli_error($con));
-      }else{
-        $sql1=mysqli_query($con,"SELECT * FROM tbl_aftersales_now WHERE langganan LIKE '$Langganan' $Where $shft $subdpt $disposisi $lolos $disposisi_pro $nego ORDER BY id ASC");
+	    // Build dynamic WHERE clause with bind parameters
+      $baseSql = "SELECT * FROM db_qc.tbl_aftersales_now WHERE langganan LIKE ?";
+      $params = array('%' . $Langganan . '%');
+      
+      // Add date range filter if provided
+      if($Awal!=""){
+          $baseSql .= " AND CONVERT(date, tgl_buat) BETWEEN ? AND ? AND sts_revdis='0'";
+          $params[] = $Awal;
+          $params[] = $Akhir;
+      } else {
+          // No date filter provided - force query to return 0 rows
+          $baseSql .= " AND 1=0";
       }
-      //$qry1=mysqli_query($con,$sql1) or die(mysqli_error($con));
-			while($row1=mysqli_fetch_array($sql1)){
+      
+      // Add shift filter
+      if($GShift!="ALL" && $GShift!=""){
+          $baseSql .= " AND (shift LIKE ? OR shift2 LIKE ?)";
+          $params[] = $GShift;
+          $params[] = $GShift;
+      }
+      
+      // Add subdept filter
+      if($Subdept!=""){
+          $baseSql .= " AND subdept=?";
+          $params[] = $Subdept;
+      }
+      
+      // Add status filters
+      if($sts_disposisi=="1"){
+          $baseSql .= " AND sts_disposisiqc='1'";
+      }
+      if($sts_lolos=="1"){
+          $baseSql .= " AND sts='1'";
+      }
+      if($sts_disposisipro=="1"){
+          $baseSql .= " AND sts_disposisipro='1'";
+      }
+      if($sts_nego=="1"){
+          $baseSql .= " AND sts_nego='1'";
+      }
+      
+      $baseSql .= " ORDER BY id ASC";
+      
+      $sql1 = sqlsrv_query($con_db_qc_sqlsrv, $baseSql, $params);
+      
+			while($row1=sqlsrv_fetch_array($sql1, SQLSRV_FETCH_ASSOC)){
       $arr_all_personil=array();
       if($row1['personil']!=""){
         $arr_all_personil[]=$row1['personil'];
@@ -283,7 +314,7 @@ $Langganan = isset($_POST['langganan']) ? $_POST['langganan'] : '';
 		 ?>
           <tr bgcolor="<?php echo $bgcolor; ?>" data-id_data="<?= $row1['id']; ?>"  data-personil="<?= $row1['personil']; ?>" data-personil2="<?= $row1['personil2']; ?>" data-personil3="<?= $row1['personil3']; ?>" data-personil4="<?= $row1['personil4']; ?>" data-personil5="<?= $row1['personil5']; ?>" data-personil6="<?= $row1['personil6']; ?>" data-shift="<?= $row1['shift']; ?>" data-shift2="<?= $row1['shift2']; ?>" data-pejabat="<?= $row1['pejabat']; ?>" data-hitung="<?= $row1['status_penghubung']; ?>" data-stsc="<?= $row1['sts_qc']; ?>">
             <td align="center"><?php echo $no; ?></td>
-            <td align="center"><?php echo $row1['tgl_buat'];?></td>
+            <td align="center"><?php echo ($row1['tgl_buat'] ? date_format($row1['tgl_buat'], 'Y-m-d') : ''); ?></td>
             <td align="center"><div data-nokk="<?= $row1['nokk']; ?>" class="redirect"><?php echo $row1['nokk'];?> </div></td>
             <td><?php echo $row1['langganan'];?></td>
             <td align="center"><?php echo $row1['po'];?></td>
@@ -346,8 +377,8 @@ $Langganan = isset($_POST['langganan']) ? $_POST['langganan'] : '';
           <div class="form-group">
             <?php
               $personil_option="";
-              $qryp = mysqli_query($con, "SELECT UPPER(nama) AS nama FROM user_login WHERE dept ='QC' ORDER BY nama ASC");
-              while ($rp = mysqli_fetch_array($qryp)) {
+              $qryp = sqlsrv_query($con_db_qc_sqlsrv, "SELECT UPPER(nama) AS nama FROM db_qc.user_login WHERE dept=? ORDER BY nama ASC", array('QC'));
+              while ($rp = sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)) {
               $personil_option .= "<option value='".$rp['nama']."'>". $rp['nama']."</option>
                   ";
               } 
@@ -429,8 +460,8 @@ $Langganan = isset($_POST['langganan']) ? $_POST['langganan'] : '';
         <div class="row">
           <div class="form-group">
             <?php
-              $qryp = mysqli_query($con, "SELECT nama FROM tbl_personil_aftersales WHERE jenis='pejabat' ORDER BY nama ASC");
-              while ($rp = mysqli_fetch_array($qryp)) {
+              $qryp = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_personil_aftersales WHERE jenis=? ORDER BY nama ASC", array('pejabat'));
+              while ($rp = sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)) {
                 $pejabat_option .= "<option value='".$rp['nama']."'>". $rp['nama']."</option>
                     ";
               } 

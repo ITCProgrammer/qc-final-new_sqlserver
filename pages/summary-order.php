@@ -76,17 +76,7 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
         <!--<div class="col-sm-2">
             <input name="langganan" type="text" class="form-control pull-right" id="langganan" placeholder="Langganan/Buyer" value="<?php echo $Langganan;  ?>" autocomplete="off"/>
           </div>-->
-        <div class="col-sm-2">
-            <select name="langganan" class="form-control select2">
-            <option value="">Pilih</option> 
-            <?php 
-            $sql=sqlsrv_query($conn,"select distinct partnername from partners where Status<>'2'");
-            while($r=sqlsrv_fetch_array($sql)){
-            ?>
-              <option value="<?php echo $r['partnername'];?>" <?php if($Langganan==$r['partnername']){ echo "SELECTED";}?>><?php echo $r['partnername'];?></option>
-            <?php } ?> 
-            </select>
-        </div>
+        
         <!-- /.input group -->
       </div>
       <div class="form-group">
@@ -176,15 +166,54 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
           <tbody>
           <?php
             $no=1;
-            if($Awal!=""){ $Where =" AND DATE_FORMAT( tgl_masuk, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
-            if($sts_tembakdok=="1"){ $Sts =" AND sts_tembakdok='1' "; }
-            if($Proses!=""){ $prs=" AND sts_aksi='$Proses' ";}else{$prs=" ";}
-            if($Awal!="" or $Order!="" or $Warna!="" or $Hanger!="" or $Item!="" or $PO!="" or $Langganan!=""){
-              $sql=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE sts_pbon='1' AND no_order LIKE '%$Order%' AND no_po LIKE '%$PO%' AND no_hanger LIKE '%$Hanger%' AND no_item LIKE '%$Item%' AND warna LIKE '%$Warna%' AND pelanggan LIKE '%$Langganan%' $Where $prs $Sts ");
-            }else{
-              $sql=mysqli_query($con,"SELECT * FROM tbl_qcf WHERE sts_pbon='1' AND no_order LIKE '$Order' AND no_po LIKE '$PO' AND no_hanger LIKE '$Hanger%' AND no_item LIKE '$Item' AND warna LIKE '$Warna' AND pelanggan LIKE '$Langganan' $Where $prs $Sts ");
+            // Build dynamic WHERE clause with bind parameters
+            $baseSql = "SELECT * FROM db_qc.tbl_qcf WHERE sts_pbon='1'";
+            $params = array();
+            
+            // Add filters with LIKE pattern
+            $baseSql .= " AND no_order LIKE ?";
+            $params[] = '%' . $Order . '%';
+            
+            $baseSql .= " AND no_po LIKE ?";
+            $params[] = '%' . $PO . '%';
+            
+            $baseSql .= " AND no_hanger LIKE ?";
+            $params[] = '%' . $Hanger . '%';
+            
+            $baseSql .= " AND no_item LIKE ?";
+            $params[] = '%' . $Item . '%';
+            
+            $baseSql .= " AND warna LIKE ?";
+            $params[] = '%' . $Warna . '%';
+            
+            $baseSql .= " AND pelanggan LIKE ?";
+            $params[] = '%' . $Langganan . '%';
+            
+            // Add date range filter - if no date provided, query returns 0 rows
+            if($Awal!="" && $Akhir!=""){
+                $baseSql .= " AND CONVERT(date, tgl_masuk) BETWEEN ? AND ?";
+                $params[] = $Awal;
+                $params[] = $Akhir;
+            } else {
+                // No date filter provided - force query to return 0 rows
+                $baseSql .= " AND 1=0";
             }
-                while($row1=mysqli_fetch_array($sql)){
+            
+            // Add tembakdok filter if checked
+            if($sts_tembakdok=="1"){
+                $baseSql .= " AND sts_tembakdok = ?";
+                $params[] = '1';
+            }
+            
+            // Add proses filter if selected
+            if($Proses!=""){
+                $baseSql .= " AND sts_aksi = ?";
+                $params[] = $Proses;
+            }
+            
+            $sql = sqlsrv_query($con_db_qc_sqlsrv, $baseSql, $params);
+            
+            while($row1=sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)){
                   $dtArr=$row1['t_jawab'];
                   $data = explode(",",$dtArr);
                   $dtArr1=$row1['persen'];
@@ -223,7 +252,7 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
               <a data-pk="<?php echo $row1['id'] ?>" data-value="<?php echo $row1['editor'] ?>" class="editor" href="javascipt:void(0)"><?php echo $row1['editor'] ?></a>
             <?php } ?>
             </td>
-            <td align="center"><?php echo $row1['tgl_masuk'];?></td>
+            <td align="center"><?php echo ($row1['tgl_masuk'] ? date_format($row1['tgl_masuk'], 'Y-m-d') : ''); ?></td>
             <td align="center"><?php echo $row1['bpp'];?></td>
             <td align="center"><?php echo $row1['sales'];?></td>
             <td align="center"><?php if($row1['sts_tembakdok']=='1'){?><span class="label label-danger blink_me"><?php echo "Tembak Dokumen";?></span><?php }else{echo " "; }?></td>

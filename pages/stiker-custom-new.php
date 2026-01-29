@@ -134,9 +134,9 @@ $valgramasi = substr($rowdb2['GRAMASI'], 0, $posg);
 $posl = strpos($rowdb2['LEBAR'], ".");
 $vallebar = substr($rowdb2['LEBAR'], 0, $posl);
 
-$sqlCek = mysqli_query($con, "SELECT * FROM tbl_ncp_qcf WHERE nodemand='$nodemand' and no_ncp='$NCPNO' ORDER BY id DESC LIMIT 1");
-$cek = mysqli_num_rows($sqlCek);
-$rcek = mysqli_fetch_array($sqlCek);
+$sqlCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_ncp_qcf WHERE nodemand=? AND no_ncp=? ORDER BY id DESC", array($nodemand, $NCPNO));
+$cek = ($sqlCek && sqlsrv_has_rows($sqlCek)) ? 1 : 0;
+$rcek = sqlsrv_fetch_array($sqlCek, SQLSRV_FETCH_ASSOC);
 
 ?>
 <div class="row">

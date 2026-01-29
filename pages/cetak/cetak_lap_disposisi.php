@@ -12,10 +12,10 @@ $Awal=$_GET['awal'];
 $Akhir=$_GET['akhir'];
 $GShift=$_GET['shft'];
 $Subdept=$_GET['subdept'];
-$TotalKirim=$_GET['total'];
-$TotalLot=$_GET['total_lot'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$TotalKirim=(float)$_GET['total'];
+$TotalLot=(float)$_GET['total_lot'];
+$qTgl = sqlsrv_query($con_db_qc_sqlsrv, "SELECT CONVERT(VARCHAR(10),CURRENT_TIMESTAMP,120) as tgl_skrg,CONVERT(VARCHAR(8),CURRENT_TIMESTAMP,108) as jam_skrg");
+$rTgl = sqlsrv_fetch_array($qTgl,SQLSRV_FETCH_ASSOC);
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -147,16 +147,11 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
 		    <tbody>
             <?php
                 $no=1;
-                if($Awal!=""){
-                    $qry1=mysqli_query($con,"SELECT * FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$_GET[awal]' AND '$_GET[akhir]'
-                            AND (sts='1' OR sts_disposisiqc='1' OR kategori!='' OR (pejabat!='' AND sts_disposisipro='1')) ORDER BY pejabat ASC");
-                    }else{
-                    $qry1=mysqli_query($con,"SELECT * FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$_GET[awal]' AND '$_GET[akhir]'
-                            AND (sts='1' OR sts_disposisiqc='1' OR kategori!='' OR (pejabat!='' AND sts_disposisipro='1')) ORDER BY pejabat ASC");
-                    }
+                $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ?
+                        AND (sts='1' OR sts_disposisiqc='1' OR kategori!='' OR (pejabat!='' AND sts_disposisipro='1')) ORDER BY pejabat ASC", array($Awal, $Akhir));
                 $tkirim=0;
                 $tclaim=0;
-                while($row1=mysqli_fetch_array($qry1)){
+                while($row1=sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
                     if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']!=""){ $tjawab=$row1['t_jawab'].",".$row1['t_jawab1'].", ".$row1['t_jawab2'];
                     }else if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']==""){
                     $tjawab=$row1['t_jawab'].",".$row1['t_jawab1'];	
@@ -231,182 +226,158 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
             </thead>
             <tbody>
             <?php 
-            $qryjml= mysqli_query($con,"SELECT a.jml_dispro, b.jml_disqc FROM
-            (SELECT COUNT(DISTINCT(pejabat)) AS jml_dispro FROM tbl_aftersales_now WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND sts_disposisipro = '1' AND pejabat!='') AS A,
-            (SELECT COUNT(DISTINCT(pejabat)) AS jml_disqc FROM tbl_aftersales_now WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND sts_disposisiqc = '1' AND pejabat!='') AS B");
-            $rjml = mysqli_fetch_array($qryjml);
+            $qryjml= sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.jml_dispro, b.jml_disqc FROM
+            (SELECT COUNT(DISTINCT(pejabat)) AS jml_dispro FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? AND sts_disposisipro = '1' AND pejabat!='') AS A,
+            (SELECT COUNT(DISTINCT(pejabat)) AS jml_disqc FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? AND sts_disposisiqc = '1' AND pejabat!='') AS B", array($Awal, $Akhir, $Awal, $Akhir));
+            $rjml = sqlsrv_fetch_array($qryjml, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="center" rowspan="<?php echo $rjml['jml_dispro']+1;?>" >DISPOSISI PRODUKSI</td>
             </tr>
             <?php
-            $pjbpro=mysqli_query($con,"SELECT DISTINCT pejabat AS pejabat, SUM(qty_claim) AS qty_claim FROM tbl_aftersales_now WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
+            $pjbpro=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT pejabat AS pejabat, SUM(qty_claim) AS qty_claim FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? 
             AND sts_disposisipro = '1' AND pejabat!='' 
             GROUP BY pejabat 
-            ORDER BY qty_claim DESC");
-            while($rpjbpro=mysqli_fetch_array($pjbpro)){
-            $dpro=mysqli_query($con,"SELECT a.pejabat, SUM(a.qty_claim) AS qty_claim, b.qty_retur, c.qty_gantikain, d.qty_pg, e.qty_lg FROM tbl_aftersales_now a
+            ORDER BY qty_claim DESC", array($Awal, $Akhir));
+            while($rpjbpro=sqlsrv_fetch_array($pjbpro, SQLSRV_FETCH_ASSOC)){
+            $dpro=sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.pejabat, SUM(a.qty_claim) AS qty_claim, b.qty_retur, c.qty_gantikain, d.qty_pg, e.qty_lg FROM db_qc.tbl_aftersales_now a
                     LEFT JOIN 
                     (SELECT
-                    pejabat, SUM(qty_claim) AS qty_retur FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-                    AND pejabat='$rpjbpro[pejabat]' AND sts_disposisipro='1' AND solusi='RETUR') b
+                    pejabat, SUM(qty_claim) AS qty_retur FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? 
+                    AND pejabat=? AND sts_disposisipro='1' AND solusi='RETUR') b
                     ON a.pejabat = b.pejabat
                     LEFT JOIN 
                     (SELECT
-                    pejabat, SUM(qty_claim) AS qty_gantikain FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-                    AND pejabat='$rpjbpro[pejabat]' AND sts_disposisipro='1' AND solusi='CUTTING LOSS (GANTI KAIN)') c
+                    pejabat, SUM(qty_claim) AS qty_gantikain FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? 
+                    AND pejabat=? AND sts_disposisipro='1' AND solusi='CUTTING LOSS (GANTI KAIN)') c
                     ON a.pejabat = c.pejabat
                     LEFT JOIN 
                     (SELECT
-                    pejabat, SUM(qty_claim) AS qty_pg FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-                    AND pejabat='$rpjbpro[pejabat]' AND sts_disposisipro='1' AND solusi='PERBAIKAN GARMENT') d
+                    pejabat, SUM(qty_claim) AS qty_pg FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? 
+                    AND pejabat=? AND sts_disposisipro='1' AND solusi='PERBAIKAN GARMENT') d
                     ON a.pejabat = d.pejabat
                     LEFT JOIN 
                     (SELECT
-                    pejabat, SUM(qty_claim) AS qty_lg FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-                    AND pejabat='$rpjbpro[pejabat]' AND sts_disposisipro='1' AND solusi='LETTER OF GUARANTEE (LG)') e
+                    pejabat, SUM(qty_claim) AS qty_lg FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? 
+                    AND pejabat=? AND sts_disposisipro='1' AND solusi='LETTER OF GUARANTEE (LG)') e
                     ON a.pejabat = e.pejabat
-                    WHERE DATE_FORMAT(a.tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND a.sts_disposisipro='1' AND a.pejabat='$rpjbpro[pejabat]'");
-            $rpro=mysqli_fetch_array($dpro);
+                    WHERE CONVERT(date, a.tgl_buat) BETWEEN ? AND ? AND a.sts_disposisipro='1' AND a.pejabat=?", array($Awal, $Akhir, $rpjbpro['pejabat'], $Awal, $Akhir, $rpjbpro['pejabat'], $Awal, $Akhir, $rpjbpro['pejabat'], $Awal, $Akhir, $rpjbpro['pejabat'], $Awal, $Akhir, $rpjbpro['pejabat']));
+            $rpro=sqlsrv_fetch_array($dpro, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="center"><?php echo $rpjbpro['pejabat'];?></td>
                 <td align="center"><?php echo $rpro['qty_claim'];?></td>
-                <td align="center"><?php echo number_format(($rpro['qty_claim']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rpro['qty_claim']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rpro['qty_retur'];?></td>
-                <td align="center"><?php echo number_format(($rpro['qty_retur']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rpro['qty_retur']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rpro['qty_gantikain'];?></td>
-                <td align="center"><?php echo number_format(($rpro['qty_gantikain']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rpro['qty_gantikain']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rpro['qty_pg'];?></td>
-                <td align="center"><?php echo number_format(($rpro['qty_pg']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rpro['qty_pg']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rpro['qty_lg'];?></td>
-                <td align="center"><?php echo number_format(($rpro['qty_lg']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rpro['qty_lg']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
             </tr>
             <?php } ?>
             <tr>
                 <td align="center" rowspan="<?php echo $rjml['jml_disqc']+1;?>" >DISPOSISI QC</td>
             </tr>
             <?php 
-            $pjbqc=mysqli_query($con,"SELECT DISTINCT pejabat AS pejabat, SUM(qty_claim) AS qty_claim FROM tbl_aftersales_now WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
+            $pjbqc=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT pejabat AS pejabat, SUM(qty_claim) AS qty_claim FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? 
             AND sts_disposisiqc = '1' AND pejabat!='' 
             GROUP BY pejabat 
-            ORDER BY qty_claim DESC");
-            while($rpjbqc=mysqli_fetch_array($pjbqc)){
-            $dqc=mysqli_query($con,"SELECT a.pejabat, SUM(a.qty_claim) AS qty_claim, b.qty_retur, c.qty_gantikain, d.qty_pg, e.qty_lg FROM tbl_aftersales_now a
+            ORDER BY qty_claim DESC", array($Awal, $Akhir));
+            while($rpjbqc=sqlsrv_fetch_array($pjbqc, SQLSRV_FETCH_ASSOC)){
+            $dqc=sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.pejabat, SUM(a.qty_claim) AS qty_claim, b.qty_retur, c.qty_gantikain, d.qty_pg, e.qty_lg FROM db_qc.tbl_aftersales_now a
             LEFT JOIN 
             (SELECT
-            pejabat, SUM(qty_claim) AS qty_retur FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-            AND pejabat='$rpjbqc[pejabat]' AND sts_disposisiqc='1' AND solusi='RETUR') b
+            pejabat, SUM(qty_claim) AS qty_retur FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? 
+            AND pejabat=? AND sts_disposisiqc='1' AND solusi='RETUR') b
             ON a.pejabat = b.pejabat
             LEFT JOIN 
             (SELECT
-            pejabat, SUM(qty_claim) AS qty_gantikain FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-            AND pejabat='$rpjbqc[pejabat]' AND sts_disposisiqc='1' AND solusi='CUTTING LOSS (GANTI KAIN)') c
+            pejabat, SUM(qty_claim) AS qty_gantikain FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? 
+            AND pejabat=? AND sts_disposisiqc='1' AND solusi='CUTTING LOSS (GANTI KAIN)') c
             ON a.pejabat = c.pejabat
             LEFT JOIN 
             (SELECT
-            pejabat, SUM(qty_claim) AS qty_pg FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-            AND pejabat='$rpjbqc[pejabat]' AND sts_disposisiqc='1' AND solusi='PERBAIKAN GARMENT') d
+            pejabat, SUM(qty_claim) AS qty_pg FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? 
+            AND pejabat=? AND sts_disposisiqc='1' AND solusi='PERBAIKAN GARMENT') d
             ON a.pejabat = d.pejabat
             LEFT JOIN 
             (SELECT
-            pejabat, SUM(qty_claim) AS qty_lg FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-            AND pejabat='$rpjbqc[pejabat]' AND sts_disposisiqc='1' AND solusi='LETTER OF GUARANTEE (LG)') e
+            pejabat, SUM(qty_claim) AS qty_lg FROM db_qc.tbl_aftersales_now WHERE CONVERT(date, tgl_buat) BETWEEN ? AND ? 
+            AND pejabat=? AND sts_disposisiqc='1' AND solusi='LETTER OF GUARANTEE (LG)') e
             ON a.pejabat = e.pejabat
-            WHERE DATE_FORMAT(a.tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND a.sts_disposisiqc='1' AND a.pejabat='$rpjbqc[pejabat]'");
-            $rqc=mysqli_fetch_array($dqc);
+            WHERE CONVERT(date, a.tgl_buat) BETWEEN ? AND ? AND a.sts_disposisiqc='1' AND a.pejabat=?", array($Awal, $Akhir, $rpjbqc['pejabat'], $Awal, $Akhir, $rpjbqc['pejabat'], $Awal, $Akhir, $rpjbqc['pejabat'], $Awal, $Akhir, $rpjbqc['pejabat'], $Awal, $Akhir, $rpjbqc['pejabat']));
+            $rqc=sqlsrv_fetch_array($dqc, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="center"><?php echo $rpjbqc['pejabat'];?></td>
                 <td align="center"><?php echo $rqc['qty_claim'];?></td>
-                <td align="center"><?php echo number_format(($rqc['qty_claim']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rqc['qty_claim']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rqc['qty_retur'];?></td>
-                <td align="center"><?php echo number_format(($rqc['qty_retur']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rqc['qty_retur']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rqc['qty_gantikain'];?></td>
-                <td align="center"><?php echo number_format(($rqc['qty_gantikain']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rqc['qty_gantikain']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rqc['qty_pg'];?></td>
-                <td align="center"><?php echo number_format(($rqc['qty_pg']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rqc['qty_pg']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rqc['qty_lg'];?></td>
-                <td align="center"><?php echo number_format(($rqc['qty_lg']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rqc['qty_lg']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
             </tr>
             <?php } ?>
             <?php
-            $dlolos=mysqli_query($con,"SELECT a.sts, SUM(a.qty_claim) AS qty_claim, b.qty_retur, c.qty_gantikain, d.qty_pg, e.qty_lg FROM tbl_aftersales_now a
-            LEFT JOIN 
-            (SELECT
-            sts, SUM(qty_claim) AS qty_retur FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-            AND sts='1' AND solusi='RETUR') b
-            ON a.sts = b.sts
-            LEFT JOIN 
-            (SELECT
-            sts, SUM(qty_claim) AS qty_gantikain FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-            AND sts='1' AND solusi='CUTTING LOSS (GANTI KAIN)') c
-            ON a.sts = c.sts
-            LEFT JOIN 
-            (SELECT
-            sts, SUM(qty_claim) AS qty_pg FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-            AND sts='1' AND solusi='PERBAIKAN GARMENT') d
-            ON a.sts = d.sts
-            LEFT JOIN 
-            (SELECT
-            sts, SUM(qty_claim) AS qty_lg FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-            AND sts='1' AND solusi='LETTER OF GUARANTEE (LG)') e
-            ON a.sts = e.sts
-            WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND a.sts='1'");
-            $rlolos=mysqli_fetch_array($dlolos);
+            $dlolos=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+                a.sts,
+                SUM(a.qty_claim) AS qty_claim,
+                SUM(CASE WHEN a.solusi = 'RETUR' THEN a.qty_claim ELSE 0 END) AS qty_retur,
+                SUM(CASE WHEN a.solusi = 'CUTTING LOSS (GANTI KAIN)' THEN a.qty_claim ELSE 0 END) AS qty_gantikain,
+                SUM(CASE WHEN a.solusi = 'PERBAIKAN GARMENT' THEN a.qty_claim ELSE 0 END) AS qty_pg,
+                SUM(CASE WHEN a.solusi = 'LETTER OF GUARANTEE (LG)' THEN a.qty_claim ELSE 0 END) AS qty_lg
+            FROM db_qc.tbl_aftersales_now a
+            WHERE CONVERT(date, a.tgl_buat) BETWEEN ? AND ? AND a.sts = '1'
+            GROUP BY a.sts", array($Awal, $Akhir));
+            $rlolos=sqlsrv_fetch_array($dlolos, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="center" colspan="2">LOLOS QC</td>
                 <td align="center"><?php echo $rlolos['qty_claim'];?></td>
-                <td align="center"><?php echo number_format(($rlolos['qty_claim']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rlolos['qty_claim']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rlolos['qty_retur'];?></td>
-                <td align="center"><?php echo number_format(($rlolos['qty_retur']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rlolos['qty_retur']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rlolos['qty_gantikain'];?></td>
-                <td align="center"><?php echo number_format(($rlolos['qty_gantikain']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rlolos['qty_gantikain']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rlolos['qty_pg'];?></td>
-                <td align="center"><?php echo number_format(($rlolos['qty_pg']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rlolos['qty_pg']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rlolos['qty_lg'];?></td>
-                <td align="center"><?php echo number_format(($rlolos['qty_lg']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rlolos['qty_lg']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
             </tr>
             <?php 
-            $ktgr = mysqli_query($con,"SELECT kategori,keterangan FROM tbl_kategori_aftersales ORDER BY id ASC");
-            while($rktgr=mysqli_fetch_array($ktgr)){
-                $dkt=mysqli_query($con,"SELECT a.kategori, SUM(a.qty_claim) AS qty_claim, b.qty_retur, c.qty_gantikain, d.qty_pg, e.qty_lg FROM tbl_aftersales_now a
-                LEFT JOIN 
-                (SELECT
-                kategori, SUM(qty_claim) AS qty_retur FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-                AND kategori='$rktgr[kategori]' AND solusi='RETUR') b
-                ON a.kategori = b.kategori
-                LEFT JOIN 
-                (SELECT
-                kategori, SUM(qty_claim) AS qty_gantikain FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-                AND kategori='$rktgr[kategori]' AND solusi='CUTTING LOSS (GANTI KAIN)') c
-                ON a.kategori = c.kategori
-                LEFT JOIN 
-                (SELECT
-                kategori, SUM(qty_claim) AS qty_pg FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-                AND kategori='$rktgr[kategori]' AND solusi='PERBAIKAN GARMENT') d
-                ON a.kategori = d.kategori
-                LEFT JOIN 
-                (SELECT
-                kategori, SUM(qty_claim) AS qty_lg FROM tbl_aftersales_now WHERE DATE_FORMAT(tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' 
-                AND kategori='$rktgr[kategori]' AND solusi='LETTER OF GUARANTEE (LG)') e
-                ON a.kategori = e.kategori
-                WHERE DATE_FORMAT(a.tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND a.kategori='$rktgr[kategori]'");
-                $rkt=mysqli_fetch_array($dkt);
+            $ktgr = sqlsrv_query($con_db_qc_sqlsrv,"SELECT kategori,keterangan FROM db_qc.tbl_kategori_aftersales ORDER BY id ASC");
+            while($rktgr=sqlsrv_fetch_array($ktgr, SQLSRV_FETCH_ASSOC)){
+                $dkt=sqlsrv_query($con_db_qc_sqlsrv,"SELECT
+                    a.kategori,
+                    SUM(a.qty_claim) AS qty_claim,
+                    SUM(CASE WHEN a.solusi = 'RETUR' THEN a.qty_claim ELSE 0 END) AS qty_retur,
+                    SUM(CASE WHEN a.solusi = 'CUTTING LOSS (GANTI KAIN)' THEN a.qty_claim ELSE 0 END) AS qty_gantikain,
+                    SUM(CASE WHEN a.solusi = 'PERBAIKAN GARMENT' THEN a.qty_claim ELSE 0 END) AS qty_pg,
+                    SUM(CASE WHEN a.solusi = 'LETTER OF GUARANTEE (LG)' THEN a.qty_claim ELSE 0 END) AS qty_lg
+                FROM db_qc.tbl_aftersales_now a
+                WHERE CONVERT(date, a.tgl_buat) BETWEEN ? AND ? AND a.kategori = ?
+                GROUP BY a.kategori", array($Awal, $Akhir, $rktgr['kategori']));
+                $rkt=sqlsrv_fetch_array($dkt, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="center" colspan="2"><?php echo $rktgr['keterangan'];?></td>
                 <td align="center"><?php echo $rkt['qty_claim'];?></td>
-                <td align="center"><?php echo number_format(($rkt['qty_claim']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rkt['qty_claim']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rkt['qty_retur'];?></td>
-                <td align="center"><?php echo number_format(($rkt['qty_retur']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rkt['qty_retur']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rkt['qty_gantikain'];?></td>
-                <td align="center"><?php echo number_format(($rkt['qty_gantikain']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rkt['qty_gantikain']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rkt['qty_pg'];?></td>
-                <td align="center"><?php echo number_format(($rkt['qty_pg']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rkt['qty_pg']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
                 <td align="center"><?php echo $rkt['qty_lg'];?></td>
-                <td align="center"><?php echo number_format(($rkt['qty_lg']/$TotalKirim)*100,2)." %";?></td>
+                <td align="center"><?php echo ($TotalKirim ? number_format(((float)$rkt['qty_lg']/$TotalKirim)*100,2)." %" : "0.00 %");?></td>
             </tr>
             <?php } ?>
             </tbody>
