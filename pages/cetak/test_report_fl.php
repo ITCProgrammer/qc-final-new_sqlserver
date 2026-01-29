@@ -75,30 +75,42 @@ session_start();
 
 $status = $_GET['tabel'];
 if ($status=='nokk') {
-	$table_tq = 'tbl_tq_nokk';
+	$table_tq = 'db_qc.tbl_tq_nokk';
 	$field  = 'nodemand';
-	$tbl_tq_test = 'tbl_tq_test';
-	$tbl_tq_disptest = 'tbl_tq_disptest';
+	$tbl_tq_test = 'db_qc.tbl_tq_test';
+	$tbl_tq_disptest = 'db_qc.tbl_tq_disptest';
 } else {
-	$table_tq = 'tbl_tq_first_lot';
+	$table_tq = 'db_qc.tbl_tq_first_lot';
 	$field  = 'no_report_fl';
-	$tbl_tq_test = 'tbl_tq_test_fl';
-	$tbl_tq_disptest = 'tbl_tq_disptest_fl';
+	$tbl_tq_test = 'db_qc.tbl_tq_test_fl';
+	$tbl_tq_disptest = 'db_qc.tbl_tq_disptest_fl';
 }
 
-$tbl_tq_randomtest =  'tbl_tq_randomtest';
+$tbl_tq_randomtest =  'db_qc.tbl_tq_randomtest';
 
 $id =  $_GET['id'];
 
 // tq_first_lot
-$tq_fl_sql  = mysqli_query($con, "SELECT * FROM $table_tq where $field = '$id'  ORDER BY id DESC LIMIT 1");
-$rcek 		= mysqli_fetch_array($tq_fl_sql);
+$tq_fl_sql = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT TOP 1 *
+     FROM $table_tq
+     WHERE $field = '$id'
+     ORDER BY id DESC"
+);
+$rcek = sqlsrv_fetch_array($tq_fl_sql, SQLSRV_FETCH_ASSOC);
 
 $id =  $rcek['id'];
 
 // tbl_tq_test_fl 
-$tq_test_fl_sql  = mysqli_query($con, "SELECT * FROM  $tbl_tq_test where id_nokk = $id order by id desc limit 1");
-$rcek1			 = mysqli_fetch_array($tq_test_fl_sql);
+$tq_test_fl_sql = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT TOP 1 *
+     FROM $tbl_tq_test
+     WHERE id_nokk = '$id'
+     ORDER BY id DESC"
+);
+$rcek1 = sqlsrv_fetch_array($tq_test_fl_sql, SQLSRV_FETCH_ASSOC);
 
 if ($rcek1==null) {
 	echo '<div style="color:red">PHYSICAL, FUNCTIONAL & PH, COLORFASTNESS (tq_test/fl) NOT FOUND </div> ';
@@ -106,27 +118,44 @@ if ($rcek1==null) {
 }
 
 // random test
-$tq_randomtes_sql  = mysqli_query($con, "SELECT * FROM $tbl_tq_randomtest   WHERE no_item='$rcek[no_item]' OR no_hanger='$rcek[no_hanger]' ");
-$rcekR 			   = mysqli_fetch_array($tq_randomtes_sql);
+$tq_randomtes_sql = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT *
+     FROM $tbl_tq_randomtest
+     WHERE no_item = '".$rcek['no_item']."'
+        OR no_hanger = '".$rcek['no_hanger']."'"
+);
+$rcekR = sqlsrv_fetch_array($tq_randomtes_sql, SQLSRV_FETCH_ASSOC);
 
-$tq_diptest_sql = mysqli_query($con,"SELECT * FROM $tbl_tq_disptest WHERE id_nokk='$rcek[id]' ORDER BY id DESC LIMIT 1");
-$rcekD			= mysqli_fetch_array($tq_diptest_sql);
+$tq_diptest_sql = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT TOP 1 *
+     FROM $tbl_tq_disptest
+     WHERE id_nokk = '".$rcek['id']."'
+     ORDER BY id DESC"
+);
+$rcekD = sqlsrv_fetch_array($tq_diptest_sql, SQLSRV_FETCH_ASSOC);
 
-$setup_report_sql = mysqli_query($con,"SELECT * FROM tbl_reportsetup_fl order by sort_id ");
-//$setup=mysqli_fetch_array($setup_report_sql);
-
+$setup_report_sql = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT *
+     FROM db_qc.tbl_reportsetup_fl
+     ORDER BY sort_id"
+);
 //$no_item 	  = 'PLF-11106';
 $no_item 	  = $rcek['no_item'];
-$standard_sql = mysqli_query($con,"SELECT * FROM tbl_std_tq_fl where no_item = '$no_item'  ");
+$standard_sql = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT *
+     FROM db_qc.tbl_std_tq_fl
+     WHERE no_item = '$no_item'"
+);
 
-$standard_data =mysqli_fetch_array($standard_sql);
-if ($standard_data==null) {
-	$standard_data = [] ; 
+
+$standard_data = sqlsrv_fetch_array($standard_sql, SQLSRV_FETCH_ASSOC);
+if ($standard_data === null) {
+    $standard_data = [];
 }
-
-
-
-
 ?>
 
 
@@ -239,7 +268,7 @@ if ($standard_data==null) {
 		<td style="text-align:center"  width="<?=$width_column?>"><u>REMARKS</u></td>
 	</tr>
 	<?php 
-		while($row=mysqli_fetch_array($setup_report_sql)){
+		while($row=sqlsrv_fetch_array($setup_report_sql)){
 		if ($row['style_header']=='1') { ?>
 			<tr>				
 					<td> </td>

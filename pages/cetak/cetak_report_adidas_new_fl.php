@@ -11,23 +11,210 @@ $nohanger=$_GET['nohanger'];
 //$nohanger=$_REQUEST['nohanger'];
 $act=$_GET['g'];
 $now=date("Y-m-d");
-$data=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',fc_note,ph_note, abr_note, bas_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note,wash_note,water_note,acid_note,alkaline_note,crock_note,phenolic_note,cm_printing_note,cm_dye_note,light_note,light_pers_note,saliva_note,h_shrinkage_note,fibre_note,pilll_note,soil_note,apperss_note,bleeding_note,chlorin_note,dye_tf_note,odour_note,apperss_pf1,apperss_pb1,apperss_pf2,apperss_pb2,apperss_pf3,apperss_pb3) AS note_g FROM tbl_tq_test_fl WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
-$rcek1=mysqli_fetch_array($data);
-$databs=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',bas_note) AS note_bs,ss_cmt,apperss_note FROM tbl_tq_test_fl WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
-$rcekbs=mysqli_fetch_array($databs);
-$sqlCekR=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',rfc_note,rph_note, rabr_note, rbas_note, rfla_note, rfwe_note, rfwi_note, rburs_note,rrepp_note,rapper_note,rfiber_note,rpillb_note,rpillm_note,rpillr_note,rthick_note,rgrowth_note,rrecover_note,rstretch_note,rsns_note,rsnab_note,rsnam_note,rsnap_note,rwash_note,rwater_note,racid_note,ralkaline_note,rcrock_note,rphenolic_note,rcm_printing_note,rcm_dye_note,rlight_note,rlight_pers_note,rsaliva_note,rh_shrinkage_note,rfibre_note,rpilll_note,rsoil_note,rapperss_note,rbleeding_note,rchlorin_note,rdye_tf_note,rodour_note) AS rnote_g FROM tbl_tq_randomtest WHERE no_item='$noitem' OR no_hanger='$nohanger'");
-$rcekR=mysqli_fetch_array($sqlCekR);
-$sqlCekD=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',dfc_note,dph_note, dabr_note, dbas_note, dfla_note, dfwe_note, dfwi_note, dburs_note,drepp_note,dapper_note,dfiber_note,dpillb_note,dpillm_note,dpillr_note,dthick_note,dgrowth_note,drecover_note,dstretch_note,dsns_note,dsnab_note,dsnam_note,dsnap_note,dwash_note,dwater_note,dacid_note,dalkaline_note,dcrock_note,dphenolic_note,dcm_printing_note,dcm_dye_note,dlight_note,dlight_pers_note,dsaliva_note,dh_shrinkage_note,dfibre_note,dpilll_note,dsoil_note,dapperss_note,dbleeding_note,dchlorin_note,ddye_tf_note,dodour_note) AS dnote_g FROM tbl_tq_disptest_fl WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
-$rcekD=mysqli_fetch_array($sqlCekD);
-$data1=mysqli_query($con,"SELECT nodemand,nokk FROM tbl_tq_first_lot WHERE id='$idkk'");
-$rd=mysqli_fetch_array($data1);
-$data2=mysqli_query($con,"SELECT a.*,b.hangtag FROM tbl_tq_first_lot a LEFT JOIN tbl_master_hangtag b ON a.no_item = b.no_item WHERE a.id='$idkk'");
-$rd2=mysqli_fetch_array($data2);
+$note_g_sql = " LTRIM(RTRIM(
+        COALESCE(NULLIF(fc_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(ph_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(abr_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(bas_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(fla_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(fwe_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(fwi_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(burs_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(repp_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(apper_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(fiber_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(pillb_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(pillm_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(pillr_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(thick_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(growth_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(recover_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(stretch_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(sns_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(snab_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(snam_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(snap_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(wash_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(water_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(acid_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(alkaline_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(crock_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(phenolic_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(cm_printing_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(cm_dye_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(light_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(light_pers_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(saliva_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(h_shrinkage_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(fibre_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(pilll_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(soil_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(apperss_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(bleeding_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(chlorin_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dye_tf_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(odour_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(CAST(apperss_pf1 AS varchar(max)), '') + ' ', '') +
+        COALESCE(NULLIF(CAST(apperss_pb1 AS varchar(max)), '') + ' ', '') +
+        COALESCE(NULLIF(CAST(apperss_pf2 AS varchar(max)), '') + ' ', '') +
+        COALESCE(NULLIF(CAST(apperss_pb2 AS varchar(max)), '') + ' ', '') +
+        COALESCE(NULLIF(CAST(apperss_pf3 AS varchar(max)), '') + ' ', '') +
+        COALESCE(NULLIF(CAST(apperss_pb3 AS varchar(max)), '') + ' ', '')
+    )) AS note_g
+";
+
+$data = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT TOP 1 *, $note_g_sql
+     FROM db_qc.tbl_tq_test_fl
+     WHERE id_nokk='$idkk'
+     ORDER BY id DESC"
+);
+$rcek1 = sqlsrv_fetch_array($data, SQLSRV_FETCH_ASSOC);
+
+$databs = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT TOP 1 *,
+        LTRIM(RTRIM(COALESCE(NULLIF(bas_note,''), ''))) AS note_bs
+     FROM db_qc.tbl_tq_test_fl
+     WHERE id_nokk='$idkk'
+     ORDER BY id DESC"
+);
+$rcekbs = sqlsrv_fetch_array($databs, SQLSRV_FETCH_ASSOC);
+
+/* random test note */
+$rnote_g_sql = "
+    LTRIM(RTRIM(
+        COALESCE(NULLIF(rfc_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rph_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rabr_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rbas_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rfla_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rfwe_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rfwi_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rburs_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rrepp_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rapper_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rfiber_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rpillb_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rpillm_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rpillr_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rthick_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rgrowth_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rrecover_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rstretch_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rsns_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rsnab_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rsnam_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rsnap_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rwash_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rwater_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(racid_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(ralkaline_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rcrock_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rphenolic_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rcm_printing_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rcm_dye_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rlight_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rlight_pers_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rsaliva_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rh_shrinkage_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rfibre_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rpilll_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rsoil_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rapperss_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rbleeding_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rchlorin_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rdye_tf_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(rodour_note,'' ) + ' ', '')
+    )) AS rnote_g
+";
+
+$sqlCekR = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT *, $rnote_g_sql
+     FROM db_qc.tbl_tq_randomtest
+     WHERE no_item='$noitem' OR no_hanger='$nohanger'"
+);
+$rcekR = sqlsrv_fetch_array($sqlCekR, SQLSRV_FETCH_ASSOC);
+
+/* diptest note */
+$dnote_g_sql = "
+    LTRIM(RTRIM(
+        COALESCE(NULLIF(dfc_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dph_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dabr_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dbas_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dfla_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dfwe_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dfwi_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dburs_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(drepp_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dapper_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dfiber_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dpillb_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dpillm_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dpillr_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dthick_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dgrowth_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(drecover_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dstretch_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dsns_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dsnab_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dsnam_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dsnap_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dwash_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dwater_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dacid_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dalkaline_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dcrock_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dphenolic_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dcm_printing_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dcm_dye_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dlight_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dlight_pers_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dsaliva_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dh_shrinkage_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dfibre_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dpilll_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dsoil_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dapperss_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dbleeding_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dchlorin_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(ddye_tf_note,'' ) + ' ', '') +
+        COALESCE(NULLIF(dodour_note,'' ) + ' ', '')
+    )) AS dnote_g
+";
+
+$sqlCekD = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT TOP 1 *, $dnote_g_sql
+     FROM db_qc.tbl_tq_disptest_fl
+     WHERE id_nokk='$idkk'
+     ORDER BY id DESC"
+);
+$rcekD = sqlsrv_fetch_array($sqlCekD, SQLSRV_FETCH_ASSOC);
+
+/* data first lot */
+$data1 = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT nodemand, nokk
+     FROM db_qc.tbl_tq_first_lot
+     WHERE id='$idkk'"
+);
+$rd = sqlsrv_fetch_array($data1, SQLSRV_FETCH_ASSOC);
+
+/* data first lot + hangtag */
+$data2 = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT a.*, b.hangtag
+     FROM db_qc.tbl_tq_first_lot a
+     LEFT JOIN db_qc.tbl_master_hangtag b ON a.no_item = b.no_item
+     WHERE a.id='$idkk'"
+);
+$rd2 = sqlsrv_fetch_array($data2, SQLSRV_FETCH_ASSOC);
 ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -144,10 +331,11 @@ border:hidden;
                         <option value="cm">cm</option>
                     </select></td>
                     <?php
-                    $sql = "SELECT * From tbl_tq_first_lot WHERE id='$idkk'";
-                    $result=mysqli_query($con,$sql);
-                    while($row=mysqli_fetch_array($result)){ 
-                    $detail=explode(",",$row['jenis_kain']);?>
+                        $sql = "SELECT * FROM db_qc.tbl_tq_first_lot WHERE id='$idkk'";
+                        $result = sqlsrv_query($con_db_qc_sqlsrv, $sql);
+
+                        while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
+                            $detail = explode(",", $row['jenis_kain']);?>
                     <td align="left" style="font-size: 8px;">AOP CCN: </td>
                     <td colspan="3" align="left" style="font-size: 8px;"><?php if($detail[2]!=""){echo $detail[2];}else{echo "";}?></td>
                 </tr>
