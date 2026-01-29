@@ -1,44 +1,143 @@
 
 
 <?php
-ini_set("error_reporting", 1);
-session_start();
-include"koneksi.php";
+    ini_set("error_reporting", 1);
+    session_start();
+    include "koneksi.php";
 
+    $no_test_get = isset($_GET['no_test']) ? $_GET['no_test'] : '';
+    $modifiedData = str_replace('00000', '/', $no_test_get);
+    $modifiedUrl  = str_replace('77777', ' ', $modifiedData);
 
-$modifiedData = str_replace('00000', '/',$_GET['no_test']);
-$modifiedUrl = str_replace('77777', ' ', $modifiedData);
+    $sql_report = sqlsrv_query(
+        $con_db_qc_sqlsrv,
+        "SELECT TOP 1 no_test
+        FROM db_qc.tbl_tq_first_lot
+        WHERE no_report_fl = ?
+        ORDER BY id DESC",
+        [$modifiedUrl]
+    );
 
-$sql_report=mysqli_query($con,"SELECT no_test FROM tbl_tq_first_lot where no_report_fl='$modifiedUrl' order by id desc limit 1");
-$data_report =mysqli_fetch_array($sql_report);
-$no_test =  $data_report['no_test'];
+    $data_report = sqlsrv_fetch_array($sql_report, SQLSRV_FETCH_ASSOC);
+    $no_test     = $data_report['no_test'] ?? '';
 
-if ($no_test=='') {
-	$status = '0';
-}
+    $status = ($no_test === '') ? '0' : '1';
 
-// echo $no_test ; 
+    $qry = sqlsrv_query(
+        $con_db_qc_sqlsrv,
+        "SELECT a.*, a.id AS idkk, b.*
+        FROM db_qc.tbl_tq_first_lot a
+        INNER JOIN db_qc.tbl_master_test b ON a.no_test = b.no_testmaster
+        WHERE a.no_test = ?",
+        [$no_test]
+    );
 
-//$nodemand=$_GET['nodemand'];
-//$no_test=$_GET['no_test'];
-$qry=mysqli_query($con,"SELECT a.*, a.id AS idkk, b.* From tbl_tq_first_lot a INNER JOIN tbl_master_test b ON a.no_test=b.no_testmaster WHERE no_test='$no_test'");
-$cekd=mysqli_num_rows($qry); 
-$rd=mysqli_fetch_array($qry);
-?>	
-<?php 
-$sqlCek1=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',fc_note,ph_note, abr_note, bas_note, dry_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,wick_note,wick_note,absor_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note,wash_note,water_note,acid_note,alkaline_note,crock_note,phenolic_note,cm_printing_note,cm_dye_note,light_note,light_pers_note,saliva_note,h_shrinkage_note,fibre_note,pilll_note,soil_note,apperss_note,bleeding_note,chlorin_note,dye_tf_note,humidity_note,odour_note,curling_note) AS note_g FROM tbl_tq_test_fl WHERE id_nokk='$rd[idkk]' ORDER BY id DESC LIMIT 1");
-$cek1=mysqli_num_rows($sqlCek1);
-$rcek1=mysqli_fetch_array($sqlCek1);
-$sqlCekR=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',rfc_note,rph_note, rabr_note, rbas_note, rdry_note, rfla_note, rfwe_note, rfwi_note, rburs_note,rrepp_note,rwick_note,rabsor_note,rapper_note,rfiber_note,rpillb_note,rpillm_note,rpillr_note,rthick_note,rgrowth_note,rrecover_note,rstretch_note,rsns_note,rsnab_note,rsnam_note,rsnap_note,rwash_note,rwater_note,racid_note,ralkaline_note,rcrock_note,rphenolic_note,rcm_printing_note,rcm_dye_note,rlight_note,rlight_pers_note,rsaliva_note,rh_shrinkage_note,rfibre_note,rpilll_note,rsoil_note,rapperss_note,rbleeding_note,rchlorin_note,rdye_tf_note,rhumidity_note,rodour_note,rcurling_note) AS rnote_g FROM tbl_tq_randomtest WHERE no_item='$rd[no_item]' OR no_hanger='$rd[no_hanger]'");
-$cekR=mysqli_num_rows($sqlCekR);
-$rcekR=mysqli_fetch_array($sqlCekR);
-$sqlCekD=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',dfc_note,dph_note, dabr_note, dbas_note, ddry_note, dfla_note, dfwe_note, dfwi_note, dburs_note,drepp_note,dwick_note,dabsor_note,dapper_note,dfiber_note,dpillb_note,dpillm_note,dpillr_note,dthick_note,dgrowth_note,drecover_note,dstretch_note,dsns_note,dsnab_note,dsnam_note,dsnap_note,dwash_note,dwater_note,dacid_note,dalkaline_note,dcrock_note,dphenolic_note,dcm_printing_note,dcm_dye_note,dlight_note,dlight_pers_note,dsaliva_note,dh_shrinkage_note,dfibre_note,dpilll_note,dsoil_note,dapperss_note,dbleeding_note,dchlorin_note,ddye_tf_note,dhumidity_note,dodour_note,dcurling_note) AS dnote_g FROM tbl_tq_disptest_fl WHERE id_nokk='$rd[idkk]' ORDER BY id DESC LIMIT 1");
-$cekD=mysqli_num_rows($sqlCekD);
-$rcekD=mysqli_fetch_array($sqlCekD);
+    $cekd = ($qry && sqlsrv_has_rows($qry)) ? 1 : 0;
+    $rd   = sqlsrv_fetch_array($qry, SQLSRV_FETCH_ASSOC);
+    ?>
+    <?php
+
+    $idkk      = $rd['idkk'] ?? '';
+    $no_item   = $rd['no_item'] ?? '';
+    $no_hanger = $rd['no_hanger'] ?? '';
+
+    $note_g_expr = "
+    LTRIM(RTRIM(CONCAT(
+        COALESCE(NULLIF(fc_note,''),'')        ,' ',
+        COALESCE(NULLIF(ph_note,''),'')        ,' ',
+        COALESCE(NULLIF(abr_note,''),'')       ,' ',
+        COALESCE(NULLIF(bas_note,''),'')       ,' ',
+        COALESCE(NULLIF(dry_note,''),'')       ,' ',
+        COALESCE(NULLIF(fla_note,''),'')       ,' ',
+        COALESCE(NULLIF(fwe_note,''),'')       ,' ',
+        COALESCE(NULLIF(fwi_note,''),'')       ,' ',
+        COALESCE(NULLIF(burs_note,''),'')      ,' ',
+        COALESCE(NULLIF(repp_note,''),'')      ,' ',
+        COALESCE(NULLIF(wick_note,''),'')      ,' ',
+        COALESCE(NULLIF(wick_note,''),'')      ,' ',
+        COALESCE(NULLIF(absor_note,''),'')     ,' ',
+        COALESCE(NULLIF(apper_note,''),'')     ,' ',
+        COALESCE(NULLIF(fiber_note,''),'')     ,' ',
+        COALESCE(NULLIF(pillb_note,''),'')     ,' ',
+        COALESCE(NULLIF(pillm_note,''),'')     ,' ',
+        COALESCE(NULLIF(pillr_note,''),'')     ,' ',
+        COALESCE(NULLIF(thick_note,''),'')     ,' ',
+        COALESCE(NULLIF(growth_note,''),'')    ,' ',
+        COALESCE(NULLIF(recover_note,''),'')   ,' ',
+        COALESCE(NULLIF(stretch_note,''),'')   ,' ',
+        COALESCE(NULLIF(sns_note,''),'')       ,' ',
+        COALESCE(NULLIF(snab_note,''),'')      ,' ',
+        COALESCE(NULLIF(snam_note,''),'')      ,' ',
+        COALESCE(NULLIF(snap_note,''),'')      ,' ',
+        COALESCE(NULLIF(wash_note,''),'')      ,' ',
+        COALESCE(NULLIF(water_note,''),'')     ,' ',
+        COALESCE(NULLIF(acid_note,''),'')      ,' ',
+        COALESCE(NULLIF(alkaline_note,''),'')  ,' ',
+        COALESCE(NULLIF(crock_note,''),'')     ,' ',
+        COALESCE(NULLIF(phenolic_note,''),'')  ,' ',
+        COALESCE(NULLIF(cm_printing_note,''),''),' ',
+        COALESCE(NULLIF(cm_dye_note,''),'')    ,' ',
+        COALESCE(NULLIF(light_note,''),'')     ,' ',
+        COALESCE(NULLIF(light_pers_note,''),''),' ',
+        COALESCE(NULLIF(saliva_note,''),'')    ,' ',
+        COALESCE(NULLIF(h_shrinkage_note,''),''),' ',
+        COALESCE(NULLIF(fibre_note,''),'')     ,' ',
+        COALESCE(NULLIF(pilll_note,''),'')     ,' ',
+        COALESCE(NULLIF(soil_note,''),'')      ,' ',
+        COALESCE(NULLIF(apperss_note,''),'')   ,' ',
+        COALESCE(NULLIF(bleeding_note,''),'')  ,' ',
+        COALESCE(NULLIF(chlorin_note,''),'')   ,' ',
+        COALESCE(NULLIF(dye_tf_note,''),'')    ,' ',
+        COALESCE(NULLIF(humidity_note,''),'')  ,' ',
+        COALESCE(NULLIF(odour_note,''),'')     ,' ',
+        COALESCE(NULLIF(curling_note,''),'')
+    )))";
+
+    $sqlCek1 = sqlsrv_query(
+        $con_db_qc_sqlsrv,
+        "SELECT TOP 1 *, $note_g_expr AS note_g
+        FROM db_qc.tbl_tq_test_fl
+        WHERE id_nokk = ?
+        ORDER BY id DESC",
+        [$idkk]
+    );
+    $cek1  = ($sqlCek1 && sqlsrv_has_rows($sqlCek1)) ? 1 : 0;
+    $rcek1 = sqlsrv_fetch_array($sqlCek1, SQLSRV_FETCH_ASSOC);
+
+    $rnote_g_expr = str_replace(
+        ['fc_note','ph_note','abr_note','bas_note','dry_note','fla_note','fwe_note','fwi_note','burs_note','repp_note','wick_note','absor_note','apper_note','fiber_note','pillb_note','pillm_note','pillr_note','thick_note','growth_note','recover_note','stretch_note','sns_note','snab_note','snam_note','snap_note','wash_note','water_note','acid_note','alkaline_note','crock_note','phenolic_note','cm_printing_note','cm_dye_note','light_note','light_pers_note','saliva_note','h_shrinkage_note','fibre_note','pilll_note','soil_note','apperss_note','bleeding_note','chlorin_note','dye_tf_note','humidity_note','odour_note','curling_note'],
+        ['rfc_note','rph_note','rabr_note','rbas_note','rdry_note','rfla_note','rfwe_note','rfwi_note','rburs_note','rrepp_note','rwick_note','rabsor_note','rapper_note','rfiber_note','rpillb_note','rpillm_note','rpillr_note','rthick_note','rgrowth_note','rrecover_note','rstretch_note','rsns_note','rsnab_note','rsnam_note','rsnap_note','rwash_note','rwater_note','racid_note','ralkaline_note','rcrock_note','rphenolic_note','rcm_printing_note','rcm_dye_note','rlight_note','rlight_pers_note','rsaliva_note','rh_shrinkage_note','rfibre_note','rpilll_note','rsoil_note','rapperss_note','rbleeding_note','rchlorin_note','rdye_tf_note','rhumidity_note','rodour_note','rcurling_note'],
+        $note_g_expr
+    );
+
+    $sqlCekR = sqlsrv_query(
+        $con_db_qc_sqlsrv,
+        "SELECT *, $rnote_g_expr AS rnote_g
+        FROM db_qc.tbl_tq_randomtest
+        WHERE no_item = ? OR no_hanger = ?",
+        [$no_item, $no_hanger]
+    );
+    $cekR  = ($sqlCekR && sqlsrv_has_rows($sqlCekR)) ? 1 : 0;
+    $rcekR = sqlsrv_fetch_array($sqlCekR, SQLSRV_FETCH_ASSOC);
+
+    $dnote_g_expr = str_replace(
+        ['fc_note','ph_note','abr_note','bas_note','dry_note','fla_note','fwe_note','fwi_note','burs_note','repp_note','wick_note','absor_note','apper_note','fiber_note','pillb_note','pillm_note','pillr_note','thick_note','growth_note','recover_note','stretch_note','sns_note','snab_note','snam_note','snap_note','wash_note','water_note','acid_note','alkaline_note','crock_note','phenolic_note','cm_printing_note','cm_dye_note','light_note','light_pers_note','saliva_note','h_shrinkage_note','fibre_note','pilll_note','soil_note','apperss_note','bleeding_note','chlorin_note','dye_tf_note','humidity_note','odour_note','curling_note'],
+        ['dfc_note','dph_note','dabr_note','dbas_note','ddry_note','dfla_note','dfwe_note','dfwi_note','dburs_note','drepp_note','dwick_note','dabsor_note','dapper_note','dfiber_note','dpillb_note','dpillm_note','dpillr_note','dthick_note','dgrowth_note','drecover_note','dstretch_note','dsns_note','dsnab_note','dsnam_note','dsnap_note','dwash_note','dwater_note','dacid_note','dalkaline_note','dcrock_note','dphenolic_note','dcm_printing_note','dcm_dye_note','dlight_note','dlight_pers_note','dsaliva_note','dh_shrinkage_note','dfibre_note','dpilll_note','dsoil_note','dapperss_note','dbleeding_note','dchlorin_note','ddye_tf_note','dhumidity_note','dodour_note','dcurling_note'],
+        $note_g_expr
+    );
+
+    $sqlCekD = sqlsrv_query(
+        $con_db_qc_sqlsrv,
+        "SELECT TOP 1 *, $dnote_g_expr AS dnote_g
+        FROM db_qc.tbl_tq_disptest_fl
+        WHERE id_nokk = ?
+        ORDER BY id DESC",
+        [$idkk]
+    );
+    $cekD  = ($sqlCekD && sqlsrv_has_rows($sqlCekD)) ? 1 : 0;
+    $rcekD = sqlsrv_fetch_array($sqlCekD, SQLSRV_FETCH_ASSOC);
 ?>
+
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form0" id="form0">
 <div class="box box-info" style="width: 98%;">
     <div class="box-header with-border">
@@ -117,7 +216,14 @@ $rcekD=mysqli_fetch_array($sqlCekD);
       <div class="col-md-6">
             <div class="box">
               <div class="box-header">
-                <small class="pull-right">Date: <?php echo $rcek1['tgl_buat'];?></small>
+                <small class="pull-right">
+						Date:
+						<?= (!empty($rcek1['tgl_buat']))
+							? (($rcek1['tgl_buat'] instanceof DateTime)
+								? $rcek1['tgl_buat']->format('Y-m-d H:i:s')
+								: date('Y-m-d H:i:s', strtotime($rcek1['tgl_buat'])))
+							: '-' ?>
+					</small>
                   <div class="box-body">
                     <table id="example1" class="table table-bordered table-hover table-striped" width="100%"> 
                         <thead class="bg-blue">
@@ -129,16 +235,22 @@ $rcekD=mysqli_fetch_array($sqlCekD);
                         </thead>
                         <tbody>
                                 <?php
-                                $sql = "SELECT a.*, b.*, c.* From tbl_tq_first_lot a 
-                                INNER JOIN tbl_master_test b ON a.no_test=b.no_testmaster
-                                INNER JOIN tbl_tq_test_fl c ON a.id=c.id_nokk
-                                WHERE no_test='$no_test'";
-                                $result=mysqli_query($con,$sql); 
-                                $no="1";
-                                while($row=mysqli_fetch_array($result)){ 
-                                $detail=explode(",",$row['physical']);
-                                $detail2=explode(",",$row['functional']);
-                                $detail3=explode(",",$row['colorfastness']);
+                                    $sql = " SELECT a.*, b.*, c.*
+                                        FROM db_qc.tbl_tq_first_lot a
+                                        INNER JOIN db_qc.tbl_master_test b
+                                            ON a.no_test = b.no_testmaster
+                                        INNER JOIN db_qc.tbl_tq_test_fl c
+                                            ON a.id = c.id_nokk
+                                        WHERE a.no_test = ?
+                                    ";
+
+                                    $result = sqlsrv_query($con_db_qc_sqlsrv, $sql, [$no_test]);
+
+                                    $no = 1;
+                                    while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
+                                        $detail  = explode(",", $row['physical']);
+                                        $detail2 = explode(",", $row['functional']);
+                                        $detail3 = explode(",", $row['colorfastness']);
                                 ?>
                             <?php if(in_array("FLAMMABILITY",$detail)){?>
                             <tr>
@@ -961,17 +1073,33 @@ $rcekD=mysqli_fetch_array($sqlCekD);
                                     <input name="no_previous_report" type="text" class="form-control"  placeholder="No Previous Report"  value="<?=$rcek1['no_previous_report']?>" required  >
                                 </div>				   
                         </div>
+                        <?php
+                            $tgl_prev = '';
+                            if (!empty($rcek1['tgl_previous_report'])) {
+                                $tgl_prev = ($rcek1['tgl_previous_report'] instanceof DateTime)
+                                    ? $rcek1['tgl_previous_report']->format('Y-m-d')
+                                    : date('Y-m-d', strtotime($rcek1['tgl_previous_report']));
+                            }
+
+                            $tgl_exp = '';
+                            if (!empty($rcek1['tgl_expired_report'])) {
+                                $tgl_exp = ($rcek1['tgl_expired_report'] instanceof DateTime)
+                                    ? $rcek1['tgl_expired_report']->format('Y-m-d')
+                                    : date('Y-m-d', strtotime($rcek1['tgl_expired_report']));
+                            }
+                        ?>
                         <div class="form-group">
-                                <label for="tgl_previous_report" class="col-sm-4 control-label">Tanggal Previous Report</label>
-                                <div class="col-sm-5">
-                                    <input onchange="updateExpiredReport()"  id="tgl_previous_report" name="tgl_previous_report" type="date" class="form-control"  placeholder="Tanggal Previous Report" value="<?=$rcek1['tgl_previous_report']?>" required >
-                                </div>				   
+                            <label for="tgl_previous_report" class="col-sm-4 control-label">Tanggal Previous Report</label>
+                            <div class="col-sm-5">
+                                <input onchange="updateExpiredReport()" id="tgl_previous_report" name="tgl_previous_report" type="date" class="form-control" placeholder="Tanggal Previous Report" value="<?= htmlspecialchars($tgl_prev) ?>" required>
+                            </div>
                         </div>
+
                         <div class="form-group">
-                                <label for="tgl_expired_report" class="col-sm-4 control-label">Tgl Expired Report</label>
-                                <div class="col-sm-5">
-                                    <input id="tgl_expired_report" name="tgl_expired_report" type="date" class="form-control"  placeholder="Tgl Expired Report"  value="<?=$rcek1['tgl_expired_report']?>"  readonly >
-                                </div>				   
+                            <label for="tgl_expired_report" class="col-sm-4 control-label">Tgl Expired Report</label>
+                            <div class="col-sm-5">
+                                <input id="tgl_expired_report" name="tgl_expired_report" type="date" class="form-control" placeholder="Tgl Expired Report" value="<?= htmlspecialchars($tgl_exp) ?>" readonly>
+                            </div>
                         </div>
 
           
@@ -1011,25 +1139,34 @@ $rcekD=mysqli_fetch_array($sqlCekD);
   }
 </script>
 
+                        <?php
+                            $tgl_target_kirim = '';
+                            if (!empty($rcek1['tgl_target_kirim'])) {
+                                $tgl_target_kirim = ($rcek1['tgl_target_kirim'] instanceof DateTime)
+                                    ? $rcek1['tgl_target_kirim']->format('Y-m-d')
+                                    : date('Y-m-d', strtotime($rcek1['tgl_target_kirim']));
+                            }
 
-
-
-
-
-
+                            $tgl_target_internal = '';
+                            if (!empty($rcek1['tgl_target_internal'])) {
+                                $tgl_target_internal = ($rcek1['tgl_target_internal'] instanceof DateTime)
+                                    ? $rcek1['tgl_target_internal']->format('Y-m-d')
+                                    : date('Y-m-d', strtotime($rcek1['tgl_target_internal']));
+                            }
+                        ?>
+                        <div class="form-group">
+                            <label for="tgl_target_kirim_mkt" class="col-sm-4 control-label">Tgl Target Kirim MKT</label>
+                            <div class="col-sm-5">
+                                <input name="tgl_target_kirim" type="date" class="form-control" placeholder="Tgl Target Kirim MKT" value="<?= htmlspecialchars($tgl_target_kirim) ?>" required>
+                            </div>
+                        </div>
 
                         <div class="form-group">
-                                <label for="tgl_target_kirim_mkt" class="col-sm-4 control-label">Tgl Target Kirim MKT</label>
-                                <div class="col-sm-5">
-                                    <input name="tgl_target_kirim" type="date" class="form-control"  placeholder="Tgl Target Kirim MKT" value="<?=$rcek1['tgl_target_kirim']?>" required  >
-                                </div>				   
-                        </div>
-                        <div class="form-group">
-                                <label for="tgl_target_internal" class="col-sm-4 control-label">Tgl Target Internal</label>
-                                <div class="col-sm-5">
-                                    <input name="tgl_target_internal" type="date" class="form-control"  placeholder="Tgl Target Internal" value="<?=$rcek1['tgl_target_internal']?>" required >
-                                </div>				   
-                        </div>
+                            <label for="tgl_target_internal" class="col-sm-4 control-label">Tgl Target Internal</label>
+                            <div class="col-sm-5">
+                                <input name="tgl_target_internal" type="date" class="form-control" placeholder="Tgl Target Internal" value="<?= htmlspecialchars($tgl_target_internal) ?>" required>
+                            </div>
+                        </div>		
 
                         <div class="form-group">					
                             <?php if($no_test!=""){ ?>
@@ -1051,7 +1188,14 @@ $rcekD=mysqli_fetch_array($sqlCekD);
         <div class="col-xs-12">
           <h2 class="page-header">
             <i class="fa fa-globe"></i> Result.
-            <small class="pull-right">Date: <?php echo $rcek1['tgl_buat'];?></small>
+            <small class="pull-right">
+                Date:
+                <?= (!empty($rcek1['tgl_buat']))
+                    ? (($rcek1['tgl_buat'] instanceof DateTime)
+                        ? $rcek1['tgl_buat']->format('Y-m-d H:i:s')
+                        : date('Y-m-d H:i:s', strtotime($rcek1['tgl_buat'])))
+                    : '-' ?>
+            </small>
           </h2>
         </div>
         <!-- /.col -->
@@ -2114,84 +2258,85 @@ $rcekD=mysqli_fetch_array($sqlCekD);
        <?php } ?> 
 
 <?php
-if($_POST['status_save']=="save" and $_POST['status']==""){
-  echo "<script>swal({
-    title: 'Status Tidak Tersimpan',   
-    text: 'Status Tidak Boleh Kosong!!,
-    type: 'info',
-    }).then((result) => {
-    if (result.value) {
-      
-     window.location.href='SummaryTQNewFL-$_GET[no_test]'; 
-    }
-  });</script>";
-}else if($_POST['status_save']=="save" and $cek1>0){
-	$sqlST=mysqli_query($con,"UPDATE tbl_tq_test_fl SET
-	`status`='$_POST[status]',
-    `approve`='$_SESSION[nama1]',
-    `tgl_approve`=now(),
-	`tgl_update`=now(),
-    penanggung_jawab_fl = '$_POST[penanggung_jawab_fl]' ,
-    no_previous_report = '$_POST[no_previous_report]',
-    tgl_previous_report = '$_POST[tgl_previous_report]',
-    tgl_expired_report = '$_POST[tgl_expired_report]',
-    tgl_target_kirim = '$_POST[tgl_target_kirim]',
-    tgl_target_internal = '$_POST[tgl_target_internal]',
-    note = '$_POST[note]'  
-    WHERE `id_nokk`='$rd[idkk]'
-	");
-	if($sqlST){
-	echo "<script>swal({
-  title: 'Status Update',   
-  text: 'Klik Ok untuk input data kembali',
-  type: 'success',
-  }).then((result) => {
-  if (result.value) {
-    
-	 window.location.href='SummaryTQNewFL-$_GET[no_test]'; 
-  }
-});</script>";
-	}
-}else if($_POST['status_save']=="save"){
-	$sqlST=mysqli_query($con,"INSERT tbl_tq_test_fl SET
-	`id_nokk`='$rd[idkk]',
-	`status`='$_POST[status]',
-    `approve`='$_SESSION[nama1]',
-	`tgl_buat`=now(),
-    `tgl_approve`=now(),
-	`tgl_update`=now(),
-    penanggung_jawab_fl = '$_POST[penanggung_jawab_fl]',
-    no_previous_report = '$_POST[no_previous_report]' ,
-    tgl_previous_report = '$_POST[tgl_previous_report]',
-    tgl_expired_report = '$_POST[tgl_expired_report]',
-    tgl_target_kirim = '$_POST[tgl_target_kirim]',
-    tgl_target_internal = '$_POST[tgl_target_internal]',
-    note = '$_POST[note]'     
-	");
-	if($sqlST){
-	echo "<script>swal({
-  title: 'Status save',   
-  text: 'Klik Ok untuk input data kembali',
-  type: 'success',
-  }).then((result) => {
-  if (result.value) {
-    
-	 window.location.href='SummaryTQNewFL-$_GET[no_test]'; 
-  }
-});</script>";
-	}
-}
-//if($no_test!="" and $cekd==0){
-if ($status=="0" and isset($_GET['no_test']) ){
+    if ($_POST['status_save'] == "save" && $_POST['status'] == "") {
     echo "<script>swal({
- title: 'No Report FL Tidak Ditemukan',   
- text: 'Klik Ok untuk input data kembali',
- type: 'info',
- }).then((result) => {
- if (result.value) {
-   
-    window.location.href='SummaryTQNewFL'; 
- }
-});</script>";
-}
+        title: 'Status Tidak Tersimpan',
+        text: 'Status Tidak Boleh Kosong!!',
+        type: 'info',
+    }).then((result) => {
+        if (result.value) {
+        window.location.href='SummaryTQNewFL-$_GET[no_test]';
+        }
+    });</script>";
+
+    } else if ($_POST['status_save'] == "save" && $cek1 > 0) {
+        $sqlST = sqlsrv_query($con_db_qc_sqlsrv, " UPDATE db_qc.tbl_tq_test_fl
+            SET
+            status = '$_POST[status]',
+            approve = '$_SESSION[nama1]',
+            tgl_approve = GETDATE(),
+            tgl_update = GETDATE(),
+            penanggung_jawab_fl = '$_POST[penanggung_jawab_fl]',
+            no_previous_report = '$_POST[no_previous_report]',
+            tgl_previous_report = '$_POST[tgl_previous_report]',
+            tgl_expired_report = '$_POST[tgl_expired_report]',
+            tgl_target_kirim = '$_POST[tgl_target_kirim]',
+            tgl_target_internal = '$_POST[tgl_target_internal]',
+            note = '$_POST[note]'
+            WHERE id_nokk = '$rd[idkk]'
+        ");
+
+        if ($sqlST) {
+            echo "<script>swal({
+            title: 'Status Update',
+            text: 'Klik Ok untuk input data kembali',
+            type: 'success',
+            }).then((result) => {
+            if (result.value) {
+                window.location.href='SummaryTQNewFL-$_GET[no_test]';
+            }
+            });</script>";
+        }
+    } else if ($_POST['status_save'] == "save") {
+        $sqlST = sqlsrv_query($con_db_qc_sqlsrv, " INSERT INTO db_qc.tbl_tq_test_fl
+            (
+            id_nokk, status, approve, tgl_buat, tgl_approve, tgl_update,
+            penanggung_jawab_fl, no_previous_report, tgl_previous_report, tgl_expired_report,
+            tgl_target_kirim, tgl_target_internal, note
+            )
+            VALUES
+            (
+            '$rd[idkk]', '$_POST[status]', '$_SESSION[nama1]',
+            GETDATE(), GETDATE(), GETDATE(),
+            '$_POST[penanggung_jawab_fl]', '$_POST[no_previous_report]', '$_POST[tgl_previous_report]',
+            '$_POST[tgl_expired_report]', '$_POST[tgl_target_kirim]', '$_POST[tgl_target_internal]',
+            '$_POST[note]'
+            )
+        ");
+
+        if ($sqlST) {
+            echo "<script>swal({
+            title: 'Status save',
+            text: 'Klik Ok untuk input data kembali',
+            type: 'success',
+            }).then((result) => {
+            if (result.value) {
+                window.location.href='SummaryTQNewFL-$_GET[no_test]';
+            }
+            });</script>";
+        }
+    }
+    //if($no_test!="" and $cekd==0){
+    if ($status=="0" and isset($_GET['no_test']) ){
+        echo "<script>swal({
+            title: 'No Report FL Tidak Ditemukan',   
+            text: 'Klik Ok untuk input data kembali',
+            type: 'info',
+            }).then((result) => {
+            if (result.value) {
+            
+                window.location.href='SummaryTQNewFL'; 
+            }
+        });</script>";
+    }
 ?>
