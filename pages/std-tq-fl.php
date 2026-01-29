@@ -288,7 +288,7 @@ if($_POST['save']=="save"){
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form0" id="form0">
     <div class="box box-success" style="width: 98%;">
         <div class="box-header with-border">
-            <h3 class="box-title">Standart FL here <?=$pelanggan?></h3>
+            <h3 class="box-title">Standart FL<?=$pelanggan?></h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse" ><i class="fa fa-minus"></i></button>
             </div>
