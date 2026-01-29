@@ -72,9 +72,14 @@ $Item		= isset($_POST['item']) ? $_POST['item'] : '';
               </thead>
               <tbody>
                 <?php
-				  if($Item!=""){ $where.=" WHERE item='$_POST[item]' ";}
-                $sql=mysqli_query($con,"SELECT * FROM master_matrialname $where");
-                while ($r=mysqli_fetch_array($sql)) {
+				  $where = "";
+				  $params = array();
+				  if($Item!=""){
+					$where = " WHERE item=?";
+					$params[] = $Item;
+				  }
+                $sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.master_matrialname $where", $params);
+                while ($r=sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
                 $no++;
                 $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
                 ?>
