@@ -2,25 +2,43 @@
 ini_set("error_reporting", 1);
 session_start();
 include("../koneksi.php");
-//$notest= isset($_POST['no_test']) ? $_POST['no_test'] : '';
 
-$modifiedData = str_replace('00000', '/',$_GET['no_test']);
-$modifiedUrl = str_replace('77777', ' ', $modifiedData);
+	$modifiedData = str_replace('00000', '/', $_GET['no_test'] ?? '');
+	$modifiedUrl  = str_replace('77777', ' ', $modifiedData);
 
-$sql_report=mysqli_query($con,"SELECT no_test FROM tbl_tq_first_lot where no_report_fl='$modifiedUrl' order by id desc limit 1");
-$data_report =mysqli_fetch_array($sql_report);
-$notest =  $data_report['no_test'];
+	$sql1 = "SELECT TOP 1 no_test
+			FROM db_qc.tbl_tq_first_lot
+			WHERE no_report_fl = ?
+			ORDER BY id DESC";
 
-if ($notest=='') {
-	$status = '0';
-}
- 
-$sqlCek=mysqli_query($con,"SELECT a.*,b.*, a.id as id_fl FROM tbl_tq_first_lot a 
-LEFT JOIN tbl_master_test b ON a.no_test=b.no_testmaster
-WHERE no_test='$notest' order by a.id desc");
-$cek=mysqli_num_rows($sqlCek);
-$rcek=mysqli_fetch_array($sqlCek);
-?>	
+	$stmt_report = sqlsrv_query($con_db_qc_sqlsrv, $sql1, [$modifiedUrl]);
+	if ($stmt_report === false) {
+		die(print_r(sqlsrv_errors(), true));
+	}
+
+	$data_report = sqlsrv_fetch_array($stmt_report, SQLSRV_FETCH_ASSOC);
+	$notest = $data_report['no_test'] ?? '';
+
+	$status = ($notest === '') ? '0' : '1';
+
+	$sql2 = "SELECT a.*, b.*, a.id AS id_fl
+			FROM db_qc.tbl_tq_first_lot a
+			LEFT JOIN db_qc.tbl_master_test b
+			ON a.no_test = b.no_testmaster
+			WHERE a.no_test = ?
+			ORDER BY a.id DESC";
+
+	$options = ["Scrollable" => SQLSRV_CURSOR_KEYSET];
+
+	$sqlCek = sqlsrv_query($con_db_qc_sqlsrv, $sql2, [$notest], $options);
+	if ($sqlCek === false) {
+		die(print_r(sqlsrv_errors(), true));
+	}
+
+	$cek  = sqlsrv_num_rows($sqlCek);
+	$rcek = sqlsrv_fetch_array($sqlCek, SQLSRV_FETCH_ASSOC);
+?>
+
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form0" id="form0">
  <div class="box box-info">
    <div class="box-header with-border">
@@ -196,13 +214,19 @@ $rcek=mysqli_fetch_array($sqlCek);
 			
 			<input name="no_test" type="hidden" class="form-control" id="no_test" placeholder="No Test"  
                 onchange="window.location='EditTQNewFL-'+this.value" value="<?php echo $notest;?>" >
-
-
 				<div class="form-group">
                   <label for="lot" class="col-sm-3 control-label">Target Kirim</label>
                   <div class="col-sm-8">
-                    <input name="target_kirim" type="date" class="form-control"  placeholder="Target kirim"
-					value="<?php if($cek>0){echo $rcek['target_kirim'];} ?>"
+                    <input name="target_kirim" type="date" class="form-control" placeholder="Target kirim"
+						value="<?php
+							if ($cek > 0 && !empty($rcek['target_kirim'])) {
+								if ($rcek['target_kirim'] instanceof DateTime) {
+									echo $rcek['target_kirim']->format('Y-m-d');
+								} else {
+									echo substr((string)$rcek['target_kirim'], 0, 10);
+								}
+							}
+						?>"
 					>
                   </div>				   
                 </div>
@@ -246,8 +270,8 @@ $rcek=mysqli_fetch_array($sqlCek);
 						<select class="form-control select2" name="season" id="season">
 							<option value="">Pilih</option>
 							<?php 
-							$qrys=mysqli_query($con,"SELECT nama FROM tbl_season_validity ORDER BY nama ASC");
-							while($rs=mysqli_fetch_array($qrys)){
+							$qrys=sqlsrv_query($con_db_qc_sqlsrv,"SELECT nama FROM db_qc.tbl_season_validity ORDER BY nama ASC");
+							while($rs=sqlsrv_fetch_array($qrys)){
 							?>
 							<option value="<?php echo $rs['nama'];?>" <?php if($rcek['season']==$rs['nama']){echo "SELECTED";}?>><?php echo $rs['nama'];?></option>	
 							<?php }?>
@@ -300,11 +324,21 @@ $rcek=mysqli_fetch_array($sqlCek);
 		<?php
 		//$buyer=$_GET[buyer];
 		//$buyer=$_GET[buyer];
-		$qMB=mysqli_query($con,"SELECT * FROM tbl_master_test WHERE no_testmaster='$notest' order by id desc ");
-		$cekMB=mysqli_num_rows($qMB);
+		$sqlMB = "SELECT *
+          FROM db_qc.tbl_master_test
+          WHERE no_testmaster = ?
+          ORDER BY id DESC";
+
+		$options = ["Scrollable" => SQLSRV_CURSOR_KEYSET];
+
+		$qMB = sqlsrv_query($con_db_qc_sqlsrv, $sqlMB, [$notest], $options);
+		if ($qMB === false) {
+			die(print_r(sqlsrv_errors(), true));
+		}
+
+		$cekMB = sqlsrv_num_rows($qMB);	
 		
-		
-		//$data_MB = mysqli_fetch_array($qMB)['physical'];
+		//$data_MB = sqlsrv_fetch_array($qMB)['physical'];
 		//echo '<pre>';
 				//print_r($data_MB);
 		//echo '</pre>';
@@ -313,15 +347,15 @@ $rcek=mysqli_fetch_array($sqlCek);
 		
 		
 					
-        if($cekMB>0){
-            while($dMB=mysqli_fetch_array($qMB)){
-            $detail=explode(",",$dMB['physical']);
-            $detail1=explode(",",$dMB['functional']);
-            $detail2=explode(",",$dMB['colorfastness']);
-			
-			$id_master_test = $dMB['id'];
-			
-		?>
+        if ($cekMB > 0) {
+			while ($dMB = sqlsrv_fetch_array($qMB, SQLSRV_FETCH_ASSOC)) {
+
+				$detail  = explode(",", (string)($dMB['physical'] ?? ''));
+				$detail1 = explode(",", (string)($dMB['functional'] ?? ''));
+				$detail2 = explode(",", (string)($dMB['colorfastness'] ?? ''));
+
+				$id_master_test = $dMB['id'];
+			?>
 		<form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
            
 			<input type="hidden" name="id_master_test" value="<?=$id_master_test?>">
@@ -599,8 +633,8 @@ $rcek=mysqli_fetch_array($sqlCek);
 </div>
 </div>
  	<?php if($notest!=""){ 
-	//$qrytm=mysqli_query($con,"SELECT a.*, b.* FROM tbl_tq_nokk_fl a LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk WHERE no_test='$notest'");
-	//$rtm=mysqli_fetch_array($qrytm);	 
+	//$qrytm=sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.*, b.* FROM tbl_tq_nokk_fl a LEFT JOIN tbl_tq_test b ON a.id=b.id_nokk WHERE no_test='$notest'");
+	//$rtm=sqlsrv_fetch_array($qrytm);	 
 	?>
 		 
 	<div class="box-footer">
@@ -617,98 +651,125 @@ $rcek=mysqli_fetch_array($sqlCek);
             </div>
 
 <?php
-if($_POST['save']=="save"){
-		
-		$id_master_test = $_POST['id_master_test'];
-		
-        $checkbox1=$_POST['physical'];
-        $checkbox2=$_POST['functional'];
-        $checkbox3=$_POST['colorfastness'];
-		$buyer=strtoupper($_POST['buyer']);
-		$nohanger=strtoupper($_POST['no_hanger']);
-		$noitem=strtoupper($_POST['no_item']);
-		$nopo=str_replace("'","''",$_POST['no_po']);
-		$notestmaster=$_POST['no_test'];
-		$lebar=$_POST['lebar'];
-		$gramasi=$_POST['grms'];
-		$jns_kain=$_POST['jns_kain'];
-		$ip= $_SERVER['REMOTE_ADDR'];
-		$pelanggan=str_replace("'","''",$_POST['pelanggan']);
-		if($_POST['is_demand_new']=="1"){$is_demand_new="1";}else{ $is_demand_new="0";}
-        $chkp="";
-        $chkf="";
-        $chkc="";   
-		foreach($checkbox1 as $chk1)  
-   		{  
-      		$chkp .= $chk1.",";  
-        }
-        foreach($checkbox2 as $chk2)  
-   		{  
-      		$chkf .= $chk2.",";  
-        } 
-        foreach($checkbox3 as $chk3)  
-   		{  
-      		$chkc .= $chk3.",";  
-   		}
-    $sqlData=mysqli_query($con,"UPDATE tbl_master_test SET
-          buyer='$buyer',
-			no_itemtest='$noitem',
-			no_testmaster='$notestmaster',
-			physical='$chkp',
-          functional='$chkf',
-          colorfastness='$chkc',
-			tgl_update=now()
-		WHERE id='$id_master_test'
-	");
-	$sqlData1=mysqli_query($con,"UPDATE tbl_tq_first_lot SET
-	lebar='$lebar',
-	gramasi='$gramasi',
-	jenis_kain='$jns_kain',
-	pelanggan='$pelanggan',
-	no_item='$noitem',
-	no_hanger='$nohanger',
-	no_po='$nopo',
-	lot='$_POST[lot]',
-	warna='$_POST[warna]',
-	development='$_POST[development]',
-	season='$_POST[season]',
-	is_demand_new='$is_demand_new',
-	nodemand_new='$_POST[nodemand_new]',
-	lot_new='$_POST[lot_new]',
-	ip='$ip',
-	tgl_update=now(),
-	kk_legacy='$_POST[no_kk_legacy]',
-	no_lot_legacy='$_POST[no_lot_legacy]',
-	no_report_fl='$_POST[no_report_fl]',
-	target_kirim='$_POST[target_kirim]'
-	WHERE id='$_POST[tq_first_lot_id]'
-	");
-    if($sqlData1){
+	if($_POST['save']=="save"){
+			$id_master_test = $_POST['id_master_test'];
 			
-        echo "<script>swal({
-    title: 'Data Tersimpan',   
-    text: 'Klik Ok untuk input data kembali',
-    type: 'success',
-    }).then((result) => {
-    if (result.value) {
-    window.location.href='EditTQNewFL-$_GET[no_test]';
-    }
-    });</script>";
-    }
-}
-//if($notest!="" and $cek==0){
-if ($status=="0" and isset($_GET['no_test']) ){
-    echo "<script>swal({
- title: 'No Report FL Tidak Ditemukan',   
- text: 'Klik Ok untuk input data kembali',
- type: 'info',
- }).then((result) => {
- if (result.value) {
-   
-    // window.location.href='EditTQNewFL'; 
- }
-});</script>";
-}
+			$checkbox1=$_POST['physical'];
+			$checkbox2=$_POST['functional'];
+			$checkbox3=$_POST['colorfastness'];
+			$buyer=strtoupper($_POST['buyer']);
+			$nohanger=strtoupper($_POST['no_hanger']);
+			$noitem=strtoupper($_POST['no_item']);
+			$nopo=str_replace("'","''",$_POST['no_po']);
+			$notestmaster=$_POST['no_test'];
+			$lebar=$_POST['lebar'];
+			$gramasi=$_POST['grms'];
+			$jns_kain=$_POST['jns_kain'];
+			$ip= $_SERVER['REMOTE_ADDR'];
+			$pelanggan=str_replace("'","''",$_POST['pelanggan']);
+			if($_POST['is_demand_new']=="1"){$is_demand_new="1";}else{ $is_demand_new="0";}
+			$chkp="";
+			$chkf="";
+			$chkc="";   
+			foreach($checkbox1 as $chk1)  
+			{  
+				$chkp .= $chk1.",";  
+			}
+			foreach($checkbox2 as $chk2)  
+			{  
+				$chkf .= $chk2.",";  
+			} 
+			foreach($checkbox3 as $chk3)  
+			{  
+				$chkc .= $chk3.",";  
+			}
+
+		$sqlData = sqlsrv_query(
+			$con_db_qc_sqlsrv,
+			"UPDATE db_qc.tbl_master_test SET
+				buyer = ?,
+				no_itemtest = ?,
+				no_testmaster = ?,
+				physical = ?,
+				functional = ?,
+				colorfastness = ?,
+				tgl_update = GETDATE()
+			WHERE id = ?",
+			array($buyer, $noitem, $notestmaster, $chkp, $chkf, $chkc, $id_master_test)
+		);
+
+		$sqlData1 = sqlsrv_query(
+			$con_db_qc_sqlsrv,
+			"UPDATE db_qc.tbl_tq_first_lot SET
+				lebar = ?,
+				gramasi = ?,
+				jenis_kain = ?,
+				pelanggan = ?,
+				no_item = ?,
+				no_hanger = ?,
+				no_po = ?,
+				lot = ?,
+				warna = ?,
+				development = ?,
+				season = ?,
+				is_demand_new = ?,
+				nodemand_new = ?,
+				lot_new = ?,
+				ip = ?,
+				tgl_update = GETDATE(),
+				kk_legacy = ?,
+				no_lot_legacy = ?,
+				no_report_fl = ?,
+				target_kirim = ?
+			WHERE id = ?",
+			array(
+				$lebar,
+				$gramasi,
+				$jns_kain,
+				$pelanggan,
+				$noitem,
+				$nohanger,
+				$nopo,
+				$_POST['lot'],
+				$_POST['warna'],
+				$_POST['development'],
+				$_POST['season'],
+				$is_demand_new,
+				$_POST['nodemand_new'],
+				$_POST['lot_new'],
+				$ip,
+				$_POST['no_kk_legacy'],
+				$_POST['no_lot_legacy'],
+				$_POST['no_report_fl'],
+				$_POST['target_kirim'],
+				$_POST['tq_first_lot_id']
+			)
+		);
+
+		if($sqlData1){
+			echo "<script>swal({
+				title: 'Data Tersimpan',   
+				text: 'Klik Ok untuk input data kembali',
+				type: 'success',
+			}).then((result) => {
+				if (result.value) {
+					window.location.href='EditTQNewFL-$_GET[no_test]';
+				}
+			});</script>";
+		}
+	}
+
+	if ($status=="0" and isset($_GET['no_test']) ){
+		echo "<script>swal({
+			title: 'No Report FL Tidak Ditemukan',   
+			text: 'Klik Ok untuk input data kembali',
+			type: 'info',
+		}).then((result) => {
+			if (result.value) {
+				// window.location.href='EditTQNewFL'; 
+			}
+		});</script>";
+	}
 ?>
 <script>
 	function aktif(){
