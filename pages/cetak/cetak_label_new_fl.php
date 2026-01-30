@@ -8,8 +8,8 @@ include "../../koneksi.php";
 //$idkk=$_GET['idkk'];
 $idkk=$_REQUEST['idkk'];
 $act=$_GET['g'];
-$data=mysqli_query($con,"SELECT * FROM tbl_tq_first_lot WHERE nodemand='$idkk' ORDER BY id DESC LIMIT 1");
-$r=mysqli_fetch_array($data);
+$data=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_tq_first_lot WHERE nodemand='$idkk' ORDER BY id DESC");
+$r=sqlsrv_fetch_array($data);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -68,7 +68,19 @@ $r=mysqli_fetch_array($data);
         </tr>
         <tr>
           <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
-	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo date('d-m-Y H:i', strtotime(substr($r['tgl_masuk'],0,18)))."/".substr($r['proses_fin'],0,14);?></div></td>
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">
+            <?php
+              $tgl_masuk_text = '';
+              if (!empty($r['tgl_masuk'])) {
+                  if ($r['tgl_masuk'] instanceof DateTime) {
+                      $tgl_masuk_text = $r['tgl_masuk']->format('d-m-Y H:i');
+                  } else {
+                      $tgl_masuk_text = date('d-m-Y H:i', strtotime(substr((string)$r['tgl_masuk'], 0, 19)));
+                  }
+              }
+              echo $tgl_masuk_text . "/" . substr((string)$r['proses_fin'], 0, 14);
+            ?></div>
+          </td>
         </tr>
         <tr>
           <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
@@ -143,7 +155,19 @@ $r=mysqli_fetch_array($data);
         </tr>
         <tr>
           <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
-	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo date('d-m-Y H:i', strtotime(substr($r['tgl_masuk'],0,18)))."/".substr($r['proses_fin'],0,14);?></div></td>
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">
+            <?php
+              $tgl_masuk_text = '';
+              if (!empty($r['tgl_masuk'])) {
+                  if ($r['tgl_masuk'] instanceof DateTime) {
+                      $tgl_masuk_text = $r['tgl_masuk']->format('d-m-Y H:i');
+                  } else {
+                      $tgl_masuk_text = date('d-m-Y H:i', strtotime(substr((string)$r['tgl_masuk'], 0, 19)));
+                  }
+              }
+              echo $tgl_masuk_text . "/" . substr((string)$r['proses_fin'], 0, 14);
+            ?></div>
+          </td>
         </tr>
         <tr>
           <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
@@ -218,7 +242,19 @@ $r=mysqli_fetch_array($data);
         </tr>
         <tr>
           <td colspan="3" style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;
-	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;"><?php echo date('d-m-Y H:i', strtotime(substr($r['tgl_masuk'],0,18)))."/".substr($r['proses_fin'],0,14);?></div></td>
+	border-left:0px #000000 solid; border-right:0px #000000 solid;"><div style="font-size:9px;">
+            <?php
+              $tgl_masuk_text = '';
+              if (!empty($r['tgl_masuk'])) {
+                  if ($r['tgl_masuk'] instanceof DateTime) {
+                      $tgl_masuk_text = $r['tgl_masuk']->format('d-m-Y H:i');
+                  } else {
+                      $tgl_masuk_text = date('d-m-Y H:i', strtotime(substr((string)$r['tgl_masuk'], 0, 19)));
+                  }
+              }
+              echo $tgl_masuk_text . "/" . substr((string)$r['proses_fin'], 0, 14);
+            ?></div>
+          </td>
         </tr>
         <tr>
           <td style="border-top:0px #000000 solid; border-bottom:0px #000000 solid;

@@ -120,38 +120,64 @@ $valrol= $rowdb2QTY['ROL'];
 
 function autono_test()
 {
-	include"koneksi.php";
-	date_default_timezone_set('Asia/Jakarta');
-    $bln= date("Ym");
-    $today= date("Ymd");
-    $sqlnotes = mysqli_query($con,"SELECT no_test FROM tbl_tq_first_lot WHERE substr(no_test,3,6) like '%".$bln."%' ORDER BY no_test DESC LIMIT 1") or die(mysqli_error());
-    $dt=mysqli_num_rows($sqlnotes);
-    if ($dt>0) {
-        $rd=mysqli_fetch_array($sqlnotes);
-        $dt=$rd['no_test'];
-        $strd=substr($dt, 10, 4);
+    include "koneksi.php";
+    date_default_timezone_set('Asia/Jakarta');
+
+    $bln   = date("Ym");
+    $today = date("Ymd");
+
+    $sqlnotes = sqlsrv_query(
+        $con_db_qc_sqlsrv,
+        "SELECT TOP 1 no_test
+         FROM db_qc.tbl_tq_first_lot
+         WHERE SUBSTRING(no_test, 3, 6) LIKE ?
+         ORDER BY no_test DESC",
+        ["%".$bln."%"]
+    );
+
+    // if ($sqlnotes === false) {
+    //     die(print_r(sqlsrv_errors(), true));
+    // }
+
+    $rd = sqlsrv_fetch_array($sqlnotes, SQLSRV_FETCH_ASSOC);
+
+    if ($rd && !empty($rd['no_test'])) {
+        $dt = $rd['no_test'];
+        $strd = substr($dt, 10, 4);
         $Urutd = (int)$strd;
     } else {
         $Urutd = 0;
     }
+
     $Urutd = $Urutd + 1;
-    $Nold="";
-    $nilaid=4-strlen($Urutd);
-    for ($i=1;$i<=$nilaid;$i++) {
-        $Nold= $Nold."0";
+
+    $Nold = "";
+    $nilaid = 4 - strlen($Urutd);
+    for ($i = 1; $i <= $nilaid; $i++) {
+        $Nold = $Nold . "0";
     }
-    $no2 = 'FL'.$today.$Nold.$Urutd;
-    //$no2 =$today.str_pad($Urutd, 4, "0",  STR_PAD_LEFT);
+
+    $no2 = 'FL' . $today . $Nold . $Urutd;
     return $no2;
 }
 
 function fl_no_urut_otomatis() {
-	include"koneksi.php";
-	$tb_tq_first_lot_sql   = mysqli_query($con,"select count(*) as c from tbl_tq_first_lot ") or die(mysqli_error());
-    $tb_tq_first_lot_count = mysqli_fetch_assoc($tb_tq_first_lot_sql)['c'];
+	include "koneksi.php";
+
+	$tb_tq_first_lot_sql = sqlsrv_query(
+		$con_db_qc_sqlsrv,
+		"SELECT COUNT(*) AS c FROM db_qc.tbl_tq_first_lot"
+	);
+
+	// if ($tb_tq_first_lot_sql === false) {
+	// 	die(print_r(sqlsrv_errors(), true));
+	// }
+
+	$row = sqlsrv_fetch_array($tb_tq_first_lot_sql, SQLSRV_FETCH_ASSOC);
+	$tb_tq_first_lot_count = (int)($row['c'] ?? 0);
 
 	$nextNumber = str_pad($tb_tq_first_lot_count + 1, 3, '0', STR_PAD_LEFT);
-	return $nextNumber ; 
+	return $nextNumber; 
 }
 
 function fl_tahun() {
@@ -168,9 +194,25 @@ function fl_buyer() {
 
 
 
-$sqlCek=mysqli_query($con,"SELECT a.*,b.hangtag FROM tbl_tq_first_lot a LEFT JOIN tbl_master_hangtag b ON a.no_item = b.no_item WHERE nodemand='$nodemand' ORDER BY id DESC LIMIT 1");
-$cek=mysqli_num_rows($sqlCek);
-$rcek=mysqli_fetch_array($sqlCek);
+
+$sqlCek = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT TOP 1 a.*, b.hangtag
+     FROM db_qc.tbl_tq_first_lot a
+     LEFT JOIN db_qc.tbl_master_hangtag b ON a.no_item = b.no_item
+     WHERE a.nodemand = ?
+     ORDER BY a.id DESC",
+    array($nodemand),
+    array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+);
+
+// if ($sqlCek === false) {
+//     die(print_r(sqlsrv_errors(), true));
+// }
+
+$rcek = sqlsrv_fetch_array($sqlCek, SQLSRV_FETCH_ASSOC);
+$cek = ($rcek) ? 1 : 0;
+
 //$no_tes=$rcek['no_test']+1;
 $no_order= isset($_POST['no_order']) ? $_POST['no_order'] : '';
 $pelanggan1= isset($_POST['pelanggan']) ? $_POST['pelanggan'] : '';
@@ -199,9 +241,9 @@ $id_kirim= isset($_POST['id_kirim']) ? $_POST['id_kirim'] : '';
 $resubmit= isset($_POST['resubmit']) ? $_POST['resubmit'] : '';
 $input_nokk= isset($_POST['nokk']) ? $_POST['nokk'] : '';
 
-//$con1=mysqli_connect("10.0.0.10","dit","4dm1n");
-//$db1=mysqli_select_db("db_finishing",$con1)or die("Gagal Koneksi ke finishing");
-//$qryFin=mysqli_query("SELECT * FROM tbl_produksi WHERE nokk='$nokk' ORDER BY id DESC LIMIT 1");
+//$con_db_qc_sqlsrv1=mysqli_connect("10.0.0.10","dit","4dm1n");
+//$db1=mysqli_select_db("db_finishing",$con_db_qc_sqlsrv1)or die("Gagal Koneksi ke finishing");
+//$qryFin=sqlsrv_query("SELECT * FROM tbl_produksi WHERE nokk='$nokk' ORDER BY id DESC LIMIT 1");
 //$dtFin=mysqli_fetch_array($qryFin);
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form0" id="form0">
@@ -268,26 +310,6 @@ $input_nokk= isset($_POST['nokk']) ? $_POST['nokk'] : '';
 			</div>
 		</div>
 
-
-		<!--
-		<div class="form-group">
-			<label for="kk_legacy" class="col-sm-3 control-label">No KK Legacy</label>
-			<div class="col-sm-4">
-				<input name="kk_legacyXXX" type="text" class="form-control" id="kk_legacy" 
-				value="<?php if($cek>0){echo $rcek['kk_legacy'];}else if($_POST['kk_legacy']!=""){echo $kk_legacy;}?>" placeholder="No KK Legacy" required>
-			</div>
-		</div>-->
-		<!--
-        <div class="form-group">
-		  <label for="no_test" class="col-sm-3 control-label">No Test</label>
-		  <div class="col-sm-4">
-			<input name="no_test" type="text" class="form-control" id="no_test" placeholder="No Test" autocomplete="off" 
-			value="<?php if($nodemand!=""){echo autono_test(); }else{} ?>" readonly="readonly" >
-		  </div>				   
-		</div>-->
-		<input name="no_test" type="hidden" class="form-control" id="no_test" placeholder="No Test" autocomplete="off" 
-			value="<?php if($nodemand!=""){echo autono_test(); }else{} ?>" readonly="readonly" >
-		
 		<div class="form-group">
 		  <label for="no_order" class="col-sm-3 control-label">No Order</label>
 		  <div class="col-sm-4">
@@ -473,8 +495,8 @@ $input_nokk= isset($_POST['nokk']) ? $_POST['nokk'] : '';
 					<select class="form-control select2" name="season" id="season" required>
 						<option value="">Pilih</option>
 						<?php 
-						$qrys=mysqli_query($con,"SELECT nama FROM tbl_season_validity ORDER BY nama ASC");
-						while($rs=mysqli_fetch_array($qrys)){
+						$qrys=sqlsrv_query($con_db_qc_sqlsrv,"SELECT nama FROM db_qc.tbl_season_validity ORDER BY nama ASC");
+						while($rs=sqlsrv_fetch_array($qrys)){
 						?>
 						<option value="<?php echo $rs['nama'];?>" <?php if($rcek['season']==$rs['nama'] OR $Season==$rs['nama']){echo "SELECTED";}?>><?php echo $rs['nama'];?></option>	
 						<?php }?>
@@ -492,16 +514,74 @@ $input_nokk= isset($_POST['nokk']) ? $_POST['nokk'] : '';
 </div>
 
 <?php
-$noitem= isset($_POST['no_itemtest']) ? $_POST['no_itemtest'] : '';
-$buyer= isset($_POST['buyer']) ? $_POST['buyer'] : '';
-$sqlCek1=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',fc_note,ph_note, abr_note, bas_note, dry_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,wick_note,wick_note,absor_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note) AS note_g FROM tbl_tq_test_fl WHERE id_nokk='$rcek[id]' ORDER BY id DESC LIMIT 1");
-$cek1=mysqli_num_rows($sqlCek1);
-$rcek1=mysqli_fetch_array($sqlCek1);
+$noitem = isset($_POST['no_itemtest']) ? $_POST['no_itemtest'] : '';
+$buyer  = isset($_POST['buyer']) ? $_POST['buyer'] : '';
 
-// $sqlcekNoTes=mysqli_query($con,"SELECT * FROM xxxtxxxbl_tq_nokk_fl WHERE no_test='$_POST[no_test]'");
-$sqlcekNoTes=mysqli_query($con,"SELECT * FROM tbl_tq_first_lot WHERE no_report_fl ='$_POST[no_report_fl]'");
-$cekNoTes=mysqli_num_rows($sqlcekNoTes);
+// SQL Server: CONCAT_WS tidak ada (versi lama), jadi pakai CONCAT + COALESCE + spasi
+// LIMIT 1 -> TOP 1
+// id_nokk='$rcek[id]' -> pakai parameter (lebih aman)
+
+$sqlCek1 = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT TOP 1 *,
+        LTRIM(RTRIM(CONCAT(
+            COALESCE(fc_note,''),' ',
+            COALESCE(ph_note,''),' ',
+            COALESCE(abr_note,''),' ',
+            COALESCE(bas_note,''),' ',
+            COALESCE(dry_note,''),' ',
+            COALESCE(fla_note,''),' ',
+            COALESCE(fwe_note,''),' ',
+            COALESCE(fwi_note,''),' ',
+            COALESCE(burs_note,''),' ',
+            COALESCE(repp_note,''),' ',
+            COALESCE(wick_note,''),' ',
+            COALESCE(wick_note,''),' ',
+            COALESCE(absor_note,''),' ',
+            COALESCE(apper_note,''),' ',
+            COALESCE(fiber_note,''),' ',
+            COALESCE(pillb_note,''),' ',
+            COALESCE(pillm_note,''),' ',
+            COALESCE(pillr_note,''),' ',
+            COALESCE(thick_note,''),' ',
+            COALESCE(growth_note,''),' ',
+            COALESCE(recover_note,''),' ',
+            COALESCE(stretch_note,''),' ',
+            COALESCE(sns_note,''),' ',
+            COALESCE(snab_note,''),' ',
+            COALESCE(snam_note,''),' ',
+            COALESCE(snap_note,'')
+        ))) AS note_g
+     FROM db_qc.tbl_tq_test_fl
+     WHERE id_nokk = ?
+     ORDER BY id DESC",
+    array($rcek['id']),
+    array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+);
+
+// if ($sqlCek1 === false) {
+//     die(print_r(sqlsrv_errors(), true));
+// }
+
+$cek1  = sqlsrv_num_rows($sqlCek1);
+$rcek1 = sqlsrv_fetch_array($sqlCek1, SQLSRV_FETCH_ASSOC);
+
+// Cek no report FL (MySQL -> SQL Server)
+// Pakai parameter + scrollable biar num_rows jalan
+$sqlcekNoTes = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT *
+     FROM db_qc.tbl_tq_first_lot
+     WHERE no_report_fl = ?",
+    array($_POST['no_report_fl']),
+    array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+);
+
+// if ($sqlcekNoTes === false) {
+//     die(print_r(sqlsrv_errors(), true));
+// }
+
+$cekNoTes = sqlsrv_num_rows($sqlcekNoTes);
 ?>
 <?php if($_GET['nodemand']!=""){ ?>
 <div class="box box-success">
@@ -539,14 +619,24 @@ $cekNoTes=mysqli_num_rows($sqlcekNoTes);
 <div class="col-md-12">
 <!-- Custom Tabs -->
 				<?php
-					$qMB=mysqli_query($con,"SELECT * FROM tbl_masterbuyer_test WHERE buyer='$_POST[buyer]'");
-					$cekMB=mysqli_num_rows($qMB);
-					
-                if($cekMB>0){
-                    while($dMB=mysqli_fetch_array($qMB)){
-                    $detail=explode(",",$dMB['physical']);
-                    $detail1=explode(",",$dMB['functional']);
-                    $detail2=explode(",",$dMB['colorfastness']);
+					$qMB = sqlsrv_query(
+						$con_db_qc_sqlsrv,
+						"SELECT * FROM db_qc.tbl_masterbuyer_test WHERE buyer = ?",
+						array($_POST['buyer']),
+						array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+					);
+
+					if ($qMB === false) {
+						die(print_r(sqlsrv_errors(), true));
+					}
+
+					$cekMB = sqlsrv_num_rows($qMB);
+
+					if($cekMB > 0){
+						while($dMB = sqlsrv_fetch_array($qMB, SQLSRV_FETCH_ASSOC)){
+							$detail  = explode(",", (string)$dMB['physical']);
+							$detail1 = explode(",", (string)$dMB['functional']);
+							$detail2 = explode(",", (string)$dMB['colorfastness']);
 				?>
 				<form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
                      <div class="form-group">
@@ -857,130 +947,128 @@ if($_POST['save']=="save" AND $cekNoTes>0){
 		}
 	  });</script>";
 }else if($_POST['save']=="save" and $cekMB>0){
-	//$con=mysqli_connect("localhost","root","");
-	//$db=mysqli_select_db("db_qc",$con)or die("Gagal Koneksi");	
-	//$con=mysqli_connect("10.0.0.10","dit","4dm1n");
-    //$db=mysqli_select_db("db_qc",$con)or die("Gagal Koneksi");
-function nourut()
-{
-	include"koneksi.php";
-    $format = date("ym");
-    $sql=mysqli_query($con,"SELECT no_id FROM tbl_tq_first_lot WHERE substr(no_id,1,4) like '%".$format."%' ORDER BY no_id DESC LIMIT 1 ") or die(mysqli_error());
-    $d=mysqli_num_rows($sql);
-    if ($d>0) {
-        $r=mysqli_fetch_array($sql);
-        $d=$r['no_id'];
-        $str=substr($d, 4, 4);
-        $Urut = (int)$str;
-    } else {
-        $Urut = 0;
-    }
-    $Urut = $Urut + 1;
-    $Nol="";
-    $nilai=4-strlen($Urut);
-    for ($i=1;$i<=$nilai;$i++) {
-        $Nol= $Nol."0";
-    }
-    $no1 =$format.$Nol.$Urut;
-    return $no1;
-}
-$nourut=nourut();	
-	  $warna=str_replace("'","''",$_POST['warna']);
-	  $nowarna=str_replace("'","''",$_POST['no_warna']);	
-	  $jns=str_replace("'","''",$_POST['jns_kain']);
-	  $po=str_replace("'","''",$_POST['no_po']);
-	  $lot=trim($_POST['lot']);
-      $checkbox1=$_POST['physical'];
-      $checkbox2=$_POST['functional'];
-      $checkbox3=$_POST['colorfastness'];
-	  $buyer=strtoupper($_POST['buyer']);
-	  $noitem=strtoupper($_POST['no_itemtest']);
-	  $notestmaster=$_POST['no_testmaster'];
-	  $ip= $_SERVER['REMOTE_ADDR'];
-	  if($_POST['nokk']==''){$nokk=$_POST['nodemand'];}else{$nokk=$_POST['nokk'];}
-	  $target = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d') + 2, date('Y')));
-      
-	  $chkp="";
-      $chkf="";
-      $chkc="";   
-		foreach($checkbox1 as $chk1)  
-   		{  
-      		$chkp .= $chk1.",";  
-        }
-        foreach($checkbox2 as $chk2)  
-   		{  
-      		$chkf .= $chk2.",";  
-        } 
-        foreach($checkbox3 as $chk3)  
-   		{  
-      		$chkc .= $chk3.",";  
-   		}  
-  	  $sqlData=mysqli_query($con,"INSERT INTO tbl_tq_first_lot SET 
-	  	  no_id='$nourut',	
-		  nokk='$nokk',
-		  nodemand='$_POST[nodemand]',
-		  no_test='$_POST[no_test]',
-		  pelanggan='$_POST[pelanggan]',
-		  no_order='$_POST[no_order]',
-		  no_hanger='$_POST[no_hanger]',
-		  no_item='$_POST[no_item]',
-		  no_po='$po',
-		  jenis_kain='$jns',
-		  lebar='$_POST[lebar]',
-		  gramasi='$_POST[grms]',
-		  berat='$_POST[berat]',
-		  rol='$_POST[rol]',
-		  lot='$lot',
-		  warna='$warna',
-		  no_warna='$nowarna',
-		  tgl_fin=now(),
-		  proses_fin='$_POST[proses]',
-		  suhu='$_POST[suhu]',
-		  tgl_masuk=now(),
-          buyer='$buyer',
-		  development='$_POST[development]',
-		  tgl_target='$target',
-		  season='$_POST[season]',
-		  kk_legacy='$_POST[kk_legacy]',
-		  no_lot_legacy='$_POST[no_lot_legacy]',
-		  ip='$ip',
-		  tgl_update=now(),
-		  jenis_test = '$_POST[jenis_test]',
-		  no_report_fl = '$_POST[no_report_fl]',
-		  target_kirim = '$_POST[target_kirim]',
-		  id_kirim = '$_POST[id_kirim]',
-		  resubmit = '$_POST[resubmit]'
-		  ");
-		$sqlData2=mysqli_query($con,"INSERT INTO tbl_master_test SET
-			buyer='$buyer',
-			no_testmaster='$notestmaster',
-			physical='$chkp',
-			functional='$chkf',
-			colorfastness='$chkc',
-			tgl_update=now()");
-		$sqlData3=mysqli_query($con,"UPDATE tbl_masterbuyer_test SET
-			buyer='$buyer',
-			physical='$chkp',
-			functional='$chkf',
-			colorfastness='$chkc',
-			tgl_update=now()
-			WHERE buyer='$buyer'");	 	  
-	  
-		if($sqlData2){
-			
-			echo "<script>swal({
-  title: 'Data Tersimpan',   
-  text: 'Klik Ok untuk input data kembali',
-  type: 'success',
-  }).then((result) => {
-  if (result.value) {
-     window.open('pages/cetak/cetak_label_new_fl.php?idkk=$_GET[nodemand]','_blank');	
-	 window.location.href='KainInNewFL';
-	 
-  }
-});</script>";
+
+	function nourut()
+	{
+		include "koneksi.php";
+		$format = date("ym");
+
+		$query = "SELECT TOP 1 no_id
+				  FROM db_qc.tbl_tq_first_lot
+				  WHERE SUBSTRING(CAST(no_id AS varchar(50)), 1, 4) LIKE ?
+				  ORDER BY no_id DESC";
+
+		$params = array("%".$format."%");
+
+		$sql = sqlsrv_query($con_db_qc_sqlsrv, $query, $params);
+
+		// DEBUG yang benar: cek hasil query dulu
+		if ($sql === false) {
+			echo "<pre>";
+			echo "QUERY:\n".$query."\n\n";
+			echo "PARAMS:\n"; print_r($params);
+			echo "\nERRORS:\n"; print_r(sqlsrv_errors());
+			echo "</pre>";
+			exit;
 		}
-				
+
+		$r = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC);
+
+		if ($r && !empty($r['no_id'])) {
+			$d = $r['no_id'];
+			$str = substr($d, 4, 4);
+			$Urut = (int)$str;
+		} else {
+			$Urut = 0;
+		}
+
+		$Urut = $Urut + 1;
+		$Nol = "";
+		$nilai = 4 - strlen($Urut);
+		for ($i=1; $i<=$nilai; $i++) {
+			$Nol = $Nol."0";
+		}
+		$no1 = $format.$Nol.$Urut;
+		return $no1;
+	}
+
+	$nourut = nourut();
+
+	$warna   = str_replace("'","''",$_POST['warna']);
+	$nowarna = str_replace("'","''",$_POST['no_warna']);
+	$jns     = str_replace("'","''",$_POST['jns_kain']);
+	$po      = str_replace("'","''",$_POST['no_po']);
+	$lot     = trim($_POST['lot']);
+	$checkbox1 = $_POST['physical'];
+	$checkbox2 = $_POST['functional'];
+	$checkbox3 = $_POST['colorfastness'];
+	$buyer   = strtoupper($_POST['buyer']);
+	$noitem  = strtoupper($_POST['no_itemtest']);
+	$notestmaster = $_POST['no_testmaster'];
+	$ip      = $_SERVER['REMOTE_ADDR'];
+	if($_POST['nokk']==''){$nokk=$_POST['nodemand'];}else{$nokk=$_POST['nokk'];}
+	$target = date('Y-m-d', mktime(0, 0, 0, date('m'), date('d') + 2, date('Y')));
+
+	$chkp="";
+	$chkf="";
+	$chkc="";
+	foreach($checkbox1 as $chk1) { $chkp .= $chk1.","; }
+	foreach($checkbox2 as $chk2) { $chkf .= $chk2.","; }
+	foreach($checkbox3 as $chk3) { $chkc .= $chk3.","; }
+
+	$sqlData = sqlsrv_query($con_db_qc_sqlsrv,
+		"INSERT INTO db_qc.tbl_tq_first_lot
+		(no_id, nokk, nodemand, no_test, pelanggan, no_order, no_hanger, no_item, no_po, jenis_kain,
+		lebar, gramasi, berat, rol, lot, warna, no_warna, tgl_fin, proses_fin, suhu, tgl_masuk, buyer,
+		development, tgl_target, season, kk_legacy, no_lot_legacy, ip, tgl_update, jenis_test,
+		no_report_fl, target_kirim, id_kirim, resubmit)
+		VALUES
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+			?, ?, ?, ?, ?, ?, ?, GETDATE(), ?, ?, GETDATE(), ?,
+			?, ?, ?, ?, ?, ?, GETDATE(), ?,
+			?, ?, ?, ?)",
+		[
+			$nourut,
+			$nokk, $_POST['nodemand'], $_POST['no_test'], $_POST['pelanggan'], $_POST['no_order'], $_POST['no_hanger'], $_POST['no_item'],
+			$po, $jns, $_POST['lebar'], $_POST['grms'], $_POST['berat'], $_POST['rol'], $lot,
+			$warna, $nowarna, $_POST['proses'], $_POST['suhu'], $buyer, $_POST['development'], $target, $_POST['season'],
+			$_POST['kk_legacy'], $_POST['no_lot_legacy'], $ip, $_POST['jenis_test'], $_POST['no_report_fl'], $_POST['target_kirim'], $_POST['id_kirim'], $_POST['resubmit']
+		]
+	);
+
+	// kalau mau debug insert juga:
+	// if($sqlData === false){ die(print_r(sqlsrv_errors(), true)); }
+
+	$sqlData2 = sqlsrv_query($con_db_qc_sqlsrv,
+		"INSERT INTO db_qc.tbl_master_test
+		(buyer, no_testmaster, physical, functional, colorfastness, tgl_update)
+		VALUES (?, ?, ?, ?, ?, GETDATE())",
+		[$buyer, $notestmaster, $chkp, $chkf, $chkc]
+	);
+
+	$sqlData3 = sqlsrv_query($con_db_qc_sqlsrv,
+		"UPDATE db_qc.tbl_masterbuyer_test SET
+			buyer = ?,
+			physical = ?,
+			functional = ?,
+			colorfastness = ?,
+			tgl_update = GETDATE()
+		WHERE buyer = ?",
+		[$buyer, $chkp, $chkf, $chkc, $buyer]
+	);
+
+	if($sqlData2){
+		echo "<script>swal({
+			title: 'Data Tersimpan',
+			text: 'Klik Ok untuk input data kembali',
+			type: 'success',
+		}).then((result) => {
+			if (result.value) {
+				window.open('pages/cetak/cetak_label_new_fl.php?idkk=$_GET[nodemand]','_blank');
+				window.location.href='KainInNewFL';
+			}
+		});</script>";
+	}
 }else if($_POST['save']=="save" AND $_POST['physical']=="" AND $_POST['functional']=="" AND $_POST['colorfastness']==""){
 	echo "<script>swal({
 		title: 'Data Testing Tidak Boleh Kosong!',   
@@ -992,30 +1080,43 @@ $nourut=nourut();
 		   
 		}
 	  });</script>";
- }else if($_POST['save']=="save"){
+}else if($_POST['save']=="save"){
 	function nourut()
-{
-	include"koneksi.php";
-    $format = date("ym");
-    $sql=mysqli_query($con,"SELECT no_id FROM tbl_tq_first_lot WHERE substr(no_id,1,4) like '%".$format."%' ORDER BY no_id DESC LIMIT 1 ") or die(mysqli_error());
-    $d=mysqli_num_rows($sql);
-    if ($d>0) {
-        $r=mysqli_fetch_array($sql);
-        $d=$r['no_id'];
-        $str=substr($d, 4, 4);
-        $Urut = (int)$str;
-    } else {
-        $Urut = 0;
-    }
-    $Urut = $Urut + 1;
-    $Nol="";
-    $nilai=4-strlen($Urut);
-    for ($i=1;$i<=$nilai;$i++) {
-        $Nol= $Nol."0";
-    }
-    $no1 =$format.$Nol.$Urut;
-    return $no1;
-}
+	{
+		include "koneksi.php";
+		$format = date("ym");
+
+		$sql = sqlsrv_query($con_db_qc_sqlsrv,
+			"SELECT TOP 1 no_id
+			 FROM db_qc.tbl_tq_first_lot
+			 WHERE SUBSTRING(no_id, 1, 4) LIKE ?
+			 ORDER BY no_id DESC",
+			["%".$format."%"]
+		);
+
+		if ($sql === false) {
+			die(print_r(sqlsrv_errors(), true));
+		}
+
+		$r = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC);
+
+		if ($r && !empty($r['no_id'])) {
+			$d = $r['no_id'];
+			$str = substr($d, 4, 4);
+			$Urut = (int)$str;
+		} else {
+			$Urut = 0;
+		}
+
+		$Urut = $Urut + 1;
+		$Nol = "";
+		$nilai = 4 - strlen($Urut);
+		for ($i = 1; $i <= $nilai; $i++) {
+			$Nol = $Nol."0";
+		}
+		$no1 = $format.$Nol.$Urut;
+		return $no1;
+	}
 	  $nourut=nourut();	
 	  $warna=str_replace("'","''",$_POST['warna']);
 	  $nowarna=str_replace("'","''",$_POST['no_warna']);	
@@ -1045,73 +1146,53 @@ $nourut=nourut();
    		{  
       		$chkc .= $chk3.",";  
    		}   
-  	  $sqlData=mysqli_query($con,"INSERT INTO tbl_tq_first_lot SET 
-	  	  no_id='$nourut',	
-		  nokk='$_POST[nokk]',
-		  nodemand='$_POST[nodemand]',
-		   no_test='$_POST[no_test]',
-		  pelanggan='$_POST[pelanggan]',
-		  no_order='$_POST[no_order]',
-		  no_hanger='$_POST[no_hanger]',
-		  no_item='$_POST[no_item]',
-		  no_po='$po',
-		  jenis_kain='$jns',
-		  lebar='$_POST[lebar]',
-		  gramasi='$_POST[grms]',
-		  lot='$lot',
-		  berat='$_POST[berat]',
-		  rol='$_POST[rol]',
-		  warna='$warna',
-		  no_warna='$nowarna',
-		  tgl_fin=now(),
-		  proses_fin='$_POST[proses]',
-		  suhu='$_POST[suhu]',
-		  tgl_masuk=now(),
-          buyer='$buyer',
-		  development='$_POST[development]',
-		  tgl_target='$target',
-		  kk_legacy='$_POST[kk_legacy]',
-		  no_lot_legacy='$_POST[no_lot_legacy]',
-		  ip='$ip',
-		  tgl_update=now(),
-		  jenis_test = '$_POST[jenis_test]',
-		  no_report_fl = '$_POST[no_report_fl]',
-		  target_kirim = '$_POST[target_kirim]',
-		  id_kirim = '$_POST[id_kirim]',
-		  resubmit = '$_POST[resubmit]'
-		  ");
-		$sqlData1=mysqli_query($con,"INSERT INTO tbl_masterbuyer_test SET
-			buyer='$buyer',
-			physical='$chkp',
-            functional='$chkf',
-            colorfastness='$chkc',
-			tgl_update=now()
-		");
-		$sqlData2=mysqli_query($con,"INSERT INTO tbl_master_test SET
-			buyer='$buyer',
-			no_testmaster='$notestmaster',
-			physical='$chkp',
-            functional='$chkf',
-            colorfastness='$chkc',
-			tgl_update=now()
-		");	 	  
+
+		$sqlData = sqlsrv_query($con_db_qc_sqlsrv,
+			"INSERT INTO db_qc.tbl_tq_first_lot
+			(no_id, nokk, nodemand, no_test, pelanggan, no_order, no_hanger, no_item, no_po, jenis_kain,
+			lebar, gramasi, lot, berat, rol, warna, no_warna, tgl_fin, proses_fin, suhu, tgl_masuk, buyer,
+			development, tgl_target, kk_legacy, no_lot_legacy, ip, tgl_update, jenis_test, no_report_fl,
+			target_kirim, id_kirim, resubmit)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+				?, ?, ?, ?, ?, ?, ?, GETDATE(), ?, ?, GETDATE(), ?,
+				?, ?, ?, ?, ?, GETDATE(), ?, ?,
+				?, ?, ?)",
+			[
+				$nourut, $_POST['nokk'], $_POST['nodemand'], $_POST['no_test'], $_POST['pelanggan'], $_POST['no_order'], $_POST['no_hanger'], $_POST['no_item'],
+				$po, $jns, $_POST['lebar'], $_POST['grms'], $lot, $_POST['berat'], $_POST['rol'], $warna, $nowarna,
+				$_POST['proses'], $_POST['suhu'], $buyer, $_POST['development'], $target, $_POST['kk_legacy'], $_POST['no_lot_legacy'], $ip,
+				$_POST['jenis_test'], $_POST['no_report_fl'], $_POST['target_kirim'], $_POST['id_kirim'], $_POST['resubmit']
+			]
+		);
+
+		$sqlData1 = sqlsrv_query($con_db_qc_sqlsrv,
+			"INSERT INTO db_qc.tbl_masterbuyer_test
+			(buyer, physical, functional, colorfastness, tgl_update)
+			VALUES (?, ?, ?, ?, GETDATE())",
+			[$buyer, $chkp, $chkf, $chkc]
+		);
+
+		$sqlData2 = sqlsrv_query($con_db_qc_sqlsrv,
+			"INSERT INTO db_qc.tbl_master_test
+			(buyer, no_testmaster, physical, functional, colorfastness, tgl_update)
+			VALUES (?, ?, ?, ?, ?, GETDATE())",
+			[$buyer, $notestmaster, $chkp, $chkf, $chkc]
+		);
 	  
 		if($sqlData2){
-			
 			echo "<script>swal({
-  title: 'Data Tersimpan',   
-  text: 'Klik Ok untuk input data kembali',
-  type: 'success',
-  }).then((result) => {
-  if (result.value) {
-     window.open('pages/cetak/cetak_label_new_fl.php?idkk=$_GET[nodemand]','_blank');	
-	 window.location.href='KainInNewFL';
-	 
-  }
-});</script>";
+				title: 'Data Tersimpan',   
+				text: 'Klik Ok untuk input data kembali',
+				type: 'success',
+				}).then((result) => {
+				if (result.value) {
+					window.open('pages/cetak/cetak_label_new_fl.php?idkk=$_GET[nodemand]','_blank');	
+					window.location.href='KainInNewFL';
+					
+				}
+			});</script>";
 		}
 	}
-
 ?>
 
 <div class="modal fade" id="DataSeason">
@@ -1143,25 +1224,29 @@ $nourut=nourut();
   </div>
           <!-- /.modal-dialog -->
 </div>
-<?php 
-if($_POST['simpan_season']=="Simpan"){
-	$nama=strtoupper($_POST['nama']);
-	$sqlData1=mysqli_query($con,"INSERT INTO tbl_season_validity SET 
-		  nama='$nama'");
-	if($sqlData1){	
-	echo "<script>swal({
-  title: 'Data Telah Tersimpan',   
-  text: 'Klik Ok untuk input data kembali',
-  type: 'success',
-  }).then((result) => {
-  if (result.value) {
-         window.location.href='KainInNewFL-$nodemand';
-	 
-  }
-});</script>";
+<?php
+	if($_POST['simpan_season']=="Simpan"){
+		$nama = strtoupper($_POST['nama']);
+
+		$sqlData1 = sqlsrv_query($con_db_qc_sqlsrv,
+			"INSERT INTO db_qc.tbl_season_validity (nama) VALUES (?)",
+			[$nama]
+		);
+
+		if($sqlData1){
+			echo "<script>swal({
+				title: 'Data Telah Tersimpan',
+				text: 'Klik Ok untuk input data kembali',
+				type: 'success',
+			}).then((result) => {
+				if (result.value) {
+					window.location.href='KainInNewFL-$nodemand';
+				}
+			});</script>";
 		}
-}
+	}
 ?>
+
  <?php
 		$tahun = fl_tahun();
 		$buyer = fl_buyer();
