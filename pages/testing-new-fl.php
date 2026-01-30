@@ -8680,12 +8680,12 @@ $rcekcmt = ($sqlCmt !== false) ? sqlsrv_fetch_array($sqlCmt, SQLSRV_FETCH_ASSOC)
 				[dnedle_note]       ='$_POST[dnedle_note]',
 				[tgl_update]        = GETDATE()
 				WHERE [id_nokk]     ='$rcek[id]'");
-				if ($sqlPHYD === false) {
-					echo "<pre>";
-					print_r(sqlsrv_errors());
-					echo "</pre>";
-					exit;
-				}
+				// if ($sqlPHYD === false) {
+				// 	echo "<pre>";
+				// 	print_r(sqlsrv_errors());
+				// 	echo "</pre>";
+				// 	exit;
+				// }
 
 			$sqlPHYDI = sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_disptest_fl
 				([id_nokk],
@@ -8800,12 +8800,12 @@ $rcekcmt = ($sqlCmt !== false) ? sqlsrv_fetch_array($sqlCmt, SQLSRV_FETCH_ASSOC)
 				'$_POST[dnedle]','$_POST[dnedle_note]',
 				GETDATE(),GETDATE()
 			)");
-			if ($sqlPHYDI === false) {
-					echo "<pre>";
-					print_r(sqlsrv_errors());
-					echo "</pre>";
-					exit;
-				}
+				// if ($sqlPHYDI === false) {
+				// 	echo "<pre>";
+				// 	print_r(sqlsrv_errors());
+				// 	echo "</pre>";
+				// 	exit;
+				// }
 
 
 				$sql = "UPDATE db_qc.tbl_tq_marginal_fl SET
@@ -9660,12 +9660,12 @@ $rcekcmt = ($sqlCmt !== false) ? sqlsrv_fetch_array($sqlCmt, SQLSRV_FETCH_ASSOC)
 
 				$sqlPHYMI = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 
-				if ($sqlPHYMI === false) {
-					echo "<pre>";
-					print_r(sqlsrv_errors());
-					echo "</pre>";
-					exit;
-				}
+				// if ($sqlPHYMI === false) {
+				// 	echo "<pre>";
+				// 	print_r(sqlsrv_errors());
+				// 	echo "</pre>";
+				// 	exit;
+				// }
 
 				echo "<script>swal({
 					title: 'Data Physical Telah Tersimpan',   
@@ -10091,12 +10091,12 @@ $rcekcmt = ($sqlCmt !== false) ? sqlsrv_fetch_array($sqlCmt, SQLSRV_FETCH_ASSOC)
 
 		$sqlPHY = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 
-		if ($sqlPHY === false) {
-			echo "<pre>";
-			print_r(sqlsrv_errors());
-			echo "</pre>";
-			exit;
-		}
+		// if ($sqlPHY === false) {
+		// 	echo "<pre>";
+		// 	print_r(sqlsrv_errors());
+		// 	echo "</pre>";
+		// 	exit;
+		// }
 
 		if($sqlPHY){
 			echo "<script>swal({
@@ -10332,7 +10332,7 @@ if($_POST['colorfastness_save']=="save" and $cek1>0){
 	];
 
 	$sqlCLR = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
-	if($sqlCLR === false){ die(print_r(sqlsrv_errors(), true)); }
+	// if($sqlCLR === false){ die(print_r(sqlsrv_errors(), true)); }
 
 	if($sqlCLR){
 
@@ -10493,7 +10493,7 @@ if($_POST['colorfastness_save']=="save" and $cek1>0){
 		];
 
 		$sqlCLRD = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
-		if($sqlCLRD === false){ die(print_r(sqlsrv_errors(), true)); }
+		// if($sqlCLRD === false){ die(print_r(sqlsrv_errors(), true)); }
 
 		$sql = "INSERT INTO [db_qc].[tbl_tq_disptest_fl] (
 			[id_nokk],
@@ -11420,7 +11420,7 @@ if($_POST['functional_save']=="save" and $cek1>0){
 		];
 
 		$sqlFPHD = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
-		if($sqlFPHD === false){ die(print_r(sqlsrv_errors(), true)); }
+		// if($sqlFPHD === false){ die(print_r(sqlsrv_errors(), true)); }
 
 		$sql = "INSERT INTO [db_qc].[tbl_tq_disptest_fl] (
 			[id_nokk],
@@ -11564,7 +11564,7 @@ if($_POST['functional_save']=="save" and $cek1>0){
 		];
 
 		$sqlFPHM = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
-		if($sqlFPHM === false){ die(print_r(sqlsrv_errors(), true)); }
+		// if($sqlFPHM === false){ die(print_r(sqlsrv_errors(), true)); }
 
 		$sql = "INSERT INTO [db_qc].[tbl_tq_marginal_fl] (
 			[id_nokk],
@@ -11627,7 +11627,7 @@ if($_POST['functional_save']=="save" and $cek1>0){
 		];
 
 		$sqlFPHMI = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
-		if($sqlFPHMI === false){ die(print_r(sqlsrv_errors(), true)); }
+		// if($sqlFPHMI === false){ die(print_r(sqlsrv_errors(), true)); }
 
 		if ($sqlFPHMI) {
 			echo "<script>swal({
@@ -11726,7 +11726,7 @@ if($_POST['functional_save']=="save" and $cek1>0){
 	];
 
 	$sqlFPH = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
-	if($sqlFPH === false){ die(print_r(sqlsrv_errors(), true)); }
+	// if($sqlFPH === false){ die(print_r(sqlsrv_errors(), true)); }
 
 	if($sqlFPH){
 		echo "<script>swal({
