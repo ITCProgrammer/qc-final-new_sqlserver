@@ -1,31 +1,31 @@
 <?php 
 include "../koneksi.php";
 $array_ms = ['MS1','MS2','MS3','MS4','MS6','S2'];
-$standard_report_sql  = mysqli_query($con,"SELECT * FROM STANDARD_REPORT WHERE status_input = 1  order by display,  properties_order ");
+$standard_report_sql  = sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.standard_report WHERE status_input = 1  ORDER BY display,  properties_order ");
  
-$array_note = [] ;
-$array_group = []; 
-while ($datas = mysqli_fetch_assoc($standard_report_sql) ) { 
-	$array_category[$datas['id']] = $datas['id'];
-	if ($datas['properties_note']) {
-		$array_note[$datas['id']] = $datas['group'];
-	}
-	
-	$array_properties[$datas['id']] = $datas['properties'];
-	$array_group[$datas['id']] = $datas['group'];
+$array_note = [];
+$array_group = [];
+$array_category = [];
+$array_properties = [];
+
+while ($datas = sqlsrv_fetch_array($standard_report_sql, SQLSRV_FETCH_ASSOC)) {
+
+    $array_category[$datas['id']] = $datas['id'];
+
+    if (!empty($datas['properties_note'])) {
+        $array_note[$datas['id']] = $datas['group'];
+    }
+
+    $array_properties[$datas['id']] = $datas['properties'];
+    $array_group[$datas['id']] = $datas['group'];
 }
-
-
-
-
-
 
 //$array_category = ['Dimentional Stability12','Press Dimensional Changes','Bursting Strength'];
 
-$standard_sql  = mysqli_query($con,"SELECT * FROM STANDARD ");
+$standard_sql  = sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.standard ");
 $array_standard = [];
 	
-while ($datas = mysqli_fetch_assoc($standard_sql) ) {
+while ($datas = sqlsrv_fetch_array($standard_sql) ) {
 	$key = $datas['category'].'/'.$datas['sub_category'];
 	$array_standard[$key] = $datas['value'];
 }
@@ -199,13 +199,13 @@ if (isset($_GET['sub']) ) {
 			echo $value; 			
 			echo '<br>';
 			//if exists (category, sub_category)
-			$standard_sql  = mysqli_query($con,"SELECT * FROM STANDARD WHERE category  = '$updatedString' and sub_category = '$sub'");
-			$standard_data = mysqli_fetch_assoc($standard_sql);
+			$standard_sql  = sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.standard WHERE category  = '$updatedString' and sub_category = '$sub'");
+			$standard_data = sqlsrv_fetch_array($standard_sql);
 //if ($updatedString !='save') {
 				if ($standard_data) {	
-					 mysqli_query($con,"update STANDARD set value = '$value' where category = '$updatedString' and sub_category = '$sub' ");
+					 sqlsrv_query($con_db_qc_sqlsrv,"update db_qc.standard set value = '$value' where category = '$updatedString' and sub_category = '$sub' ");
 				} else {
-					 $standard_sql = mysqli_query($con,"insert into standard (category,sub_category,value) VALUES ('$updatedString','$sub','$value')");
+					 $standard_sql = sqlsrv_query($con_db_qc_sqlsrv,"insert into db_qc.standard (category,sub_category,value) VALUES ('$updatedString','$sub','$value')");
 				}
 			//}
 			//echo '<br>';
