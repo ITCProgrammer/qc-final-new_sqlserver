@@ -8,14 +8,14 @@ include("../koneksi.php");
     $fiber_content = str_replace("'","''",$_POST['fiber_content']);
     $user = $_SESSION['usrid'];
 
-		$sqlupdate="UPDATE master_matrialname SET 
-		item='$no_item',
-        matrial_name='$material_name',
-        fiber_content='$fiber_content',
-		last_update=now(),
-		last_update_user ='$user'
+		$sqlupdate="UPDATE db_qc.master_matrialname SET 
+			item='$no_item',
+			matrial_name='$material_name',
+			fiber_content='$fiber_content',
+			last_update=GETDATE(),
+			last_update_user ='$user'
 		WHERE id='$id'";
-		$result = mysqli_query($con,$sqlupdate) or die (mysqli_error());
+		$result = sqlsrv_query($con_db_qc_sqlsrv,$sqlupdate) or die (sqlsrv_error());
 		if($result){
 			echo " <script>window.location='MasterLLL';</script>";
 		}else{

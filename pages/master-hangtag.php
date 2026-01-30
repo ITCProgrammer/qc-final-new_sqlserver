@@ -72,8 +72,8 @@ $Item		= isset($_POST['item']) ? $_POST['item'] : '';
               <tbody>
                 <?php
 				  if($Item!=""){ $where.=" WHERE no_item='$_POST[item]' ";}
-                $sql=mysqli_query($con,"SELECT * FROM tbl_master_hangtag $where");
-                while ($r=mysqli_fetch_array($sql)) {
+                $sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_master_hangtag $where");
+                while ($r=sqlsrv_fetch_array($sql)) {
                 $no++;
                 $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
                 ?>
