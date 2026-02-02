@@ -222,7 +222,6 @@ $rcekD=sqlsrv_fetch_array($sqlCekD);
                                 //Data ditampilkan ke tabel
                                 $sql = sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.* FROM db_qc.tbl_tq_nokk a INNER JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk WHERE LEN(a.no_test) = 12 and a.nodemand!='' and (a.pelanggan like'%mizuno%' or a.buyer like'%mizuno%') ");
                                 $no="1";
-                                var_dump(sqlsrv_errors());
 
                                 while ($r = sqlsrv_fetch_array($sql)) {
                                     ?>
