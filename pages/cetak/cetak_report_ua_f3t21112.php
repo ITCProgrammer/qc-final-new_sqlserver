@@ -6,25 +6,25 @@ $idkk=$_GET['idkk'];
 $noitem=$_GET['noitem'];
 $nohanger=$_GET['nohanger'];
 $now=date("Y-m-d");
-$data=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',fc_note,ph_note, abr_note, bas_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note,wash_note,water_note,acid_note,alkaline_note,crock_note,phenolic_note,cm_printing_note,cm_dye_note,light_note,light_pers_note,saliva_note,h_shrinkage_note,fibre_note,pilll_note,soil_note,apperss_note,bleeding_note,chlorin_note,dye_tf_note) AS note_g FROM tbl_tq_test WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
-$rcek1=mysqli_fetch_array($data);
-$databs=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',bas_note) AS note_bs FROM tbl_tq_test WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
-$rcekbs=mysqli_fetch_array($databs);
-$sqlCekR=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',rfc_note,rph_note, rabr_note, rbas_note, rfla_note, rfwe_note, rfwi_note, rburs_note,rrepp_note,rapper_note,rfiber_note,rpillb_note,rpillm_note,rpillr_note,rthick_note,rgrowth_note,rrecover_note,rstretch_note,rsns_note,rsnab_note,rsnam_note,rsnap_note,rwash_note,rwater_note,racid_note,ralkaline_note,rcrock_note,rphenolic_note,rcm_printing_note,rcm_dye_note,rlight_note,rlight_pers_note,rsaliva_note,rh_shrinkage_note,rfibre_note,rpilll_note,rsoil_note,rapperss_note,rbleeding_note,rchlorin_note,rdye_tf_note) AS rnote_g FROM tbl_tq_randomtest WHERE no_item='$noitem' OR no_hanger='$nohanger'");
-$rcekR=mysqli_fetch_array($sqlCekR);
-$sqlCekD=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',dfc_note,dph_note, dabr_note, dbas_note, dfla_note, dfwe_note, dfwi_note, dss_cmt, dburs_note,drepp_note,dapper_note,dfiber_note,dpillb_note,dpillm_note,dpillr_note,dthick_note,dgrowth_note,drecover_note,dstretch_note,dsns_note,dsnab_note,dsnam_note,dsnap_note,dwash_note,dwater_note,dacid_note,dalkaline_note,dcrock_note,dphenolic_note,dcm_printing_note,dcm_dye_note,dlight_note,dlight_pers_note,dsaliva_note,dh_shrinkage_note,dfibre_note,dpilll_note,dsoil_note,dapperss_note,dbleeding_note,dchlorin_note,ddye_tf_note) AS dnote_g FROM tbl_tq_disptest WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
-$rcekD=mysqli_fetch_array($sqlCekD);
-$sqlCekM=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',mfc_note,mph_note, mabr_note, mbas_note, mdry_note, mfla_note, mfwe_note, mfwi_note, mburs_note,mrepp_note,mwick_note,mabsor_note,mapper_note,mfiber_note,mpillb_note,mpillm_note,mpillr_note,mthick_note,mgrowth_note,mrecover_note,mstretch_note,msns_note,msnab_note,msnam_note,msnap_note,mwash_note,mwater_note,macid_note,malkaline_note,mcrock_note,mphenolic_note,mcm_printing_note,mcm_dye_note,mlight_note,mlight_pers_note,msaliva_note,mh_shrinkage_note,mfibre_note,mpilll_note,msoil_note,mapperss_note,mbleeding_note,mchlorin_note,mdye_tf_note,mhumidity_note,modour_note) AS mnote_g FROM tbl_tq_marginal WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
-$rcekM=mysqli_fetch_array($sqlCekM);
-$data1=mysqli_query($con,"SELECT nokk FROM tbl_tq_nokk WHERE id='$idkk'");
-$rd=mysqli_fetch_array($data1);
-$data2=mysqli_query($con,"SELECT * FROM tbl_tq_nokk WHERE id='$idkk'");
-$rd2=mysqli_fetch_array($data2);
+$data=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 *,
+	CONCAT(' ',fc_note,ph_note, abr_note, bas_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note,wash_note,water_note,acid_note,alkaline_note,crock_note,phenolic_note,cm_printing_note,cm_dye_note,light_note,light_pers_note,saliva_note,h_shrinkage_note,fibre_note,pilll_note,soil_note,apperss_note,bleeding_note,chlorin_note,dye_tf_note) AS note_g FROM db_qc.tbl_tq_test WHERE id_nokk='$idkk' ORDER BY id DESC");
+$rcek1=sqlsrv_fetch_array($data);
+$databs=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 *,
+	CONCAT(' ',bas_note) AS note_bs FROM db_qc.tbl_tq_test WHERE id_nokk='$idkk' ORDER BY id DESC");
+$rcekbs=sqlsrv_fetch_array($databs);
+$sqlCekR=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 *,
+	CONCAT(' ',rfc_note,rph_note, rabr_note, rbas_note, rfla_note, rfwe_note, rfwi_note, rburs_note,rrepp_note,rapper_note,rfiber_note,rpillb_note,rpillm_note,rpillr_note,rthick_note,rgrowth_note,rrecover_note,rstretch_note,rsns_note,rsnab_note,rsnam_note,rsnap_note,rwash_note,rwater_note,racid_note,ralkaline_note,rcrock_note,rphenolic_note,rcm_printing_note,rcm_dye_note,rlight_note,rlight_pers_note,rsaliva_note,rh_shrinkage_note,rfibre_note,rpilll_note,rsoil_note,rapperss_note,rbleeding_note,rchlorin_note,rdye_tf_note) AS rnote_g FROM db_qc.tbl_tq_randomtest WHERE no_item='$noitem' OR no_hanger='$nohanger'");
+$rcekR=sqlsrv_fetch_array($sqlCekR);
+$sqlCekD=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 *,
+	CONCAT(' ',dfc_note,dph_note, dabr_note, dbas_note, dfla_note, dfwe_note, dfwi_note, dss_cmt, dburs_note,drepp_note,dapper_note,dfiber_note,dpillb_note,dpillm_note,dpillr_note,dthick_note,dgrowth_note,drecover_note,dstretch_note,dsns_note,dsnab_note,dsnam_note,dsnap_note,dwash_note,dwater_note,dacid_note,dalkaline_note,dcrock_note,dphenolic_note,dcm_printing_note,dcm_dye_note,dlight_note,dlight_pers_note,dsaliva_note,dh_shrinkage_note,dfibre_note,dpilll_note,dsoil_note,dapperss_note,dbleeding_note,dchlorin_note,ddye_tf_note) AS dnote_g FROM db_qc.tbl_tq_disptest WHERE id_nokk='$idkk' ORDER BY id DESC");
+$rcekD=sqlsrv_fetch_array($sqlCekD);
+$sqlCekM=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 *,
+	CONCAT(' ',mfc_note,mph_note, mabr_note, mbas_note, mdry_note, mfla_note, mfwe_note, mfwi_note, mburs_note,mrepp_note,mwick_note,mabsor_note,mapper_note,mfiber_note,mpillb_note,mpillm_note,mpillr_note,mthick_note,mgrowth_note,mrecover_note,mstretch_note,msns_note,msnab_note,msnam_note,msnap_note,mwash_note,mwater_note,macid_note,malkaline_note,mcrock_note,mphenolic_note,mcm_printing_note,mcm_dye_note,mlight_note,mlight_pers_note,msaliva_note,mh_shrinkage_note,mfibre_note,mpilll_note,msoil_note,mapperss_note,mbleeding_note,mchlorin_note,mdye_tf_note,mhumidity_note,modour_note) AS mnote_g FROM db_qc.tbl_tq_marginal WHERE id_nokk='$idkk' ORDER BY id DESC");
+$rcekM=sqlsrv_fetch_array($sqlCekM);
+$data1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT nokk FROM db_qc.tbl_tq_nokk WHERE id='$idkk'");
+$rd=sqlsrv_fetch_array($data1);
+$data2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_tq_nokk WHERE id='$idkk'");
+$rd2=sqlsrv_fetch_array($data2);
 $pos=strpos($rd2['pelanggan'], "/");
 $langganan=substr($rd2['pelanggan'],0,$pos);
 $positem=strpos($rd2['no_item'], "(");
@@ -125,7 +125,7 @@ textarea {
             <td align="right" style="font-size: 12px;"><?php if($rd2['reject1']!=''){echo "Page 1 of 7";}else{echo "Page 1 of 6";}?></td> 
         </tr>
         <tr>
-            <td align="right" style="font-size: 12px;"><?php echo date("F j, Y", strtotime($rd2['date_out']));?></td> 
+            <td align="right" style="font-size: 12px;"><?php echo date("F j, Y", $rd2['date_out']);?></td> 
         </tr>
         <?php 
         for($i=1;$i<=7;$i++)
@@ -179,19 +179,19 @@ textarea {
         </tr>
         <tr>
             <?php 
-            $sqlattn=mysqli_query($con,"SELECT * FROM tbl_kontak_tq_langganan WHERE langganan='$langganan'");
-            $attn=mysqli_fetch_array($sqlattn);
+            $sqlattn=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_kontak_tq_langganan WHERE langganan='$langganan'");
+            $attn=sqlsrv_fetch_array($sqlattn);
             ?>
             <td align="left" style="font-size: 12px;" width="50%">ATTN : UNDER ARMOUR</td>
             <td align="right" style="font-size: 12px;" width="25%">DATE IN</td> 
             <td align="right" style="font-size: 12px;" width="3%">:</td> 
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo date("F j, Y", strtotime($rd2['date_in']));?></td>
+            <td align="left" style="font-size: 12px;" width="25%"><?php echo date("F j, Y", $rd2['date_in']);?></td>
         </tr>
         <tr>
             <td align="left" style="font-size: 12px;" width="50%">&nbsp;</td>
             <td align="right" style="font-size: 12px;" width="25%">DATE OUT</td> 
             <td align="right" style="font-size: 12px;" width="3%">:</td> 
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo date("F j, Y", strtotime($rd2['date_out']));?></td>
+            <td align="left" style="font-size: 12px;" width="25%"><?php echo date("F j, Y", $rd2['date_out']);?></td>
         </tr>
         <tr>
             <td align="left" style="font-size: 12px;" width="50%">&nbsp;</td>
@@ -290,9 +290,9 @@ textarea {
             <td align="left" style="font-size: 12px;" width="25%"><strong>Fabric Weight:</strong></td>
             <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['gramasi']." g/m2";?></td>
             <?php
-                $sqljk0 = "SELECT jenis_kain From tbl_tq_nokk WHERE id='$idkk'";
-                $resultjk0=mysqli_query($con,$sqljk0);
-                while($rowjk0=mysqli_fetch_array($resultjk0)){ 
+                $sqljk0 = "SELECT jenis_kain From db_qc.tbl_tq_nokk WHERE id='$idkk'";
+                $resultjk0=sqlsrv_query($con_db_qc_sqlsrv,$sqljk0);
+                while($rowjk0=sqlsrv_fetch_array($resultjk0)){ 
                 $detailjk0=explode(",",$rowjk0['jenis_kain']);?>
             <td align="left" style="font-size: 12px;" width="25%"><strong>Fiber/Material Composition:</strong></td>
             <td align="left" style="font-size: 12px;" width="25%"><?php if($detailjk0[0]!=""){echo $detailjk0[0];}else{echo "";}?></td>
@@ -360,9 +360,9 @@ textarea {
     <table width="100%" border="1" class="table-list1">
         <tr>
             <?php
-                $sqljk1 = "SELECT jenis_kain From tbl_tq_nokk WHERE id='$idkk'";
-                $resultjk1=mysqli_query($con,$sqljk1);
-                while($rowjk1=mysqli_fetch_array($resultjk1)){ 
+                $sqljk1 = "SELECT jenis_kain From db_qc.tbl_tq_nokk WHERE id='$idkk'";
+                $resultjk1=sqlsrv_query($con_db_qc_sqlsrv,$sqljk1);
+                while($rowjk1=sqlsrv_fetch_array($resultjk1)){ 
                 $detailjk1=explode(",",$rowjk1['jenis_kain']);?>
             <td align="left" style="font-size: 12px;" width="25%"><strong>Submitted Fiber Content</strong></td>
             <td align="left" style="font-size: 12px;" width="75%"><?php if($detailjk1[0]!=""){echo $detailjk1[0];}else{echo "";}?></td>
@@ -773,8 +773,8 @@ textarea {
         ?>
     </table>
     <?php 
-        $sqlstd=mysqli_query($con,"SELECT * FROM tbl_std_tq_ua WHERE no_item='$rd2[no_item]'");
-        $rstd=mysqli_fetch_array($sqlstd);
+        $sqlstd=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_std_tq_ua WHERE no_item='$rd2[no_item]'");
+        $rstd=sqlsrv_fetch_array($sqlstd);
     ?>
     <table width="100%">
         <tr>
