@@ -4,12 +4,12 @@ $category_m = $_GET['category'];
 $id_nokk = $_GET['id'];
 
 include "../../koneksi.php";
-$sql   = mysqli_query($con,"SELECT a.* 
-from standard  a 
-join   standard_report b on (a.category = b.id)
-where a.sub_category  = '$category_m' and b.status_input = 1 ");
+$sql   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.* 
+FROM db_qc.standard  a 
+JOIN db_qc.standard_report b on (a.category = b.id)
+WHERE a.sub_category  = '$category_m' and b.status_input = 1 ");
 $array_standard = [];
-while ($data = mysqli_fetch_assoc($sql) ) {
+while ($data = sqlsrv_fetch_array($sql) ) {
 	 $key = $data['category'].'/'.$data['sub_category'];
 	 $array_standard[$key] = $data['value'];
 }
@@ -17,8 +17,8 @@ while ($data = mysqli_fetch_assoc($sql) ) {
 
 
 function get_data($category) {
-	global $con ; 
-	$sql   = mysqli_query($con,"SELECT * FROM standard_report where display = '$category' ");
+	global $con_db_qc_sqlsrv ; 
+	$sql   = sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.standard_report where display = '$category' ");
 	return $sql ; 	
 }
 
@@ -26,17 +26,17 @@ function get_data($category) {
 
 
 
-$test_sql  = mysqli_query($con, "SELECT a.* ,b.*
-FROM tbl_tq_test a 
-left join tbl_tq_test_2 b on (a.id_nokk = b.id_nokk)
+$test_sql  = sqlsrv_query($con_db_qc_sqlsrv, "SELECT a.* ,b.*
+FROM db_qc.tbl_tq_test a 
+left join db_qc.tbl_tq_test_2 b on (a.id_nokk = TRY_CAST(b.id_nokk AS BIGINT))
 where a.id_nokk= '$id_nokk'");
-$test_data 	= mysqli_fetch_assoc($test_sql);
+$test_data 	= sqlsrv_fetch_array($test_sql);
 
-$disp_sql  = mysqli_query($con, "SELECT * FROM tbl_tq_disptest where id_nokk= '$id_nokk'");
-$disp_data 	= mysqli_fetch_assoc($disp_sql);
+$disp_sql  = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_tq_disptest where id_nokk= '$id_nokk'");
+$disp_data 	= sqlsrv_fetch_array($disp_sql);
 
-$marginal_sql   = mysqli_query($con, "SELECT * FROM tbl_tq_marginal where id_nokk= '$id_nokk'");
-$marginal_data 	= mysqli_fetch_assoc($marginal_sql);
+$marginal_sql   = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_tq_marginal where id_nokk= '$id_nokk'");
+$marginal_data 	= sqlsrv_fetch_array($marginal_sql);
 
 function get_result($status,$result_field) {
 	global $test_data;
@@ -55,8 +55,8 @@ function get_result($status,$result_field) {
 }
 
 
-$tq_fl_sql  = mysqli_query($con, "SELECT * FROM TBL_TQ_NOKK where id = '$id_nokk' ");
-$rcek 		= mysqli_fetch_array($tq_fl_sql);
+$tq_fl_sql  = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.TBL_TQ_NOKK where id = '$id_nokk' ");
+$rcek 		= sqlsrv_fetch_array($tq_fl_sql);
 ?>
 
 
@@ -245,7 +245,7 @@ body, table {
 	
 	<?php  // 1 FABRIC PHYSICAL TEST
 	$get_data = get_data(1);
-	while ($data = mysqli_fetch_assoc($get_data) ) {  ?>
+	while ($data = sqlsrv_fetch_array($get_data) ) {  ?>
 	<tr>
 		<td style="text-align:left;<?=$data['style']?>"><?=$data['properties']?></td>	
 		<td><?=$data['method']?></td>		
@@ -289,7 +289,7 @@ body, table {
 	<?php  // 2 FABRIC COLOR FASTNESS TEST
 	$get_data = get_data(2);
 	$no = 1;
-	while ($data = mysqli_fetch_assoc($get_data) ) {  ?>
+	while ($data = sqlsrv_fetch_array($get_data) ) {  ?>
 	<tr>
 		<td style="text-align:left;<?=$data['style']?>"><?=$data['properties']?></td>	
 		<?php if ($no == 10 or $no == 20 )   {?>
@@ -334,7 +334,7 @@ body, table {
 	<?php  // 3
 	$get_data = get_data(3); //COLOR FASTNESS TO PERSPIRATION ACID
 	$no = 1;
-	while ($data = mysqli_fetch_assoc($get_data) ) {  ?>
+	while ($data = sqlsrv_fetch_array($get_data) ) {  ?>
 	<tr>
 		<td style="text-align:left;<?=$data['style']?>"><?=$data['properties']?></td>	
 		
@@ -375,7 +375,7 @@ body, table {
 	<?php  // 4 COLOR FASTNESS TO PERSPIRATION ALKALINE
 	$get_data = get_data(4);
 	$no = 1;
-	while ($data = mysqli_fetch_assoc($get_data) ) {  ?>
+	while ($data = sqlsrv_fetch_array($get_data) ) {  ?>
 	<tr>
 		<td style="text-align:left;<?=$data['style']?>"><?=$data['properties']?></td>	
 		
@@ -408,7 +408,7 @@ body, table {
 	<?php  // 5 COLOR FASTNESS TO CROCKING
 	$get_data = get_data(5);
 	$no = 1;
-	while ($data = mysqli_fetch_assoc($get_data) ) {  ?>
+	while ($data = sqlsrv_fetch_array($get_data) ) {  ?>
 	<tr>
 		<td style="text-align:left;<?=$data['style']?>"><?=$data['properties']?></td>	
 		<?php  if ($no==1) {?>
@@ -444,7 +444,7 @@ body, table {
 	<?php  // 6 COLOR FASTNESS TO SUBLIMATION
 	$get_data = get_data(6);
 	$no = 1;
-	while ($data = mysqli_fetch_assoc($get_data) ) {  ?>
+	while ($data = sqlsrv_fetch_array($get_data) ) {  ?>
 	<tr>
 		<td style="text-align:left;<?=$data['style']?>"><?=$data['properties']?></td>	
 		<?php  if ($no==1) {?>
@@ -480,7 +480,7 @@ body, table {
 	<?php  // 7
 	$get_data = get_data(7);
 	$no = 1;
-	while ($data = mysqli_fetch_assoc($get_data) ) {  ?>
+	while ($data = sqlsrv_fetch_array($get_data) ) {  ?>
 	<tr>
 		<td style="text-align:left;<?=$data['style']?>"><?=$data['properties']?></td>	
 		<?php  if ($no==1) {?>
@@ -516,7 +516,7 @@ body, table {
 	<?php  // 8
 	$get_data = get_data(8);
 	$no = 1;
-	while ($data = mysqli_fetch_assoc($get_data) ) {  ?>
+	while ($data = sqlsrv_fetch_array($get_data) ) {  ?>
 	<tr>
 		<td style="text-align:left;<?=$data['style']?>"><?=$data['properties']?></td>	
 		<td ><?=$data['method']?></td>
@@ -572,7 +572,7 @@ body, table {
 	<?php  // 9
 	$get_data = get_data(9);
 	$no = 1;
-	while ($data = mysqli_fetch_assoc($get_data) ) {  ?>
+	while ($data = sqlsrv_fetch_array($get_data) ) {  ?>
 	<tr>
 		<td style="text-align:left;<?=$data['style']?>"><?=$data['properties']?></td>	
 		<?php  if ($no==1) {?>
@@ -602,7 +602,7 @@ body, table {
 	<?php  // 10
 	$get_data = get_data(10);
 	$no = 1;
-	while ($data = mysqli_fetch_assoc($get_data) ) {  ?>
+	while ($data = sqlsrv_fetch_array($get_data) ) {  ?>
 	<tr>
 		<td style="text-align:left;<?=$data['style']?>"><?=$data['properties']?></td>	
 		<?php  if ($no==1) {?>
