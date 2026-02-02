@@ -3,8 +3,8 @@ ini_set("error_reporting", 1);
 session_start();
 include"koneksi.php";
 $buyer	= isset($_POST['buyer']) ? $_POST['buyer'] : '';
-$qcek=mysqli_query($con,"SELECT * FROM tbl_masterbuyerlab_test WHERE buyer='$buyer'");
-$cek=mysqli_fetch_array($qcek);
+$qcek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_masterbuyerlab_test WHERE buyer='$buyer'");
+$cek=sqlsrv_fetch_array($qcek);
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form0" id="form0">
 <div class="row">
@@ -46,11 +46,11 @@ $cek=mysqli_fetch_array($qcek);
 					<?php if($_POST['buyer']!=""){?>
 					<div class="col-md-12">
 						<?php
-						$qMB=mysqli_query($con,"SELECT * FROM tbl_masterbuyerlab_test WHERE buyer='$buyer'");
-						$cekMB=mysqli_num_rows($qMB);
+						$qMB=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_masterbuyerlab_test WHERE buyer=?", array($buyer), array("Scrollable" => SQLSRV_CURSOR_KEYSET));
+						$cekMB=sqlsrv_num_rows($qMB);
 									
 						if($cekMB>0){
-							while($dMB=mysqli_fetch_array($qMB)){
+							while($dMB=sqlsrv_fetch_array($qMB)){
 							$detail=explode(",",$dMB['physical']);
 							$detail1=explode(",",$dMB['functional']);
 							$detail2=explode(",",$dMB['colorfastness']);
@@ -198,14 +198,22 @@ if($_POST['save']=="save" and $cekMB>0){
    		{  
       		$chkc .= $chk3.",";  
    		}  
-		$sqlData=mysqli_query($con,"UPDATE tbl_masterbuyerlab_test SET
-			buyer='$buyer',
-			physical='$chkp',
-			functional='$chkf',
-			colorfastness='$chkc',
-			approve='$approve',
-			tgl_update=now()
-			WHERE buyer='$buyer'");	 	  
+		$sqlData = sqlsrv_query(
+			$con_db_qc_sqlsrv,
+			"UPDATE db_qc.tbl_masterbuyerlab_test SET
+				buyer = ?,
+				physical = ?,
+				functional = ?,
+				colorfastness = ?,
+				approve = ?,
+				tgl_update = GETDATE()
+			WHERE buyer = ?",
+			[$buyer, $chkp, $chkf, $chkc, $approve, $buyer]
+		);
+
+		if ($sqlData === false) {
+			die(print_r(sqlsrv_errors(), true));
+		}
 	  
 		if($sqlData){
 			
@@ -253,14 +261,22 @@ if($_POST['save']=="save" and $cekMB>0){
    		{  
       		$chkc .= $chk3.",";  
    		}   
-		$sqlData=mysqli_query($con,"INSERT INTO tbl_masterbuyerlab_test SET
-			buyer='$buyer',
-			physical='$chkp',
-            functional='$chkf',
-            colorfastness='$chkc',
-			approve='$approve',
-			tgl_update=now()
-		");
+		$sqlData = sqlsrv_query(
+			$con_db_qc_sqlsrv,
+			"INSERT INTO db_qc.tbl_masterbuyerlab_test
+			(buyer, physical, functional, colorfastness, approve, tgl_update)
+			VALUES (?, ?, ?, ?, ?, GETDATE())",
+			[$buyer, $chkp, $chkf, $chkc, $approve]
+		);
+
+		if ($sqlData === false) {
+			die(print_r(sqlsrv_errors(), true));
+		}
+
+		
+		if ($sqlData === false) {
+			die(print_r(sqlsrv_errors(), true));
+		}
 		if($sqlData){
 			
 			echo "<script>swal({
