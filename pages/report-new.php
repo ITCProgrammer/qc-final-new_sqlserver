@@ -21,29 +21,41 @@ include"koneksi.php";
 $nodemand=$_GET['nodemand'];
 $no_test=$_GET['no_test'];
 //$notest= isset($_POST['no_test']) ? $_POST['no_test'] : '';
-//$sqlCek=mysqli_query("SELECT * FROM tbl_tq_nokk WHERE nokk='$nokk' and no_test='$notest' ORDER BY id DESC LIMIT 1");
+//$sqlCek=mysqli_query("SELECT * FROM db_qc.tbl_tq_nokk WHERE nokk='$nokk' and no_test='$notest' ORDER BY id DESC LIMIT 1");
 //$cek=mysqli_num_rows($sqlCek);
-//$rcek=mysqli_fetch_array($sqlCek);
-$qryNoKK=mysqli_query($con,"SELECT * FROM tbl_tq_nokk WHERE no_test='$no_test'");
-$NoKKcek=mysqli_num_rows($qryNoKK); 
-$rNoKK=mysqli_fetch_array($qryNoKK);
+//$rcek=sqlsrv_fetch_array($sqlCek,SQLSRV_FETCH_ASSOC);
+$qryNoKK=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_tq_nokk WHERE no_test='$no_test'");
+$NoKKcek=0; 
+$rNoKK=sqlsrv_fetch_array($qryNoKK,SQLSRV_FETCH_ASSOC);
+if($rNoKK){
+    $NoKKcek++;
+}
 $pos=strpos($rNoKK['pelanggan'], "/");
 $posbuyer=substr($rNoKK['pelanggan'],$pos+1,50);
 $buyer=str_replace("'","''",$posbuyer);
 ?>	
 <?php 
-$sqlCek1=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',fc_note,ph_note, abr_note, bas_note, dry_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,wick_note,wick_note,absor_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note,wash_note,water_note,acid_note,alkaline_note,crock_note,phenolic_note,cm_printing_note,cm_dye_note,light_note,light_pers_note,saliva_note,h_shrinkage_note,fibre_note) AS note_g FROM tbl_tq_test WHERE id_nokk='$rNoKK[id]' ORDER BY id DESC LIMIT 1");
-$cek1=mysqli_num_rows($sqlCek1);
-$rcek1=mysqli_fetch_array($sqlCek1);
-$sqlCekR=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',rfc_note,rph_note, rabr_note, rbas_note, rdry_note, rfla_note, rfwe_note, rfwi_note, rburs_note,rrepp_note,rwick_note,rabsor_note,rapper_note,rfiber_note,rpillb_note,rpillm_note,rpillr_note,rthick_note,rgrowth_note,rrecover_note,rstretch_note,rsns_note,rsnab_note,rsnam_note,rsnap_note,rwash_note,rwater_note,racid_note,ralkaline_note,rcrock_note,rphenolic_note,rcm_printing_note,rcm_dye_note,rlight_note,rlight_pers_note,rsaliva_note,rh_shrinkage_note,rfibre_note) AS rnote_g FROM tbl_tq_randomtest WHERE no_item='$rNoKK[no_item]' OR no_hanger='$rNoKK[no_hanger]'");
-$cekR=mysqli_num_rows($sqlCekR);
-$rcekR=mysqli_fetch_array($sqlCekR);
-$sqlCekD=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',dfc_note,dph_note, dabr_note, dbas_note, ddry_note, dfla_note, dfwe_note, dfwi_note, dburs_note,drepp_note,dwick_note,dabsor_note,dapper_note,dfiber_note,dpillb_note,dpillm_note,dpillr_note,dthick_note,dgrowth_note,drecover_note,dstretch_note,dsns_note,dsnab_note,dsnam_note,dsnap_note,dwash_note,dwater_note,dacid_note,dalkaline_note,dcrock_note,dphenolic_note,dcm_printing_note,dcm_dye_note,dlight_note,dlight_pers_note,dsaliva_note,dh_shrinkage_note,dfibre_note) AS dnote_g FROM tbl_tq_disptest WHERE id_nokk='$rNoKK[id]' ORDER BY id DESC LIMIT 1");
-$cekD=mysqli_num_rows($sqlCekD);
-$rcekD=mysqli_fetch_array($sqlCekD);
+$sqlCek1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 *,
+	CONCAT_WS(' ',fc_note,ph_note, abr_note, bas_note, dry_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,wick_note,wick_note,absor_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note,wash_note,water_note,acid_note,alkaline_note,crock_note,phenolic_note,cm_printing_note,cm_dye_note,light_note,light_pers_note,saliva_note,h_shrinkage_note,fibre_note) AS note_g FROM db_qc.tbl_tq_test WHERE id_nokk='$rNoKK[id]' ORDER BY id DESC ");
+$cek1=0; 
+$rcek1=sqlsrv_fetch_array($sqlCek1,SQLSRV_FETCH_ASSOC);
+if($rcek1){
+    $cek1++;
+}
+$sqlCekR=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *,
+	CONCAT_WS(' ',rfc_note,rph_note, rabr_note, rbas_note, rdry_note, rfla_note, rfwe_note, rfwi_note, rburs_note,rrepp_note,rwick_note,rabsor_note,rapper_note,rfiber_note,rpillb_note,rpillm_note,rpillr_note,rthick_note,rgrowth_note,rrecover_note,rstretch_note,rsns_note,rsnab_note,rsnam_note,rsnap_note,rwash_note,rwater_note,racid_note,ralkaline_note,rcrock_note,rphenolic_note,rcm_printing_note,rcm_dye_note,rlight_note,rlight_pers_note,rsaliva_note,rh_shrinkage_note,rfibre_note) AS rnote_g FROM db_qc.tbl_tq_randomtest WHERE no_item='$rNoKK[no_item]' OR no_hanger='$rNoKK[no_hanger]'");
+$cekR=0; 
+$rcekR=sqlsrv_fetch_array($sqlCekR,SQLSRV_FETCH_ASSOC);
+if($rcekR){
+    $cekR++;
+}
+$sqlCekD=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 *,
+	CONCAT_WS(' ',dfc_note,dph_note, dabr_note, dbas_note, ddry_note, dfla_note, dfwe_note, dfwi_note, dburs_note,drepp_note,dwick_note,dabsor_note,dapper_note,dfiber_note,dpillb_note,dpillm_note,dpillr_note,dthick_note,dgrowth_note,drecover_note,dstretch_note,dsns_note,dsnab_note,dsnam_note,dsnap_note,dwash_note,dwater_note,dacid_note,dalkaline_note,dcrock_note,dphenolic_note,dcm_printing_note,dcm_dye_note,dlight_note,dlight_pers_note,dsaliva_note,dh_shrinkage_note,dfibre_note) AS dnote_g FROM db_qc.tbl_tq_disptest WHERE id_nokk='$rNoKK[id]' ORDER BY id DESC ");
+$cekD=0; 
+$rcekD=sqlsrv_fetch_array($sqlCekD,SQLSRV_FETCH_ASSOC);
+if($rcekD){
+    $cekD++;
+}
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form0" id="form0">
  <div class="box box-success" style="width: 98%;">
@@ -222,9 +234,9 @@ $rcekD=mysqli_fetch_array($sqlCekD);
 					<tbody>
 						<?php
                                 //Data ditampilkan ke tabel
-                                $sql = mysqli_query($con,"SELECT a.* FROM tbl_tq_nokk a INNER JOIN tbl_tq_test b ON a.id=b.id_nokk WHERE LENGTH(a.no_test) = 12 and a.nodemand!=''");
+                                $sql = sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 10 a.* FROM db_qc.tbl_tq_nokk a INNER JOIN db_qc.tbl_tq_test b ON a.id=b.id_nokk WHERE LEN(a.no_test) = 12 and a.nodemand!='' ORDER BY id DESC");
                                 $no="1";
-                                while ($r = mysqli_fetch_array($sql)) {
+                                while ($r = sqlsrv_fetch_array($sql,SQLSRV_FETCH_ASSOC)) {
                                     ?>
 						<tr class="pilih-no_test" data-no_test="<?php echo $r['no_test']; ?>">
 							<td align="center">
