@@ -12,8 +12,10 @@ $Awal = $_GET['awal'];
 $Akhir = $_GET['akhir'];
 //$Dept=$_GET['dept'];
 //$Cancel=$_GET['cancel'];
-$qTgl = mysqli_query($con, "SELECT DATE_FORMAT(now(),'%d-%b-%y') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl = mysqli_fetch_array($qTgl);
+$qTgl=sqlsrv_query($con_db_qc_sqlsrv,"SELECT CONVERT(VARCHAR(10),CURRENT_TIMESTAMP,120) as tgl_skrg,CONVERT(VARCHAR(8),CURRENT_TIMESTAMP,108) as jam_skrg");
+$rTgl=sqlsrv_fetch_array($qTgl,SQLSRV_FETCH_ASSOC);
+//diubah formatnya di php bukan di query
+$rTgl['tgl_skrg']=date("d-M-y",strtotime($rTgl['tgl_skrg']));
 if ($Awal != "") {
     $tgl = substr($Awal, 0, 10);
     $jam = $Awal;
@@ -230,10 +232,17 @@ if ($Awal != "") {
         <tbody>
             <?php
             date_default_timezone_set("Asia/Jakarta");
-            $query = mysqli_query($con, "SELECT * FROM tbl_tq_randomtest WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' GROUP BY no_item ");
-            while ($r = mysqli_fetch_array($query)) {
-                $q1 = mysqli_query($con, "SELECT * FROM tbl_tq_nokk WHERE no_item='$r[no_item]' AND no_hanger='$r[no_hanger]'");
-                $r1 = mysqli_fetch_array($q1);
+            $query = sqlsrv_query($con_db_qc_sqlsrv, "SELECT no_item ,MAX(no_hanger) no_hanger,MAX(id) id,MAX(rprt_f1) rprt_f1,MAX(rprt_b1) rprt_b1,MAX(rpb_f1) rpb_f1,
+                        MAX(rsp_grdl1) rsp_grdl1,MAX(rsp_clsl1) rsp_clsl1,MAX(rsp_shol1) rsp_shol1,MAX(rsp_medl1) rsp_medl1,MAX(rsp_lonl1) rsp_lonl1,MAX(rsp_grdw1) rsp_grdw1,
+                        MAX(rsp_clsw1) rsp_clsw1,MAX(rsp_show1) rsp_show1,MAX(rsp_medw1) rsp_medw1,MAX(rsp_lonw1) rsp_lonw1,MAX(rsp_grdl2) rsp_grdl2,MAX(rsp_grdw2) rsp_grdw2,
+                        MAX(rsm_l1) rsm_l1,MAX(rsm_w1) rsm_w1,MAX(rsm_l2) rsm_l2,MAX(rsm_w2) rsm_w2,MAX(rsm_l3) rsm_l3,MAX(rsm_w3) rsm_w3,MAX(rbs_instron) rbs_instron,
+                        MAX(rbs_tru) rbs_tru,MAX(rbs_mullen) rbs_mullen,MAX(rpm_f1) rpm_f1,MAX(rpm_f2) rpm_f2,MAX(rstretch_l1) rstretch_l1,MAX(rstretch_w1) rstretch_w1,
+                        MAX(rrecover_l1) rrecover_l1,MAX(rrecover_w1) rrecover_w1,MAX(rwick_l2) rwick_l2,MAX(rwick_w2) rwick_w2,MAX(rabsor_b1) rabsor_b1,MAX(rdryaf1) rdryaf1,
+                        MAX(rbow) rbow,MAX(rskew) rskew ,CONVERT(VARCHAR(10), MAX(tgl_update) ) tgl_update
+                    FROM db_qc.tbl_tq_randomtest WHERE CONVERT(DATE, [tgl_update] ) BETWEEN '$Awal' AND '$Akhir' GROUP BY no_item ");
+            while ($r = sqlsrv_fetch_array($query,SQLSRV_FETCH_ASSOC)) {
+                $q1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_tq_nokk WHERE no_item='$r[no_item]' AND no_hanger='$r[no_hanger]'");
+                $r1 = sqlsrv_fetch_array($q1,SQLSRV_FETCH_ASSOC);
                 $pos = strpos($r1['pelanggan'], "/");
                 $posbuyer = substr($r1['pelanggan'], $pos + 1, 50);
                 $buyer = str_replace("'", "''", $posbuyer);
@@ -241,19 +250,19 @@ if ($Awal != "") {
                 $tgl_update = date("Y-m-d", strtotime($r['tgl_update']));
                 $update = new DateTime($tgl_update);
                 $selisih = $today->diff($update);
-                $qtemp = mysqli_query($con, "SELECT * FROM tbl_tq_temp_random WHERE no_item='$r[no_item]' AND no_hanger='$r[no_hanger]'");
-                $rtemp = mysqli_fetch_array($qtemp);
+                $qtemp = sqlsrv_query($con_db_qc_sqlsrv, "SELECT *,CONVERT(VARCHAR(10), tgl_update ) tgl_update  FROM db_qc.tbl_tq_temp_random WHERE no_item='$r[no_item]' AND no_hanger='$r[no_hanger]'");
+                $rtemp = sqlsrv_fetch_array($qtemp,SQLSRV_FETCH_ASSOC);                
                 $tgl_update_temp = date("Y-m-d", strtotime($rtemp['tgl_update']));
                 $update_temp = new DateTime($tgl_update_temp);
                 $selisih_temp = $today->diff($update_temp);
-                $qtemp1 = mysqli_query($con, "SELECT * FROM tbl_tq_temp_random2 WHERE no_item='$r[no_item]' AND no_hanger='$r[no_hanger]'");
-                $rtemp1 = mysqli_fetch_array($qtemp1);
+                $qtemp1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT *,CONVERT(VARCHAR(10), tgl_update ) tgl_update  FROM db_qc.tbl_tq_temp_random2 WHERE no_item='$r[no_item]' AND no_hanger='$r[no_hanger]'");
+                $rtemp1 = sqlsrv_fetch_array($qtemp1,SQLSRV_FETCH_ASSOC);
                 $tgl_update_temp1 = date("Y-m-d", strtotime($rtemp1['tgl_update']));
                 $update_temp1 = new DateTime($tgl_update_temp1);
                 $selisih_temp1 = $today->diff($update_temp1);
 
-                $qrwarna = mysqli_query($con, "SELECT * FROM tbl_tq_random_warna WHERE no_item='$r[no_item]' and no_hanger='$r[no_hanger]'");
-                $rwarna = mysqli_fetch_array($qrwarna);
+                $qrwarna = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_tq_random_warna WHERE no_item='$r[no_item]' and no_hanger='$r[no_hanger]'");
+                $rwarna = sqlsrv_fetch_array($qrwarna,SQLSRV_FETCH_ASSOC);
                 //$cekwarna=mysqli_num_rows($qwarna);
                 ?>
                 <tr>

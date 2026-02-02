@@ -11,8 +11,10 @@ $Awal=$_GET['awal'];
 $Akhir=$_GET['akhir'];
 //$Dept=$_GET['dept'];
 //$Cancel=$_GET['cancel'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%d-%b-%y') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl=sqlsrv_query($con_db_qc_sqlsrv,"SELECT CONVERT(VARCHAR(10),CURRENT_TIMESTAMP,120) as tgl_skrg,CONVERT(VARCHAR(8),CURRENT_TIMESTAMP,108) as jam_skrg");
+$rTgl=sqlsrv_fetch_array($qTgl,SQLSRV_FETCH_ASSOC);
+//diubah formatnya di php bukan di query
+$rTgl['tgl_skrg']=date("d-M-y",strtotime($rTgl['tgl_skrg']));
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -145,10 +147,10 @@ border:hidden;
         </thead>
         <tbody>
             <?php
-                $query=mysqli_query($con,"SELECT * FROM tbl_tq_randomtest WHERE DATE_FORMAT( tgl_update, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND (rsm_l1!='' OR rsm_w1!='' OR rsm_l2!='' OR rsm_l3!='' OR rsm_l2!='' OR rsm_w3!='') GROUP BY no_item ");
-                while($r=mysqli_fetch_array($query)){
-                $q1=mysqli_query($con,"SELECT * FROM tbl_tq_nokk WHERE no_item='$r[no_item]' OR no_hanger='$r[no_hanger]'");
-                $r1=mysqli_fetch_array($q1);
+                $query=sqlsrv_query($con_db_qc_sqlsrv,"SELECT no_item ,MAX(no_hanger) no_hanger FROM db_qc.tbl_tq_randomtest WHERE CONVERT(DATE, tgl_update ) BETWEEN '$Awal' AND '$Akhir' AND (rsm_l1!='' OR rsm_w1!='' OR rsm_l2!='' OR rsm_l3!='' OR rsm_l2!='' OR rsm_w3!='') GROUP BY no_item ");
+                while($r=sqlsrv_fetch_array($query,SQLSRV_FETCH_ASSOC)){
+                $q1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_tq_nokk WHERE no_item='$r[no_item]' OR no_hanger='$r[no_hanger]'");
+                $r1=sqlsrv_fetch_array($q1,SQLSRV_FETCH_ASSOC);
                 $pos=strpos($r1['pelanggan'], "/");
                 $posbuyer=substr($r1['pelanggan'],$pos+1,50);
                 $buyer=str_replace("'","''",$posbuyer);
