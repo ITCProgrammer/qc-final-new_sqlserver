@@ -21,23 +21,215 @@ include "koneksi.php";
 
 $no_counter = $_GET['no_counter'];
 
-$qryNoKK = mysqli_query($conlab, "SELECT * FROM tbl_test_qc WHERE sts_laborat <> 'Cancel' AND sts_qc <> 'Belum Terima Kain' AND deleted_at IS NULL AND no_counter='$no_counter'");
-$NoKKcek = mysqli_num_rows($qryNoKK);
-$rNoKK = mysqli_fetch_array($qryNoKK);
+$qryNoKK = sqlsrv_query(
+    $con_db_laborat_sqlsrv,
+    "SELECT * 
+     FROM db_laborat.tbl_test_qc
+     WHERE sts_laborat <> 'Cancel'
+       AND sts_qc <> 'Belum Terima Kain'
+       AND deleted_at IS NULL
+       AND no_counter = ?",
+    array($no_counter),
+    array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+);
+
+// if ($qryNoKK === false) {
+//     die(print_r(sqlsrv_errors(), true));
+// }
+
+$NoKKcek = sqlsrv_num_rows($qryNoKK);
+$rNoKK   = sqlsrv_fetch_array($qryNoKK, SQLSRV_FETCH_ASSOC);
 
 
-$sqlCek1 = mysqli_query($conlab, "SELECT *,
-	CONCAT_WS(' ',fc_note,ph_note, abr_note, bas_note, dry_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,wick_note,absor_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note,wash_note,water_note,acid_note,alkaline_note,crock_note,phenolic_note,cm_printing_note,cm_dye_note,light_note,light_pers_note,saliva_note,h_shrinkage_note,fibre_note,pilll_note,soil_note,apperss_note,bleeding_note,chlorin_note,dye_tf_note) AS note_g FROM tbl_tq_test WHERE id_nokk='$rNoKK[id]' ORDER BY id DESC LIMIT 1");
-$cek1 = mysqli_num_rows($sqlCek1);
-$rcek1 = mysqli_fetch_array($sqlCek1);
-$sqlCekR = mysqli_query($conlab, "SELECT *,
-	CONCAT_WS(' ',rfc_note,rph_note, rabr_note, rbas_note, rdry_note, rfla_note, rfwe_note, rfwi_note, rburs_note,rrepp_note,rwick_note,rabsor_note,rapper_note,rfiber_note,rpillb_note,rpillm_note,rpillr_note,rthick_note,rgrowth_note,rrecover_note,rstretch_note,rsns_note,rsnab_note,rsnam_note,rsnap_note,rwash_note,rwater_note,racid_note,ralkaline_note,rcrock_note,rphenolic_note,rcm_printing_note,rcm_dye_note,rlight_note,rlight_pers_note,rsaliva_note,rh_shrinkage_note,rfibre_note,rpilll_note,rsoil_note,rapperss_note,rbleeding_note,rchlorin_note,rdye_tf_note) AS rnote_g FROM tbl_tq_randomtest WHERE no_item='$rNoKK[no_item]' OR no_hanger='$rNoKK[no_hanger]'");
-$cekR = mysqli_num_rows($sqlCekR);
-$rcekR = mysqli_fetch_array($sqlCekR);
-$sqlCekD = mysqli_query($conlab, "SELECT *,
-	CONCAT_WS(' ',dfc_note,dph_note, dabr_note, dbas_note, ddry_note, dfla_note, dfwe_note, dfwi_note, dburs_note,drepp_note,dwick_note,dabsor_note,dapper_note,dfiber_note,dpillb_note,dpillm_note,dpillr_note,dthick_note,dgrowth_note,drecover_note,dstretch_note,dsns_note,dsnab_note,dsnam_note,dsnap_note,dwash_note,dwater_note,dacid_note,dalkaline_note,dcrock_note,dphenolic_note,dcm_printing_note,dcm_dye_note,dlight_note,dlight_pers_note,dsaliva_note,dh_shrinkage_note,dfibre_note,dpilll_note,dsoil_note,dapperss_note,dbleeding_note,dchlorin_note,ddye_tf_note) AS dnote_g FROM tbl_tq_disptest WHERE id_nokk='$rNoKK[id]' ORDER BY id DESC LIMIT 1");
-$cekD = mysqli_num_rows($sqlCekD);
-$rcekD = mysqli_fetch_array($sqlCekD);
+$sqlCek1 = sqlsrv_query(
+    $con_db_laborat_sqlsrv,
+    "SELECT TOP 1 *,
+        LTRIM(RTRIM(CONCAT(
+            COALESCE(fc_note,''),' ',
+            COALESCE(ph_note,''),' ',
+            COALESCE(abr_note,''),' ',
+            COALESCE(bas_note,''),' ',
+            COALESCE(dry_note,''),' ',
+            COALESCE(fla_note,''),' ',
+            COALESCE(fwe_note,''),' ',
+            COALESCE(fwi_note,''),' ',
+            COALESCE(burs_note,''),' ',
+            COALESCE(repp_note,''),' ',
+            COALESCE(wick_note,''),' ',
+            COALESCE(absor_note,''),' ',
+            COALESCE(apper_note,''),' ',
+            COALESCE(fiber_note,''),' ',
+            COALESCE(pillb_note,''),' ',
+            COALESCE(pillm_note,''),' ',
+            COALESCE(pillr_note,''),' ',
+            COALESCE(thick_note,''),' ',
+            COALESCE(growth_note,''),' ',
+            COALESCE(recover_note,''),' ',
+            COALESCE(stretch_note,''),' ',
+            COALESCE(sns_note,''),' ',
+            COALESCE(snab_note,''),' ',
+            COALESCE(snam_note,''),' ',
+            COALESCE(snap_note,''),' ',
+            COALESCE(wash_note,''),' ',
+            COALESCE(water_note,''),' ',
+            COALESCE(acid_note,''),' ',
+            COALESCE(alkaline_note,''),' ',
+            COALESCE(crock_note,''),' ',
+            COALESCE(phenolic_note,''),' ',
+            COALESCE(cm_printing_note,''),' ',
+            COALESCE(cm_dye_note,''),' ',
+            COALESCE(light_note,''),' ',
+            COALESCE(light_pers_note,''),' ',
+            COALESCE(saliva_note,''),' ',
+            COALESCE(h_shrinkage_note,''),' ',
+            COALESCE(fibre_note,''),' ',
+            COALESCE(pilll_note,''),' ',
+            COALESCE(soil_note,''),' ',
+            COALESCE(apperss_note,''),' ',
+            COALESCE(bleeding_note,''),' ',
+            COALESCE(chlorin_note,''),' ',
+            COALESCE(dye_tf_note,'')
+        ))) AS note_g
+     FROM db_laborat.tbl_tq_test
+     WHERE id_nokk = ?
+     ORDER BY id DESC",
+    array($rNoKK['id']),
+    array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+);
+
+if ($sqlCek1 === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+
+$cek1 = sqlsrv_num_rows($sqlCek1);
+$rcek1 = sqlsrv_fetch_array($sqlCek1);
+
+$sqlCekR = sqlsrv_query(
+    $con_db_laborat_sqlsrv,
+    "SELECT *,
+        LTRIM(RTRIM(CONCAT(
+            COALESCE(rfc_note,''),' ',
+            COALESCE(rph_note,''),' ',
+            COALESCE(rabr_note,''),' ',
+            COALESCE(rbas_note,''),' ',
+            COALESCE(rdry_note,''),' ',
+            COALESCE(rfla_note,''),' ',
+            COALESCE(rfwe_note,''),' ',
+            COALESCE(rfwi_note,''),' ',
+            COALESCE(rburs_note,''),' ',
+            COALESCE(rrepp_note,''),' ',
+            COALESCE(rwick_note,''),' ',
+            COALESCE(rabsor_note,''),' ',
+            COALESCE(rapper_note,''),' ',
+            COALESCE(rfiber_note,''),' ',
+            COALESCE(rpillb_note,''),' ',
+            COALESCE(rpillm_note,''),' ',
+            COALESCE(rpillr_note,''),' ',
+            COALESCE(rthick_note,''),' ',
+            COALESCE(rgrowth_note,''),' ',
+            COALESCE(rrecover_note,''),' ',
+            COALESCE(rstretch_note,''),' ',
+            COALESCE(rsns_note,''),' ',
+            COALESCE(rsnab_note,''),' ',
+            COALESCE(rsnam_note,''),' ',
+            COALESCE(rsnap_note,''),' ',
+            COALESCE(rwash_note,''),' ',
+            COALESCE(rwater_note,''),' ',
+            COALESCE(racid_note,''),' ',
+            COALESCE(ralkaline_note,''),' ',
+            COALESCE(rcrock_note,''),' ',
+            COALESCE(rphenolic_note,''),' ',
+            COALESCE(rcm_printing_note,''),' ',
+            COALESCE(rcm_dye_note,''),' ',
+            COALESCE(rlight_note,''),' ',
+            COALESCE(rlight_pers_note,''),' ',
+            COALESCE(rsaliva_note,''),' ',
+            COALESCE(rh_shrinkage_note,''),' ',
+            COALESCE(rfibre_note,''),' ',
+            COALESCE(rpilll_note,''),' ',
+            COALESCE(rsoil_note,''),' ',
+            COALESCE(rapperss_note,''),' ',
+            COALESCE(rbleeding_note,''),' ',
+            COALESCE(rchlorin_note,''),' ',
+            COALESCE(rdye_tf_note,'')
+        ))) AS rnote_g
+     FROM db_laborat.tbl_tq_randomtest
+     WHERE no_item = ? OR no_hanger = ?",
+    array($rNoKK['no_item'], $rNoKK['no_hanger']),
+    array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+);
+
+// if ($sqlCekR === false) {
+//     die(print_r(sqlsrv_errors(), true));
+// }
+
+$cekR  = sqlsrv_num_rows($sqlCekR);
+$rcekR = sqlsrv_fetch_array($sqlCekR, SQLSRV_FETCH_ASSOC);
+
+
+$sqlCekD = sqlsrv_query(
+    $con_db_laborat_sqlsrv,
+    "SELECT TOP 1 *,
+        LTRIM(RTRIM(CONCAT(
+            COALESCE(dfc_note,''),' ',
+            COALESCE(dph_note,''),' ',
+            COALESCE(dabr_note,''),' ',
+            COALESCE(dbas_note,''),' ',
+            COALESCE(ddry_note,''),' ',
+            COALESCE(dfla_note,''),' ',
+            COALESCE(dfwe_note,''),' ',
+            COALESCE(dfwi_note,''),' ',
+            COALESCE(dburs_note,''),' ',
+            COALESCE(drepp_note,''),' ',
+            COALESCE(dwick_note,''),' ',
+            COALESCE(dabsor_note,''),' ',
+            COALESCE(dapper_note,''),' ',
+            COALESCE(dfiber_note,''),' ',
+            COALESCE(dpillb_note,''),' ',
+            COALESCE(dpillm_note,''),' ',
+            COALESCE(dpillr_note,''),' ',
+            COALESCE(dthick_note,''),' ',
+            COALESCE(dgrowth_note,''),' ',
+            COALESCE(drecover_note,''),' ',
+            COALESCE(dstretch_note,''),' ',
+            COALESCE(dsns_note,''),' ',
+            COALESCE(dsnab_note,''),' ',
+            COALESCE(dsnam_note,''),' ',
+            COALESCE(dsnap_note,''),' ',
+            COALESCE(dwash_note,''),' ',
+            COALESCE(dwater_note,''),' ',
+            COALESCE(dacid_note,''),' ',
+            COALESCE(dalkaline_note,''),' ',
+            COALESCE(dcrock_note,''),' ',
+            COALESCE(dphenolic_note,''),' ',
+            COALESCE(dcm_printing_note,''),' ',
+            COALESCE(dcm_dye_note,''),' ',
+            COALESCE(dlight_note,''),' ',
+            COALESCE(dlight_pers_note,''),' ',
+            COALESCE(dsaliva_note,''),' ',
+            COALESCE(dh_shrinkage_note,''),' ',
+            COALESCE(dfibre_note,''),' ',
+            COALESCE(dpilll_note,''),' ',
+            COALESCE(dsoil_note,''),' ',
+            COALESCE(dapperss_note,''),' ',
+            COALESCE(dbleeding_note,''),' ',
+            COALESCE(dchlorin_note,''),' ',
+            COALESCE(ddye_tf_note,'')
+        ))) AS dnote_g
+     FROM db_laborat.tbl_tq_disptest
+     WHERE id_nokk = ?
+     ORDER BY id DESC",
+    array($rNoKK['id']),
+    array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+);
+
+// if ($sqlCekD === false) {
+//     die(print_r(sqlsrv_errors(), true));
+// }
+
+$cekD  = sqlsrv_num_rows($sqlCekD);
+$rcekD = sqlsrv_fetch_array($sqlCekD, SQLSRV_FETCH_ASSOC);
+
 ?>
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form0" id="form0">
 	<div class="box box-info" style="width: 98%;">
@@ -92,7 +284,6 @@ $rcekD = mysqli_fetch_array($sqlCekD);
 		</div>
 	</div>
 </form>
-
 <?php if ($cek1 > 0) { ?>
 	<section class="invoice">
 		<!-- title row -->
@@ -101,7 +292,7 @@ $rcekD = mysqli_fetch_array($sqlCekD);
 				<h2 class="page-header">
 					<i class="fa fa-globe"></i> Result.
 					<small class="pull-right">Date:
-						<?php echo $rcek1['tgl_buat']; ?>
+						<?php echo $rcek1['tgl_buat']->format('Y-m-d H:i:s'); ?>
 					</small>
 				</h2>
 			</div>

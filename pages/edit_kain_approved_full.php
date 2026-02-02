@@ -29,38 +29,54 @@ $ip_num = get_client_ip();
 $approved1 = str_replace("'", "''", $_POST['approved1']);
 $approved2 = str_replace("'", "''", $_POST['approved2']);
 
-mysqli_begin_transaction($conlab);
-
 try {
-	$sql_update = "UPDATE `tbl_test_qc` SET 
-                    `sts_qc`='Hasil Test Full',
-                    `sts_laborat`='Waiting Approval Full',
-                    `tgl_approve_qc` = NOW(),
-                    `approved_qc1` ='$approved1',
-                    `approved_qc2` ='$approved2'
-                    -- `terimakain_by`='{$_SESSION['usrid']}'
-                    WHERE `id`='$id' LIMIT 1";
+	if (sqlsrv_begin_transaction($con_db_laborat_sqlsrv) === false) {
+		throw new Exception("Begin transaction failed: " . print_r(sqlsrv_errors(), true));
+	}
+	$sql_update = "UPDATE db_laborat.tbl_test_qc SET
+					sts_qc = ?,
+					sts_laborat = ?,
+					tgl_approve_qc = GETDATE(),
+					approved_qc1 = ?,
+					approved_qc2 = ?
+				  WHERE id = ?";
 
-	$result_update = mysqli_query($conlab, $sql_update);
+	$params_update = array(
+		'Hasil Test Full',
+		'Waiting Approval Full',
+		$approved1,
+		$approved2,
+		$id
+	);
 
-	if (!$result_update) {
-		throw new Exception("Query UPDATE failed.");
+	$result_update = sqlsrv_query($con_db_laborat_sqlsrv, $sql_update, $params_update);
+	if ($result_update === false) {
+		throw new Exception("Query UPDATE failed: " . print_r(sqlsrv_errors(), true));
 	}
 
-	$sql_insert_log = "INSERT INTO log_qc_test (no_counter, `status`, info, do_by, do_at, ip_address)
-                        VALUES ('$no_counter', 'Waiting Approval Full', 'QC sudah approve full', '{$_SESSION['usrid']}', NOW(), '$ip_num')";
+	$sql_insert_log = "INSERT INTO db_laborat.log_qc_test
+						(no_counter, status, info, do_by, do_at, ip_address)
+					   VALUES
+						(?, ?, ?, ?, GETDATE(), ?)";
 
-	$result_insert_log = mysqli_query($conlab, $sql_insert_log);
+	$params_log = array(
+		$no_counter,
+		'Waiting Approval Full',
+		'QC sudah approve full',
+		$_SESSION['usrid'],
+		$ip_num
+	);
 
-	if (!$result_insert_log) {
-		throw new Exception("Query INSERT log failed.");
+	$result_insert_log = sqlsrv_query($con_db_laborat_sqlsrv, $sql_insert_log, $params_log);
+	if ($result_insert_log === false) {
+		throw new Exception("Query INSERT log failed: " . print_r(sqlsrv_errors(), true));
 	}
 
-	mysqli_commit($conlab);
+	sqlsrv_commit($con_db_laborat_sqlsrv);
 
 	echo "<script>window.location='KainInLab';</script>";
 } catch (Exception $e) {
-	mysqli_rollback($conlab);
+	sqlsrv_rollback($con_db_laborat_sqlsrv);
 
 	echo "<script>swal({
 	title: 'Gagal approve!!',
