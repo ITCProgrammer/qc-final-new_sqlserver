@@ -10,9 +10,9 @@ input[type="number"] {
 <?php
 
 $nodemand = $_GET['nodemand'];
-$sqlCek = mysqli_query($con, "SELECT no_test FROM tbl_tq_nokk WHERE nodemand='$nodemand' ORDER BY id DESC LIMIT 1");
-$cek = mysqli_num_rows($sqlCek);
-$rcek = mysqli_fetch_array($sqlCek);
+$sqlCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 no_test FROM db_qc.tbl_tq_nokk WHERE nodemand='$nodemand' ORDER BY id DESC");
+$cek = sqlsrv_has_rows($sqlCek) ? 1 : 0;
+$rcek = sqlsrv_fetch_array($sqlCek);
 
 $no_test_value = !empty($rcek['no_test']) ? $rcek['no_test'] : '';
 

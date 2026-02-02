@@ -113,26 +113,26 @@ textarea {
     $nokk = $_GET['id_nokk'];
     $notest = $_GET['no_test'];
 
-    $query_main="SELECT * FROM tbl_kaken_mizuno t WHERE t.id_nokk ='$nokk'";
-    $stmt1 = mysqli_query($con,$query_main);
-    $data1 = mysqli_fetch_assoc($stmt1);
+    $query_main="SELECT * FROM db_qc.tbl_kaken_mizuno t WHERE t.id_nokk ='$nokk'";
+    $stmt1 = sqlsrv_query($con_db_qc_sqlsrv,$query_main);
+    $data1 = sqlsrv_fetch_array($stmt1);
     // print_r($data1);
 
-    $query_main2="SELECT * FROM tbl_tq_test t WHERE t.id_nokk ='$nokk'";
-    $stmt2 = mysqli_query($con,$query_main2);
-    $data2 = mysqli_fetch_assoc($stmt2);
+    $query_main2="SELECT * FROM db_qc.tbl_tq_test t WHERE t.id_nokk ='$nokk'";
+    $stmt2 = sqlsrv_query($con_db_qc_sqlsrv,$query_main2);
+    $data2 = sqlsrv_fetch_array($stmt2);
 
-    $query_main3="SELECT * FROM tbl_tq_test_2 t WHERE t.id_nokk ='$nokk'";
-    $stmt3 = mysqli_query($con,$query_main3);
-    $data3 = mysqli_fetch_assoc($stmt3);
+    $query_main3="SELECT * FROM db_qc.tbl_tq_test_2 t WHERE t.id_nokk ='$nokk'";
+    $stmt3 = sqlsrv_query($con_db_qc_sqlsrv,$query_main3);
+    $data3 = sqlsrv_fetch_array($stmt3);
 
-    $query_main4="SELECT * FROM tbl_tq_disptest t WHERE t.id_nokk ='$nokk'";
-    $stmt4 = mysqli_query($con,$query_main4);
-    $data4 = mysqli_fetch_assoc($stmt4);
+    $query_main4="SELECT * FROM db_qc.tbl_tq_disptest t WHERE t.id_nokk ='$nokk'";
+    $stmt4 = sqlsrv_query($con_db_qc_sqlsrv,$query_main4);
+    $data4 = sqlsrv_fetch_array($stmt4);
 
-    $query_main5="SELECT * FROM tbl_tq_disptest_2 t WHERE t.id_nokk ='$nokk'";
-    $stmt5 = mysqli_query($con,$query_main5);
-    $data5 = mysqli_fetch_assoc($stmt5);
+    $query_main5="SELECT * FROM db_qc.tbl_tq_disptest_2 t WHERE t.id_nokk ='$nokk'";
+    $stmt5 = sqlsrv_query($con_db_qc_sqlsrv,$query_main5);
+    $data5 = sqlsrv_fetch_array($stmt5);
     
 
 
@@ -1375,7 +1375,7 @@ textarea {
               <tr>
                 <td style="border: 1px solid #000;" colspan="2" rowspan="9">Testing    Institute</td>
                 <td style="border-top: 1px solid #000;" colspan="4" rowspan="2"> Issued on :</td>
-                <td style="border-top: 1px solid #000;" colspan="3"><?= $data1['issued_on'];?></td>
+                <td style="border-top: 1px solid #000;" colspan="3"><?= ($data1['issued_on'] ? date_format($data1['issued_on'], "Y-m-d") : '');?></td>
                 <td colspan="24" align="left" valign="top" style="border-top: 1px solid #000;"></td>
                 <td style="border: 1px solid #000;" colspan="4" rowspan="9">Comment</td>
                 <td colspan="20" style="border-top: 1px solid #000;"></td>

@@ -36,29 +36,27 @@ $Revisi     	= isset($_POST['revisi']) ? $_POST['revisi'] : '';
 $Sts_rev     	= isset($_POST['sts_rev']) ? $_POST['sts_rev'] : '';
 $ip				= $_SERVER['REMOTE_ADDR'];
 
-$sqlCek1=mysqli_query($con,"SELECT 
+$sqlCek1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 
 								n.*
 							FROM 
-								tbl_kaken_mizuno n
+								db_qc.tbl_kaken_mizuno n
 							WHERE 
 								(no_test='$notes' OR no_test='$notes_post') 
 							ORDER BY 
-								id_kaken DESC 
-							LIMIT 1");
-$cek=mysqli_num_rows($sqlCek1);
-$rcek1=mysqli_fetch_array($sqlCek1);
+								id_kaken DESC");
+$cek=sqlsrv_has_rows($sqlCek1) ? 1 : 0;
+$rcek1=sqlsrv_fetch_array($sqlCek1);
 
-$sqlCek=mysqli_query($con,"SELECT 
+$sqlCek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1
 								n.*
 							FROM 
-								tbl_tq_nokk n
+								db_qc.tbl_tq_nokk n
 							WHERE 
 								(no_test='$notes' OR no_test='$notes_post') 
 							ORDER BY 
-								id DESC 
-							LIMIT 1");
-$cek33=mysqli_num_rows($sqlCek);
-$rcek=mysqli_fetch_array($sqlCek);
+								id DESC");
+$cek33=sqlsrv_has_rows($sqlCek) ? 1 : 0;
+$rcek=sqlsrv_fetch_array($sqlCek);
 
 $sqlDB2 = "SELECT
 				A.CODE AS DEMANDNO,
@@ -412,7 +410,7 @@ $sqlDB2 = "SELECT
                 <div class="col-sm-4">					  
 					<div class="input-group date">
 						<div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-						<input name="issued_on" type="date" class="form-control pull-right" value="<?php if($rcek1['issued_on']!="" OR $rcek1['issued_on']!=NULL){echo $rcek1['issued_on'];}else{echo $TglKirim;} ?>" required autocomplete="off"/>
+						<input name="issued_on" type="date" class="form-control pull-right" value="<?php if($rcek1['issued_on']!="" OR $rcek1['issued_on']!=NULL){echo ($rcek1['issued_on'] ? date_format($rcek1['issued_on'], "Y-m-d") : '');}else{echo $TglKirim;} ?>" required autocomplete="off"/>
 					</div>
 				</div>
             </div> 		  
@@ -494,21 +492,21 @@ $sqlDB2 = "SELECT
 <?php 
 if(isset($_POST['save1'])){
 
-    $no_id          = $_POST['no_id'];
-    $nodemand       = $_POST['nodemand'];
-    $nodemand_old   = $_POST['nodemand_old'];
-    $no_test        = $_POST['no_test'];
-    $lebar          = $_POST['lebar'];
-    $gramasi        = $_POST['gramasi'];
-    $tahun          = $_POST['tahun'];
-    $standar_category = $_POST['standar_category'];
-    $jenis_kain     = str_replace("'", "''", $_POST['jns_kain']);
-    $season         = $_POST['season'];
-    $jenis_report   = $_POST['jenis_report'];
-    $issued_on      = $_POST['issued_on'];
-    $lot            = $_POST['lot'];
-    $lot_new        = $_POST['lot_new'];
-    $buyer          = $_POST['buyer'];
+	$no_id          = $_POST['no_id'];
+	$nodemand       = $_POST['nodemand'];
+	$nodemand_old   = $_POST['nodemand_old'];
+	$no_test        = $_POST['no_test'];
+	$lebar          = $_POST['lebar'];
+	$gramasi        = $_POST['gramasi'];
+	$tahun          = $_POST['tahun'];
+	$standar_category = $_POST['standar_category'];
+	$jenis_kain     = str_replace("'", "''", $_POST['jns_kain']);
+	$season         = $_POST['season'];
+	$jenis_report   = $_POST['jenis_report'];
+	$issued_on      = $_POST['issued_on'];
+	$lot            = $_POST['lot'];
+	$lot_new        = $_POST['lot_new'];
+	$buyer          = $_POST['buyer'];
 	$colorname      = $_POST['colorname'];
 	$colorcode      = $_POST['colorcode'];
 	$no_report      = $_POST['no_report'];
@@ -520,13 +518,13 @@ if(isset($_POST['save1'])){
     $notes = $no_test; // bisa diganti sesuai variabel aslimu
 
     // cek data apakah sudah ada
-    $cek=mysqli_query($con,"SELECT id_kaken FROM tbl_kaken_mizuno WHERE id_nokk='$no_id'");
-    $ada=mysqli_num_rows($cek);
+    $cek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT id_kaken FROM db_qc.tbl_kaken_mizuno WHERE id_nokk='$no_id'");
+    $ada=sqlsrv_has_rows($cek) ? 1 : 0;
 
     if($ada==0){
         // ===================== INSERT =====================
-        $sqlKK = mysqli_query($con,"INSERT INTO 
-										tbl_kaken_mizuno (
+        $sqlKK = sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO 
+										db_qc.tbl_kaken_mizuno (
 											id_nokk, 
 											nodemand, 
 											nodemand_old, 
@@ -567,7 +565,7 @@ if(isset($_POST['save1'])){
 										'$lot_new', 
 										'$buyer', 
 										'$ip', 
-										NOW(),
+										GETDATE(),
 										'$colorname',
 										'$colorcode',
 										'$no_report', 
@@ -590,13 +588,13 @@ if(isset($_POST['save1'])){
             </script>";
         }else{
             echo "<script>
-            swal('Gagal!', 'Data gagal disimpan: ".mysqli_error($con)."', 'error');
+            swal('Gagal!', 'Data gagal disimpan: ".sqlsrv_errors()."', 'error');
             </script>";
         }
 
     }else{
         // ===================== UPDATE =====================
-        $sqlKK = mysqli_query($con,"UPDATE tbl_kaken_mizuno SET
+        $sqlKK = sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_kaken_mizuno SET
 								nodemand='$nodemand',
 								nodemand_old='$nodemand_old',
 								no_test='$no_test',
@@ -612,7 +610,7 @@ if(isset($_POST['save1'])){
 								lot_new='$lot_new',
 								buyer='$buyer',
 								ip_update='$ip',
-								update_date=NOW(),
+								update_date=GETDATE(),
 								colorname='$colorname',
 								colorcode='$colorcode',
 								no_report='$no_report',
@@ -636,7 +634,7 @@ if(isset($_POST['save1'])){
             </script>";
         }else{
             echo "<script>
-            swal('Gagal!', 'Data gagal diupdate: ".mysqli_error($con)."', 'error');
+            swal('Gagal!', 'Data gagal diupdate: ".sqlsrv_errors()."', 'error');
             </script>";
         }
     }
