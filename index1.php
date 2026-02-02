@@ -188,7 +188,7 @@ $page = strtolower($page);
                     <ul class="nav navbar-nav">
                         <?php 
                             $qryNCP = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) as jml from db_qc.tbl_ncp_qcf WHERE tgl_rencana IS NULL $Wdept AND status='Belum OK'");
-                            $rNCP = sqlsrv_fetch_array($qryNCP);
+                            $rNCP = sqlsrv_fetch_array($qryNCP, SQLSRV_FETCH_ASSOC);
                         ?>
 
                         <!-- Notifications Menu -->

@@ -2,49 +2,154 @@
 ini_set("error_reporting", 1);
 session_start();
 include "../../koneksi.php";
-$idkk=$_GET['idkk'];
-$noitem=$_GET['noitem'];
-$nohanger=$_GET['nohanger'];
-$now=date("Y-m-d");
-$data=mysqli_query($con,"SELECT 
-                                *,
-	                            CONCAT_WS(' ',fc_note,ph_note, abr_note, bas_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note,wash_note,water_note,acid_note,alkaline_note,crock_note,phenolic_note,cm_printing_note,cm_dye_note,light_note,light_pers_note,saliva_note,h_shrinkage_note,fibre_note,pilll_note,soil_note,apperss_note,bleeding_note,chlorin_note,dye_tf_note) AS note_g 
-                            FROM tbl_tq_test 
-                                WHERE id_nokk='$idkk' 
-                            ORDER BY id DESC LIMIT 1");
-$rcek1=mysqli_fetch_array($data);
-$databs=mysqli_query($con,"SELECT 
-                                *,
-                                CONCAT_WS(' ',bas_note) AS note_bs 
-                            FROM tbl_tq_test 
-                                WHERE id_nokk='$idkk' 
-                            ORDER BY id DESC LIMIT 1");
-$rcekbs=mysqli_fetch_array($databs);
-$sqlCekR=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',rfc_note,rph_note, rabr_note, rbas_note, rfla_note, rfwe_note, rfwi_note, rburs_note,rrepp_note,rapper_note,rfiber_note,rpillb_note,rpillm_note,rpillr_note,rthick_note,rgrowth_note,rrecover_note,rstretch_note,rsns_note,rsnab_note,rsnam_note,rsnap_note,rwash_note,rwater_note,racid_note,ralkaline_note,rcrock_note,rphenolic_note,rcm_printing_note,rcm_dye_note,rlight_note,rlight_pers_note,rsaliva_note,rh_shrinkage_note,rfibre_note,rpilll_note,rsoil_note,rapperss_note,rbleeding_note,rchlorin_note,rdye_tf_note) AS rnote_g FROM tbl_tq_randomtest WHERE no_item='$noitem' OR no_hanger='$nohanger'");
-$rcekR=mysqli_fetch_array($sqlCekR);
-$sqlCekD=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',dfc_note,dph_note, dabr_note, dbas_note, dfla_note, dfwe_note, dfwi_note, dburs_note,drepp_note,dapper_note,dfiber_note,dpillb_note,dpillm_note,dpillr_note,dthick_note,dgrowth_note,drecover_note,dstretch_note,dsns_note,dsnab_note,dsnam_note,dsnap_note,dwash_note,dwater_note,dacid_note,dalkaline_note,dcrock_note,dphenolic_note,dcm_printing_note,dcm_dye_note,dlight_note,dlight_pers_note,dsaliva_note,dh_shrinkage_note,dfibre_note,dpilll_note,dsoil_note,dapperss_note,dbleeding_note,dchlorin_note,ddye_tf_note) AS dnote_g FROM tbl_tq_disptest WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
-$rcekD=mysqli_fetch_array($sqlCekD);
-$sqlCekM=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',mfc_note,mph_note, mabr_note, mbas_note, mdry_note, mfla_note, mfwe_note, mfwi_note, mburs_note,mrepp_note,mwick_note,mabsor_note,mapper_note,mfiber_note,mpillb_note,mpillm_note,mpillr_note,mthick_note,mgrowth_note,mrecover_note,mstretch_note,msns_note,msnab_note,msnam_note,msnap_note,mwash_note,mwater_note,macid_note,malkaline_note,mcrock_note,mphenolic_note,mcm_printing_note,mcm_dye_note,mlight_note,mlight_pers_note,msaliva_note,mh_shrinkage_note,mfibre_note,mpilll_note,msoil_note,mapperss_note,mbleeding_note,mchlorin_note,mdye_tf_note,mhumidity_note,modour_note) AS mnote_g FROM tbl_tq_marginal WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
-$rcekM=mysqli_fetch_array($sqlCekM);
-$data1=mysqli_query($con,"SELECT nokk FROM tbl_tq_nokk WHERE id='$idkk'");
-$rd=mysqli_fetch_array($data1);
-$data2=mysqli_query($con,"SELECT 
-                                n.*,
-                                t.running_color,
-                                t.running_quality
-                            FROM tbl_tq_nokk n
-                                LEFT JOIN tbl_tq_nokk2 t on t.id_tq2 = n.id
-                            WHERE id='$idkk'");
-$rd2=mysqli_fetch_array($data2);
+
+$idkk     = $_GET['idkk'];
+$noitem   = $_GET['noitem'];
+$nohanger = $_GET['nohanger'];
+$now      = date("Y-m-d");
+
+$data = sqlsrv_query($con_db_qc_sqlsrv, "
+    SELECT TOP 1 t.*,
+           notes.note_g
+    FROM tbl_tq_test t
+    OUTER APPLY (
+        SELECT STRING_AGG(v.note, ' ') AS note_g
+        FROM (VALUES
+            (t.fc_note),(t.ph_note),(t.abr_note),(t.bas_note),(t.fla_note),
+            (t.fwe_note),(t.fwi_note),(t.burs_note),(t.repp_note),
+            (t.apper_note),(t.fiber_note),(t.pillb_note),(t.pillm_note),
+            (t.pillr_note),(t.thick_note),(t.growth_note),(t.recover_note),
+            (t.stretch_note),(t.sns_note),(t.snab_note),(t.snam_note),
+            (t.snap_note),(t.wash_note),(t.water_note),(t.acid_note),
+            (t.alkaline_note),(t.crock_note),(t.phenolic_note),
+            (t.cm_printing_note),(t.cm_dye_note),(t.light_note),
+            (t.light_pers_note),(t.saliva_note),(t.h_shrinkage_note),
+            (t.fibre_note),(t.pilll_note),(t.soil_note),(t.apperss_note),
+            (t.bleeding_note),(t.chlorin_note),(t.dye_tf_note)
+        ) v(note)
+        WHERE v.note IS NOT NULL AND LTRIM(RTRIM(v.note)) <> ''
+    ) notes
+    WHERE t.id_nokk='$idkk'
+    ORDER BY t.id DESC
+");
+$rcek1 = sqlsrv_fetch_array($data, SQLSRV_FETCH_ASSOC);
+
+$databs = sqlsrv_query($con_db_qc_sqlsrv, "
+    SELECT TOP 1 t.*,
+           notes.note_bs
+    FROM tbl_tq_test t
+    OUTER APPLY (
+        SELECT STRING_AGG(v.note, ' ') AS note_bs
+        FROM (VALUES (t.bas_note)) v(note)
+        WHERE v.note IS NOT NULL AND LTRIM(RTRIM(v.note)) <> ''
+    ) notes
+    WHERE t.id_nokk='$idkk'
+    ORDER BY t.id DESC
+");
+$rcekbs = sqlsrv_fetch_array($databs, SQLSRV_FETCH_ASSOC);
+
+$sqlCekR = sqlsrv_query($con_db_qc_sqlsrv, "
+    SELECT TOP 1 r.*,
+           notes.rnote_g
+    FROM tbl_tq_randomtest r
+    OUTER APPLY (
+        SELECT STRING_AGG(v.note, ' ') AS rnote_g
+        FROM (VALUES
+            (r.rfc_note),(r.rph_note),(r.rabr_note),(r.rbas_note),(r.rfla_note),
+            (r.rfwe_note),(r.rfwi_note),(r.rburs_note),(r.rrepp_note),
+            (r.rapper_note),(r.rfiber_note),(r.rpillb_note),(r.rpillm_note),
+            (r.rpillr_note),(r.rthick_note),(r.rgrowth_note),(r.rrecover_note),
+            (r.rstretch_note),(r.rsns_note),(r.rsnab_note),(r.rsnam_note),
+            (r.rsnap_note),(r.rwash_note),(r.rwater_note),(r.racid_note),
+            (r.ralkaline_note),(r.rcrock_note),(r.rphenolic_note),
+            (r.rcm_printing_note),(r.rcm_dye_note),(r.rlight_note),
+            (r.rlight_pers_note),(r.rsaliva_note),(r.rh_shrinkage_note),
+            (r.rfibre_note),(r.rpilll_note),(r.rsoil_note),(r.rapperss_note),
+            (r.rbleeding_note),(r.rchlorin_note),(r.rdye_tf_note)
+        ) v(note)
+        WHERE v.note IS NOT NULL AND LTRIM(RTRIM(v.note)) <> ''
+    ) notes
+    WHERE r.no_item='$noitem' OR r.no_hanger='$nohanger'
+    ORDER BY r.id DESC
+");
+$rcekR = sqlsrv_fetch_array($sqlCekR, SQLSRV_FETCH_ASSOC);
+
+$sqlCekD = sqlsrv_query($con_db_qc_sqlsrv, "
+    SELECT TOP 1 d.*,
+           notes.dnote_g
+    FROM tbl_tq_disptest d
+    OUTER APPLY (
+        SELECT STRING_AGG(v.note, ' ') AS dnote_g
+        FROM (VALUES
+            (d.dfc_note),(d.dph_note),(d.dabr_note),(d.dbas_note),(d.dfla_note),
+            (d.dfwe_note),(d.dfwi_note),(d.dburs_note),(d.drepp_note),
+            (d.dapper_note),(d.dfiber_note),(d.dpillb_note),(d.dpillm_note),
+            (d.dpillr_note),(d.dthick_note),(d.dgrowth_note),(d.drecover_note),
+            (d.dstretch_note),(d.dsns_note),(d.dsnab_note),(d.dsnam_note),
+            (d.dsnap_note),(d.dwash_note),(d.dwater_note),(d.dacid_note),
+            (d.dalkaline_note),(d.dcrock_note),(d.dphenolic_note),
+            (d.dcm_printing_note),(d.dcm_dye_note),(d.dlight_note),
+            (d.dlight_pers_note),(d.dsaliva_note),(d.dh_shrinkage_note),
+            (d.dfibre_note),(d.dpilll_note),(d.dsoil_note),(d.dapperss_note),
+            (d.dbleeding_note),(d.dchlorin_note),(d.ddye_tf_note)
+        ) v(note)
+        WHERE v.note IS NOT NULL AND LTRIM(RTRIM(v.note)) <> ''
+    ) notes
+    WHERE d.id_nokk='$idkk'
+    ORDER BY d.id DESC
+");
+$rcekD = sqlsrv_fetch_array($sqlCekD, SQLSRV_FETCH_ASSOC);
+
+$sqlCekM = sqlsrv_query($con_db_qc_sqlsrv, "
+    SELECT TOP 1 m.*,
+           notes.mnote_g
+    FROM tbl_tq_marginal m
+    OUTER APPLY (
+        SELECT STRING_AGG(v.note, ' ') AS mnote_g
+        FROM (VALUES
+            (m.mfc_note),(m.mph_note),(m.mabr_note),(m.mbas_note),(m.mdry_note),
+            (m.mfla_note),(m.mfwe_note),(m.mfwi_note),(m.mburs_note),(m.mrepp_note),
+            (m.mwick_note),(m.mabsor_note),(m.mapper_note),(m.mfiber_note),
+            (m.mpillb_note),(m.mpillm_note),(m.mpillr_note),(m.mthick_note),
+            (m.mgrowth_note),(m.mrecover_note),(m.mstretch_note),(m.msns_note),
+            (m.msnab_note),(m.msnam_note),(m.msnap_note),(m.mwash_note),
+            (m.mwater_note),(m.macid_note),(m.malkaline_note),(m.mcrock_note),
+            (m.mphenolic_note),(m.mcm_printing_note),(m.mcm_dye_note),
+            (m.mlight_note),(m.mlight_pers_note),(m.msaliva_note),
+            (m.mh_shrinkage_note),(m.mfibre_note),(m.mpilll_note),(m.msoil_note),
+            (m.mapperss_note),(m.mbleeding_note),(m.mchlorin_note),
+            (m.mdye_tf_note),(m.mhumidity_note),(m.modour_note)
+        ) v(note)
+        WHERE v.note IS NOT NULL AND LTRIM(RTRIM(v.note)) <> ''
+    ) notes
+    WHERE m.id_nokk='$idkk'
+    ORDER BY m.id DESC
+");
+$rcekM = sqlsrv_fetch_array($sqlCekM, SQLSRV_FETCH_ASSOC);
+
+$data1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nokk FROM tbl_tq_nokk WHERE id='$idkk'");
+$rd    = sqlsrv_fetch_array($data1, SQLSRV_FETCH_ASSOC);
+
+$data2 = sqlsrv_query($con_db_qc_sqlsrv, "
+    SELECT n.*,
+           t.running_color,
+           t.running_quality
+    FROM tbl_tq_nokk n
+    LEFT JOIN tbl_tq_nokk2 t ON t.id_tq2 = n.id
+    WHERE n.id='$idkk'
+");
+$rd2 = sqlsrv_fetch_array($data2, SQLSRV_FETCH_ASSOC);
 
 $id_tq_test_2 = $rcek1['id_nokk'];
-
-$tq_test_2_sql = mysqli_query($con, "select id_nokk, spirality_status, bleeding_root, wrinkle, wrinkle1, wrinkle2, stat_wrinkle, stat_wrinkle1, wrinkle_note from tbl_tq_test_2 where id_nokk = '$id_tq_test_2'");
-$tq_test_2_array = mysqli_fetch_array($tq_test_2_sql);
+$tq_test_2_sql = sqlsrv_query($con_db_qc_sqlsrv, "
+    SELECT id_nokk, spirality_status, bleeding_root, wrinkle, wrinkle1, wrinkle2,
+           stat_wrinkle, stat_wrinkle1, wrinkle_note
+    FROM tbl_tq_test_2
+    WHERE id_nokk = '$id_tq_test_2'
+");
+$tq_test_2_array = sqlsrv_fetch_array($tq_test_2_sql, SQLSRV_FETCH_ASSOC);
 ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -375,8 +480,8 @@ textarea {
         <tr>
             <?php
                 $sqljk = "SELECT jenis_kain From tbl_tq_nokk WHERE id='$idkk'";
-                $resultjk=mysqli_query($con,$sqljk);
-                while($rowjk=mysqli_fetch_array($resultjk)){ 
+                $resultjk=sqlsrv_query($con_db_qc_sqlsrv,$sqljk);
+                while($rowjk=sqlsrv_fetch_array($resultjk, SQLSRV_FETCH_ASSOC)){ 
                 $detailjk=explode(",",$rowjk['jenis_kain']);?>
             <td align="left" style="font-size: 12px;" width="25%">Fabric Construction:</td>
             <td align="left" style="font-size: 12px;" width="25%"><?php if($detailjk[0]!=""){echo $detailjk[0];}else{echo "";}?></td>
@@ -413,8 +518,8 @@ textarea {
         <tr>
             <?php
                 $sqljk1 = "SELECT jenis_kain From tbl_tq_nokk WHERE id='$idkk'";
-                $resultjk1=mysqli_query($con,$sqljk1);
-                while($rowjk1=mysqli_fetch_array($resultjk1)){ 
+                $resultjk1=sqlsrv_query($con_db_qc_sqlsrv,$sqljk1);
+                while($rowjk1=sqlsrv_fetch_array($resultjk1, SQLSRV_FETCH_ASSOC)){ 
                 $detailjk1=explode(",",$rowjk1['jenis_kain']);?>
             <td align="left" style="font-size: 12px;" width="25%">Submitted Fiber Content</td>
             <td align="left" style="font-size: 12px;" width="75%"><?php if($detailjk1[0]!=""){echo $detailjk1[0];}else{echo "";}?></td>
@@ -509,8 +614,8 @@ textarea {
         <tr>
             <td class="narrow-column" style="font-size: 12px;">LLL Material Name:</td>
             <?php 
-                $query = mysqli_query($con,"select * from master_matrialname where item='$rd2[no_item]'");
-                $datamatrial = mysqli_fetch_array($query);
+                $query = sqlsrv_query($con_db_qc_sqlsrv,"select * from master_matrialname where item='$rd2[no_item]'");
+                $datamatrial = sqlsrv_fetch_array($query, SQLSRV_FETCH_ASSOC);
             ?>
             <td><?php echo $datamatrial['matrial_name'];?></td>
         </tr>
