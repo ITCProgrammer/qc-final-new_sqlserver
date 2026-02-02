@@ -163,7 +163,7 @@ $no_counter = isset($_POST['no_counter']) ? $_POST['no_counter'] : '';
             <tbody>
             <?php
             if ($no_counter != "" || $Awal != "" || $Akhir != "") {
-              $sql = "SELECT * FROM tbl_test_qc";
+              $sql = "SELECT * FROM db_laborat.tbl_test_qc";
 
               if ($no_counter != "" && ($Awal == "" || $Akhir == "")) {
                 $sql .= " WHERE no_counter = '$no_counter'";
@@ -173,10 +173,9 @@ $no_counter = isset($_POST['no_counter']) ? $_POST['no_counter'] : '';
                 $sql .= " WHERE  no_counter = '$no_counter' AND tgl_buat BETWEEN '$Awal' AND '$Akhir' ";
               }
 
+              $results = sqlsrv_query($con_db_laborat_sqlsrv, $sql);
 
-              $results = mysqli_query($conlab, $sql);
-
-              while ($r = mysqli_fetch_array($results)) {
+              while ($r = sqlsrv_fetch_array($results)) {
                 $no++;
                 $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
                 ?>

@@ -159,11 +159,11 @@ $no_counter = isset($_GET['no_counter']) ? $_GET['no_counter'] : null;
       $sql = "select
                   *
                 from
-                  tbl_test_qc a
-                left join tbl_tq_test b
+                  db_laborat.tbl_test_qc a
+                left join db_laborat.tbl_tq_test b
                   on
                   a.id = b.id_nokk
-                left join tbl_tq_test_2 c
+                left join db_laborat.tbl_tq_test_2 c
                   on
                   b.id_nokk = c.id_nokk
                 where
@@ -177,9 +177,9 @@ $no_counter = isset($_GET['no_counter']) ? $_GET['no_counter'] : null;
         $sql .= " no_counter = '$no_counter'";
       }
 
-      $query = mysqli_query($conlab, $sql);
+      $query = sqlsrv_query($con_db_laborat_sqlsrv, $sql);
 
-      while ($r = mysqli_fetch_array($query)) {
+      while ($r = sqlsrv_fetch_array($query)) {
         ?>
         <tr>
           <td>
