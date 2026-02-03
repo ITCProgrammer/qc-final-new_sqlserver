@@ -9,8 +9,14 @@ include "../../koneksi.php";
 //$idkk=$_REQUEST['idkk'];
 //$act=$_GET['g'];
 $buyer=$_GET['buyer'];
-$data=mysqli_query($con,"SELECT * FROM tbl_masterbuyer_test WHERE buyer='$buyer' ORDER BY id DESC LIMIT 1");
-$r=mysqli_fetch_array($data);
+$sql = " SELECT TOP 1 * 
+        FROM db_qc.tbl_masterbuyer_test 
+        WHERE buyer = ? 
+        ORDER BY id DESC";
+$stmt = sqlsrv_prepare($con_db_qc_sqlsrv, $sql, array($buyer));
+sqlsrv_execute($stmt);
+$r = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+
 $detail=explode(",",$r['physical']);
 $detail2=explode(",",$r['functional']);
 $detail3=explode(",",$r['colorfastness']);

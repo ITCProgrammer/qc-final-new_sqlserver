@@ -5,8 +5,17 @@ include"koneksi.php";
 //$buyer=$_GET[buyer];
 //$buyer=htmlentities($_REQUEST['buyer'], ENT_QUOTES);
 $buyer	= isset($_POST['buyer']) ? $_POST['buyer'] : '';
-$qcek=mysqli_query($con,"SELECT * FROM tbl_masterbuyer_test WHERE buyer='$buyer'");
-$cek=mysqli_fetch_array($qcek);
+$qcek = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT * FROM db_qc.tbl_masterbuyer_test WHERE buyer = ?",
+    array($buyer)
+);
+
+// if ($qcek === false) {
+//     die(print_r(sqlsrv_errors(), true));
+// }
+
+$cek = sqlsrv_fetch_array($qcek, SQLSRV_FETCH_ASSOC);
 ?>
 <div class="row">
     <div class="col-md-12">	
@@ -21,7 +30,7 @@ $cek=mysqli_fetch_array($qcek);
 				<div class="box-body"> 
 					<div class="col-md-10">
 							<div class="form-group">
-								<label for="buyer" class="col-sm-2 control-label">Buyer</label>
+								<label for="buyer" class="col-sm-2 control-label">Buyerr</label>
 									<div class="col-sm-3">
 										<input name="buyer" type="text" style="text-transform:uppercase" class="form-control" id="buyer" placeholder="Buyer"
 										value="<?php echo $buyer; ?>" required>
@@ -48,14 +57,24 @@ $cek=mysqli_fetch_array($qcek);
 					<?php if($_POST['buyer']!=""){?>
 					<div class="col-md-12">
 						<?php
-						$qMB=mysqli_query($con,"SELECT * FROM tbl_masterbuyer_test WHERE buyer='$buyer'");
-						$cekMB=mysqli_num_rows($qMB);
-									
-						if($cekMB>0){
-							while($dMB=mysqli_fetch_array($qMB)){
-							$detail=explode(",",$dMB['physical']);
-							$detail1=explode(",",$dMB['functional']);
-							$detail2=explode(",",$dMB['colorfastness']);
+							$qMB = sqlsrv_query(
+								$con_db_qc_sqlsrv,
+								"SELECT * FROM db_qc.tbl_masterbuyer_test WHERE buyer = ?",
+								[$buyer],
+								["Scrollable" => SQLSRV_CURSOR_KEYSET]
+							);
+
+							// if ($qMB === false) {
+							// 	die(print_r(sqlsrv_errors(), true));
+							// }
+
+							$cekMB = sqlsrv_num_rows($qMB);
+
+							if($cekMB > 0){
+								while($dMB = sqlsrv_fetch_array($qMB, SQLSRV_FETCH_ASSOC)){
+									$detail  = explode(",", (string)$dMB['physical']);
+									$detail1 = explode(",", (string)$dMB['functional']);
+									$detail2 = explode(",", (string)$dMB['colorfastness']);
 						?>
 						<form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
 							<br>
@@ -306,19 +325,13 @@ $cek=mysqli_fetch_array($qcek);
 				</div>
 				<?php } ?>
 				</div> 
-				<!--<div class="box-footer">
-					<button type="submit" class="btn btn-primary pull-left" name="cari" value="cari"><i class="fa fa-save"></i> Cari Data</button> 
-					<a href="pages/mastertest-new.php?buyer=<?php echo $_POST[buyer]; ?>" class="btn btn-primary <?php if($_POST[buyer]=="") { echo "disabled"; }?>" >Lihat Test</a> 
-					<a href="MasterTestNew-<?php echo urlencode($_POST[buyer]); ?>" class="btn btn-primary <?php if($_POST[buyer]=="") { echo "disabled"; }?>">Lihat Test </a>
-				</div>-->
 				<div class="box-footer">
 					<button type="submit" class="btn btn-primary pull-left" name="cari" value="cari"><i class="fa fa-search"></i> Cari Data</button>
-					<button type="submit" class="btn btn-primary pull-left" <?php if($_POST[buyer]=="" OR $cek['approve']!="" OR $cek['approve']!=NULL) { echo "disabled";}?>  name="save" value="save"><i class="fa fa-save"></i> Simpan</button>  
-					<?php if($_POST[buyer]!=""){?>
-					<a href="pages/cetak/cetak_mastertest.php?buyer=<?php echo $_POST[buyer]; ?>" target="_blank" class="btn btn-danger pull-right">Cetak</a> 
+					<button type="submit" class="btn btn-primary pull-left" <?php if($_POST['buyer']=="" OR $cek['approve']!="" OR $cek['approve']!=NULL) { echo "disabled";}?>  name="save" value="save"><i class="fa fa-save"></i> Simpan</button>  
+					<?php if($_POST['buyer']!=""){?>
+					<a href="pages/cetak/cetak_mastertest.php?buyer=<?php echo $_POST['buyer']; ?>" target="_blank" class="btn btn-danger pull-right">Cetak</a> 
 					<?php }?>
 				</div>
-				<!-- /.box-footer -->
 			</div>
 	</div>
 
@@ -354,14 +367,28 @@ if($_POST['save']=="save" and $cekMB>0){
    		{  
       		$chkc .= $chk3.",";  
    		}  
-		$sqlData=mysqli_query($con,"UPDATE tbl_masterbuyer_test SET
-			buyer='$buyer',
-			physical='$chkp',
-			functional='$chkf',
-			colorfastness='$chkc',
-			approve='$approve',
-			tgl_update=now()
-			WHERE buyer='$buyer'");	 	  
+		$sql = " UPDATE db_qc.tbl_masterbuyer_test SET
+				physical = ?,
+				functional = ?,
+				colorfastness = ?,
+				approve = ?,
+				tgl_update = GETDATE()
+			WHERE buyer = ?
+		";
+
+		$params = array(
+			$chkp,
+			$chkf,
+			$chkc,
+			$approve,
+			$buyer
+		);
+
+		$sqlData = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+		if ($sqlData === false) {
+			die(print_r(sqlsrv_errors(), true));
+		}
 	  
 		if($sqlData){
 			
@@ -409,14 +436,25 @@ if($_POST['save']=="save" and $cekMB>0){
    		{  
       		$chkc .= $chk3.",";  
    		}   
-		$sqlData=mysqli_query($con,"INSERT INTO tbl_masterbuyer_test SET
-			buyer='$buyer',
-			physical='$chkp',
-            functional='$chkf',
-            colorfastness='$chkc',
-			approve='$approve',
-			tgl_update=now()
-		");
+		$sql = " INSERT INTO db_qc.tbl_masterbuyer_test
+			(buyer, physical, functional, colorfastness, approve, tgl_update)
+			VALUES (?, ?, ?, ?, ?, GETDATE())
+		";
+
+		$params = array(
+			$buyer,
+			$chkp,
+			$chkf,
+			$chkc,
+			$approve
+		);
+
+		$sqlData = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+		if ($sqlData === false) {
+			die(print_r(sqlsrv_errors(), true));
+		}
+
 		if($sqlData){
 			
 			echo "<script>swal({
