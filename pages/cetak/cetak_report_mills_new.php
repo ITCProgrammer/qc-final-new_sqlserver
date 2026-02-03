@@ -11,22 +11,22 @@ $nohanger=$_GET['nohanger'];
 //$nohanger=$_REQUEST['nohanger'];
 $act=$_GET['g'];
 $now=date("Y-m-d");
-$data=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',fc_note,ph_note, abr_note, bas_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note,wash_note,water_note,acid_note,alkaline_note,crock_note,phenolic_note,cm_printing_note,cm_dye_note,light_note,light_pers_note,saliva_note,h_shrinkage_note,fibre_note,pilll_note,soil_note,apperss_note,bleeding_note,chlorin_note,dye_tf_note,odour_note,apperss_pf1,apperss_pb1,apperss_pf2,apperss_pb2,apperss_pf3,apperss_pb3) AS note_g FROM tbl_tq_test WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
-$rcek1=mysqli_fetch_array($data);
-$databs=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',bas_note) AS note_bs,ss_cmt,apperss_note FROM tbl_tq_test WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
-$rcekbs=mysqli_fetch_array($databs);
-$sqlCekR=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',rfc_note,rph_note, rabr_note, rbas_note, rfla_note, rfwe_note, rfwi_note, rburs_note,rrepp_note,rapper_note,rfiber_note,rpillb_note,rpillm_note,rpillr_note,rthick_note,rgrowth_note,rrecover_note,rstretch_note,rsns_note,rsnab_note,rsnam_note,rsnap_note,rwash_note,rwater_note,racid_note,ralkaline_note,rcrock_note,rphenolic_note,rcm_printing_note,rcm_dye_note,rlight_note,rlight_pers_note,rsaliva_note,rh_shrinkage_note,rfibre_note,rpilll_note,rsoil_note,rapperss_note,rbleeding_note,rchlorin_note,rdye_tf_note,rodour_note) AS rnote_g FROM tbl_tq_randomtest WHERE no_item='$noitem' OR no_hanger='$nohanger'");
-$rcekR=mysqli_fetch_array($sqlCekR);
-$sqlCekD=mysqli_query($con,"SELECT *,
-	CONCAT_WS(' ',dfc_note,dph_note, dabr_note, dbas_note, dfla_note, dfwe_note, dfwi_note, dburs_note,drepp_note,dapper_note,dfiber_note,dpillb_note,dpillm_note,dpillr_note,dthick_note,dgrowth_note,drecover_note,dstretch_note,dsns_note,dsnab_note,dsnam_note,dsnap_note,dwash_note,dwater_note,dacid_note,dalkaline_note,dcrock_note,dphenolic_note,dcm_printing_note,dcm_dye_note,dlight_note,dlight_pers_note,dsaliva_note,dh_shrinkage_note,dfibre_note,dpilll_note,dsoil_note,dapperss_note,dbleeding_note,dchlorin_note,ddye_tf_note,dodour_note) AS dnote_g FROM tbl_tq_disptest WHERE id_nokk='$idkk' ORDER BY id DESC LIMIT 1");
-$rcekD=mysqli_fetch_array($sqlCekD);
-$data1=mysqli_query($con,"SELECT nodemand,nokk FROM tbl_tq_nokk WHERE id='$idkk'");
-$rd=mysqli_fetch_array($data1);
-$data2=mysqli_query($con,"SELECT a.*,b.hangtag FROM tbl_tq_nokk a LEFT JOIN tbl_master_hangtag b ON a.no_item = b.no_item WHERE a.id='$idkk'");
-$rd2=mysqli_fetch_array($data2);
+$data=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 *,
+	CONCAT(' ',fc_note,ph_note, abr_note, bas_note, dry_note, fla_note, fwe_note, fwi_note, burs_note,repp_note,wick_note,wick_note,absor_note,apper_note,fiber_note,pillb_note,pillm_note,pillr_note,thick_note,growth_note,recover_note,stretch_note,sns_note,snab_note,snam_note,snap_note,wash_note,water_note,acid_note,alkaline_note,crock_note,phenolic_note,cm_printing_note,cm_dye_note,light_note,light_pers_note,saliva_note,h_shrinkage_note,fibre_note,pilll_note,soil_note,apperss_note,bleeding_note,chlorin_note,dye_tf_note,odour_note,apperss_pf1,apperss_pb1,apperss_pf2,apperss_pb2,apperss_pf3,apperss_pb3) AS note_g FROM db_qc.tbl_tq_test WHERE id_nokk='$idkk' ORDER BY id DESC");
+$rcek1=sqlsrv_fetch_array($data);
+$databs=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 *,
+	CONCAT(' ',bas_note) AS note_bs,ss_cmt,apperss_note FROM db_qc.tbl_tq_test WHERE id_nokk='$idkk' ORDER BY id DESC");
+$rcekbs=sqlsrv_fetch_array($databs);
+$sqlCekR=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *,
+	CONCAT(' ',rfc_note,rph_note, rabr_note, rbas_note, rfla_note, rfwe_note, rfwi_note, rburs_note,rrepp_note,rapper_note,rfiber_note,rpillb_note,rpillm_note,rpillr_note,rthick_note,rgrowth_note,rrecover_note,rstretch_note,rsns_note,rsnab_note,rsnam_note,rsnap_note,rwash_note,rwater_note,racid_note,ralkaline_note,rcrock_note,rphenolic_note,rcm_printing_note,rcm_dye_note,rlight_note,rlight_pers_note,rsaliva_note,rh_shrinkage_note,rfibre_note,rpilll_note,rsoil_note,rapperss_note,rbleeding_note,rchlorin_note,rdye_tf_note,rodour_note) AS rnote_g FROM db_qc.tbl_tq_randomtest WHERE no_item='$noitem' OR no_hanger='$nohanger'");
+$rcekR=sqlsrv_fetch_array($sqlCekR);
+$sqlCekD=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 *,
+	CONCAT(' ',dfc_note,dph_note, dabr_note, dbas_note, ddry_note, dfla_note, dfwe_note, dfwi_note, dburs_note,drepp_note,dwick_note,dabsor_note,dapper_note,dfiber_note,dpillb_note,dpillm_note,dpillr_note,dthick_note,dgrowth_note,drecover_note,dstretch_note,dsns_note,dsnab_note,dsnam_note,dsnap_note,dwash_note,dwater_note,dacid_note,dalkaline_note,dcrock_note,dphenolic_note,dcm_printing_note,dcm_dye_note,dlight_note,dlight_pers_note,dsaliva_note,dh_shrinkage_note,dfibre_note,dpilll_note,dsoil_note,dapperss_note,dbleeding_note,dchlorin_note,ddye_tf_note,dodour_note) AS dnote_g FROM db_qc.tbl_tq_disptest WHERE id_nokk='$idkk' ORDER BY id DESC");
+$rcekD=sqlsrv_fetch_array($sqlCekD);
+$data1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT nodemand,nokk FROM db_qc.tbl_tq_nokk WHERE id='$idkk'");
+$rd=sqlsrv_fetch_array($data1);
+$data2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.*,b.hangtag FROM db_qc.tbl_tq_nokk a LEFT JOIN db_qc.tbl_master_hangtag b ON a.no_item = b.no_item WHERE a.id='$idkk'");
+$rd2=sqlsrv_fetch_array($data2);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -137,9 +137,9 @@ border:hidden;
                         <option value="cm">cm</option>
                     </select></td>
                     <?php
-                    $sql = "SELECT * From tbl_tq_nokk WHERE id='$idkk'";
-                    $result=mysqli_query($con,$sql);
-                    while($row=mysqli_fetch_array($result)){ 
+                    $sql = "SELECT * From db_qc.tbl_tq_nokk WHERE id='$idkk'";
+                    $result=sqlsrv_query($con_db_qc_sqlsrv,$sql);
+                    while($row=sqlsrv_fetch_array($result)){ 
                     $detail=explode(",",$row['jenis_kain']);?>
                     <td align="left" style="font-size: 8px;">AOP CCN: </td>
                     <td colspan="3" align="left" style="font-size: 8px;"><?php if($detail[2]!=""){echo $detail[2];}else{echo "";}?></td>
