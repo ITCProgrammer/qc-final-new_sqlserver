@@ -932,13 +932,17 @@ if ($_POST['send'] == "send") {
 	// Kirim email
 	if (!$mail->send()) {
 		echo 'Pesan tidak dapat dikirim.';
-		echo 'Mailer Error: ' . $mail->ErrorInfo;
+		echo 'Mailer Error: ';
+		p($mail);
 	} else {
 		// echo 'Pesan telah terkirim';
 		$isi = str_replace("'", "''", $_POST['editor1']);
 		$kirim = $qc . $rmp . $knt . $prt . $brs . $rmp . $dye . $fin . $bun . $heri . $polo . $leading . $lulu . $add1 . $add2 . $add3 . " " . $_POST['untuk'] . " " . $_POST['untuk1'] . " " . $_POST['untuk2'];
 		$sqlmail = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_email_bon (no_bon, isi, kirim_ke, tgl_kirim, jam_kirim) 
 			VALUES ('$rcek[bpp]', '$isi', '$kirim', GETDATE(), GETDATE())");
+		if(!$sqlmail){
+			p(sqlsrv_errors());
+		}
 	}
 }
 function nobon()
@@ -1014,7 +1018,7 @@ if ($_POST['save'] == "save") {
 	$netto = floatval(str_replace(',', '.', $_POST['netto']));
 	$panjang = floatval(str_replace(',', '.', $_POST['panjang']));
 	$sisa = floatval(str_replace(',', '.', $_POST['sisa']));
-	$qty_mslh = intval($_POST['qty_mslh']);
+	$qty_mslh = floatval($_POST['qty_mslh']);
 	// perform INSERT using numeric values unquoted
 	$sqlData = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_qcf 
 			(bpp, nokk, nodemand, pelanggan, no_order, no_hanger, no_item, no_po, no_ko, jenis_kain, styl, 
@@ -1090,7 +1094,7 @@ if ($_POST['update'] == "update") {
 	$netto = floatval(str_replace(',', '.', $_POST['netto']));
 	$panjang = floatval(str_replace(',', '.', $_POST['panjang']));
 	$sisa = floatval(str_replace(',', '.', $_POST['sisa']));
-	$qty_mslh = intval($_POST['qty_mslh']);
+	$qty_mslh = floatval($_POST['qty_mslh']);
 	$sqlData = sqlsrv_query($con_db_qc_sqlsrv, "UPDATE db_qc.tbl_qcf SET 
 			pelanggan='$_POST[pelanggan]',
 			no_order='$_POST[no_order]',
