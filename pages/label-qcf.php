@@ -394,8 +394,9 @@ if ($_POST['save'] == "save" and $cek > 0) {
 		(nodemand, nokk, no_order, pelanggan, no_po, no_hanger, no_item, jenis_kain, 
 		 lebar, gramasi, warna, no_warna, lot, qty_yard, season, availability, nokk_legacy, tgl_update)
 		VALUES 
-		('$_POST[nodemand]', '$_POST[nokk]', '$no_order', '$pelanggan', '$no_po', '$no_hanger', '$no_item', '$jenis_kain', 
-		 '$_POST[lebar]', '$_POST[grms]', '$warna', '$no_warna', '$lot', '$_POST[qty_yard]', '$_POST[season]', '$av2', '$_POST[nokk_legacy]', GETDATE())");
+		(?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  GETDATE())",
+		 [$_POST['nodemand'],$_POST['nokk'],$no_order,$pelanggan,$no_po,$no_hanger,$no_item,$jenis_kain,floatval($_POST['lebar']),
+		 floatval($_POST['grms']),$warna,$no_warna,$lot,$_POST['qty_yard'],$_POST['season'],$av2,$_POST['nokk_legacy']]);
 
 	if ($sqlData1) {
 
@@ -409,6 +410,11 @@ if ($_POST['save'] == "save" and $cek > 0) {
 	 
   }
 });</script>";
+	}
+	else{
+		//untuk cek error tinggal uncomment 
+		echo "<script>alert('error');</script>";
+		// p(sqlsrv_errors());
 	}
 } else if ($_POST['ubah'] == "ubah" and $cek1 > 0) {
 	if (isset($_POST['availability'])) {
@@ -446,6 +452,11 @@ if ($_POST['save'] == "save" and $cek > 0) {
 	 
   }
 });</script>";
+	}
+	else{
+		//untuk cek error tinggal uncomment 
+		echo "<script>alert('error');</script>";
+		// p(sqlsrv_errors());
 	}
 }
 
