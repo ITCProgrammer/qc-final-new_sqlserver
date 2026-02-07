@@ -1616,7 +1616,7 @@ if($_POST['save']=="save"){
 	  } else {
 		$penghubung_masalah    =  '';
 		$penghubung_keterangan =  '';
-		$advice1 				=  '';
+		$advice1 			   =  '';
 		$penghubung_roll1      =  '';
 		$penghubung_roll2      =  '';
 		$penghubung_roll3      =  '';
@@ -1716,8 +1716,7 @@ if($_POST['save']=="save"){
 			?,?,?,?,?,?,?,?,?,?,?,?,
 			?,?,?,?,?,?,?,?,?,?,
 			?,?,?,?,?,?,?,
-			?,?,?,?,?,?,?,?,?,?,?,
-			?,?,?)";
+			?,?,?,?,?,?,?,?,?)";
 
 		$params = [
 			$_POST['nokk'],
@@ -1731,11 +1730,11 @@ if($_POST['save']=="save"){
 			$_POST['no_ko'],
 			$jns,
 			$styl,
-			$_POST['qty1'],
-			$_POST['qty2'],
+			floatval($_POST['qty1']),
+			floatval($_POST['qty2']),
 			$_POST['satuan1'],
 			$_POST['qty3'],
-			$_POST['qty4'],
+			floatval($_POST['qty4']),
 			$_POST['lebar'],
 			$_POST['grms'],
 			$_POST['inslebar'],
@@ -1745,20 +1744,20 @@ if($_POST['save']=="save"){
 			$_POST['pp'],
 			$_POST['pl'],
 			$_POST['ps'],
-			$_POST['extra'],
-			$_POST['extra_p'],
-			$_POST['estimasi'],
-			$_POST['estimasi_p'],
+			floatval($_POST['extra']),
+			floatval($_POST['extra_p']),
+			floatval($_POST['estimasi']),
+			floatval($_POST['estimasi_p']),
 			$lot,
 			$_POST['rol'],
 			$warna,
 			$nowarna,
 			$cekwarna,
-			$_POST['netto'],
-			$_POST['panjang'],
+			floatval($_POST['netto']),
+			floatval($_POST['panjang']),
 			$_POST['satuan2'],
 			$_POST['lot_legacy'],
-			$_POST['sisa'],
+			floatval($_POST['sisa']),
 			$tglmsk,
 			$_POST['tglpk'],
 			$_POST['jam_pack'],
@@ -1767,7 +1766,7 @@ if($_POST['save']=="save"){
 			$_POST['tglins'],
 			$_POST['tglfin'],
 			$_POST['tgl_delivery'],
-			$_POST['qty_mslh'],
+			floatval($_POST['qty_mslh']),
 			$_POST['rol_mslh'],
 			$multijawab,
 			$persen,
@@ -1818,6 +1817,18 @@ if($_POST['save']=="save"){
 					window.location.href='InputDataNew'; 
 				}
 				});</script>";
+		}else{
+			$errorMsg = implode(", ", []);
+			echo "<script>swal({
+				title: 'Gagal Menyimpan Data',   
+				text: 'Terjadi kesalahan saat menyimpan data ke database.\\nError: " . addslashes($errorMsg) . "',
+				type: 'error',
+			}).then((result) => {
+				if (result.value) {
+					window.location.href='InputDataNew'; 
+				}
+			});</script>";
+			p(sqlsrv_errors());
 		}
 	}else{
 		// Prepare parameterized query untuk INSERT tanpa file upload
@@ -1838,8 +1849,7 @@ if($_POST['save']=="save"){
 			?,?,?,?,?,?,?,?,?,?,?,?,
 			?,?,?,?,?,?,?,?,?,?,
 			?,?,?,?,?,?,?,
-			?,?,?,?,?,?,?,?,?,?,?,
-			?,?,?)";
+			?,?,?,?,?,?,?,?)";
 
 		$params = [
 			$_POST['nokk'],
@@ -1853,11 +1863,11 @@ if($_POST['save']=="save"){
 			$_POST['no_ko'],
 			$jns,
 			$styl,
-			$_POST['qty1'],
-			$_POST['qty2'],
+			floatval($_POST['qty1']),
+			floatval($_POST['qty2']),
 			$_POST['satuan1'],
 			$_POST['qty3'],
-			$_POST['qty4'],
+			floatval($_POST['qty4']),
 			$_POST['lebar'],
 			$_POST['grms'],
 			$_POST['inslebar'],
@@ -1867,20 +1877,20 @@ if($_POST['save']=="save"){
 			$_POST['pp'],
 			$_POST['pl'],
 			$_POST['ps'],
-			$_POST['extra'],
-			$_POST['extra_p'],
-			$_POST['estimasi'],
-			$_POST['estimasi_p'],
+			floatval($_POST['extra']),
+			floatval($_POST['extra_p']),
+			floatval($_POST['estimasi']),
+			floatval($_POST['estimasi_p']),
 			$lot,
 			$_POST['rol'],
 			$warna,
 			$nowarna,
 			$cekwarna,
-			$_POST['netto'],
-			$_POST['panjang'],
+			floatval($_POST['netto']),
+			floatval($_POST['panjang']),
 			$_POST['satuan2'],
 			$_POST['lot_legacy'],
-			$_POST['sisa'],
+			floatval($_POST['sisa']),
 			$tglmsk,
 			$_POST['tglpk'],
 			$_POST['jam_pack'],
@@ -1889,7 +1899,7 @@ if($_POST['save']=="save"){
 			$_POST['tglins'],
 			$_POST['tglfin'],
 			$_POST['tgl_delivery'],
-			$_POST['qty_mslh'],
+			floatval($_POST['qty_mslh']),
 			$_POST['rol_mslh'],
 			$multijawab,
 			$persen,
@@ -1940,9 +1950,9 @@ if($_POST['save']=="save"){
 				}
 				});</script>";
 		}else{
-			$errorMsg = implode(", ", sqlsrv_errors());
+			$errorMsg = implode(", ", []);
 			echo "<script>swal({
-				title: 'Gagal Menyimpan Data',   
+				title: 'Gagal Menyimpan Data (tanpa upload)',   
 				text: 'Terjadi kesalahan saat menyimpan data ke database.\\nError: " . addslashes($errorMsg) . "',
 				type: 'error',
 			}).then((result) => {
@@ -1950,6 +1960,7 @@ if($_POST['save']=="save"){
 					window.location.href='InputDataNew'; 
 				}
 			});</script>";
+			p(sqlsrv_errors());
 		}
 	}
 }
@@ -2217,12 +2228,12 @@ if($_POST['update']=="update"){
 				WHERE nodemand=?";
 			$params = array(
 				$_POST['pelanggan'], $_POST['no_order'], $_POST['no_hanger'], $_POST['no_item'], $po, $_POST['no_ko'], 
-				$jns, $styl, $_POST['qty1'], $_POST['qty2'], $_POST['satuan1'], $_POST['qty3'], $_POST['qty4'], 
+				$jns, $styl, floatval($_POST['qty1']), floatval($_POST['qty2']), $_POST['satuan1'], $_POST['qty3'], floatval($_POST['qty4']), 
 				$_POST['lebar'], $_POST['grms'], $_POST['inslebar'], $_POST['insgrms'], $_POST['finlebar'], $_POST['fingrms'],
-				$_POST['pp'], $_POST['pl'], $_POST['ps'], $_POST['extra'], $_POST['extra_p'], $_POST['estimasi'], $_POST['estimasi_p'],
-				$lot, $_POST['rol'], $warna, $nowarna, $cekwarna, $_POST['netto'], $_POST['panjang'], $_POST['satuan2'], $_POST['sisa'],
+				$_POST['pp'], $_POST['pl'], $_POST['ps'], floatval($_POST['extra']), floatval($_POST['extra_p']), floatval($_POST['estimasi']), floatval($_POST['estimasi_p']),
+				$lot, $_POST['rol'], $warna, $nowarna, $cekwarna, floatval($_POST['netto']), floatval($_POST['panjang']), $_POST['satuan2'], floatval($_POST['sisa']),
 				$tglmsk, $_POST['tglpk'], $_POST['jam_pack'], $_POST['tglcwarna'], $_POST['jam_cwarna'], $_POST['tglins'], $_POST['tglfin'], 
-				$_POST['tgl_delivery'], $_POST['qty_mslh'], $_POST['rol_mslh'], $multijawab, $_POST['persen'], $sts_pbon, $sts_nodelay, 
+				$_POST['tgl_delivery'], floatval($_POST['qty_mslh']), $_POST['rol_mslh'], $multijawab, $_POST['persen'], $sts_pbon, $sts_nodelay, 
 				$sts_tembakdok, $masalah, $ket1, $sales,
 				$penghubung_masalah, $penghubung_keterangan, $advice1, $penghubung_roll1, $penghubung_roll2, $penghubung_roll3, 
 				$penghubung_dep, $penghubung_dep_persen,
@@ -2361,11 +2372,11 @@ if($_POST['update']=="update"){
 			$_POST['no_ko'],
 			$jns,
 			$styl,
-			$_POST['qty1'],
-			$_POST['qty2'],
+			floatval($_POST['qty1']),
+			floatval($_POST['qty2']),
 			$_POST['satuan1'],
 			$_POST['qty3'],
-			$_POST['qty4'],
+			floatval($_POST['qty4']),
 			$_POST['lebar'],
 			$_POST['grms'],
 			$_POST['inslebar'],
@@ -2375,19 +2386,19 @@ if($_POST['update']=="update"){
 			$_POST['pp'],
 			$_POST['pl'],
 			$_POST['ps'],
-			$_POST['extra'],
-			$_POST['extra_p'],
-			$_POST['estimasi'],
-			$_POST['estimasi_p'],
+			floatval($_POST['extra']),
+			floatval($_POST['extra_p']),
+			floatval($_POST['estimasi']),
+			floatval($_POST['estimasi_p']),
 			$lot,
 			$_POST['rol'],
 			$warna,
 			$nowarna,
 			$cekwarna,
-			$_POST['netto'],
-			$_POST['panjang'],
+			floatval($_POST['netto']),
+			floatval($_POST['panjang']),
 			$_POST['satuan2'],
-			$_POST['sisa'],
+			floatval($_POST['sisa']),
 			$tglmsk,
 			$_POST['tglpk'],
 			$_POST['jam_pack'],
@@ -2396,7 +2407,7 @@ if($_POST['update']=="update"){
 			$_POST['tglins'],
 			$_POST['tglfin'],
 			$_POST['tgl_delivery'],
-			$_POST['qty_mslh'],
+			floatval($_POST['qty_mslh']),
 			$_POST['rol_mslh'],
 			$multijawab,
 			$persen,
