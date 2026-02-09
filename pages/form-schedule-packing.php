@@ -745,7 +745,7 @@ $Langganan = isset($_POST['langganan']) ? $_POST['langganan'] : '';
 																				catatan, COUNT(*) OVER() AS total_rows 
 																			FROM db_qc.tbl_schedule_packing 
 																			WHERE nodemand = '$nodemand'");
-					$row_row_cek_potong_tq = sqlsrv_fetch_assoc($stmt_cek_potong_tq);
+					$row_row_cek_potong_tq = sqlsrv_fetch_array($stmt_cek_potong_tq, SQLSRV_FETCH_ASSOC);
 					$num_row_cek_potong_tq = $row_row_cek_potong_tq['total_rows'] ?? 0;
 				?>
 					<div class="form-group">
@@ -908,33 +908,38 @@ if ($_POST['save'] == "save") {
 		'$_POST[no_item]',
 		'$jns',
 		'$_POST[tgl_delivery]',
-		'$_POST[lebar]',
-		'$_POST[grms]',
+		TRY_CONVERT(INT, NULLIF('$_POST[lebar]', '')),
+    	TRY_CONVERT(DECIMAL(18,2), NULLIF('$_POST[grms]', '')),
 		'$warna',
 		'$nowarna',
 		'$_POST[qty1]',
 		'$_POST[qty2]',
 		'$_POST[satuan1]',
 		'$lot',
-		'$_POST[qty3]',
-		'$_POST[qty4]',
+		TRY_CONVERT(DECIMAL(18,2), NULLIF('$_POST[qty3]', '')),
+    	TRY_CONVERT(DECIMAL(18,2), NULLIF('$_POST[qty4]', '')),
 		'$_POST[no_mc]',
 		'$_POST[proses]',
-		'$_POST[revisi]',
+		TRY_CONVERT(DECIMAL(18,2), NULLIF('$_POST[revisi]', '')),
 		'$_POST[ket]',
 		'$_POST[ket_kain]',
 		GETDATE(),
 		'$_POST[personil]',
-		'$_POST[target]',
+		TRY_CONVERT(DECIMAL(18,2), NULLIF('$_POST[target]', '')),
 		'$catatan',
 		'$_POST[t_jawab]',
 		'$lembur',
 		'$_POST[jenis_packing]',
 		'$_POST[speed]',
 		GETDATE(),
-		'$_POST[total_gerobak]'
+		TRY_CONVERT(INT, NULLIF('$_POST[total_gerobak]', ''))
 	)");
-
+	// if ($sqlData === false) {
+	// 	echo "<pre>INSERT GAGAL:\n";
+	// 	print_r(sqlsrv_errors());
+	// 	echo "\nSQL:\n$sql</pre>";
+	// 	exit;
+	// }
 	if ($sqlData) {
 		// echo "<script>alert('Data Tersimpan');</script>";
 		// echo "<script>window.location.href='?p=Input-Data-KJ;</script>";
