@@ -1517,6 +1517,17 @@ function normalize_numeric_input($value)
 	return $value;
 }
 
+function format_sqlsrv_date($value)
+{
+	if ($value instanceof DateTime) {
+		return $value->format('Y-m-d');
+	}
+	if (is_string($value)) {
+		return $value;
+	}
+	return '';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$date_fields = ['date_in', 'date_out1', 'tgl_kirim'];
 	foreach ($date_fields as $field) {
@@ -1936,7 +1947,7 @@ $cekM = $rowCntM['total'];
                 <div class="col-sm-4">					  
 					<div class="input-group date">
 						<div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-							<input name="date_in" type="text" class="form-control pull-right" id="datepicker" placeholder="0000-00-00" value="<?php if($rcek['date_in']!="" OR $rcek['date_in']!=NULL){echo $rcek['date_in'];}else{echo $DateIn;} ?>" required autocomplete="off"/>
+							<input name="date_in" type="text" class="form-control pull-right" id="datepicker" placeholder="0000-00-00" value="<?php if(!empty($rcek['date_in'])){echo format_sqlsrv_date($rcek['date_in']);}else{echo $DateIn;} ?>" required autocomplete="off"/>
 					</div>
 				</div>
             </div>
@@ -1945,7 +1956,7 @@ $cekM = $rowCntM['total'];
                 <div class="col-sm-4">					  
 					<div class="input-group date">
 						<div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-							<input name="date_out1" type="text" class="form-control pull-right" id="datepicker2" placeholder="0000-00-00" value="<?php if($rcek['date_out1']!="" OR $rcek['date_out1']!=NULL){echo $rcek['date_out1'];}else{echo $Date_out;} ?>" required autocomplete="off" />
+							<input name="date_out1" type="text" class="form-control pull-right" id="datepicker2" placeholder="0000-00-00" value="<?php if(!empty($rcek['date_out1'])){echo format_sqlsrv_date($rcek['date_out1']);}else{echo $Date_out;} ?>" required autocomplete="off" />
 					</div>
 				</div>
             </div>
@@ -1984,7 +1995,7 @@ $cekM = $rowCntM['total'];
                 <div class="col-sm-4">					  
 					<div class="input-group date">
 						<div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-							<input name="tgl_kirim" type="text" class="form-control pull-right" id="datepicker1" placeholder="0000-00-00" value="<?php if($rcek['tgl_kirim']!="" OR $rcek['tgl_kirim']!=NULL){echo $rcek['tgl_kirim'];}else{echo $TglKirim;} ?>" required autocomplete="off"/>
+							<input name="tgl_kirim" type="text" class="form-control pull-right" id="datepicker1" placeholder="0000-00-00" value="<?php if(!empty($rcek['tgl_kirim'])){echo format_sqlsrv_date($rcek['tgl_kirim']);}else{echo $TglKirim;} ?>" required autocomplete="off"/>
 					</div>
 				</div>
             </div>
