@@ -67,6 +67,34 @@ include "koneksi.php";
 if ($_POST['simpan'] == "simpan") {
     $errors = [];
 
+    $number_fields = [
+        'rol' => 'Qty Roll',
+        'bruto' => 'Bruto',
+        'rol_netto' => 'Qty Netto (Roll)',
+        'netto' => 'Qty Netto (KG)',
+        'rol_mutasi' => 'Qty Mutasi (Roll)',
+        'mutasi' => 'Qty Mutasi (KG)',
+        'kg_bs' => 'Qty BS (KG)',
+        'rol_bs' => 'Qty BS (Roll)',
+        'kg_th' => 'Qty Tahanan (KG)',
+        'rol_th' => 'Qty Tahanan (Roll)',
+        'panjang' => 'Panjang',
+        'lebar' => 'Lebar',
+        'gramasi' => 'Gramasi',
+        'qty_loss' => 'Loss (KG)',
+        'qty_kq' => 'KQ (KG)',
+        'qty_bq' => 'BQ (KG)',
+        'qty_kf' => 'KF (KG)',
+        'qty_bf' => 'BF (KG)',
+        'speed' => 'Speed'
+    ];
+
+    foreach ($number_fields as $field => $label) {
+        if (!isset($_POST[$field]) || trim($_POST[$field]) === '') {
+            $_POST[$field] = '0';
+        }
+    }
+
     $required_fields = [
         'nodemand' => 'No Demand',
         'shift' => 'Shift',
@@ -74,21 +102,11 @@ if ($_POST['simpan'] == "simpan") {
         'tgl' => 'Tgl Update',
         'awal' => 'Tgl Pengiriman',
         'inspektor' => 'Group',
-        'rol_netto' => 'Qty Netto (Roll)',
-        'netto' => 'Qty Netto (KG)',
-        'rol_mutasi' => 'Qty Mutasi (Roll)',
-        'mutasi' => 'Qty Mutasi (KG)',
-        'panjang' => 'Panjang',
         'ket_qty' => 'Ket. Qty',
-        'qty_loss' => 'Loss (KG)',
         'note_loss' => 'Note Loss',
-        'qty_kq' => 'KQ (KG)',
         'note_kq' => 'Note KQ',
-        'qty_bq' => 'BQ (KG)',
         'note_bq' => 'Note BQ',
-        'qty_kf' => 'KF (KG)',
         'note_kf' => 'Note KF',
-        'qty_bf' => 'BF (KG)',
         'note_bf' => 'Note BF'
     ];
 
@@ -136,27 +154,6 @@ if ($_POST['simpan'] == "simpan") {
         }
     }
 
-    $number_fields = [
-        'rol' => 'Qty Roll',
-        'bruto' => 'Bruto',
-        'rol_netto' => 'Qty Netto (Roll)',
-        'netto' => 'Qty Netto (KG)',
-        'rol_mutasi' => 'Qty Mutasi (Roll)',
-        'mutasi' => 'Qty Mutasi (KG)',
-        'kg_bs' => 'Qty BS (KG)',
-        'rol_bs' => 'Qty BS (Roll)',
-        'kg_th' => 'Qty Tahanan (KG)',
-        'rol_th' => 'Qty Tahanan (Roll)',
-        'panjang' => 'Panjang',
-        'lebar' => 'Lebar',
-        'gramasi' => 'Gramasi',
-        'qty_loss' => 'Loss (KG)',
-        'qty_kq' => 'KQ (KG)',
-        'qty_bq' => 'BQ (KG)',
-        'qty_kf' => 'KF (KG)',
-        'qty_bf' => 'BF (KG)',
-        'speed' => 'Speed'
-    ];
     foreach ($number_fields as $field => $label) {
         if (!isset($_POST[$field])) {
             continue;
