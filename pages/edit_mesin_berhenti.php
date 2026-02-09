@@ -21,6 +21,7 @@ if($_POST){
 	$t_jawab = $_POST['t_jawab'];
 	$t_jawab_buyer = $_POST['t_jawab_buyer'];
 	$operator = $_POST['operator'];
+	$kode_stop = $_POST['kode_stop'];
 	
 	$Qrycek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_schedule WHERE id=? ",[$id]);
 	$rCek=sqlsrv_fetch_array($Qrycek,SQLSRV_FETCH_ASSOC);
@@ -46,8 +47,9 @@ if($_POST){
 				[g_shift]=?,
 				[qty_loss]=?,
 				[note_loss]=?,
-				[operator]=?
-				WHERE [id]=? ",[$lfin,$lqcf,$istirahat,$shading,$shift,$demand_lgcy,$t_jawab,$t_jawab_buyer,$gshift,floatval($qtyloss),$noteloss,$operator,$id]);
+				[operator]=?,
+				[kode_stop]=?
+				WHERE [id]=? ",[$lfin,$lqcf,$istirahat,$shading,$shift,$demand_lgcy,$t_jawab,$t_jawab_buyer,$gshift,floatval($qtyloss),$noteloss,$operator,$kode_stop,$id]);
 				$sqlUrut=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_schedule 
 		  		SET no_urut = no_urut - 1 
 				WHERE no_mesin = ?

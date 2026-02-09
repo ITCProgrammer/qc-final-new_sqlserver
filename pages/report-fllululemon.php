@@ -1480,7 +1480,31 @@ function tampil2(){
 	}
 }
 </script>
+<?php
+if (isset($_GET['nodemand']) && $_GET['nodemand'] != "") {
+    $nodemand_input = $_GET['nodemand'];
+    
+    $queryCek = "SELECT TOP 1 no_test FROM db_qc.tbl_tq_nokk
+                 WHERE (CASE 
+                            WHEN [nodemand_new] IS NOT NULL AND [nodemand_new] <> '' 
+                            THEN [nodemand_new] 
+                            ELSE [nodemand] 
+                        END) = ?
+                 ORDER BY id DESC";
 
+    $params = [$nodemand_input];
+    $stmtCek = sqlsrv_query($con_db_qc_sqlsrv, $queryCek, $params);
+    
+    if ($stmtCek && $row = sqlsrv_fetch_array($stmtCek, SQLSRV_FETCH_ASSOC)) {
+        $noTestDitemukan = $row['no_test'];
+        echo "<script>window.location='ReportFLLululemonNoTes-$noTestDitemukan';</script>";
+        exit;
+    } else {
+        echo "<script>alert('No Demand tidak ditemukan!'); window.location='ReportFLLululemon';</script>";
+        exit;
+    }
+}
+?>
 <?php if(!$_GET['nodemand']){ ?>
 	<form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form0" id="form0">
 		<div class="box box-info">
