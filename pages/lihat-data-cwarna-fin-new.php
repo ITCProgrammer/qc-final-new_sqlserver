@@ -29,12 +29,12 @@ include "koneksi.php";
 	if (strlen($jamA) == 5) {
     $start_date = $Awal . " " . $jamA;
   } else {
-    $start_date = $Awal . $jamA;
+    $start_date = $Awal . " " . $jamA;
   }
   if (strlen($jamAr) == 5) {
     $stop_date = $Akhir . " " . $jamAr;
   } else {
-    $stop_date = $Akhir . $jamAr;
+    $stop_date = $Akhir . " " . $jamAr;
   }
   ?>
   <div class="row">
@@ -149,11 +149,11 @@ include "koneksi.php";
     <!-- TOP 5 Berdasarkan Buyer -->
     <div class="col-xs-5">
       <?php
-        $sqlball = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
-                                          count(a.nokk) as jml_kk_all 
-                                          from 
-                                          db_qc.tbl_lap_inspeksi a
-                                          where (a.proses !='Oven' or a.proses !='Fin 1X') and a.dept ='QCF' $WhereDate");
+        $sqlball = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(a.nokk) AS jml_kk_all
+                                                      FROM db_qc.tbl_lap_inspeksi a
+                                                      WHERE a.proses NOT IN ('Oven', 'Fin 1X')
+                                                        AND a.dept = 'QCF'
+                                                        AND CAST(a.tgl_update AS date) BETWEEN ? AND ?", [$Awal, $Akhir]);
         $rball = sqlsrv_fetch_array($sqlball, SQLSRV_FETCH_ASSOC);
       ?>
       <div class="box box-success">
