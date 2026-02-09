@@ -122,6 +122,20 @@ while ($r = sqlsrv_fetch_array($modal,SQLSRV_FETCH_ASSOC)) {
 							<input name="jml_rol" class="form-control" id="jml_rol_x" placeholder="0" required>
 							<span class="help-block with-errors"></span>
 						</div>
+						<label for="kode_stop" class="col-md-2 control-label">Kode Stop</label>
+						<div class="col-sm-4">
+							<select class="form-control select2" name="kode_stop" id="kode_stop" required>
+							<option value="">Pilih</option>
+							<option value="LM">LM || Listrik Mati</option>
+							<option value="KM">KM || Kerusakan Mesin</option>
+							<option value="KO">KO || Kurang Order</option>
+							<option value="AP">AP || Abnormal Produk</option>
+							<option value="PA">PA || Pelaksanaan Apel</option>
+							<option value="PM">PM || Pemeliharaan Mesin</option>
+							<option value="GT">GT || Gangguan Teknis </option>
+							<option value="TG">TG || Tunggu </option>
+						</select>
+						</div>
 						<!-- <label for="demand_lgcy" class="col-md-2 control-label">No Demand x</label>
 						<div class="col-sm-3">
 							<input name="demand_lgcy" class="form-control" id="demand_lgcy" placeholder="Demand"
