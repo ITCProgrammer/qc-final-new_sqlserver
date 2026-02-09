@@ -38,6 +38,18 @@ include "koneksi.php";
   $MC = isset($_POST['nomc']) ? $_POST['nomc'] : '';
 
 
+  if ($Awal != "" && $Akhir == "") {
+    $Akhir = $Awal;
+  }
+  if ($jamA != "" || $jamAr != "") {
+    if ($jamA == "") {
+      $jamA = "00:00";
+    }
+    if ($jamAr == "") {
+      $jamAr = "23:59";
+    }
+  }
+
   $shft = " ";
   if ($GShift != "" && $GShift != "ALL") {
     $shft = " AND shift='$GShift' ";
@@ -295,15 +307,15 @@ include "koneksi.php";
               ?>
               <?php
               $qryPAR = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
-                                            SUM(IIF(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
-                                            SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-                                            SUM(IIF(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
-                                            SUM(IIF(pelanggan like '%LULU%',netto,0)) as lulu_kg,
-                                            SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-                                            SUM(IIF(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
-                                            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
-                                            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-                                            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
+                                            SUM(IIF(ISNULL(pelanggan,'') like '%ADIDAS%',netto,0)) as adidas_kg,
+                                            SUM(IIF(ISNULL(pelanggan,'') like '%ADIDAS%',panjang,0)) as adidas_yd,
+                                            SUM(IIF(ISNULL(pelanggan,'') like '%ADIDAS%',jml_netto,0)) as adidas_roll,
+                                            SUM(IIF(ISNULL(pelanggan,'') like '%LULU%',netto,0)) as lulu_kg,
+                                            SUM(IIF(ISNULL(pelanggan,'') like '%LULU%',panjang,0)) as lulu_yd,
+                                            SUM(IIF(ISNULL(pelanggan,'') like '%LULU%',jml_netto,0)) as lulu_roll,
+                                            SUM(IIF(ISNULL(pelanggan,'') NOT LIKE '%ADIDAS%' AND ISNULL(pelanggan,'') NOT LIKE '%LULU%',netto,0)) as lain_kg,
+                                            SUM(IIF(ISNULL(pelanggan,'') NOT LIKE '%ADIDAS%' AND ISNULL(pelanggan,'') NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+                                            SUM(IIF(ISNULL(pelanggan,'') NOT LIKE '%ADIDAS%' AND ISNULL(pelanggan,'') NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
                                             SUM(netto) as tot_kg,
                                             SUM(panjang) as tot_yd,
                                             SUM(jml_netto) as tot_roll	
@@ -333,15 +345,15 @@ include "koneksi.php";
               </tr>
               <?php
               $qryPBR = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
-                                            SUM(IIF(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
-                                            SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-                                            SUM(IIF(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
-                                            SUM(IIF(pelanggan like '%LULU%',netto,0)) as lulu_kg,
-                                            SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-                                            SUM(IIF(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
-                                            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
-                                            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-                                            SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
+                                            SUM(IIF(ISNULL(pelanggan,'') like '%ADIDAS%',netto,0)) as adidas_kg,
+                                            SUM(IIF(ISNULL(pelanggan,'') like '%ADIDAS%',panjang,0)) as adidas_yd,
+                                            SUM(IIF(ISNULL(pelanggan,'') like '%ADIDAS%',jml_netto,0)) as adidas_roll,
+                                            SUM(IIF(ISNULL(pelanggan,'') like '%LULU%',netto,0)) as lulu_kg,
+                                            SUM(IIF(ISNULL(pelanggan,'') like '%LULU%',panjang,0)) as lulu_yd,
+                                            SUM(IIF(ISNULL(pelanggan,'') like '%LULU%',jml_netto,0)) as lulu_roll,
+                                            SUM(IIF(ISNULL(pelanggan,'') NOT LIKE '%ADIDAS%' AND ISNULL(pelanggan,'') NOT LIKE '%LULU%',netto,0)) as lain_kg,
+                                            SUM(IIF(ISNULL(pelanggan,'') NOT LIKE '%ADIDAS%' AND ISNULL(pelanggan,'') NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+                                            SUM(IIF(ISNULL(pelanggan,'') NOT LIKE '%ADIDAS%' AND ISNULL(pelanggan,'') NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
                                             SUM(netto) as tot_kg,
                                             SUM(panjang) as tot_yd,
                                             SUM(jml_netto) as tot_roll	
@@ -371,15 +383,15 @@ include "koneksi.php";
               </tr>
               <?php
               $qryPCR = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
-                                          SUM(IIF(pelanggan like '%ADIDAS%',netto,0)) as adidas_kg,
-                                          SUM(IIF(pelanggan like '%ADIDAS%',panjang,0)) as adidas_yd,
-                                          SUM(IIF(pelanggan like '%ADIDAS%',jml_netto,0)) as adidas_roll,
-                                          SUM(IIF(pelanggan like '%LULU%',netto,0)) as lulu_kg,
-                                          SUM(IIF(pelanggan like '%LULU%',panjang,0)) as lulu_yd,
-                                          SUM(IIF(pelanggan like '%LULU%',jml_netto,0)) as lulu_roll,
-                                          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',netto,0)) as lain_kg,
-                                          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',panjang,0)) as lain_yd,
-                                          SUM(IIF(pelanggan NOT LIKE '%ADIDAS%' AND pelanggan NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
+                                          SUM(IIF(ISNULL(pelanggan,'') like '%ADIDAS%',netto,0)) as adidas_kg,
+                                          SUM(IIF(ISNULL(pelanggan,'') like '%ADIDAS%',panjang,0)) as adidas_yd,
+                                          SUM(IIF(ISNULL(pelanggan,'') like '%ADIDAS%',jml_netto,0)) as adidas_roll,
+                                          SUM(IIF(ISNULL(pelanggan,'') like '%LULU%',netto,0)) as lulu_kg,
+                                          SUM(IIF(ISNULL(pelanggan,'') like '%LULU%',panjang,0)) as lulu_yd,
+                                          SUM(IIF(ISNULL(pelanggan,'') like '%LULU%',jml_netto,0)) as lulu_roll,
+                                          SUM(IIF(ISNULL(pelanggan,'') NOT LIKE '%ADIDAS%' AND ISNULL(pelanggan,'') NOT LIKE '%LULU%',netto,0)) as lain_kg,
+                                          SUM(IIF(ISNULL(pelanggan,'') NOT LIKE '%ADIDAS%' AND ISNULL(pelanggan,'') NOT LIKE '%LULU%',panjang,0)) as lain_yd,
+                                          SUM(IIF(ISNULL(pelanggan,'') NOT LIKE '%ADIDAS%' AND ISNULL(pelanggan,'') NOT LIKE '%LULU%',jml_netto,0)) as lain_roll,
                                           SUM(netto) as tot_kg,
                                           SUM(panjang) as tot_yd,
                                           SUM(jml_netto) as tot_roll	
