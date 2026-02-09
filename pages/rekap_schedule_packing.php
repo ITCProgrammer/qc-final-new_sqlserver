@@ -17,18 +17,19 @@ include "koneksi.php";
   <?php
   $data_kiri = [];
   $data_kanan = [];
+  $jenis_packing_filter = "('Normal','Development','BS','KKPreset','KainDragon','InspectMeja','QtyKecil','QtyBesar')";
   $query_mysql_kiri = "SELECT
     nodemand,
     id,
     nokk,
     rol,
     bruto,
-    proses
+    jenis_packing
   FROM
     db_qc.tbl_schedule_packing
   WHERE
     [status] <> 'selesai'
-    AND proses ='Packing'";
+    AND jenis_packing IN $jenis_packing_filter";
   $prepare_mysql_kiri = sqlsrv_query($con_db_qc_sqlsrv, $query_mysql_kiri);
   while($data_mysql_kiri = sqlsrv_fetch_array($prepare_mysql_kiri)){
     $data_kiri[] = $data_mysql_kiri;
@@ -38,19 +39,19 @@ include "koneksi.php";
   $sum_hanger = [];
   foreach($data_kiri as $key => $value){
     $query_db2 = "SELECT
-                    p.SUBCODE02,
-                    p.SUBCODE03,
-                    p.SUBCODE04,
                     TRIM(p.SUBCODE02) || TRIM(p.SUBCODE03) AS HANGER
                   FROM
                     PRODUCTIONDEMAND p
                   WHERE
-                    p.CODE = '$value[nodemand]'";
+                    p.CODE = '$value[nodemand]'
+                  FETCH FIRST 1 ROWS ONLY";
     $stmt_db2 = db2_exec($conn1, $query_db2);
-    while($data_db2 = db2_fetch_assoc($stmt_db2)){
-      // $data[] = $data_db2['HANGER'];
-      $data_hanger_kiri[$data_db2['HANGER']] += $value['bruto'];
+    $data_db2 = $stmt_db2 ? db2_fetch_assoc($stmt_db2) : false;
+    $hanger = $data_db2 && $data_db2['HANGER'] !== null ? trim($data_db2['HANGER']) : '';
+    if ($hanger === '') {
+      $hanger = 'TANPA HANGER';
     }
+    $data_hanger_kiri[$hanger] = ($data_hanger_kiri[$hanger] ?? 0) + (float)$value['bruto'];
   }
   arsort($data_hanger_kiri);
       $top5 = array_slice($data_hanger_kiri, 0, 5, true);
@@ -66,12 +67,12 @@ include "koneksi.php";
     nokk,
     rol,
     bruto,
-    proses
+    jenis_packing
   FROM
     db_qc.tbl_schedule_packing
   WHERE
     [status] <> 'selesai'
-    AND proses ='Inspect Meja'";
+    AND jenis_packing = 'InspectMeja'";
   $prepare_mysql_kanan = sqlsrv_query($con_db_qc_sqlsrv, $query_mysql_kanan);
   while($data_mysql_kanan = sqlsrv_fetch_array($prepare_mysql_kanan)){
     $data_kanan[] = $data_mysql_kanan;
@@ -81,19 +82,19 @@ include "koneksi.php";
   $sum_hanger = [];
   foreach($data_kanan as $key => $value){
     $query_db2 = "SELECT
-                    p.SUBCODE02,
-                    p.SUBCODE03,
-                    p.SUBCODE04,
                     TRIM(p.SUBCODE02) || TRIM(p.SUBCODE03) AS HANGER
                   FROM
                     PRODUCTIONDEMAND p
                   WHERE
-                    p.CODE = '$value[nodemand]'";
+                    p.CODE = '$value[nodemand]'
+                  FETCH FIRST 1 ROWS ONLY";
     $stmt_db2 = db2_exec($conn1, $query_db2);
-    while($data_db2 = db2_fetch_assoc($stmt_db2)){
-      // $data[] = $data_db2['HANGER'];
-      $data_hanger_kanan[$data_db2['HANGER']] += $value['bruto'];
+    $data_db2 = $stmt_db2 ? db2_fetch_assoc($stmt_db2) : false;
+    $hanger = $data_db2 && $data_db2['HANGER'] !== null ? trim($data_db2['HANGER']) : '';
+    if ($hanger === '') {
+      $hanger = 'TANPA HANGER';
     }
+    $data_hanger_kanan[$hanger] = ($data_hanger_kanan[$hanger] ?? 0) + (float)$value['bruto'];
   }
   arsort($data_hanger_kanan);
       $top5_kanan = array_slice($data_hanger_kanan, 0, 5, true);

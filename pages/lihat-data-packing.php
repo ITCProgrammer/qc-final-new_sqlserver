@@ -38,24 +38,33 @@ include "koneksi.php";
   $MC = isset($_POST['nomc']) ? $_POST['nomc'] : '';
 
 
+  $shft = " ";
+  if ($GShift != "" && $GShift != "ALL") {
+    $shft = " AND shift='$GShift' ";
+  }
+  $nomc = " ";
+  if ($MC != "" && $MC != "ALL") {
+    $nomc = " AND no_mc LIKE '%$MC' ";
+  }
+  $grp = " ";
+  if ($Group != "" && $Group != "ALL") {
+    $grp = " AND inspektor='$Group' ";
+  }
+
+  $start_date = '';
+  $stop_date = '';
   $Where = "1 = 0 AND ";
   if ($Awal != "") {
-    if (strlen($jamA) == 5) {
-      $start_date = $Awal . " " . $jamA;
-    } else {
-      $start_date = $Awal . " 0" . $jamA;
-    }
-    if (strlen($jamAr) == 5) {
-      $stop_date = $Akhir . " " . $jamAr;
-    } else {
-      $stop_date = $Akhir . " 0" . $jamAr;
-    }
-    if ($jamA != "" or $jamAr != "") {
-      $Where = " TRY_CONVERT(datetime,TRY_CONVERT(VARCHAR(19),CONCAT(tgl_update,' ',jam_update))) between '$start_date:00' and '$stop_date:59' and ";
+    if ($jamA != "" || $jamAr != "") {
+      $jamA_fmt = (strlen($jamA) == 5) ? $jamA : "0" . $jamA;
+      $jamAr_fmt = (strlen($jamAr) == 5) ? $jamAr : "0" . $jamAr;
+      $start_date = $Awal . " " . $jamA_fmt;
+      $stop_date = $Akhir . " " . $jamAr_fmt;
+      $Where = " DATEADD(second, DATEDIFF(second, 0, TRY_CAST(jam_update AS time)), TRY_CAST(tgl_update AS datetime)) between '$start_date:00' and '$stop_date:59' and ";
     } else {
       $start_date = $Awal;
       $stop_date = $Akhir;
-      $Where = " FORMAT( tgl_update , 'yyyy-MM-dd') between '$start_date' and '$stop_date' and ";
+      $Where = " CONVERT(date, tgl_update) between '$start_date' and '$stop_date' and ";
     }
   }
   //$start_date= $Awal." ".$jamA;
@@ -302,8 +311,8 @@ include "koneksi.php";
                                             db_qc.tbl_lap_inspeksi
                                           where
                                             $Where
-                                            dept = 'PACKING' and
-                                            sts_gkg = '0' and
+                                            dept = 'PACKING' $shft $nomc $grp
+                                            and sts_gkg = '0' and
                                             inspektor = 'PACKING A'");
               $rowPAR = sqlsrv_fetch_array($qryPAR);
               ?>
@@ -340,7 +349,7 @@ include "koneksi.php";
                                             db_qc.tbl_lap_inspeksi
                                           where
                                             $Where
-                                            dept = 'PACKING'
+                                            dept = 'PACKING' $shft $nomc $grp
                                             and sts_gkg = '0'
                                             and inspektor = 'PACKING B'");
               $rowPBR = sqlsrv_fetch_array($qryPBR);
@@ -378,7 +387,7 @@ include "koneksi.php";
                                           db_qc.tbl_lap_inspeksi
                                         where
                                           $Where
-                                          dept = 'PACKING'
+                                          dept = 'PACKING' $shft $nomc $grp
                                           and sts_gkg = '0'
                                           and inspektor = 'PACKING C'");
               $rowPCR = sqlsrv_fetch_array($qryPCR);
@@ -678,7 +687,7 @@ include "koneksi.php";
           db_qc.tbl_lap_inspeksi
         where
           $Where
-          dept = 'PACKING'
+          dept = 'PACKING' $shft $nomc $grp
           and sts_gkg = '0'
           and inspektor = 'PACKING A'");
               $rowPAR1 = sqlsrv_fetch_array($qryPAR1);
@@ -709,7 +718,7 @@ include "koneksi.php";
               db_qc.tbl_lap_inspeksi
             where
               $Where
-              dept = 'PACKING'
+              dept = 'PACKING' $shft $nomc $grp
               and sts_gkg = '0'
               and inspektor = 'PACKING B'");
               $rowPBR1 = sqlsrv_fetch_array($qryPBR1);
@@ -740,7 +749,7 @@ include "koneksi.php";
                 db_qc.tbl_lap_inspeksi
               where
                 $Where
-                dept = 'PACKING'
+                dept = 'PACKING' $shft $nomc $grp
                 and sts_gkg = '0'
                 and inspektor = 'PACKING C'");
               $rowPCR1 = sqlsrv_fetch_array($qryPCR1);
@@ -914,7 +923,7 @@ include "koneksi.php";
                 db_qc.tbl_lap_inspeksi
               where
                 $Where
-                dept = 'PACKING'
+                dept = 'PACKING' $shft $nomc $grp
                 and inspektor = 'PACKING A'");
               $rowPAB = sqlsrv_fetch_array($qryPAB);
               ?>
@@ -948,7 +957,7 @@ include "koneksi.php";
             db_qc.tbl_lap_inspeksi
           where
             $Where
-            dept = 'PACKING'
+            dept = 'PACKING' $shft $nomc $grp
             and inspektor = 'PACKING B'");
               $rowPBB = sqlsrv_fetch_array($qryPBB);
               ?>
@@ -982,7 +991,7 @@ include "koneksi.php";
             db_qc.tbl_lap_inspeksi
           where
             $Where
-            dept = 'PACKING'
+            dept = 'PACKING' $shft $nomc $grp
             and inspektor = 'PACKING C'");
               $rowPCB = sqlsrv_fetch_array($qryPCB);
               ?>
@@ -1162,7 +1171,7 @@ include "koneksi.php";
               db_qc.tbl_lap_inspeksi
             where
               $Where
-              dept = 'PACKING'
+              dept = 'PACKING' $shft $nomc $grp
               and inspektor = 'PACKING A'");
               $rowPAT = sqlsrv_fetch_array($qryPAT);
               ?>
@@ -1195,7 +1204,7 @@ include "koneksi.php";
           db_qc.tbl_lap_inspeksi
         where
           $Where
-          dept = 'PACKING'
+          dept = 'PACKING' $shft $nomc $grp
           and inspektor = 'PACKING B'");
               $rowPBT = sqlsrv_fetch_array($qryPBT);
               ?>
@@ -1229,7 +1238,7 @@ include "koneksi.php";
         db_qc.tbl_lap_inspeksi
       where
         $Where
-        dept = 'PACKING'
+        dept = 'PACKING' $shft $nomc $grp
         and inspektor = 'PACKING C'");
               $rowPCT = sqlsrv_fetch_array($qryPCT);
               ?>
@@ -1427,7 +1436,7 @@ include "koneksi.php";
                                       db_qc.tbl_lap_inspeksi
                                     where
                                       $Where
-                                      dept = 'PACKING'
+                                      dept = 'PACKING' $shft $nomc $grp
                                       and sts_gkg = '1'
                                       and inspektor = 'PACKING A'");
               $rowPAG = sqlsrv_fetch_array($qryPAG);
@@ -1466,7 +1475,7 @@ include "koneksi.php";
                           db_qc.tbl_lap_inspeksi
                         where
                           $Where
-                          dept = 'PACKING'
+                          dept = 'PACKING' $shft $nomc $grp
                           and sts_gkg = '1'
                           and inspektor = 'PACKING B'");
               $rowPBG = sqlsrv_fetch_array($qryPBG);
@@ -1505,7 +1514,7 @@ include "koneksi.php";
                                   db_qc.tbl_lap_inspeksi
                                 where
                                   $Where
-                                  dept = 'PACKING'
+                                  dept = 'PACKING' $shft $nomc $grp
                                   and sts_gkg = '1'
                                   and inspektor = 'PACKING C'");
               $rowPCG = sqlsrv_fetch_array($qryPCG);
@@ -1661,7 +1670,7 @@ include "koneksi.php";
           db_qc.tbl_lap_inspeksi
         where
           $Where
-          dept = 'PACKING'
+          dept = 'PACKING' $shft $nomc $grp
           and sts_gkg = '0'");
               $rowOK = sqlsrv_fetch_array($qryOK);
               ?>
@@ -1681,7 +1690,8 @@ include "koneksi.php";
         from
           db_qc.tbl_lap_inspeksi
         where
-          $Where dept = 'PACKING'");
+          $Where
+          dept = 'PACKING' $shft $nomc $grp");
               $rowTH = sqlsrv_fetch_array($qryTH);
               ?>
               <tr>
@@ -1700,7 +1710,8 @@ include "koneksi.php";
         from
           db_qc.tbl_lap_inspeksi
         where
-          $Where dept = 'PACKING'");
+          $Where
+          dept = 'PACKING' $shft $nomc $grp");
               $rowBS = sqlsrv_fetch_array($qryBS);
               ?>
               <tr>
@@ -1719,7 +1730,8 @@ include "koneksi.php";
                 from
                   db_qc.tbl_lap_inspeksi
                 where
-                  $Where dept = 'PACKING'
+                  $Where
+                  dept = 'PACKING' $shft $nomc $grp
                   and sts_gkg = '1'");
               $rowPST = sqlsrv_fetch_array($qryPST);
               ?>
@@ -1908,26 +1920,7 @@ include "koneksi.php";
             <tbody>
               <?php
               $no = 1;
-              if ($GShift != "ALL") {
-                $shft = " AND shift='$GShift' ";
-              } else {
-                $shft = " ";
-              }
-              if ($MC != "ALL") {
-                $nomc = " AND no_mc LIKE '%$MC' ";
-              } else {
-                $nomc = " ";
-              }
-              if ($Group != "ALL") {
-                $grp = " AND inspektor='$Group' ";
-              } else {
-                $grp = " ";
-              }
-              if ($Awal != "" and $Akhir != "") {
-                $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_lap_inspeksi WHERE $Where dept='PACKING' $shft $nomc $grp ORDER BY id ASC");
-              } else {
-                $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_lap_inspeksi WHERE $Where dept='PACKING' $shft $nomc $grp ORDER BY id ASC");
-              }
+              $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_lap_inspeksi WHERE $Where dept='PACKING' $shft $nomc $grp ORDER BY id ASC");
               while ($row1 = sqlsrv_fetch_array($qry1)) {
               ?>
                 <tr bgcolor="<?php echo $bgcolor; ?>">
@@ -2035,17 +2028,19 @@ include "koneksi.php";
             <tbody>
               <?php
                 $qtyLapHarianPacking = "SELECT
-                                          tgl_update,
+                                          CONVERT(date, tgl_update) as tgl_update,
                                           SUM(netto) as tot_kg
                                         FROM
                                           db_qc.tbl_lap_inspeksi 
                                         WHERE
-                                          CAST(tgl_update AS DATE) BETWEEN '$start_date' AND '$stop_date' 
-                                          AND dept = 'PACKING' 
+                                          $Where
+                                          dept = 'PACKING' $shft $nomc $grp
                                           AND sts_gkg = '0' 
                                           AND inspektor IN ('PACKING A', 'PACKING B', 'PACKING C')
                                         GROUP BY
-                                          tgl_update;";
+                                          CONVERT(date, tgl_update)
+                                        ORDER BY
+                                          CONVERT(date, tgl_update);";
                 $resultLapHarianPacking = sqlsrv_query($con_db_qc_sqlsrv, $qtyLapHarianPacking);
                 $totalLapHarianPacking = 0;
               ?>
