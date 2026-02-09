@@ -850,7 +850,7 @@ if ($_POST['save'] == "save") {
 		}
 		$sqlData = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_schedule ([nokk],[nodemand],[langganan],[buyer],[no_order],[po],[no_hanger],[no_item],[jenis_kain],[tgl_delivery],[lebar],[gramasi],[warna],[no_warna],[qty_order],[pjng_order],[satuan_order],[lot],[rol],[bruto],[no_mesin],[no_urut],[no_sch],[proses],[revisi],[ket_status],[ket_kain],[tgl_masuk],[personil],[target],[catatan],[t_jawab],[lembur],[tgl_update],[total_gerobak])
 		  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,?,?,?,?,?,CURRENT_TIMESTAMP,?)",
-		  [$kartu,$_POST['nodemand'],$_POST['langganan'],$_POST['buyer'],$_POST['no_order'],$po,$_POST['no_hanger'],$_POST['no_item'],$jns,$_POST['tgl_delivery'],$_POST['lebar'],$_POST['grms'],$warna,$nowarna,$_POST['qty1'],$_POST['qty2'],$_POST['satuan1'],$lot,$_POST['qty3'],$_POST['qty4'],$_POST['no_mc'],$_POST['no_urut'],$_POST['no_urut'],$_POST['proses'],$_POST['revisi'],$_POST['ket'],$_POST['ket_kain'],$_POST['personil'],$_POST['target'],$catatan,$_POST['t_jawab'],$lembur,$_POST['total_gerobak']]);
+		  [$kartu,$_POST['nodemand'],$_POST['langganan'],$_POST['buyer'],$_POST['no_order'],$po,$_POST['no_hanger'],$_POST['no_item'],$jns,$_POST['tgl_delivery'],(float) $_POST['lebar'],(float) $_POST['grms'],$warna,$nowarna,(float) $_POST['qty1'],(float) $_POST['qty2'],$_POST['satuan1'],$lot,(float) $_POST['qty3'],(float) $_POST['qty4'],$_POST['no_mc'],$_POST['no_urut'],$_POST['no_urut'],$_POST['proses'],$_POST['revisi'],$_POST['ket'],$_POST['ket_kain'],$_POST['personil'],(float) $_POST['target'],$catatan,$_POST['t_jawab'],$lembur,(float) $_POST['total_gerobak']]);
 
 		if ($sqlData) {
 			// echo "<script>alert('Data Tersimpan');</script>";
