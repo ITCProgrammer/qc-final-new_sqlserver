@@ -65,6 +65,123 @@ include "koneksi.php";
 
 
 if ($_POST['simpan'] == "simpan") {
+    $errors = [];
+
+    $number_fields = [
+        'rol' => 'Qty Roll',
+        'bruto' => 'Bruto',
+        'rol_netto' => 'Qty Netto (Roll)',
+        'netto' => 'Qty Netto (KG)',
+        'rol_mutasi' => 'Qty Mutasi (Roll)',
+        'mutasi' => 'Qty Mutasi (KG)',
+        'kg_bs' => 'Qty BS (KG)',
+        'rol_bs' => 'Qty BS (Roll)',
+        'kg_th' => 'Qty Tahanan (KG)',
+        'rol_th' => 'Qty Tahanan (Roll)',
+        'panjang' => 'Panjang',
+        'lebar' => 'Lebar',
+        'gramasi' => 'Gramasi',
+        'qty_loss' => 'Loss (KG)',
+        'qty_kq' => 'KQ (KG)',
+        'qty_bq' => 'BQ (KG)',
+        'qty_kf' => 'KF (KG)',
+        'qty_bf' => 'BF (KG)',
+        'speed' => 'Speed'
+    ];
+
+    foreach ($number_fields as $field => $label) {
+        if (!isset($_POST[$field]) || trim($_POST[$field]) === '') {
+            $_POST[$field] = '0';
+        }
+    }
+
+    $required_fields = [
+        'nodemand' => 'No Demand',
+        'shift' => 'Shift',
+        'operator' => 'Operator',
+        'tgl' => 'Tgl Update',
+        'awal' => 'Tgl Pengiriman',
+        'inspektor' => 'Group',
+        'ket_qty' => 'Ket. Qty',
+        'note_loss' => 'Note Loss',
+        'note_kq' => 'Note KQ',
+        'note_bq' => 'Note BQ',
+        'note_kf' => 'Note KF',
+        'note_bf' => 'Note BF'
+    ];
+
+    foreach ($required_fields as $field => $label) {
+        $value = isset($_POST[$field]) ? trim($_POST[$field]) : '';
+        if ($field === 'shift') {
+            if ($value === '' || $value === '0') {
+                $errors[] = "$label wajib dipilih.";
+            }
+        } else {
+            if ($value === '') {
+                $errors[] = "$label wajib diisi.";
+            }
+        }
+    }
+
+    $date_fields = [
+        'tgl' => 'Tgl Update',
+        'awal' => 'Tgl Pengiriman',
+        'tgl_mulai' => 'Tgl Mulai',
+        'tgl_selesai' => 'Tgl Selesai'
+    ];
+    foreach ($date_fields as $field => $label) {
+        $value = isset($_POST[$field]) ? trim($_POST[$field]) : '';
+        if ($value !== '') {
+            $dt = DateTime::createFromFormat('Y-m-d', $value);
+            if (!$dt || $dt->format('Y-m-d') !== $value) {
+                $errors[] = "$label harus format YYYY-MM-DD.";
+            }
+        }
+    }
+
+    $time_fields = [
+        'jam' => 'Jam Mutasi',
+        'mulai' => 'Jam Mulai',
+        'selesai' => 'Jam Selesai',
+        'istirahat' => 'Istirahat'
+    ];
+    foreach ($time_fields as $field => $label) {
+        $value = isset($_POST[$field]) ? trim($_POST[$field]) : '';
+        if ($value !== '') {
+            if (!preg_match('/^\d{2}([:.])\d{2}(:\d{2})?$/', $value)) {
+                $errors[] = "$label harus format HH:MM atau HH:MM:SS.";
+            }
+        }
+    }
+
+    foreach ($number_fields as $field => $label) {
+        if (!isset($_POST[$field])) {
+            continue;
+        }
+        $value = trim($_POST[$field]);
+        if ($value === '') {
+            continue;
+        }
+        $normalized = str_replace(',', '.', $value);
+        if (!is_numeric($normalized)) {
+            $errors[] = "$label harus angka (gunakan titik atau koma untuk desimal).";
+        }
+    }
+
+    if (!isset($_POST['tgl']) || trim($_POST['tgl']) === '') {
+        $_POST['tgl'] = date('Y-m-d');
+    }
+
+    if (count($errors) > 0) {
+        $err_text = implode("\\n", $errors);
+        echo "<script>
+                swal({
+                    title: 'Validasi gagal',
+                    text: '$err_text',
+                    type: 'error'
+                });
+            </script>";
+    } else {
     // $ceksql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_lap_inspeksi WHERE nodemand='$_GET[nodemand]' and shift='$_POST[shift]' AND CONVERT(date, tgl_update) = CONVERT(date, GETDATE()) AND dept='PACKING'");
     $ceksql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_lap_inspeksi WHERE nodemand='$_GET[nodemand]' and shift='$_POST[shift]' AND dept='PACKING' AND operator='$_GET[operator]'");
     $rcek = sqlsrv_fetch_array($ceksql);
@@ -142,6 +259,16 @@ if ($_POST['simpan'] == "simpan") {
                         if (result.value) {
                             window.location.href='LapPackingNew&$_POST[nodemand]';
                         }
+                    });
+                </script>";
+        } else {
+            $sqlerr = sqlsrv_errors();
+            $errmsg = ($sqlerr && isset($sqlerr[0]['message'])) ? $sqlerr[0]['message'] : 'Gagal update data. Silakan cek input.';
+            echo "<script>
+                    swal({
+                        title: 'Gagal update',
+                        text: " . json_encode($errmsg) . ",
+                        type: 'error'
                     });
                 </script>";
         }
@@ -285,7 +412,18 @@ if ($_POST['simpan'] == "simpan") {
                         }
                     });
                 </script>";
+        } else {
+            $sqlerr = sqlsrv_errors();
+            $errmsg = ($sqlerr && isset($sqlerr[0]['message'])) ? $sqlerr[0]['message'] : 'Gagal simpan data. Silakan cek input.';
+            echo "<script>
+                    swal({
+                        title: 'Gagal simpan',
+                        text: " . json_encode($errmsg) . ",
+                        type: 'error'
+                    });
+                </script>";
         }
+    }
     }
 }
 ?>
@@ -840,6 +978,8 @@ $rowtoBS = db2_fetch_assoc($stmt2BS);
                             <input name="tgl" type="text" class="form-control pull-right" id="datepicker1"
                                 placeholder="0000-00-00" value="<?php if ($crow > 0) {
                                     echo $row['tgl_update'];
+                                } else {
+                                    echo date('Y-m-d');
                                 } ?>" required />
                         </div>
                     </div>
