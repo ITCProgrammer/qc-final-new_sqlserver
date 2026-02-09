@@ -10,7 +10,7 @@ if (isset($_GET['nodemand'])) {
         WHERE nodemand = ?
         ORDER BY no_test DESC
     ";
-    $query = sqlsrv_query($con_invqc_sqlsrv, $sql, [$nodemand]);
+    $query = sqlsrv_query($con_db_qc_sqlsrv, $sql, [$nodemand]);
 
     $row = sqlsrv_fetch_array($query, SQLSRV_FETCH_ASSOC);
 
