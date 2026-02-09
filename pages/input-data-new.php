@@ -46,7 +46,33 @@
 <?php
 ini_set("error_reporting", 1);
 session_start();
-include "koneksi.php";  
+include "koneksi.php";
+
+function format_sqlsrv_date($value)
+{
+	if ($value instanceof DateTime) {
+		return $value->format('Y-m-d');
+	}
+	if (is_string($value) && trim($value) !== '') {
+		$raw = substr($value, 0, 10);
+		$dt = DateTime::createFromFormat('Y-m-d', $raw);
+		if ($dt) {
+			return $dt->format('Y-m-d');
+		}
+	}
+	return '';
+}
+
+function to_datetime_safe($value)
+{
+	if ($value instanceof DateTime) {
+		return $value;
+	}
+	if (is_string($value) && trim($value) !== '') {
+		return new DateTime($value);
+	}
+	return null;
+}
 $nodemand=$_GET['nodemand'];
 /*$sqlDB2="SELECT ITXVIEWINPUTDATAADMQC.* FROM ITXVIEWINPUTDATAADMQC ITXVIEWINPUTDATAADMQC
 		WHERE ITXVIEWINPUTDATAADMQC.DEMANDNO='$nodemand'";*/
@@ -716,7 +742,7 @@ $rcekd=sqlsrv_fetch_array($sqlD, SQLSRV_FETCH_ASSOC);
         <div class="col-sm-4">
           <div class="input-group date">
             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-            <input name="tglfin" type="text" class="form-control pull-right" id="datepicker_" placeholder="0000-00-00" value="<?php if($cek>0){echo $rcek['tgl_fin'];}else{echo $rowdb2['TGL_FIN'];}?>" readonly/>
+            <input name="tglfin" type="text" class="form-control pull-right" id="datepicker_" placeholder="0000-00-00" value="<?php if($cek>0){echo format_sqlsrv_date($rcek['tgl_fin']);}else{echo format_sqlsrv_date($rowdb2['TGL_FIN']);}?>" readonly/>
           </div>
         </div>
       </div>
@@ -726,7 +752,7 @@ $rcekd=sqlsrv_fetch_array($sqlD, SQLSRV_FETCH_ASSOC);
         <div class="col-sm-4">
           <div class="input-group date">
             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-            <input name="tglins" type="text" class="form-control pull-right" id="datepicker1_" placeholder="0000-00-00" value="<?php if($cek>0){echo $rcek['tgl_ins'];}else{echo $rowdb2['TGL_INS'];} ?>" readonly/>
+            <input name="tglins" type="text" class="form-control pull-right" id="datepicker1_" placeholder="0000-00-00" value="<?php if($cek>0){echo format_sqlsrv_date($rcek['tgl_ins']);}else{echo format_sqlsrv_date($rowdb2['TGL_INS']);} ?>" readonly/>
           </div>
         </div>
 	  </div> 
@@ -735,7 +761,7 @@ $rcekd=sqlsrv_fetch_array($sqlD, SQLSRV_FETCH_ASSOC);
         <div class="col-sm-4">
           <div class="input-group date">
             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-            <input name="tglcwarna" type="text" class="form-control pull-right" id="datepicker4_" placeholder="0000-00-00" value="<?php if($cek>0){echo $rcek['tglcwarna'];}else{echo $rowdb2['TGL_CCK_WARNA'];}?>" readonly/>
+            <input name="tglcwarna" type="text" class="form-control pull-right" id="datepicker4_" placeholder="0000-00-00" value="<?php if($cek>0){echo format_sqlsrv_date($rcek['tglcwarna']);}else{echo format_sqlsrv_date($rowdb2['TGL_CCK_WARNA']);}?>" readonly/>
           </div>
         </div>
 		<div class="col-sm-2">
@@ -749,15 +775,13 @@ $rcekd=sqlsrv_fetch_array($sqlD, SQLSRV_FETCH_ASSOC);
         </div>
 		<font color="red">
 		<?php
-		$tgl_w=$sWarna['tgl_cwarna'] ? date_format($sWarna['tgl_cwarna'], 'Y-m-d') : '';
-		if($cek>0){
-		$tgl_warna= new DateTime($rcek['tglcwarna']);
-		$tgl_pack= new DateTime($rcek['tgl_pack']);}else{
-			$tgl_warna= new DateTime($tgl_w);
-			$tgl_pack= new DateTime($sPack['tgl_mulai']);
+		$tgl_w = format_sqlsrv_date(isset($sWarna['tgl_cwarna']) ? $sWarna['tgl_cwarna'] : '');
+		$tgl_warna = $cek>0 ? to_datetime_safe($rcek['tglcwarna']) : to_datetime_safe($tgl_w);
+		$tgl_pack = $cek>0 ? to_datetime_safe($rcek['tgl_pack']) : to_datetime_safe($sPack['tgl_mulai']);
+		if ($tgl_warna && $tgl_pack) {
+			$delay = $tgl_warna->diff($tgl_pack); 
+			if($delay->days>=3){?> <span class='badge bg-red blink_me'><?php echo "Delay "; echo $delay->days; echo " Hari";?></span> <?php }
 		}
-		$delay = $tgl_warna->diff($tgl_pack); 
-		if($delay->days>=3){?> <span class='badge bg-red blink_me'><?php echo "Delay "; echo $delay->days; echo " Hari";?></span> <?php } 
 		?></font>
       </div> 
 	  <div class="form-group">
@@ -765,7 +789,7 @@ $rcekd=sqlsrv_fetch_array($sqlD, SQLSRV_FETCH_ASSOC);
         <div class="col-sm-4">
           <div class="input-group date">
             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-            <input name="tglpk" type="text" class="form-control pull-right" id="datepicker2_" placeholder="0000-00-00" value="<?php if($cek>0){echo $rcek['tgl_pack'];}else{echo $rowdb2['TGL_PACK'];}?>" readonly/>
+            <input name="tglpk" type="text" class="form-control pull-right" id="datepicker2_" placeholder="0000-00-00" value="<?php if($cek>0){echo format_sqlsrv_date($rcek['tgl_pack']);}else{echo format_sqlsrv_date($rowdb2['TGL_PACK']);}?>" readonly/>
           </div>
         </div>
 		<div class="col-sm-2">
@@ -783,7 +807,7 @@ $rcekd=sqlsrv_fetch_array($sqlD, SQLSRV_FETCH_ASSOC);
         <div class="col-sm-4">
           <div class="input-group date">
             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-            <input name="tglmsk" type="date" class="form-control pull-right" value="<?php if($cek>0){echo ($rcek['tgl_masuk'] ? date_format($rcek['tgl_masuk'], 'Y-m-d') : '');}?>" required>
+            <input name="tglmsk" type="date" class="form-control pull-right" value="<?php if($cek>0){echo format_sqlsrv_date($rcek['tgl_masuk']);}?>" required>
           </div>
         </div>
 	  </div>
@@ -970,7 +994,7 @@ $rcekd=sqlsrv_fetch_array($sqlD, SQLSRV_FETCH_ASSOC);
 			<?php } ?>
 		  <input type="hidden" value="<?php if($cek>0){echo $rcek['pelanggan'];}else{echo $rowdb2['LANGGANAN']."/".$rowdb20['BUYER'];}?>" name="pelanggan">
 		  <input type="hidden" value="<?php if($cek>0){echo $rcek['no_ko'];}else{echo $rKO['KONo'];}?>" name="no_ko">
-		  <input type="hidden" value="<?php if($cek>0){echo ($rcek['tgl_delivery'] ? date_format($rcek['tgl_delivery'], 'Y-m-d') : '');}else{echo $rowdb2['DELIVERYDATE'];}?>" name="tgl_delivery">
+		  <input type="hidden" value="<?php if($cek>0){echo format_sqlsrv_date($rcek['tgl_delivery']);}else{echo format_sqlsrv_date($rowdb2['DELIVERYDATE']);}?>" name="tgl_delivery">
 	 
 	 
 	 
@@ -1194,7 +1218,7 @@ $rcekd=sqlsrv_fetch_array($sqlD, SQLSRV_FETCH_ASSOC);
     <td width="723" valign="top" nowrap>ITEM</td>
     <td width="723" valign="top" nowrap><?php echo $rcek['no_item'];?></td>
     <td width="723" nowrap valign="bottom"><p>DELIVERY KAIN    JADI</p></td>
-    <td width="723" nowrap valign="bottom"><p><?php echo ($rcek['tgl_delivery'] ? date_format($rcek['tgl_delivery'], "Y-m-d") : '');?> </p></td>
+    <td width="723" nowrap valign="bottom"><p><?php echo format_sqlsrv_date($rcek['tgl_delivery']);?> </p></td>
   </tr>
   <tr>
     <td width="723" nowrap valign="bottom"><p>WARNA</p></td>
