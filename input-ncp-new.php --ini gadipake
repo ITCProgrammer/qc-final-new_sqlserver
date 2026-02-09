@@ -1017,7 +1017,8 @@ function no_urut()
 	return $nipbr;
 }
 $nou = no_urut();
-function autono_reg()
+
+function autono_reg_unuse()
 {
 	include "koneksi.php";
 	date_default_timezone_set('Asia/Jakarta');
@@ -1043,6 +1044,7 @@ function autono_reg()
 	//$no2 =$today.str_pad($Urutd, 4, "0",  STR_PAD_LEFT);
 	return $no2;
 }
+
 if ($_POST['save'] == "Simpan") {
 	$warna = str_replace("'", "''", $_POST['warna']);
 	$nowarna = str_replace("'", "''", $_POST['no_warna']);

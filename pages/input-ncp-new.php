@@ -1028,37 +1028,39 @@ function no_urut()
 	return $nipbr;
 }
 $nou = no_urut();
+
 function autono_reg()
 {
-	include "koneksi.php";
-	date_default_timezone_set('Asia/Jakarta');
-	$bln = date("ym");
-	$today = date("ymd");
-	$sqlnotes = sqlsrv_query(
-		$con_db_qc_sqlsrv,
-		"SELECT TOP 1 reg_no FROM db_qc.tbl_ncp_qcf_now 
-		 WHERE SUBSTRING(reg_no, 1, 6) LIKE '%" . $today . "%' 
-		 ORDER BY reg_no DESC"
-	);
-	$dt = sqlsrv_has_rows($sqlnotes) ? 1 : 0;
-	if ($dt > 0) {
-		$rd = sqlsrv_fetch_array($sqlnotes);
-		$dt = $rd['reg_no'];
-		$strd = substr($dt, 6, 2);
-		$Urutd = (int)$strd;
-	} else {
-		$Urutd = 0;
-	}
-	$Urutd = $Urutd + 1;
-	$Nold = "";
-	$nilaid = 2 - strlen($Urutd);
-	for ($i = 1; $i <= $nilaid; $i++) {
-		$Nold = $Nold . "0";
-	}
-	$no2 = $today . $Nold . $Urutd;
-	//$no2 =$today.str_pad($Urutd, 4, "0",  STR_PAD_LEFT);
-	return $no2;
+    include "koneksi.php";
+    date_default_timezone_set('Asia/Jakarta');
+    $today = date("ymd"); 
+
+    $sql_string = "SELECT TOP 1 reg_no FROM db_qc.tbl_ncp_qcf_now 
+                   WHERE reg_no LIKE '" . $today . "%' 
+                   ORDER BY reg_no DESC";
+    
+    $sqlnotes = sqlsrv_query($con_db_qc_sqlsrv, $sql_string);
+
+    if ($sqlnotes === false) {
+        $Urutd = 0;
+    } else {
+        if (sqlsrv_has_rows($sqlnotes)) {
+            $rd = sqlsrv_fetch_array($sqlnotes, SQLSRV_FETCH_ASSOC);
+            $last_reg = $rd['reg_no'];
+            $strd = substr($last_reg, -2); 
+            $Urutd = (int)$strd;
+        } else {
+            $Urutd = 0;
+        }
+    }
+
+    $Urutd = $Urutd + 1;
+
+    $no2 = $today . str_pad($Urutd, 2, "0", STR_PAD_LEFT);
+    
+    return $no2;
 }
+
 if ($_POST['save'] == "Simpan") {
 	$warna = str_replace("'", "''", $_POST['warna']);
 	$nowarna = str_replace("'", "''", $_POST['no_warna']);
@@ -1110,48 +1112,48 @@ if ($_POST['save'] == "Simpan") {
 	} else {
 		$rgno = autono_reg();
 	}
-$sqlData = sqlsrv_query(
-		$con_db_qc_sqlsrv,
-		"INSERT INTO db_qc.tbl_ncp_qcf_now (
-			reg_no, nodemand, nokk, no_ncp, langganan, buyer, no_order,
-			no_hanger, no_item, prod_order, po, po_rajut, supp_rajut,
-			jenis_kain, lebar, gramasi, lot, rol, warna, no_warna,
-			masalah, berat, dept, nsp, nsp1, nsp2, peninjau_awal,
-			ket, tempat, masalah_tambahan, masalah_dominan, dibuat_oleh,
-			revisi, no_ncp_gabungan, ncp_hitung, kain_gerobak, m_proses,
-			tgl_delivery, tgl_rencana, tgl_buat, tgl_update,
-			status_warna, disposisi
-		) VALUES (
-			'$rgno', '$_POST[nodemand]', '$_POST[nokk]', '$ncp',
-			'$_POST[pelanggan]', '$_POST[buyer]', '$_POST[no_order]',
-			'$_POST[no_hanger]', '$_POST[no_item]', '$_POST[lot]',
-			'$po', '$_POST[po_rajut]', '$_POST[supp_rajut]',
-			'$jns', '$lebar', '$grms', '$_POST[lot]',
-			'$rol', '$warna', '$nowarna', '$kt1', '$_POST[berat]',
-			'$_POST[dept]', '$_POST[nsp1]', '$_POST[nsp2]', '$_POST[nsp3]',
-			'$_POST[peninjau_awal1]', '$ket', '$_POST[tempat]',
-			'$_POST[masalah_tambahan]', '$_POST[masalah_dominan]',
-			'$_POST[dibuat_oleh]', '$rev1', '$ncpgabung', '$hitung',
-			'$kaingerobak', '$_POST[m_proses]', '$_POST[tgl_delivery]',
-			'$_POST[tgl_target]', GETDATE(), GETDATE(),
-			'$_POST[status_warna]', '$_POST[disposisi]'
-		)"
-	);
+// $sqlData = sqlsrv_query(
+// 		$con_db_qc_sqlsrv,
+// 		"INSERT INTO db_qc.tbl_ncp_qcf_now (
+// 			reg_no, nodemand, nokk, no_ncp, langganan, buyer, no_order,
+// 			no_hanger, no_item, prod_order, po, po_rajut, supp_rajut,
+// 			jenis_kain, lebar, gramasi, lot, rol, warna, no_warna,
+// 			masalah, berat, dept, nsp, nsp1, nsp2, peninjau_awal,
+// 			ket, tempat, masalah_tambahan, masalah_dominan, dibuat_oleh,
+// 			revisi, no_ncp_gabungan, ncp_hitung, kain_gerobak, m_proses,
+// 			tgl_delivery, tgl_rencana, tgl_buat, tgl_update,
+// 			status_warna, disposisi
+// 		) VALUES (
+// 			'$rgno', '$_POST[nodemand]', '$_POST[nokk]', '$ncp',
+// 			'$_POST[pelanggan]', '$_POST[buyer]', '$_POST[no_order]',
+// 			'$_POST[no_hanger]', '$_POST[no_item]', '$_POST[lot]',
+// 			'$po', '$_POST[po_rajut]', '$_POST[supp_rajut]',
+// 			'$jns', '$lebar', '$grms', '$_POST[lot]',
+// 			'$rol', '$warna', '$nowarna', '$kt1', '$_POST[berat]',
+// 			'$_POST[dept]', '$_POST[nsp1]', '$_POST[nsp2]', '$_POST[nsp3]',
+// 			'$_POST[peninjau_awal1]', '$ket', '$_POST[tempat]',
+// 			'$_POST[masalah_tambahan]', '$_POST[masalah_dominan]',
+// 			'$_POST[dibuat_oleh]', '$rev1', '$ncpgabung', '$hitung',
+// 			'$kaingerobak', '$_POST[m_proses]', '$_POST[tgl_delivery]',
+// 			'$_POST[tgl_target]', GETDATE(), GETDATE(),
+// 			'$_POST[status_warna]', '$_POST[disposisi]'
+// 		)"
+// 	);
 
-	if ($sqlData) {
+// 	if ($sqlData) {
 
-		echo "<script>swal({
-  title: 'Data Tersimpan',   
-  text: 'Klik Ok untuk input data kembali',
-  type: 'success',
-  }).then((result) => {
-  if (result.value) {
-      window.open('pages/cetak/cetak_ncp_now.php?no_ncp_gabungan=$ncpgabung','_blank');
-      window.location.href='NCPNew-$_GET[nodemand]';
+// 		echo "<script>swal({
+//   title: 'Data Tersimpan',   
+//   text: 'Klik Ok untuk input data kembali',
+//   type: 'success',
+//   }).then((result) => {
+//   if (result.value) {
+//       window.open('pages/cetak/cetak_ncp_now.php?no_ncp_gabungan=$ncpgabung','_blank');
+//       window.location.href='NCPNew-$_GET[nodemand]';
 	 
-  }
-});</script>";
-	}
+//   }
+// });</script>";
+// 	}
 }
 if ($_POST['save'] == "Ubah") {
 	$sqlCk = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 revisi, dept, no_ncp FROM db_qc.tbl_ncp_qcf_now WHERE id='$_POST[idncp]' ORDER BY id DESC");
