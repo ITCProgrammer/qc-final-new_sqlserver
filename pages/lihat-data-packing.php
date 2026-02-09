@@ -51,7 +51,7 @@ include "koneksi.php";
       $stop_date = $Akhir . " 0" . $jamAr;
     }
     if ($jamA != "" or $jamAr != "") {
-      $Where = " FORMAT(CONCAT(tgl_update,' ',jam_update), 'yyyy-MM-dd HH:mm') between '$start_date' and '$stop_date' and ";
+      $Where = " TRY_CONVERT(datetime,TRY_CONVERT(VARCHAR(19),CONCAT(tgl_update,' ',jam_update))) between '$start_date:00' and '$stop_date:59' and ";
     } else {
       $start_date = $Awal;
       $stop_date = $Akhir;

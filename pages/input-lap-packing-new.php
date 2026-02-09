@@ -522,7 +522,15 @@ GROUP BY
 	PRODUCTIONRESERVATION.ORDERCODE,
 	PRODUCTIONRESERVATION.ITEMTYPEAFICODE ";
 $stmtbr = db2_exec($conn1, $sqlbruto, array('cursor' => DB2_SCROLLABLE));
-$rowbr = db2_fetch_assoc($stmtbr);
+if (!$stmtbr) {
+    error_log("DB2 error sqlbruto: " . db2_conn_errormsg($conn1));
+    $rowbr = ['QTY_BAGI_KAIN' => 0];
+} else {
+    $rowbr = db2_fetch_assoc($stmtbr);
+    if ($rowbr === false || $rowbr === null) {
+        $rowbr = ['QTY_BAGI_KAIN' => 0];
+    }
+}
 $sqlto = "SELECT 
 ELEMENTSINSPECTION.DEMANDCODE,
 ELEMENTSINSPECTION.OPERATORCODE,
