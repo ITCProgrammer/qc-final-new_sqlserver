@@ -1061,7 +1061,8 @@ function autono_reg()
     return $no2;
 }
 
-if ($_POST['save'] == "Simpan") {
+if ($_POST['save'] == "Simpan") 
+{
 	$warna = str_replace("'", "''", $_POST['warna']);
 	$nowarna = str_replace("'", "''", $_POST['no_warna']);
 	$jns = str_replace("'", "''", $_POST['jns_kain']);
@@ -1112,48 +1113,60 @@ if ($_POST['save'] == "Simpan") {
 	} else {
 		$rgno = autono_reg();
 	}
-// $sqlData = sqlsrv_query(
-// 		$con_db_qc_sqlsrv,
-// 		"INSERT INTO db_qc.tbl_ncp_qcf_now (
-// 			reg_no, nodemand, nokk, no_ncp, langganan, buyer, no_order,
-// 			no_hanger, no_item, prod_order, po, po_rajut, supp_rajut,
-// 			jenis_kain, lebar, gramasi, lot, rol, warna, no_warna,
-// 			masalah, berat, dept, nsp, nsp1, nsp2, peninjau_awal,
-// 			ket, tempat, masalah_tambahan, masalah_dominan, dibuat_oleh,
-// 			revisi, no_ncp_gabungan, ncp_hitung, kain_gerobak, m_proses,
-// 			tgl_delivery, tgl_rencana, tgl_buat, tgl_update,
-// 			status_warna, disposisi
-// 		) VALUES (
-// 			'$rgno', '$_POST[nodemand]', '$_POST[nokk]', '$ncp',
-// 			'$_POST[pelanggan]', '$_POST[buyer]', '$_POST[no_order]',
-// 			'$_POST[no_hanger]', '$_POST[no_item]', '$_POST[lot]',
-// 			'$po', '$_POST[po_rajut]', '$_POST[supp_rajut]',
-// 			'$jns', '$lebar', '$grms', '$_POST[lot]',
-// 			'$rol', '$warna', '$nowarna', '$kt1', '$_POST[berat]',
-// 			'$_POST[dept]', '$_POST[nsp1]', '$_POST[nsp2]', '$_POST[nsp3]',
-// 			'$_POST[peninjau_awal1]', '$ket', '$_POST[tempat]',
-// 			'$_POST[masalah_tambahan]', '$_POST[masalah_dominan]',
-// 			'$_POST[dibuat_oleh]', '$rev1', '$ncpgabung', '$hitung',
-// 			'$kaingerobak', '$_POST[m_proses]', '$_POST[tgl_delivery]',
-// 			'$_POST[tgl_target]', GETDATE(), GETDATE(),
-// 			'$_POST[status_warna]', '$_POST[disposisi]'
-// 		)"
-// 	);
+	$sqlData = sqlsrv_query(
+		$con_db_qc_sqlsrv,
+		"INSERT INTO db_qc.tbl_ncp_qcf_now (
+			reg_no, nodemand, nokk, no_ncp, langganan, buyer, no_order,
+			no_hanger, no_item, prod_order, po, po_rajut, supp_rajut,
+			jenis_kain, lebar, gramasi, lot, rol, warna, no_warna,
+			masalah, berat, dept, nsp, nsp1, nsp2, peninjau_awal,
+			ket, tempat, masalah_tambahan, masalah_dominan, dibuat_oleh,
+			revisi, no_ncp_gabungan, ncp_hitung, kain_gerobak, m_proses,
+			tgl_delivery, tgl_rencana, tgl_buat, tgl_update,
+			status_warna, disposisi
+		) VALUES (
+			'$rgno', '$_POST[nodemand]', '$_POST[nokk]', '$ncp',
+			'$_POST[pelanggan]', '$_POST[buyer]', '$_POST[no_order]',
+			'$_POST[no_hanger]', '$_POST[no_item]', '$_POST[lot]',
+			'$po', '$_POST[po_rajut]', '$_POST[supp_rajut]',
+			'$jns', '$lebar', '$grms', '$_POST[lot]',
+			'$rol', '$warna', '$nowarna', '$kt1', '$_POST[berat]',
+			'$_POST[dept]', '$_POST[nsp1]', '$_POST[nsp2]', '$_POST[nsp3]',
+			'$_POST[peninjau_awal1]', '$ket', '$_POST[tempat]',
+			'$_POST[masalah_tambahan]', '$_POST[masalah_dominan]',
+			'$_POST[dibuat_oleh]', '$rev1', '$ncpgabung', '$hitung',
+			'$kaingerobak', '$_POST[m_proses]', '$_POST[tgl_delivery]',
+			'$_POST[tgl_target]', GETDATE(), GETDATE(),
+			'$_POST[status_warna]', '$_POST[disposisi]'
+		)"
+	);
 
-// 	if ($sqlData) {
+	if ($sqlData) {
 
-// 		echo "<script>swal({
-//   title: 'Data Tersimpan',   
-//   text: 'Klik Ok untuk input data kembali',
-//   type: 'success',
-//   }).then((result) => {
-//   if (result.value) {
-//       window.open('pages/cetak/cetak_ncp_now.php?no_ncp_gabungan=$ncpgabung','_blank');
-//       window.location.href='NCPNew-$_GET[nodemand]';
-	 
-//   }
-// });</script>";
-// 	}
+		echo "<script>swal({
+		title: 'Data Tersimpan',   
+		text: 'Klik Ok untuk input data kembali',
+		type: 'success',
+		}).then((result) => {
+		if (result.value) {
+			window.open('pages/cetak/cetak_ncp_now.php?no_ncp_gabungan=$ncpgabung','_blank');
+			window.location.href='NCPNew-$_GET[nodemand]';
+			
+		}
+		});</script>";
+	}else {
+        $errors = sqlsrv_errors();
+        $errorMsg = "";
+        foreach ($errors as $error) {
+            $cleanMsg = str_replace(array("'", "\"", "\n", "\r"), "", $error['message']);
+            $errorMsg .= "SQLSTATE: ".$error['SQLSTATE']." | Code: ".$error['code']." | Msg: ".$cleanMsg . "\\n";
+        }
+        echo "<script>swal({
+            title: 'Gagal Simpan!',
+            text: 'Detail Error: $errorMsg',
+            type: 'error'
+        });</script>";
+    }
 }
 if ($_POST['save'] == "Ubah") {
 	$sqlCk = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 revisi, dept, no_ncp FROM db_qc.tbl_ncp_qcf_now WHERE id='$_POST[idncp]' ORDER BY id DESC");
