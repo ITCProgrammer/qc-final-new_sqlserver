@@ -288,7 +288,7 @@ STOCKTRANSACTION.ORDERCODE";
 $stmt1r = db2_exec($conn1, $sqlroll, array('cursor' => DB2_SCROLLABLE));
 $rowr = db2_fetch_assoc($stmt1r);
 
-$sqlCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 *, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_schedule_packing WHERE nodemand='$nodemand' ORDER BY id DESC");
+$sqlCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 *,CONVERT(VARCHAR(10),tgl_delivery) tgl_delivery, COUNT(*) OVER() AS total_rows FROM db_qc.tbl_schedule_packing WHERE nodemand='$nodemand' ORDER BY id DESC");
 $rcek = sqlsrv_fetch_array($sqlCek);
 $cek = $rcek['total_rows'] ?? 0;
 
@@ -740,7 +740,7 @@ $Langganan = isset($_POST['langganan']) ? $_POST['langganan'] : '';
 				if (($cek > 0 || trim($rowdb2['CODE']) != NULL) && $nodemand != "") {
 					$stmt_cek_potong_tq = sqlsrv_query($con_db_qc_sqlsrv, "SELECT 
 																				nodemand, 
-																				tgl_masuk, 
+																				CONVERT(VARCHAR(19),tgl_masuk) tgl_masuk, 
 																				personil, 
 																				catatan, COUNT(*) OVER() AS total_rows 
 																			FROM db_qc.tbl_schedule_packing 
