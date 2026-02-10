@@ -218,8 +218,8 @@ $page = strtolower($page);
                                     include('koneksi.php');
 
                                     //TIM A
-                                    $sqlTimA = "SELECT COUNT(*) AS jml
-                                        FROM tbl_qcf
+                                    $sqlTimA = "SELECT COUNT(*) AS jml_a
+                                        FROM db_qc.tbl_qcf
                                         WHERE sts_pbon = '1'
                                         AND sts_aksi IS NULL
                                         AND sales IN (
