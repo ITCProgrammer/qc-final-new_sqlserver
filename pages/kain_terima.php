@@ -1,8 +1,9 @@
 <?php
 include("../koneksi.php");
 $modal_id = $_GET['id'];
-$qry = mysqli_query($conlab, "SELECT * FROM tbl_test_qc  WHERE id='$modal_id'");
-$r = mysqli_fetch_array($qry);
+$qry = sqlsrv_query($con_db_laborat_sqlsrv, "SELECT * FROM db_laborat.tbl_test_qc  WHERE id='$modal_id'");
+$r = sqlsrv_fetch_array($qry);
+
 ?>
 <div class="modal-dialog ">
   <div class="modal-content">

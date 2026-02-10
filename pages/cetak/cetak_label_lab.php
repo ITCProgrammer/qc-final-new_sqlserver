@@ -89,7 +89,7 @@ $r = sqlsrv_fetch_array($data);
               <td colspan="3" style="border-top:0px #000000 solid; border-bottom:20px solid grey;
   border-left:0px #000000 solid; border-right:0px #000000 solid;">
                 <div style="font-size:7px;">
-                  <?php echo $r['tgl_terimakain']->format('Y-m-d') ?>
+                  <?php echo ($r['tgl_terimakain'] ? $r['tgl_terimakain']->format('Y-m-d') : '') ?>
                 </div>
               </td>
             </tr>
@@ -154,7 +154,7 @@ $r = sqlsrv_fetch_array($data);
               <td colspan="3" style="border-top:0px #000000 solid; border-bottom:20px solid grey;
   border-left:0px #000000 solid; border-right:0px #000000 solid;">
                 <div style="font-size:7px;">
-                  <?php echo $r['tgl_terimakain']->format('Y-m-d') ?>
+                  <?php echo ($r['tgl_terimakain'] ? $r['tgl_terimakain']->format('Y-m-d') : '') ?>
                 </div>
               </td>
             </tr>
@@ -219,7 +219,7 @@ $r = sqlsrv_fetch_array($data);
               <td colspan="3" style="border-top:0px #000000 solid; border-bottom:20px solid grey;
   border-left:0px #000000 solid; border-right:0px #000000 solid;">
                 <div style="font-size:7px;">
-                  <?php echo $r['tgl_terimakain']->format('Y-m-d') ?>
+                  <?php echo ($r['tgl_terimakain'] ? $r['tgl_terimakain']->format('Y-m-d') : '') ?>
                 </div>
               </td>
             </tr>
