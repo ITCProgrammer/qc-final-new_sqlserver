@@ -11,7 +11,7 @@ $now      = date("Y-m-d");
 $data = sqlsrv_query($con_db_qc_sqlsrv, "
     SELECT TOP 1 t.*,
            notes.note_g
-    FROM tbl_tq_test t
+    FROM db_qc.tbl_tq_test t
     OUTER APPLY (
         SELECT STRING_AGG(v.note, ' ') AS note_g
         FROM (VALUES
@@ -37,7 +37,7 @@ $rcek1 = sqlsrv_fetch_array($data, SQLSRV_FETCH_ASSOC);
 $databs = sqlsrv_query($con_db_qc_sqlsrv, "
     SELECT TOP 1 t.*,
            notes.note_bs
-    FROM tbl_tq_test t
+    FROM db_qc.tbl_tq_test t
     OUTER APPLY (
         SELECT STRING_AGG(v.note, ' ') AS note_bs
         FROM (VALUES (t.bas_note)) v(note)
@@ -51,7 +51,7 @@ $rcekbs = sqlsrv_fetch_array($databs, SQLSRV_FETCH_ASSOC);
 $sqlCekR = sqlsrv_query($con_db_qc_sqlsrv, "
     SELECT TOP 1 r.*,
            notes.rnote_g
-    FROM tbl_tq_randomtest r
+    FROM db_qc.tbl_tq_randomtest r
     OUTER APPLY (
         SELECT STRING_AGG(v.note, ' ') AS rnote_g
         FROM (VALUES
@@ -77,7 +77,7 @@ $rcekR = sqlsrv_fetch_array($sqlCekR, SQLSRV_FETCH_ASSOC);
 $sqlCekD = sqlsrv_query($con_db_qc_sqlsrv, "
     SELECT TOP 1 d.*,
            notes.dnote_g
-    FROM tbl_tq_disptest d
+    FROM db_qc.tbl_tq_disptest d
     OUTER APPLY (
         SELECT STRING_AGG(v.note, ' ') AS dnote_g
         FROM (VALUES
@@ -103,7 +103,7 @@ $rcekD = sqlsrv_fetch_array($sqlCekD, SQLSRV_FETCH_ASSOC);
 $sqlCekM = sqlsrv_query($con_db_qc_sqlsrv, "
     SELECT TOP 1 m.*,
            notes.mnote_g
-    FROM tbl_tq_marginal m
+    FROM db_qc.tbl_tq_marginal m
     OUTER APPLY (
         SELECT STRING_AGG(v.note, ' ') AS mnote_g
         FROM (VALUES
@@ -127,15 +127,15 @@ $sqlCekM = sqlsrv_query($con_db_qc_sqlsrv, "
 ");
 $rcekM = sqlsrv_fetch_array($sqlCekM, SQLSRV_FETCH_ASSOC);
 
-$data1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nokk FROM tbl_tq_nokk WHERE id='$idkk'");
+$data1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nokk FROM db_qc.tbl_tq_nokk WHERE id='$idkk'");
 $rd    = sqlsrv_fetch_array($data1, SQLSRV_FETCH_ASSOC);
 
 $data2 = sqlsrv_query($con_db_qc_sqlsrv, "
     SELECT n.*,
            t.running_color,
            t.running_quality
-    FROM tbl_tq_nokk n
-    LEFT JOIN tbl_tq_nokk2 t ON t.id_tq2 = n.id
+    FROM db_qc.tbl_tq_nokk n
+    LEFT JOIN db_qc.tbl_tq_nokk2 t ON t.id_tq2 = n.id
     WHERE n.id='$idkk'
 ");
 $rd2 = sqlsrv_fetch_array($data2, SQLSRV_FETCH_ASSOC);
@@ -144,7 +144,7 @@ $id_tq_test_2 = $rcek1['id_nokk'];
 $tq_test_2_sql = sqlsrv_query($con_db_qc_sqlsrv, "
     SELECT id_nokk, spirality_status, bleeding_root, wrinkle, wrinkle1, wrinkle2,
            stat_wrinkle, stat_wrinkle1, wrinkle_note
-    FROM tbl_tq_test_2
+    FROM db_qc.tbl_tq_test_2
     WHERE id_nokk = '$id_tq_test_2'
 ");
 $tq_test_2_array = sqlsrv_fetch_array($tq_test_2_sql, SQLSRV_FETCH_ASSOC);
@@ -250,7 +250,19 @@ textarea {
             <td align="right" style="font-size: 12px;">Page 1 of 9</td> 
         </tr>
         <tr>
-            <td align="right" style="font-size: 12px;"><?php echo date("F j, Y", strtotime($rd2['date_out1']));?></td> 
+            <td align="right" style="font-size: 12px;">
+                <?php
+                $v = $rd2['date_out1'] ?? null;
+
+                if ($v instanceof DateTimeInterface) {
+                    echo $v->format('F j, Y');
+                } elseif (is_string($v) && trim($v) !== '') {
+                    echo date('F j, Y', strtotime($v));
+                } else {
+                    echo ''; // atau '-' kalau mau
+                }
+                ?>
+            </td>
         </tr>
         <tr>
             <!-- <td align="right" style="font-size: 12px;">&nbsp;</td>  -->
@@ -479,7 +491,7 @@ textarea {
         </tr>
         <tr>
             <?php
-                $sqljk = "SELECT jenis_kain From tbl_tq_nokk WHERE id='$idkk'";
+                $sqljk = "SELECT jenis_kain From db_qc.tbl_tq_nokk WHERE id='$idkk'";
                 $resultjk=sqlsrv_query($con_db_qc_sqlsrv,$sqljk);
                 while($rowjk=sqlsrv_fetch_array($resultjk, SQLSRV_FETCH_ASSOC)){ 
                 $detailjk=explode(",",$rowjk['jenis_kain']);?>
@@ -517,7 +529,7 @@ textarea {
     <table width="100%" border="1" class="table-list1">
         <tr>
             <?php
-                $sqljk1 = "SELECT jenis_kain From tbl_tq_nokk WHERE id='$idkk'";
+                $sqljk1 = "SELECT jenis_kain From db_qc.tbl_tq_nokk WHERE id='$idkk'";
                 $resultjk1=sqlsrv_query($con_db_qc_sqlsrv,$sqljk1);
                 while($rowjk1=sqlsrv_fetch_array($resultjk1, SQLSRV_FETCH_ASSOC)){ 
                 $detailjk1=explode(",",$rowjk1['jenis_kain']);?>
@@ -614,7 +626,7 @@ textarea {
         <tr>
             <td class="narrow-column" style="font-size: 12px;">LLL Material Name:</td>
             <?php 
-                $query = sqlsrv_query($con_db_qc_sqlsrv,"select * from master_matrialname where item='$rd2[no_item]'");
+                $query = sqlsrv_query($con_db_qc_sqlsrv,"select * from db_qc.master_matrialname where item='$rd2[no_item]'");
                 $datamatrial = sqlsrv_fetch_array($query, SQLSRV_FETCH_ASSOC);
             ?>
             <td><?php echo $datamatrial['matrial_name'];?></td>
