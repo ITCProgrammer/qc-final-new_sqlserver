@@ -3,28 +3,32 @@
     include "koneksi.php";
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_user']) && $_POST['simpan_user'] == 'Simpan') {
-        $nama     = mysqli_real_escape_string($con, $_POST['nama']);
-        $user     = mysqli_real_escape_string($con, $_POST['user']);
-        $email    = mysqli_real_escape_string($con, $_POST['email']);
-        $password = mysqli_real_escape_string($con, $_POST['password']);
-        $level    = mysqli_real_escape_string($con, $_POST['level']);
+        $nama     = $_POST['nama'];
+        $user     = $_POST['user'];
+        $email    = $_POST['email'];
+        $password = $_POST['password'];
+        $level    = $_POST['level'];
         $status   = 'Aktif';
-        $dept     = mysqli_real_escape_string($con, $_POST['dept']);
-        $foto     = mysqli_real_escape_string($con, $_POST['foto']);
-        $akses    = mysqli_real_escape_string($con, $_POST['akses']);
-        $jabatan  = mysqli_real_escape_string($con, $_POST['jabatan']);
-        // $jobdesc  = mysqli_real_escape_string($con, $_POST['jobdesc']);
+        $dept     = $_POST['dept'];
+        $foto     = $_POST['foto'];
+        $akses    = $_POST['akses'];
+        $jabatan  = $_POST['jabatan'];
+        // $jobdesc  = $_POST['jobdesc'];
 
-        $query = "INSERT INTO user_login 
-            (nama, user, email, password, level, status, dept, foto, akses, jabatan
+        $query = sqlsrv_query(
+            $con_db_qc_sqlsrv,
+            "INSERT INTO db_qc.user_login 
+            ([nama], [user], [email], [password], [level], [status], [dept], [foto], [akses], [jabatan]
             -- , jobdesc
             ) 
             VALUES 
-            ('$nama', '$user', '$email', '$password', '$level', '$status', '$dept', '$foto', '$akses', '$jabatan'
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             -- , '$jobdesc'
-            )";
+            )",
+            [$nama, $user, $email, $password, $level, $status, $dept, $foto, $akses, $jabatan]
+        );
 
-        if (mysqli_query($con, $query)) {
+        if ($query) {
             echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
             echo "<script>
                 Swal.fire({
@@ -45,39 +49,44 @@
             echo "<script>
                 Swal.fire({
                     title: 'Gagal Menyimpan!',
-                    text: '" . addslashes(mysqli_error($con)) . "',
+                    text: 'ERROR',
                     icon: 'error',
                     confirmButtonText: 'OK'
                 }).then(() => {
                     window.history.back();
                 });
             </script>";
+            p(sqlsrv_errors());
             exit;
         }
     }
 
     // Proses update data
     if (isset($_POST['update_user'])) {
-        $id       = mysqli_real_escape_string($con, $_POST['id']); 
-        $nama     = mysqli_real_escape_string($con, $_POST['nama']);
-        $user     = mysqli_real_escape_string($con, $_POST['user']);
-        $email    = mysqli_real_escape_string($con, $_POST['email']);
-        $password = mysqli_real_escape_string($con, $_POST['password']);
-        $level    = mysqli_real_escape_string($con, $_POST['level']);
-        $dept     = mysqli_real_escape_string($con, $_POST['dept']);
-        $foto     = mysqli_real_escape_string($con, $_POST['foto']);
-        $akses    = mysqli_real_escape_string($con, $_POST['akses']);
-        $jabatan  = mysqli_real_escape_string($con, $_POST['jabatan']);
-        // $jobdesc  = mysqli_real_escape_string($con, $_POST['jobdesc']);
+        $id       = $_POST['id']; 
+        $nama     = $_POST['nama'];
+        $user     = $_POST['user'];
+        $email    = $_POST['email'];
+        $password = $_POST['password'];
+        $level    = $_POST['level'];
+        $dept     = $_POST['dept'];
+        $foto     = $_POST['foto'];
+        $akses    = $_POST['akses'];
+        $jabatan  = $_POST['jabatan'];
+        // $jobdesc  = $_POST['jobdesc'];
 
-        $query = "UPDATE user_login SET 
-                    nama='$nama',  user='$user', email='$email', password='$password', 
-                    level='$level', dept='$dept', foto='$foto', akses='$akses', 
-                    jabatan='$jabatan'
+        $query = sqlsrv_query(
+            $con_db_qc_sqlsrv,
+            "UPDATE db_qc.user_login SET 
+                    [nama]=?,  [user]=?, [email]=?, [password]=?, 
+                    [level]=? , [dept]=?, [foto]=?, [akses]=?, 
+                    [jabatan]=?
                     -- , jobdesc='$jobdesc' 
-                    WHERE id='$id'";
+                    WHERE [id]=? ",
+            [$nama, $user, $email, $password, $level, $dept, $foto, $akses, $jabatan,$id]
+        );
 
-        if (mysqli_query($con, $query)) {
+        if ($query) {
             echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
             echo "<script>
                 Swal.fire({
@@ -95,11 +104,12 @@
             echo "<script>
                 Swal.fire({
                     title: 'Gagal Memperbarui!',
-                    text: '" . addslashes(mysqli_error($con)) . "',
+                    text: 'ERROR',
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });
             </script>";
+            p(sqlsrv_errors());
             exit;
         }
     }
@@ -137,14 +147,14 @@
                             </thead>
                             <tbody>
                                 <?php
-                                    $users = mysqli_query($con, "SELECT *
-                                            FROM user_login
+                                    $users = sqlsrv_query($con_db_qc_sqlsrv, "SELECT *
+                                            FROM db_qc.user_login
                                             WHERE status = 'Aktif'
                                             AND dept = 'QC'
                                             AND (akses = 'admin' OR akses = 'biasa');
                                     ");
                                     $no = 1;
-                                    while($user = mysqli_fetch_array($users)) {
+                                    while($user = sqlsrv_fetch_array($users, SQLSRV_FETCH_ASSOC)) {
                                 ?>
                                 <tr>
                                     <td align="center"><?php echo $no;?></td>
@@ -194,13 +204,13 @@
                                 <input type="text" name="password" class="form-control" required>
                             </div>
                             <?php
-                                $levels = mysqli_query($con, "SELECT DISTINCT level FROM user_login ORDER BY level ASC");
+                                $levels = sqlsrv_query($con_db_qc_sqlsrv, "SELECT DISTINCT level FROM db_qc.user_login ORDER BY level ASC");
                             ?>
                             <div class="form-group">
                                 <label>Level</label>
                                 <select name="level" class="form-control" required>
                                     <option value="" disabled selected>-- Pilih Level --</option>
-                                    <?php while ($level = mysqli_fetch_assoc($levels)) { ?>
+                                    <?php while ($level = sqlsrv_fetch_array($levels, SQLSRV_FETCH_ASSOC)) { ?>
                                         <option value="<?php echo htmlspecialchars($level['level']); ?>">
                                             <?php echo htmlspecialchars($level['level']); ?>
                                         </option>
@@ -208,14 +218,14 @@
                                 </select>
                             </div>
                             <?php
-                                $departments = mysqli_query($con, "SELECT nama FROM tbl_dept ORDER BY nama ASC");
+                                $departments = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_dept ORDER BY nama ASC");
                             ?>
                             <div class="form-group">
                                 <label>Departemen</label>
                                 <select name="dept" class="form-control" required>
                                     <option value="" disabled selected>-- Pilih Departemen --</option>
-                                    <?php while ($dept = mysqli_fetch_assoc($departments)) { ?>
-                                        <option value="<?php echo ($dept['nama'] == 'QCF') ? 'QC' : htmlspecialchars($dept['nama']); ?>">
+                                    <?php while ($dept = sqlsrv_fetch_array($departments, SQLSRV_FETCH_ASSOC)) { ?>
+                                        <option value="<?php echo (trim($dept['nama']) == 'QCF') ? 'QC' : htmlspecialchars($dept['nama']); ?>">
                                             <?php echo htmlspecialchars($dept['nama']); ?>
                                         </option>
                                     <?php } ?>
@@ -261,8 +271,8 @@
         </div>
 
         <?php
-            $users = mysqli_query($con, "SELECT * FROM user_login WHERE status = 'Aktif'");
-            while ($user = mysqli_fetch_array($users)) {
+            $users = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.user_login WHERE status = 'Aktif'");
+            while ($user = sqlsrv_fetch_array($users, SQLSRV_FETCH_ASSOC)) {
             ?>
             <div class="modal fade" id="editUserModal_<?php echo $user['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="editUserLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
@@ -294,13 +304,13 @@
                                 </div>
                                 <!-- LEVEL -->
                                 <?php
-                                    $levels = mysqli_query($con, "SELECT DISTINCT level FROM user_login ORDER BY level ASC");
+                                    $levels = sqlsrv_query($con_db_qc_sqlsrv, "SELECT DISTINCT level FROM db_qc.user_login ORDER BY level ASC");
                                 ?>
                                 <div class="form-group">
                                     <label>Level</label>
                                     <select name="level" class="form-control" required>
                                         <option value="" disabled>-- Pilih Level --</option>
-                                        <?php while ($level = mysqli_fetch_assoc($levels)) { ?>
+                                        <?php while ($level = sqlsrv_fetch_array($levels, SQLSRV_FETCH_ASSOC)) { ?>
                                             <option value="<?php echo htmlspecialchars($level['level']); ?>"
                                                 <?php echo ($level['level'] == $user['level']) ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($level['level']); ?>
@@ -311,15 +321,16 @@
 
                                 <!-- DEPARTEMEN -->
                                 <?php
-                                    $departments = mysqli_query($con, "SELECT nama FROM tbl_dept ORDER BY nama ASC");
+                                    $departments = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_dept ORDER BY nama ASC");
                                 ?>
                                 <div class="form-group">
                                     <label>Departemen</label>
                                     <select name="dept" class="form-control" required>
                                         <option value="" disabled>-- Pilih Departemen --</option>
-                                        <?php while ($dept = mysqli_fetch_assoc($departments)) { ?>
-                                            <option value="<?php echo htmlspecialchars($dept['nama']); ?>"
-                                                <?php echo ($dept['nama'] == $user['dept']) ? 'selected' : ''; ?>>
+                                        <?php while ($dept = sqlsrv_fetch_array($departments, SQLSRV_FETCH_ASSOC)) { 
+                                            $depart = (trim($dept['nama']) == 'QCF') ? 'QC' : htmlspecialchars($dept['nama']); ?>
+                                            <option value="<?php echo $depart; ?>"
+                                                <?php echo ($depart == $user['dept']) ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($dept['nama']); ?>
                                             </option>
                                         <?php } ?>
