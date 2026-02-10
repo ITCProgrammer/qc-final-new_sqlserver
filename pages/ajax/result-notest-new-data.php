@@ -18,9 +18,9 @@ $sql = sqlsrv_query(
         a.no_hanger,
         a.no_item,
         a.warna
-    FROM tbl_tq_nokk a
-    INNER JOIN tbl_tq_test b
-        ON a.id = b.id_nokk
+    FROM db_qc.tbl_tq_nokk a
+    INNER JOIN  db_qc.tbl_tq_test b
+        ON a.id = b.id_nokk 
     WHERE YEAR(a.tgl_masuk) NOT IN (2019, 2020, 2021)
       AND a.nodemand <> ''
 "
