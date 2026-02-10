@@ -12,8 +12,10 @@ $Akhir=$_GET['akhir'];
 $TotalKirim=$_GET['total'];
 //$Dept=$_GET['dept'];
 //$Cancel=$_GET['cancel'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl=sqlsrv_query($con_db_qc_sqlsrv,"SELECT CONVERT(VARCHAR(10),CURRENT_TIMESTAMP,120) as tgl_skrg,CONVERT(VARCHAR(8),CURRENT_TIMESTAMP,108) as jam_skrg");
+$rTgl=sqlsrv_fetch_array($qTgl, SQLSRV_FETCH_ASSOC);
+//diubah formatnya di php bukan di query
+$rTgl['tgl_skrg']=date("d-M-y",strtotime($rTgl['tgl_skrg']));
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -90,18 +92,18 @@ font-family:sans-serif, Roman, serif;
 	</thead>
     <tr><td><br><br><br></td></tr>
     <?php
-        $qryCek=mysqli_query($con,"SELECT DISTINCT t_jawab FROM tbl_detail_retur_now 
-        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir'
+        $qryCek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT t_jawab FROM db_qc.tbl_detail_retur_now 
+        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir'
         UNION
-        SELECT DISTINCT t_jawab1 AS t_jawab FROM tbl_detail_retur_now 
-        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND t_jawab1!=''
+        SELECT DISTINCT t_jawab1 AS t_jawab FROM db_qc.tbl_detail_retur_now 
+        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND t_jawab1!=''
 		 UNION
-        SELECT 'YND' t_jawab FROM tbl_detail_retur_now 
-        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND (t_jawab = 'YND' or t_jawab1 = 'YND' or t_jawab2 = 'YND' )
+        SELECT 'YND' t_jawab FROM db_qc.tbl_detail_retur_now 
+        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND (t_jawab = 'YND' or t_jawab1 = 'YND' or t_jawab2 = 'YND' )
 		");
        $tdye=$tfin=$tknt=$tqcf=$tlab=$trmp=$tprt=$tpro=$tgkj=$tcst=$tgkg=$tknk=$tbrs=$ttas=0;
 	   $totynd = 0 ;
-        while($rCek=mysqli_fetch_array($qryCek)){
+        while($rCek=sqlsrv_fetch_array($qryCek, SQLSRV_FETCH_ASSOC)){
     ?>
     <?php if($rCek['t_jawab']=="DYE"){?>
 	
@@ -112,9 +114,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qrydye=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='DYE' OR `t_jawab1`='DYE' OR `t_jawab2`='DYE')");
-                $rowdye=mysqli_fetch_array($qrydye);
+                $qrydye=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='DYE' OR t_jawab1='DYE' OR t_jawab2='DYE')");
+                $rowdye=sqlsrv_fetch_array($qrydye, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -128,14 +130,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qrydye1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='DYE' OR `t_jawab1`='DYE' OR `t_jawab2`='DYE')");
+                    $qrydye1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='DYE' OR t_jawab1='DYE' OR t_jawab2='DYE')");
                     $tdye=0;
-                    while($rowdye1=mysqli_fetch_array($qrydye1)){
-                        $qrydye2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowdye1[masalah_dominan]' AND (`t_jawab`='DYE' OR `t_jawab1`='DYE' OR `t_jawab2`='DYE')");
+                    while($rowdye1=sqlsrv_fetch_array($qrydye1, SQLSRV_FETCH_ASSOC)){
+                        $qrydye2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowdye1[masalah_dominan]' AND (t_jawab='DYE' OR t_jawab1='DYE' OR t_jawab2='DYE')");
                         $totdye=0;
-                        while($rowdye2=mysqli_fetch_array($qrydye2)){
+                        while($rowdye2=sqlsrv_fetch_array($qrydye2, SQLSRV_FETCH_ASSOC)){
                             $totdye=$totdye+$rowdye2['kg'];
                         }
                     ?>
@@ -184,9 +186,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qryfin=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now 
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='FIN' OR `t_jawab1`='FIN' OR `t_jawab2`='FIN')");
-                $rowfin=mysqli_fetch_array($qryfin);
+                $qryfin=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now 
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='FIN' OR t_jawab1='FIN' OR t_jawab2='FIN')");
+                $rowfin=sqlsrv_fetch_array($qryfin, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -200,14 +202,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qryfin1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='FIN' OR `t_jawab1`='FIN' OR `t_jawab2`='FIN')");
+                    $qryfin1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='FIN' OR t_jawab1='FIN' OR t_jawab2='FIN')");
                     $tfin=0;
-                    while($rowfin1=mysqli_fetch_array($qryfin1)){
-                        $qryfin2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowfin1[masalah_dominan]' AND (`t_jawab`='FIN' OR `t_jawab1`='FIN' OR `t_jawab2`='FIN')");
+                    while($rowfin1=sqlsrv_fetch_array($qryfin1, SQLSRV_FETCH_ASSOC)){
+                        $qryfin2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowfin1[masalah_dominan]' AND (t_jawab='FIN' OR t_jawab1='FIN' OR t_jawab2='FIN')");
                         $totfin=0;
-                        while($rowfin2=mysqli_fetch_array($qryfin2)){
+                        while($rowfin2=sqlsrv_fetch_array($qryfin2, SQLSRV_FETCH_ASSOC)){
                             $totfin=$totfin+$rowfin2['kg'];
                         }
                     ?>
@@ -255,9 +257,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qryknt=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='KNT' OR `t_jawab1`='KNT' OR `t_jawab2`='KNT')");
-                $rowknt=mysqli_fetch_array($qryknt);
+                $qryknt=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='KNT' OR t_jawab1='KNT' OR t_jawab2='KNT')");
+                $rowknt=sqlsrv_fetch_array($qryknt, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -271,14 +273,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qryknt1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='KNT' OR `t_jawab1`='KNT' OR `t_jawab2`='KNT')");
+                    $qryknt1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='KNT' OR t_jawab1='KNT' OR t_jawab2='KNT')");
                     $tknt=0;
-                    while($rowknt1=mysqli_fetch_array($qryknt1)){
-                        $qryknt2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowknt1[masalah_dominan]' AND (`t_jawab`='KNT' OR `t_jawab1`='KNT' OR `t_jawab2`='KNT')");
+                    while($rowknt1=sqlsrv_fetch_array($qryknt1, SQLSRV_FETCH_ASSOC)){
+                        $qryknt2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowknt1[masalah_dominan]' AND (t_jawab='KNT' OR t_jawab1='KNT' OR t_jawab2='KNT')");
                         $totknt=0;
-                        while($rowknt2=mysqli_fetch_array($qryknt2)){
+                        while($rowknt2=sqlsrv_fetch_array($qryknt2, SQLSRV_FETCH_ASSOC)){
                             $totknt=$totknt+$rowknt2['kg'];
                         }
                     ?>
@@ -327,9 +329,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qryqcf=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='QCF' OR `t_jawab1`='QCF' OR `t_jawab2`='QCF')");
-                $rowqcf=mysqli_fetch_array($qryqcf);
+                $qryqcf=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='QCF' OR t_jawab1='QCF' OR t_jawab2='QCF')");
+                $rowqcf=sqlsrv_fetch_array($qryqcf, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -343,14 +345,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qryqcf1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='QCF' OR `t_jawab1`='QCF' OR `t_jawab2`='QCF')");
+                    $qryqcf1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='QCF' OR t_jawab1='QCF' OR t_jawab2='QCF')");
                     $tqcf=0;
-                    while($rowqcf1=mysqli_fetch_array($qryqcf1)){
-                        $qryqcf2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowqcf1[masalah_dominan]' AND (`t_jawab`='QCF' OR `t_jawab1`='QCF' OR `t_jawab2`='QCF')");
+                    while($rowqcf1=sqlsrv_fetch_array($qryqcf1, SQLSRV_FETCH_ASSOC)){
+                        $qryqcf2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowqcf1[masalah_dominan]' AND (t_jawab='QCF' OR t_jawab1='QCF' OR t_jawab2='QCF')");
                         $totqcf=0;
-                        while($rowqcf2=mysqli_fetch_array($qryqcf2)){
+                        while($rowqcf2=sqlsrv_fetch_array($qryqcf2, SQLSRV_FETCH_ASSOC)){
                             $totqcf=$totqcf+$rowqcf2['kg'];
                         }
                     ?>
@@ -399,9 +401,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qryppc=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now 
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='PPC' OR `t_jawab1`='PPC' OR `t_jawab2`='PPC')");
-                $rowppc=mysqli_fetch_array($qryppc);
+                $qryppc=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now 
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='PPC' OR t_jawab1='PPC' OR t_jawab2='PPC')");
+                $rowppc=sqlsrv_fetch_array($qryppc, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -415,14 +417,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qryppc1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='PPC' OR `t_jawab1`='PPC' OR `t_jawab2`='PPC')");
+                    $qryppc1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='PPC' OR t_jawab1='PPC' OR t_jawab2='PPC')");
                     $tppc=0;
-                    while($rowppc1=mysqli_fetch_array($qryppc1)){
-                        $qryppc2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowppc1[masalah_dominan]' AND (`t_jawab`='PPC' OR `t_jawab1`='PPC' OR `t_jawab2`='PPC')");
+                    while($rowppc1=sqlsrv_fetch_array($qryppc1, SQLSRV_FETCH_ASSOC)){
+                        $qryppc2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowppc1[masalah_dominan]' AND (t_jawab='PPC' OR t_jawab1='PPC' OR t_jawab2='PPC')");
                         $totppc=0;
-                        while($rowppc2=mysqli_fetch_array($qryppc2)){
+                        while($rowppc2=sqlsrv_fetch_array($qryppc2, SQLSRV_FETCH_ASSOC)){
                             $totppc=$totppc+$rowppc2['kg'];
                         }
                     ?>
@@ -471,9 +473,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qrymkt=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now 
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='MKT' OR `t_jawab1`='MKT' OR `t_jawab2`='MKT')");
-                $rowmkt=mysqli_fetch_array($qrymkt);
+                $qrymkt=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now 
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='MKT' OR t_jawab1='MKT' OR t_jawab2='MKT')");
+                $rowmkt=sqlsrv_fetch_array($qrymkt, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -487,14 +489,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qrymkt1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='MKT' OR `t_jawab1`='MKT' OR `t_jawab2`='MKT')");
+                    $qrymkt1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='MKT' OR t_jawab1='MKT' OR t_jawab2='MKT')");
                     $tmkt=0;
-                    while($rowmkt1=mysqli_fetch_array($qrymkt1)){
-                        $qrymkt2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowmkt1[masalah_dominan]' AND (`t_jawab`='MKT' OR `t_jawab1`='MKT' OR `t_jawab2`='MKT')");
+                    while($rowmkt1=sqlsrv_fetch_array($qrymkt1, SQLSRV_FETCH_ASSOC)){
+                        $qrymkt2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowmkt1[masalah_dominan]' AND (t_jawab='MKT' OR t_jawab1='MKT' OR t_jawab2='MKT')");
                         $totmkt=0;
-                        while($rowmkt2=mysqli_fetch_array($qrymkt2)){
+                        while($rowmkt2=sqlsrv_fetch_array($qrymkt2, SQLSRV_FETCH_ASSOC)){
                             $totmkt=$totmkt+$rowmkt2['kg'];
                         }
                     ?>
@@ -543,9 +545,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qrylab=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='LAB' OR `t_jawab1`='LAB' OR `t_jawab2`='LAB')");
-                $rowlab=mysqli_fetch_array($qrylab);
+                $qrylab=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='LAB' OR t_jawab1='LAB' OR t_jawab2='LAB')");
+                $rowlab=sqlsrv_fetch_array($qrylab, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -559,14 +561,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qrylab1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='LAB' OR `t_jawab1`='LAB' OR `t_jawab2`='LAB')");
+                    $qrylab1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='LAB' OR t_jawab1='LAB' OR t_jawab2='LAB')");
                     $tlab=0;
-                    while($rowlab1=mysqli_fetch_array($qrylab1)){
-                        $qrylab2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowlab1[masalah_dominan]' AND (`t_jawab`='LAB' OR `t_jawab1`='LAB' OR `t_jawab2`='LAB')");
+                    while($rowlab1=sqlsrv_fetch_array($qrylab1, SQLSRV_FETCH_ASSOC)){
+                        $qrylab2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowlab1[masalah_dominan]' AND (t_jawab='LAB' OR t_jawab1='LAB' OR t_jawab2='LAB')");
                         $totlab=0;
-                        while($rowlab2=mysqli_fetch_array($qrylab2)){
+                        while($rowlab2=sqlsrv_fetch_array($qrylab2, SQLSRV_FETCH_ASSOC)){
                             $totlab=$totlab+$rowlab2['kg'];
                         }
                     ?>
@@ -616,9 +618,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qrylab=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='YND' OR `t_jawab1`='YND' OR `t_jawab2`='YND')");
-                $rowlab=mysqli_fetch_array($qrylab);
+                $qrylab=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='YND' OR t_jawab1='YND' OR t_jawab2='YND')");
+                $rowlab=sqlsrv_fetch_array($qrylab, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -632,14 +634,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qrylab1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='YND' OR `t_jawab1`='YND' OR `t_jawab2`='YND')");
+                    $qrylab1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='YND' OR t_jawab1='YND' OR t_jawab2='YND')");
                     $tynd=0;
-                    while($rowlab1=mysqli_fetch_array($qrylab1)){
-                        $qrylab2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowlab1[masalah_dominan]' AND (`t_jawab`='YND' OR `t_jawab1`='YND' OR `t_jawab2`='YND')");
+                    while($rowlab1=sqlsrv_fetch_array($qrylab1, SQLSRV_FETCH_ASSOC)){
+                        $qrylab2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowlab1[masalah_dominan]' AND (t_jawab='YND' OR t_jawab1='YND' OR t_jawab2='YND')");
                         $totynd=0;
-                        while($rowlab2=mysqli_fetch_array($qrylab2)){
+                        while($rowlab2=sqlsrv_fetch_array($qrylab2, SQLSRV_FETCH_ASSOC)){
                             $totynd=$totlab+$rowlab2['kg'];
                         }
                     ?>
@@ -690,9 +692,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qryrmp=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now 
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='RMP' OR `t_jawab1`='RMP' OR `t_jawab2`='RMP')");
-                $rowrmp=mysqli_fetch_array($qryrmp);
+                $qryrmp=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now 
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='RMP' OR t_jawab1='RMP' OR t_jawab2='RMP')");
+                $rowrmp=sqlsrv_fetch_array($qryrmp, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -706,14 +708,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qryrmp1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='RMP' OR `t_jawab1`='RMP' OR `t_jawab2`='RMP')");
+                    $qryrmp1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='RMP' OR t_jawab1='RMP' OR t_jawab2='RMP')");
                     $trmp=0;
-                    while($rowrmp1=mysqli_fetch_array($qryrmp1)){
-                        $qryrmp2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowrmp1[masalah_dominan]' AND (`t_jawab`='RMP' OR `t_jawab1`='RMP' OR `t_jawab2`='RMP')");
+                    while($rowrmp1=sqlsrv_fetch_array($qryrmp1, SQLSRV_FETCH_ASSOC)){
+                        $qryrmp2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowrmp1[masalah_dominan]' AND (t_jawab='RMP' OR t_jawab1='RMP' OR t_jawab2='RMP')");
                         $totrmp=0;
-                        while($rowrmp2=mysqli_fetch_array($qryrmp2)){
+                        while($rowrmp2=sqlsrv_fetch_array($qryrmp2, SQLSRV_FETCH_ASSOC)){
                             $totrmp=$totrmp+$rowrmp2['kg'];
                         }
                     ?>
@@ -762,9 +764,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qryprt=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now 
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='PRT' OR `t_jawab1`='PRT' OR `t_jawab2`='PRT')");
-                $rowprt=mysqli_fetch_array($qryprt);
+                $qryprt=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now 
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='PRT' OR t_jawab1='PRT' OR t_jawab2='PRT')");
+                $rowprt=sqlsrv_fetch_array($qryprt, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -778,14 +780,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qryprt1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='PRT' OR `t_jawab1`='PRT' OR `t_jawab2`='PRT')");
+                    $qryprt1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='PRT' OR t_jawab1='PRT' OR t_jawab2='PRT')");
                     $tprt=0;
-                    while($rowprt1=mysqli_fetch_array($qryprt1)){
-                        $qryprt2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowprt1[masalah_dominan]' AND (`t_jawab`='PRT' OR `t_jawab1`='PRT' OR `t_jawab2`='PRT')");
+                    while($rowprt1=sqlsrv_fetch_array($qryprt1, SQLSRV_FETCH_ASSOC)){
+                        $qryprt2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowprt1[masalah_dominan]' AND (t_jawab='PRT' OR t_jawab1='PRT' OR t_jawab2='PRT')");
                         $totprt=0;
-                        while($rowprt2=mysqli_fetch_array($qryprt2)){
+                        while($rowprt2=sqlsrv_fetch_array($qryprt2, SQLSRV_FETCH_ASSOC)){
                             $totprt=$totprt+$rowprt2['kg'];
                         }
                     ?>
@@ -834,9 +836,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qrypro=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='PRO' OR `t_jawab1`='PRO' OR `t_jawab2`='PRO')");
-                $rowpro=mysqli_fetch_array($qrypro);
+                $qrypro=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='PRO' OR t_jawab1='PRO' OR t_jawab2='PRO')");
+                $rowpro=sqlsrv_fetch_array($qrypro, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -850,14 +852,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qrypro1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='PRO' OR `t_jawab1`='PRO' OR `t_jawab2`='PRO')");
+                    $qrypro1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='PRO' OR t_jawab1='PRO' OR t_jawab2='PRO')");
                     $tpro=0;
-                    while($rowpro1=mysqli_fetch_array($qrypro1)){
-                        $qrypro2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowpro1[masalah_dominan]' AND (`t_jawab`='PRO' OR `t_jawab1`='PRO' OR `t_jawab2`='PRO')");
+                    while($rowpro1=sqlsrv_fetch_array($qrypro1, SQLSRV_FETCH_ASSOC)){
+                        $qrypro2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowpro1[masalah_dominan]' AND (t_jawab='PRO' OR t_jawab1='PRO' OR t_jawab2='PRO')");
                         $totpro=0;
-                        while($rowpro2=mysqli_fetch_array($qrypro2)){
+                        while($rowpro2=sqlsrv_fetch_array($qrypro2, SQLSRV_FETCH_ASSOC)){
                             $totpro=$totpro+$rowpro2['kg'];
                         }
                     ?>
@@ -906,9 +908,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qrygkj=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now 
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='GKJ' OR `t_jawab1`='GKJ' OR `t_jawab2`='GKJ')");
-                $rowgkj=mysqli_fetch_array($qrygkj);
+                $qrygkj=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now 
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='GKJ' OR t_jawab1='GKJ' OR t_jawab2='GKJ')");
+                $rowgkj=sqlsrv_fetch_array($qrygkj, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -922,14 +924,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qrygkj1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='GKJ' OR `t_jawab1`='GKJ' OR `t_jawab2`='GKJ')");
+                    $qrygkj1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='GKJ' OR t_jawab1='GKJ' OR t_jawab2='GKJ')");
                     $tgkj=0;
-                    while($rowgkj1=mysqli_fetch_array($qrygkj1)){
-                        $qrygkj2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowgkj1[masalah_dominan]' AND (`t_jawab`='GKJ' OR `t_jawab1`='GKJ' OR `t_jawab2`='GKJ')");
+                    while($rowgkj1=sqlsrv_fetch_array($qrygkj1, SQLSRV_FETCH_ASSOC)){
+                        $qrygkj2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowgkj1[masalah_dominan]' AND (t_jawab='GKJ' OR t_jawab1='GKJ' OR t_jawab2='GKJ')");
                         $totgkj=0;
-                        while($rowgkj2=mysqli_fetch_array($qrygkj2)){
+                        while($rowgkj2=sqlsrv_fetch_array($qrygkj2, SQLSRV_FETCH_ASSOC)){
                             $totgkj=$totgkj+$rowgkj2['kg'];
                         }
                     ?>
@@ -978,9 +980,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qrycst=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now 
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='CST' OR `t_jawab1`='CST' OR `t_jawab2`='CST')");
-                $rowcst=mysqli_fetch_array($qrycst);
+                $qrycst=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now 
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='CST' OR t_jawab1='CST' OR t_jawab2='CST')");
+                $rowcst=sqlsrv_fetch_array($qrycst, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -994,14 +996,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qrycst1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='CST' OR `t_jawab1`='CST' OR `t_jawab2`='CST')");
+                    $qrycst1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='CST' OR t_jawab1='CST' OR t_jawab2='CST')");
                     $tcst=0;
-                    while($rowcst1=mysqli_fetch_array($qrycst1)){
-                        $qrycst2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowcst1[masalah_dominan]' AND (`t_jawab`='CST' OR `t_jawab1`='CST' OR `t_jawab2`='CST')");
+                    while($rowcst1=sqlsrv_fetch_array($qrycst1, SQLSRV_FETCH_ASSOC)){
+                        $qrycst2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowcst1[masalah_dominan]' AND (t_jawab='CST' OR t_jawab1='CST' OR t_jawab2='CST')");
                         $totcst=0;
-                        while($rowcst2=mysqli_fetch_array($qrycst2)){
+                        while($rowcst2=sqlsrv_fetch_array($qrycst2, SQLSRV_FETCH_ASSOC)){
                             $totcst=$totcst+$rowcst2['kg'];
                         }
                     ?>
@@ -1050,9 +1052,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qrygkg=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now 
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='GKG' OR `t_jawab1`='GKG' OR `t_jawab2`='GKG')");
-                $rowgkg=mysqli_fetch_array($qrygkg);
+                $qrygkg=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now 
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='GKG' OR t_jawab1='GKG' OR t_jawab2='GKG')");
+                $rowgkg=sqlsrv_fetch_array($qrygkg, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -1066,14 +1068,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qrygkg1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='GKG' OR `t_jawab1`='GKG' OR `t_jawab2`='GKG')");
+                    $qrygkg1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='GKG' OR t_jawab1='GKG' OR t_jawab2='GKG')");
                     $tgkg=0;
-                    while($rowgkg1=mysqli_fetch_array($qrygkg1)){
-                        $qrygkg2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowgkg1[masalah_dominan]' AND (`t_jawab`='GKG' OR `t_jawab1`='GKG' OR `t_jawab2`='GKG')");
+                    while($rowgkg1=sqlsrv_fetch_array($qrygkg1, SQLSRV_FETCH_ASSOC)){
+                        $qrygkg2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowgkg1[masalah_dominan]' AND (t_jawab='GKG' OR t_jawab1='GKG' OR t_jawab2='GKG')");
                         $totgkg=0;
-                        while($rowgkg2=mysqli_fetch_array($qrygkg2)){
+                        while($rowgkg2=sqlsrv_fetch_array($qrygkg2, SQLSRV_FETCH_ASSOC)){
                             $totgkg=$totgkg+$rowgkg2['kg'];
                         }
                     ?>
@@ -1122,9 +1124,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qryknk=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='KNK' OR `t_jawab1`='KNK' OR `t_jawab2`='KNK')");
-                $rowknk=mysqli_fetch_array($qryknk);
+                $qryknk=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='KNK' OR t_jawab1='KNK' OR t_jawab2='KNK')");
+                $rowknk=sqlsrv_fetch_array($qryknk, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -1138,14 +1140,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qryknk1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='KNK' OR `t_jawab1`='KNK' OR `t_jawab2`='KNK')");
+                    $qryknk1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='KNK' OR t_jawab1='KNK' OR t_jawab2='KNK')");
                     $tknk=0;
-                    while($rowknk1=mysqli_fetch_array($qryknk1)){
-                        $qryknk2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowknk1[masalah_dominan]' AND (`t_jawab`='KNK' OR `t_jawab1`='KNK' OR `t_jawab2`='KNK')");
+                    while($rowknk1=sqlsrv_fetch_array($qryknk1, SQLSRV_FETCH_ASSOC)){
+                        $qryknk2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowknk1[masalah_dominan]' AND (t_jawab='KNK' OR t_jawab1='KNK' OR t_jawab2='KNK')");
                         $totknk=0;
-                        while($rowknk2=mysqli_fetch_array($qryknk2)){
+                        while($rowknk2=sqlsrv_fetch_array($qryknk2, SQLSRV_FETCH_ASSOC)){
                             $totknk=$totknk+$rowknk2['kg'];
                         }
                     ?>
@@ -1194,9 +1196,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qrybrs=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='BRS' OR `t_jawab1`='BRS' OR `t_jawab2`='BRS')");
-                $rowbrs=mysqli_fetch_array($qrybrs);
+                $qrybrs=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='BRS' OR t_jawab1='BRS' OR t_jawab2='BRS')");
+                $rowbrs=sqlsrv_fetch_array($qrybrs, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -1210,14 +1212,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qrybrs1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='BRS' OR `t_jawab1`='BRS' OR `t_jawab2`='BRS')");
+                    $qrybrs1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='BRS' OR t_jawab1='BRS' OR t_jawab2='BRS')");
                     $tbrs=0;
-                    while($rowbrs1=mysqli_fetch_array($qrybrs1)){
-                        $qrybrs2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowbrs1[masalah_dominan]' AND (`t_jawab`='BRS' OR `t_jawab1`='BRS' OR `t_jawab2`='BRS')");
+                    while($rowbrs1=sqlsrv_fetch_array($qrybrs1, SQLSRV_FETCH_ASSOC)){
+                        $qrybrs2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowbrs1[masalah_dominan]' AND (t_jawab='BRS' OR t_jawab1='BRS' OR t_jawab2='BRS')");                        
                         $totbrs=0;
-                        while($rowbrs2=mysqli_fetch_array($qrybrs2)){
+                        while($rowbrs2=sqlsrv_fetch_array($qrybrs2, SQLSRV_FETCH_ASSOC)){
                             $totbrs=$totbrs+$rowbrs2['kg'];
                         }
                     ?>
@@ -1266,9 +1268,9 @@ font-family:sans-serif, Roman, serif;
                 $no=1;
                 $Awal=$_GET['awal'];
                 $Akhir=$_GET['akhir'];		
-                $qrytas=mysqli_query($con,"SELECT t_jawab,t_jawab1,t_jawab2 FROM tbl_detail_retur_now
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='TAS' OR `t_jawab1`='TAS' OR `t_jawab2`='TAS')");
-                $rowtas=mysqli_fetch_array($qrytas);
+                $qrytas=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab,t_jawab1,t_jawab2 FROM db_qc.tbl_detail_retur_now
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='TAS' OR t_jawab1='TAS' OR t_jawab2='TAS')");
+                $rowtas=sqlsrv_fetch_array($qrytas, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" valign="middle" style="border-top:0px #000000 solid; 
@@ -1282,14 +1284,14 @@ font-family:sans-serif, Roman, serif;
                                     border-left:0px #000000 solid; 
                                     border-right:0px #000000 solid;"><table border="0" class="table-list1" width="100%">
                     <?php
-                    $qrytas1=mysqli_query($con,"SELECT DISTINCT masalah_dominan FROM tbl_detail_retur_now 
-                    WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND (`t_jawab`='TAS' OR `t_jawab1`='TAS' OR `t_jawab2`='TAS')");
+                    $qrytas1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT DISTINCT masalah_dominan FROM db_qc.tbl_detail_retur_now 
+                    WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND (t_jawab='TAS' OR t_jawab1='TAS' OR t_jawab2='TAS')");
                     $ttas=0;
-                    while($rowtas1=mysqli_fetch_array($qrytas1)){
-                        $qrytas2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2, IF(t_jawab2!='',kg/3,IF(t_jawab1!='',kg/2,kg)) AS kg FROM tbl_detail_retur_now 
-                        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND masalah_dominan='$rowtas1[masalah_dominan]' AND (`t_jawab`='TAS' OR `t_jawab1`='TAS' OR `t_jawab2`='TAS')");
+                    while($rowtas1=sqlsrv_fetch_array($qrytas1, SQLSRV_FETCH_ASSOC)){
+                        $qrytas2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2, CASE WHEN t_jawab2!='' THEN kg/3 WHEN t_jawab1!='' THEN kg/2 ELSE kg END AS kg FROM db_qc.tbl_detail_retur_now 
+                        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND masalah_dominan='$rowtas1[masalah_dominan]' AND (t_jawab='TAS' OR t_jawab1='TAS' OR t_jawab2='TAS')");
                         $tottas=0;
-                        while($rowtas2=mysqli_fetch_array($qrytas2)){
+                        while($rowtas2=sqlsrv_fetch_array($qrytas2, SQLSRV_FETCH_ASSOC)){
                             $tottas=$tottas+$rowtas2['kg'];
                         }
                     ?>
@@ -1359,9 +1361,9 @@ font-family:sans-serif, Roman, serif;
     </tr>
     <tr><td><br><br><br><br><br><br></td></tr>
     <?php 
-        $qrybss=mysqli_query($con,"SELECT SUM(kg) as kgbss, ket FROM tbl_detail_retur_now 
-        WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND ket LIKE '%BSS%'");
-        $rowbss=mysqli_fetch_array($qrybss);
+        $qrybss=sqlsrv_query($con_db_qc_sqlsrv,"SELECT SUM(kg) as kgbss, ket FROM db_qc.tbl_detail_retur_now 
+        WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND ket LIKE '%BSS%' group by ket");
+        $rowbss=sqlsrv_fetch_array($qrybss, SQLSRV_FETCH_ASSOC);
     ?>
     <tr>
         <td align="center"><table border="0" class="table-list1" width="65%">
@@ -1384,9 +1386,9 @@ font-family:sans-serif, Roman, serif;
                                     border-right:0px #000000 solid; font-size: 12px;" align="left"> &nbsp;</td>
             </tr>
             <?php 
-                $qrybs=mysqli_query($con,"SELECT SUM(kg) as kgbs, ket FROM tbl_detail_retur_now
-                WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' AND ket LIKE '%BS'");
-                $rowbs=mysqli_fetch_array($qrybs);
+                $qrybs=sqlsrv_query($con_db_qc_sqlsrv,"SELECT SUM(kg) as kgbs, ket FROM db_qc.tbl_detail_retur_now
+                WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur is not null AND ket LIKE '%BS' group by ket");
+                $rowbs=sqlsrv_fetch_array($qrybs, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td width="20%" style="border-top:0px #000000 solid; 
@@ -1455,7 +1457,7 @@ font-family:sans-serif, Roman, serif;
                 <td width="5%" align="right" style="border-top:0px #000000 solid; 
                                     border-bottom:0px #000000 solid;
                                     border-left:0px #000000 solid; 
-                                    border-right:0px #000000 solid; font-size: 12px;"><?php echo number_format($TotalKirim,2);?></td></td>
+                                    border-right:0px #000000 solid; font-size: 12px;"><?php echo number_format(floatval($TotalKirim),2);?></td></td>
                 <td width="15%" style="border-top:0px #000000 solid; 
                                     border-bottom:0px #000000 solid;
                                     border-left:0px #000000 solid; 
@@ -1469,7 +1471,7 @@ font-family:sans-serif, Roman, serif;
                 <td width="5%" align="right" style="border-top:0px #000000 solid; 
                                     border-bottom:0px #000000 solid;
                                     border-left:0px #000000 solid; 
-                                    border-right:0px #000000 solid; font-size: 12px;"><?php echo round((($TotalKirim-$totalreturn)/$TotalKirim)*100,2);?></td>
+                                    border-right:0px #000000 solid; font-size: 12px;"><?php echo floatval($TotalKirim)==0 ?"": round((($TotalKirim-$totalreturn)/$TotalKirim)*100,2);?></td>
                 <td width="15%" style="border-top:0px #000000 solid; 
                                     border-bottom:0px #000000 solid;
                                     border-left:0px #000000 solid; 

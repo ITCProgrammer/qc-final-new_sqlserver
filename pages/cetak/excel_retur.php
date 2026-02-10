@@ -40,16 +40,16 @@ $PO=$_GET['po'];
     </tr>
 	<?php 
     $no=1;
-    if($Awal!=""){ $Where =" AND DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' "; }
+    if($Awal!=""){ $Where =" AND CONVERT(DATE, a.tgltrm_sjretur) BETWEEN '$Awal' AND '$Akhir' AND a.tgl_sjretur is not null "; }
     if($Status!=""){ $sts=" AND `status`='$Status' ";}else{$sts=" ";}
     if($Awal!="" or $Order!="" or $PO!="" or $Langganan!=""){
-        $query=mysqli_query($con,"SELECT * FROM tbl_detail_retur_now WHERE no_order LIKE '%$Order%' AND po LIKE '%$PO%' AND langganan LIKE '%$Langganan%' $Where $sts ORDER BY tgl_buat ASC ");
+        $query=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *,CONVERT(VARCHAR(19), tgl_sjretur) AS tgl_sjretur,CONVERT(VARCHAR(19), tgltrm_sjretur) AS tgltrm_sjretur FROM db_qc.tbl_detail_retur_now a WHERE no_order LIKE '%$Order%' AND po LIKE '%$PO%' AND langganan LIKE '%$Langganan%' $Where $sts ORDER BY tgl_buat ASC ");
     }else{
-        $query=mysqli_query($con,"SELECT * FROM tbl_detail_retur_now WHERE no_order LIKE '$Order' AND po LIKE '$PO' AND langganan LIKE '$Langganan' $Where $sts ORDER BY tgl_buat ASC");
+        $query=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *,CONVERT(VARCHAR(19), tgl_sjretur) AS tgl_sjretur,CONVERT(VARCHAR(19), tgltrm_sjretur) AS tgltrm_sjretur FROM db_qc.tbl_detail_retur_now a WHERE no_order LIKE '$Order' AND po LIKE '$PO' AND langganan LIKE '$Langganan' $Where $sts ORDER BY tgl_buat ASC");
     }
     $troll=0;
     $tkg=0;
-	while($r=mysqli_fetch_array($query)){
+	while($r=sqlsrv_fetch_array($query, SQLSRV_FETCH_ASSOC)){
         if($r['t_jawab']!="" and $r['t_jawab1']!="" and $r['t_jawab2']!=""){ $tjawab=$r['t_jawab'].",".$r['t_jawab1'].",".$r['t_jawab2'];
         }else if($r['t_jawab']!="" and $r['t_jawab1']!="" and $r['t_jawab2']==""){
         $tjawab=$r['t_jawab'].",".$r['t_jawab1'];	
@@ -74,7 +74,7 @@ $PO=$_GET['po'];
       <td><?php echo $r['tgl_sjretur'];?></td>
       <td>'<?php echo $r['sjreturplg'];?></td>
       <td><?php echo $r['langganan'];?></td>
-      <td><?php echo $r['no_po'];?></td>
+      <td><?php echo $r['po'];?></td>
       <td><?php echo $r['no_order'];?></td>
       <td><?php echo $r['order_returbaru'];?></td>
       <td><?php echo $r['warna'];?></td>

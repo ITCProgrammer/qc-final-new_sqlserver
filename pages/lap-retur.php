@@ -3,6 +3,9 @@ ini_set("error_reporting", 1);
 session_start();
 include"koneksi.php";
 
+function toDistinct(){
+
+}
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -155,23 +158,37 @@ $Bon	= isset($_POST['bon']) ? $_POST['bon'] : '';
           <tbody>
           <?php
             $no=1;
-            if($Awal!=""){ $Where =" AND DATE_FORMAT( a.tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
-            if($Status!=""){ $sts=" AND a.`status`='$Status' ";}else{$sts=" ";}
-            if($Bon!=""){ $rtr=" AND a.`no_retur` LIKE '%$Bon%' ";}else{$rtr=" ";}
+            if($Awal!=""){ $Where =" AND CONVERT(DATE, a.tgl_buat) BETWEEN '$Awal' AND '$Akhir' "; }
+            if($Status!=""){ $sts=" AND a.status='$Status' ";}else{$sts=" ";}
+            if($Bon!=""){ $rtr=" AND a.no_retur LIKE '%$Bon%' ";}else{$rtr=" ";}
             if($Awal!="" or $Order!="" or $Langganan!="" or $PO!=""){
-              $qry1=mysqli_query($con,"SELECT a.*,
-              GROUP_CONCAT( DISTINCT b.no_ncp SEPARATOR ', ' ) AS no_ncp,
-              GROUP_CONCAT( DISTINCT b.masalah SEPARATOR ', ' ) AS masalah_ncp 
-              FROM tbl_detail_retur_now a LEFT JOIN tbl_ncp_qcf_new b ON a.nodemand_ncp=b.nodemand 
-              WHERE a.no_order LIKE '$Order%' AND a.po LIKE '$PO%' AND a.langganan LIKE '%$Langganan%' $Where $sts $rtr GROUP BY a.id ORDER BY a.tgl_buat ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.id,
+              MAX(a.t_jawab) AS t_jawab,MAX(a.t_jawab1) AS t_jawab1,MAX(a.t_jawab2) AS t_jawab2,MAX(a.status) AS status,
+              CONVERT(VARCHAR(19), MAX(a.tgltrm_sjretur)) AS tgltrm_sjretur,CONVERT(VARCHAR(19),MAX(a.tgl_sjretur)) AS tgl_sjretur,MAX(a.sjreturplg) AS sjreturplg,
+              MAX(a.no_retur) AS no_retur,MAX(a.nodemand) AS nodemand,MAX(a.langganan) AS langganan,MAX(a.po) AS po,
+              MAX(a.no_order) AS no_order,MAX(a.order_returbaru) AS order_returbaru,MAX(a.status1) AS status1,MAX(a.status2) AS status2,
+              MAX(a.status3) AS status3,MAX(a.jenis_kain) AS jenis_kain,MAX(a.warna) AS warna,MAX(a.lot) AS lot,MAX(a.roll) AS roll,
+              MAX(a.kg) AS kg,MAX(a.pjg) AS pjg,MAX(a.qty_tu) AS qty_tu,MAX(a.masalah) AS masalah,
+              MAX(a.ket) AS ket, MAX(a.nodemand_akj) AS nodemand_akj,
+              STRING_AGG (  b.no_ncp , ', ' ) AS no_ncp,
+              STRING_AGG (  b.masalah, ', ' ) AS masalah_ncp 
+              FROM db_qc.tbl_detail_retur_now a LEFT JOIN db_qc.tbl_ncp_qcf_new b ON a.nodemand_ncp=b.nodemand 
+              WHERE a.no_order LIKE '$Order%' AND a.po LIKE '$PO%' AND a.langganan LIKE '%$Langganan%' $Where $sts $rtr GROUP BY a.id ORDER BY max(a.tgl_buat) ASC");
             }else{
-              $qry1=mysqli_query($con,"SELECT a.*,
-              GROUP_CONCAT( DISTINCT b.no_ncp SEPARATOR ', ' ) AS no_ncp,
-              GROUP_CONCAT( DISTINCT b.masalah SEPARATOR ', ' ) AS masalah_ncp 
-              FROM tbl_detail_retur_now a LEFT JOIN tbl_ncp_qcf_new b ON a.nodemand_ncp=b.nodemand 
-              WHERE a.no_order LIKE '$Order' AND a.po LIKE '$PO' AND a.langganan LIKE '%$Langganan%' $Where $sts $rtr GROUP BY a.id ORDER BY a.tgl_buat ASC");
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT a.id,
+              MAX(a.t_jawab) AS t_jawab,MAX(a.t_jawab1) AS t_jawab1,MAX(a.t_jawab2) AS t_jawab2,MAX(a.status) AS status,
+              CONVERT(VARCHAR(19), MAX(a.tgltrm_sjretur)) AS tgltrm_sjretur,CONVERT(VARCHAR(19),MAX(a.tgl_sjretur)) AS tgl_sjretur,MAX(a.sjreturplg) AS sjreturplg,
+              MAX(a.no_retur) AS no_retur,MAX(a.nodemand) AS nodemand,MAX(a.langganan) AS langganan,MAX(a.po) AS po,
+              MAX(a.no_order) AS no_order,MAX(a.order_returbaru) AS order_returbaru,MAX(a.status1) AS status1,MAX(a.status2) AS status2,
+              MAX(a.status3) AS status3,MAX(a.jenis_kain) AS jenis_kain,MAX(a.warna) AS warna,MAX(a.lot) AS lot,MAX(a.roll) AS roll,
+              MAX(a.kg) AS kg,MAX(a.pjg) AS pjg,MAX(a.qty_tu) AS qty_tu,MAX(a.masalah) AS masalah,
+              MAX(a.ket) AS ket, MAX(a.nodemand_akj) AS nodemand_akj,
+              STRING_AGG (  b.no_ncp , ', ' ) AS no_ncp,
+              STRING_AGG (  b.masalah, ', ' ) AS masalah_ncp 
+              FROM db_qc.tbl_detail_retur_now a LEFT JOIN db_qc.tbl_ncp_qcf_new b ON a.nodemand_ncp=b.nodemand 
+              WHERE a.no_order LIKE '$Order' AND a.po LIKE '$PO' AND a.langganan LIKE '%$Langganan%' $Where $sts $rtr GROUP BY a.id ORDER BY max(a.tgl_buat) ASC");
             }
-                while($row1=mysqli_fetch_array($qry1)){
+                while($row1=sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
                   if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']!=""){ $tjawab=$row1['t_jawab'].",".$row1['t_jawab1'].",".$row1['t_jawab2'];
                   }else if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']==""){
                   $tjawab=$row1['t_jawab'].",".$row1['t_jawab1'];	

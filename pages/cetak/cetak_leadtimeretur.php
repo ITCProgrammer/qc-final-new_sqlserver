@@ -11,8 +11,10 @@ $Awal=$_GET['awal'];
 $Akhir=$_GET['akhir'];
 //$Dept=$_GET['dept'];
 //$Cancel=$_GET['cancel'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%d-%b-%y') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl=sqlsrv_query($con_db_qc_sqlsrv,"SELECT CONVERT(VARCHAR(10),CURRENT_TIMESTAMP,120) as tgl_skrg,CONVERT(VARCHAR(8),CURRENT_TIMESTAMP,108) as jam_skrg");
+$rTgl=sqlsrv_fetch_array($qTgl, SQLSRV_FETCH_ASSOC);
+//diubah formatnya di php bukan di query
+$rTgl['tgl_skrg']=date("d-M-y",strtotime($rTgl['tgl_skrg']));
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -144,11 +146,11 @@ border:hidden;
 	$no=1;
 	$Awal=$_GET['awal'];
 	$Akhir=$_GET['akhir'];		
-  $qry1=mysqli_query($con,"SELECT * FROM tbl_detail_retur_now
-  WHERE DATE_FORMAT( tgltrm_sjretur, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' ORDER BY tgltrm_sjretur ASC");
-        while($row1=mysqli_fetch_array($qry1)){
-        $qry2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2 FROM tbl_aftersales_now WHERE nodemand='$row1[nodemand]'");
-        $r2=mysqli_fetch_array($qry2);
+  $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *,CONVERT(VARCHAR(19), tgl_sjretur) AS tgl_sjretur,CONVERT(VARCHAR(19), tgltrm_sjretur) AS tgltrm_sjretur, CONVERT(VARCHAR(19), tgl_keputusan) AS tgl_keputusan FROM db_qc.tbl_detail_retur_now a
+  WHERE CONVERT(DATE, a.tgltrm_sjretur) BETWEEN '$Awal' AND '$Akhir' AND a.tgl_sjretur is not null ORDER BY a.tgltrm_sjretur ASC");
+        while($row1=sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
+        $qry2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2 FROM db_qc.tbl_aftersales_now WHERE nodemand='$row1[nodemand]'");
+        $r2=sqlsrv_fetch_array($qry2, SQLSRV_FETCH_ASSOC);
         $tglgkj = new DateTime($row1['tgltrm_sjretur']);
         $tglkeputusan = new DateTime($row1['tgl_keputusan']);
         $delay = $tglgkj->diff($tglkeputusan);

@@ -3,6 +3,6 @@ ini_set("error_reporting", 1);
 session_start();
 include "../../koneksi.php";
 
-mysqli_query($con,"UPDATE tbl_detail_retur_now SET `order_returbaru` = '$_POST[value]' where id = '$_POST[pk]'");
+$up=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE TOP (1) db_qc.tbl_detail_retur_now SET order_returbaru = ? where id = ? ",[$_POST['value'],$_POST['pk']]); 
 
 echo json_encode('success');

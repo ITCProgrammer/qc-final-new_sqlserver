@@ -12,8 +12,10 @@ $Akhir=$_GET['akhir'];
 $TotalKirim=$_GET['total'];
 //$Dept=$_GET['dept'];
 //$Cancel=$_GET['cancel'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%d-%b-%y') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl=sqlsrv_query($con_db_qc_sqlsrv,"SELECT CONVERT(VARCHAR(10),CURRENT_TIMESTAMP,120) as tgl_skrg,CONVERT(VARCHAR(8),CURRENT_TIMESTAMP,108) as jam_skrg");
+$rTgl=sqlsrv_fetch_array($qTgl, SQLSRV_FETCH_ASSOC);
+//diubah formatnya di php bukan di query
+$rTgl['tgl_skrg']=date("d-M-y",strtotime($rTgl['tgl_skrg']));
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -150,15 +152,15 @@ border:hidden;
 	$no=1;
 	$Awal=$_GET['awal'];
 	$Akhir=$_GET['akhir'];		
-  $qry1=mysqli_query($con,"SELECT *
-  FROM tbl_detail_retur_now WHERE DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' AND tgl_sjretur!='0000-00-00' ORDER BY tgltrm_sjretur ASC");
-  //$qrygk=mysqli_query("");
+  $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, CONVERT(VARCHAR(19), tgltrm_sjretur) AS tgltrm_sjretur, CONVERT(VARCHAR(19),tgl_sjretur) AS tgl_sjretur
+  FROM db_qc.tbl_detail_retur_now a WHERE CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' AND a.tgl_sjretur is not null ORDER BY a.tgltrm_sjretur ASC");
+  
   $troll=0;
   $tqty=0;
   $tqty_tu=0;
-            while($row1=mysqli_fetch_array($qry1)){
-        $qry2=mysqli_query($con,"SELECT t_jawab, t_jawab1, t_jawab2 FROM tbl_aftersales_now WHERE nodemand='$row1[nodemand]'");
-        $r2=mysqli_fetch_array($qry2);
+            while($row1=sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
+        $qry2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT t_jawab, t_jawab1, t_jawab2 FROM db_qc.tbl_aftersales_now WHERE nodemand='$row1[nodemand]'");
+        $r2=sqlsrv_fetch_array($qry2, SQLSRV_FETCH_ASSOC);
 		 ?>
           <tr valign="top">
             <td align="center" valign="middle"><font size="-2"><?php echo $no; ?></font></td>
@@ -223,11 +225,11 @@ border:hidden;
             </tr>
             <tr>
                 <td align="left" width="50%"><strong>Total Kirim</strong></td>
-                <td align="center" width="50%"><strong><?php echo number_format($TotalKirim,2);?></strong></td>
+                <td align="center" width="50%"><strong><?php echo number_format(floatval($TotalKirim),2);?></strong></td>
             </tr>
             <tr>
                 <td align="left" width="50%"><strong>Persentase</strong></td>
-                <td align="center" width="50%"><strong><?php echo number_format(($tqty/$TotalKirim)*100,2)." %";?></strong></td>
+                <td align="center" width="50%"><strong><?php echo floatval($TotalKirim)==0 ?" ": number_format(($tqty/floatval($TotalKirim))*100,2)." %";?></strong></td>
             </tr>
         </table></td>
     </tr>
@@ -236,9 +238,9 @@ border:hidden;
             <?php
             $Awal=$_GET['awal'];
             $Akhir=$_GET['akhir'];
-            if($Awal !="" AND $Akhir !=""){ $Where=" DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' ";} 
-            $qryQC=mysqli_query($con,"SELECT SUM(qty_tu) AS qty_claim_qc FROM tbl_detail_retur_now WHERE $Where AND (`t_jawab`='QCF' OR `t_jawab1`='QCF' OR `t_jawab2`='QCF')");
-            $rowQC=mysqli_fetch_array($qryQC);
+            if($Awal !="" AND $Akhir !=""){ $Where=" CONVERT(DATE, tgl_buat) BETWEEN '$Awal' AND '$Akhir' ";} 
+            $qryQC=sqlsrv_query($con_db_qc_sqlsrv,"SELECT SUM(qty_tu) AS qty_claim_qc FROM db_qc.tbl_detail_retur_now WHERE $Where AND (t_jawab='QCF' OR t_jawab1='QCF' OR t_jawab2='QCF')");
+            $rowQC=sqlsrv_fetch_array($qryQC, SQLSRV_FETCH_ASSOC);
             ?>
             <tr>
                 <td align="left" bgcolor="#FDDC18" width="50%"><strong>Total Return QCF</strong></td>
@@ -246,11 +248,11 @@ border:hidden;
             </tr>
             <tr>
                 <td align="left" width="50%"><strong>Total Kirim</strong></td>
-                <td align="center" width="50%"><strong><?php echo number_format($TotalKirim,2);?></strong></td>
+                <td align="center" width="50%"><strong><?php echo number_format(floatval($TotalKirim),2);?></strong></td>
             </tr>
             <tr>
                 <td align="left" width="50%"><strong>Persentase</strong></td>
-                <td align="center" width="50%"><strong><?php echo number_format(($rowQC['qty_claim_qc']/$TotalKirim)*100,4)." %";?></strong></td>
+                <td align="center" width="50%"><strong><?php echo floatval($TotalKirim)==0 ?" " : number_format(($rowQC['qty_claim_qc']/floatval($TotalKirim))*100,4)." %";?></strong></td>
             </tr>
         </table></td>
     </tr>
