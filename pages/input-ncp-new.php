@@ -1095,7 +1095,7 @@ if ($_POST['save'] == "Simpan")
 
 	$sqlCk = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 no_ncp FROM db_qc.tbl_ncp_qcf_now WHERE reg_no='$REGNO' ORDER BY id DESC");
 	$rck = sqlsrv_fetch_array($sqlCk);
-	$sqlCk1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 revisi, no_ncp, dept FROM db_qc.tbl_ncp_qcf_now WHERE reg_no='$REGNO' AND dept='$_POST[dept]' ORDER BY revisi DESC");
+	$sqlCk1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 revisi, no_ncp, dept FROM db_qc.tbl_ncp_qcf_now WHERE reg_no='$REGNO' AND dept='$_POST[dept]' ORDER BY id DESC");
 	$rck1 = sqlsrv_fetch_array($sqlCk1);
 	$rev1 = $rck1['revisi'] + 1;
 	if ($rck1['no_ncp'] != "" and $rck1['dept'] != "") {
