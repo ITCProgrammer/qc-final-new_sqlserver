@@ -140,6 +140,7 @@ $data2 = sqlsrv_query($con_db_qc_sqlsrv, "
 ");
 $rd2 = sqlsrv_fetch_array($data2, SQLSRV_FETCH_ASSOC);
 
+// print_r($rd2);
 $id_tq_test_2 = $rcek1['id_nokk'];
 $tq_test_2_sql = sqlsrv_query($con_db_qc_sqlsrv, "
     SELECT id_nokk, spirality_status, bleeding_root, wrinkle, wrinkle1, wrinkle2,
@@ -355,7 +356,15 @@ textarea {
             <td align="left" style="font-size: 12px;" width="50%" rowspan="3"><img src="ITTI_Logo.png" width="60" height="59" alt=""/></td> 
             <td align="right" style="font-size: 12px;" width="35%">DATE OUT</td> 
             <td align="right" style="font-size: 12px;" width="3%">:</td> 
-            <td align="right" style="font-size: 12px;" width="25%"><?php echo date("F j, Y", strtotime($rd2['date_out1']));?></td> 
+            <td align="right" style="font-size: 12px;" width="25%"><?php 
+                                                        if ($rd2['date_out1'] instanceof DateTime) {
+                                                            echo $rd2['date_out1']->format("F j, Y");
+                                                        } elseif (is_string($rd2['date_out1'])) {
+                                                            echo date("F j, Y", strtotime($rd2['date_out1']));
+                                                        } else {
+                                                            echo "-"; // Handle nulls or empty values
+                                                        }
+                                                        ?></td> 
         </tr>
         <tr>
             <td align="right" style="font-size: 12px;" width="35%">REPORT NO</td> 
@@ -365,30 +374,20 @@ textarea {
         <tr>
             <td align="right" style="font-size: 12px;" width="35%">DATE IN</td> 
             <td align="right" style="font-size: 12px;" width="3%">:</td> 
-            <td align="right" style="font-size: 12px;" width="25%"><?php echo date("F j, Y", strtotime($rd2['date_in']));?></td> 
+            <td align="right" style="font-size: 12px;" width="25%"><?php 
+            if ($rd2['date_in'] instanceof DateTime) {
+                                                            echo $rd2['date_in']->format("F j, Y");
+                                                        } elseif (is_string($rd2['date_in'])) {
+                                                            echo date("F j, Y", strtotime($rd2['date_in']));
+                                                        } else {
+                                                            echo "-"; // Handle nulls or empty values
+                                                        }?></td> 
         </tr>
         <tr>
             <td align="center" style="font-size: 12px;" colspan="4">&nbsp;</td> 
         </tr>
         <tr>
             <td align="right" style="font-size: 12px;" colspan="4">
-                <!-- <table width="35%" style="border: 3px solid #555;">
-                    <tr>
-                        <td align="center" style="font-size: 12px;" colspan="2"><u>OVERALL RATING</u></td>
-                    </tr>
-                    <tr>
-                        <td align="center" style="font-size: 12px;">PASS</td>
-                        <td align="center" style="font-size: 12px;"><u><?php if($rcek1['status']=="Pass"){echo "&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; X &nbsp; &nbsp; &nbsp; &nbsp;";}else{echo "&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;";}?></u></td>
-                    </tr>
-                    <tr>
-                        <td align="center" style="font-size: 12px;">MARGINAL PASS</td>
-                        <td align="center" style="font-size: 12px;"><u><?php if($rcek1['status']=="Marginal Pass"){echo "&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; X &nbsp; &nbsp; &nbsp; &nbsp;";}else{echo "&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;";}?></u></td>
-                    </tr>
-                    <tr>
-                        <td align="center" style="font-size: 12px;">FAIL</td>
-                        <td align="center" style="font-size: 12px;"><u><?php if($rcek1['status']=="Fail"){echo "&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; X &nbsp; &nbsp; &nbsp; &nbsp;";}else{echo "&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;";}?></u></td>
-                    </tr>
-                </table> -->
             </td> 
         </tr>
         <tr>
@@ -398,166 +397,6 @@ textarea {
             <td align="center" style="font-size: 12px;" colspan="4">&nbsp;</td> 
         </tr>
     </table>
-    <!-- <table width="100%" border="1" class="table-list1">
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Vendor Name:</td>
-            <td align="left" style="font-size: 12px;" width="25%">PT INDOTAICHEN</td>
-            <td align="left" style="font-size: 12px;" width="25%">Vendor Code:</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Factory Name:</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-            <td align="left" style="font-size: 12px;" width="25%">Factory Code:</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Fabric Mill Name:</td>
-            <td align="left" style="font-size: 12px;" width="25%">INDOTAICHEN</td>
-            <td align="left" style="font-size: 12px;" width="25%">Fabric Mill Code:</td>
-            <td align="left" style="font-size: 12px;" width="25%">INDO01</td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Trim Supplier Name:</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-            <td align="left" style="font-size: 12px;" width="25%">Trim Supplier Code:</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Sample Name &amp; Description:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['jenis_kain'];?></td>
-            <td align="left" style="font-size: 12px;" width="25%">Protocol(s) used:</td>
-            <td align="left" style="font-size: 12px;" width="25%">Apparel Fabric Performance Std - <?php echo $rd2['protocol']; ?></td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Phase:</td>
-            <td align="left" style="font-size: 12px;" width="25%">BULK FABRIC</td>
-            <td align="left" style="font-size: 12px;" width="25%">Color Description:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['warna'];?></td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Color Code:</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-            <td align="left" style="font-size: 12px;" width="25%">Color Abbreviation:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['color_abbrev'];?></td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Brand:</td>
-            <td align="left" style="font-size: 12px;" width="25%">LULULEMON</td>
-            <td align="left" style="font-size: 12px;" width="25%">PO#:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['no_po'];?></td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Style No:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['style'];?></td>
-            <td align="left" style="font-size: 12px;" width="25%">Category:</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">First Hand Over Date:</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-            <td align="left" style="font-size: 12px;" width="25%">Season:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['season'];?></td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Countries of Distribution:</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-            <td align="left" style="font-size: 12px;" width="25%">Country of Origin:</td>
-            <td align="left" style="font-size: 12px;" width="25%">INDONESIA</td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Trim(s) Article No:</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-            <td align="left" style="font-size: 12px;" width="25%">Supplier Article No:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['no_item'];?></td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Weight:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['gramasi']." G/M2";?></td>
-            <td align="left" style="font-size: 12px;" width="25%">Lot#:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['lot'];?></td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Intent Fabric Use</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-            <td align="left" style="font-size: 12px;" width="25%">Fabric Count:</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">(shell/lining)</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-            <td align="left" style="font-size: 12px;" width="25%">&nbsp;</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-        </tr>
-        <tr>
-            <?php
-                $sqljk = "SELECT jenis_kain From db_qc.tbl_tq_nokk WHERE id='$idkk'";
-                $resultjk=sqlsrv_query($con_db_qc_sqlsrv,$sqljk);
-                while($rowjk=sqlsrv_fetch_array($resultjk, SQLSRV_FETCH_ASSOC)){ 
-                $detailjk=explode(",",$rowjk['jenis_kain']);?>
-            <td align="left" style="font-size: 12px;" width="25%">Fabric Construction:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php if($detailjk[0]!=""){echo $detailjk[0];}else{echo "";}?></td>
-            <td align="left" style="font-size: 12px;" width="25%">Fabric Type:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php if($detailjk[1]!=""){echo $detailjk[1];}else{echo "";}?></td>
-            <?php }?>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Special Claim(s):</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-            <td align="left" style="font-size: 12px;" width="25%">Fabric Finish:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['fabric_finish'];?></td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Delivery Date:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['tgl_kirim'];?></td>
-            <td align="left" style="font-size: 12px;" width="25%">End Use:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['enduse'];?></td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Test Package:</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['test_package'];?></td>
-            <td align="left" style="font-size: 12px;" width="25%">Others:</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Previous Report no(s):</td>
-            <td align="left" style="font-size: 12px;" width="25%"><?php echo $rd2['prev_report'];?></td>
-            <td align="left" style="font-size: 12px;" width="25%">Retest Report No:</td>
-            <td align="left" style="font-size: 12px;" width="25%">/</td>
-        </tr>
-    </table>
-    <table width="100%" border="1" class="table-list1">
-        <tr>
-            <?php
-                $sqljk1 = "SELECT jenis_kain From db_qc.tbl_tq_nokk WHERE id='$idkk'";
-                $resultjk1=sqlsrv_query($con_db_qc_sqlsrv,$sqljk1);
-                while($rowjk1=sqlsrv_fetch_array($resultjk1, SQLSRV_FETCH_ASSOC)){ 
-                $detailjk1=explode(",",$rowjk1['jenis_kain']);?>
-            <td align="left" style="font-size: 12px;" width="25%">Submitted Fiber Content</td>
-            <td align="left" style="font-size: 12px;" width="75%"><?php if($detailjk1[0]!=""){echo $detailjk1[0];}else{echo "";}?></td>
-            <?php }?>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Actual Fiber Content</td>
-            <td align="left" style="font-size: 12px;" width="75%">/</td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Suggested Fiber Content</td>
-            <td align="left" style="font-size: 12px;" width="75%">/</td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Submitted Care Instruction(s)</td>
-            <td align="left" style="font-size: 12px;" width="75%">MACHINE WASH COLD, DO NOT BLEACH, TUMBLE DRY LOW, DO NOT IRON, DO NOT DRY CLEAN</td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Targeted Care Instruction</td>
-            <td align="left" style="font-size: 12px;" width="75%">/</td>
-        </tr>
-        <tr>
-            <td align="left" style="font-size: 12px;" width="25%">Suggested Care Instruction(s)</td>
-            <td align="left" style="font-size: 12px;" width="75%">/</td>
-        </tr>
-    </table> -->
     
     <!-- Additional Information -->
     <table class="table-list1">
@@ -681,7 +520,7 @@ textarea {
         </tr>
         <tr>
             <td class="narrow-column" style="font-size: 12px;">Exmill date (MM/DD/YYYY):</td>
-            <td><?php echo date("m/d/Y", strtotime($rd2['tgl_kirim'])); ?></td>
+            <td><?php echo $rd2['tgl_kirim']->format("m/d/Y"); ?></td>
         </tr>
         <tr>
             <td class="narrow-column" style="font-size: 12px;">Test Protocol:</td>
@@ -728,7 +567,7 @@ textarea {
         </tr>
         <tr>
             <td class="narrow-column" style="font-size: 12px;">Test Performing Date:</td>
-            <td><?php echo date("m/d/Y", strtotime($rd2['date_in'])); ?> - <?php echo date("m/d/Y", strtotime($rd2['date_out1'])); ?></td> <!-- ganti date_out dari input depan halaman -->
+            <td><?php echo $rd2['date_in']->format("m/d/Y"); ?> - <?php echo $rd2['date_out1']->format("m/d/Y"); ?></td> <!-- ganti date_out dari input depan halaman -->
         </tr>
         <tr>
             <td class="narrow-column" style="font-size: 12px;">Applicant's Submitted Care Instruction</td>
@@ -747,7 +586,9 @@ textarea {
             <td>
                 <?php
                 if (!empty($rd2['date_out1'])) {
-                    $dt = new DateTime($rd2['date_out1']);
+                    // Kita gunakan clone supaya variabel asli $rd2['date_out1'] tidak ikut berubah
+                    $dt = clone $rd2['date_out1']; 
+                    
                     $dt->modify('+1 year');
                     $dt->modify('-1 day');
                     echo $dt->format('m/d/Y');
@@ -769,7 +610,9 @@ textarea {
             <td align="right" style="font-size: 12px;">Page 3 of 9</td> 
         </tr>
         <tr>
-            <td align="right" style="font-size: 12px;"><?php echo date("F j, Y", strtotime($rd2['date_out1']));?></td> 
+            <td align="right" style="font-size: 12px;">
+                <?php echo $rd2['date_out1'] ? $rd2['date_out1']->format("F j, Y") : ""; ?>
+            </td>
         </tr>
         <tr>
             <td align="right" style="font-size: 12px;">&nbsp;</td> 
@@ -1294,7 +1137,7 @@ textarea {
             <td align="right" style="font-size: 12px;">Page 4 of 9</td> 
         </tr>
         <tr>
-            <td align="right" style="font-size: 12px;"><?php echo date("F j, Y", strtotime($rd2['date_out1']));?></td> 
+            <td align="right" style="font-size: 12px;"><?php echo $rd2['date_out1'] ? $rd2['date_out1']->format("F j, Y") : ""; ?></td> 
         </tr>
         <tr>
             <td align="right" style="font-size: 12px;">&nbsp;</td> 
@@ -1581,8 +1424,7 @@ textarea {
             <tr>
                 <td align="right" style="font-size: 12px;">Page 5 of 9</td> 
             </tr>
-            <tr>
-                <td align="right" style="font-size: 12px;"><?php echo date("F j, Y", strtotime($rd2['date_out1']));?></td> 
+                <td align="right" style="font-size: 12px;"><?php echo $rd2['date_out1'] ? $rd2['date_out1']->format("F j, Y") : ""; ?></td> 
             </tr>
             <tr>
                 <td align="right" style="font-size: 12px;">&nbsp;</td> 
@@ -1934,8 +1776,7 @@ textarea {
             <tr>
                 <td align="right" style="font-size: 12px;">Page 6 of 9</td> 
             </tr>
-            <tr>
-                <td align="right" style="font-size: 12px;"><?php echo date("F j, Y", strtotime($rd2['date_out1']));?></td> 
+                <td align="right" style="font-size: 12px;"><?php echo $rd2['date_out1'] ? $rd2['date_out1']->format("F j, Y") : ""; ?></td> 
             </tr>
             <tr>
                 <td align="right" style="font-size: 12px;">&nbsp;</td> 
@@ -2191,7 +2032,7 @@ textarea {
             <td align="right" style="font-size: 12px;">Page 7 of 9</td> 
         </tr>
         <tr>
-            <td align="right" style="font-size: 12px;"><?php echo date("F j, Y", strtotime($rd2['date_out1']));?></td> 
+            <td align="right" style="font-size: 12px;"><?php echo $rd2['date_out1'] ? $rd2['date_out1']->format("F j, Y") : ""; ?></td> 
         </tr>
         <tr>
             <td align="right" style="font-size: 12px;">&nbsp;</td> 
@@ -2483,7 +2324,7 @@ textarea {
             <td align="right" style="font-size: 12px;">Page 8 of 9</td> 
         </tr>
         <tr>
-            <td align="right" style="font-size: 12px;"><?php echo date("F j, Y", strtotime($rd2['date_out1']));?></td> 
+            <td align="right" style="font-size: 12px;"><?php echo $rd2['date_out1'] ? $rd2['date_out1']->format("F j, Y") : ""; ?></td> 
         </tr>
         <tr>
             <td align="right" style="font-size: 12px;">&nbsp;</td> 
@@ -2785,7 +2626,7 @@ textarea {
             <td align="right" style="font-size: 12px;">Page 9 of 9</td> 
         </tr>
         <tr>
-            <td align="right" style="font-size: 12px;"><?php echo date("F j, Y", strtotime($rd2['date_out1']));?></td> 
+            <td align="right" style="font-size: 12px;"><?php echo $rd2['date_out1'] ? $rd2['date_out1']->format("F j, Y") : ""; ?></td> 
         </tr>
         <tr>
             <td align="right" style="font-size: 12px;">&nbsp;</td> 
@@ -3151,7 +2992,7 @@ textarea {
                 <td align="right" style="font-size: 12px;"><?php echo $rd2['no_rptlulu']; ?><?php if ($rd2['sts_rev'] == "1" and $rd2['revisi'] != "") { echo "-" . $rd2['revisi']; } ?></td>
             </tr>
             <tr>
-                <td align="right" style="font-size: 12px;"><?php echo date("F j, Y", strtotime($rd2['date_out1'])); ?></td>
+                <td align="right" style="font-size: 12px;"><?php echo $rd2['date_out1'] ? $rd2['date_out1']->format("F j, Y") : ""; ?></td>
             </tr>
             <tr> <td align="right" style="font-size: 12px;">&nbsp;</td> </tr>
             <tr> <td align="right" style="font-size: 12px;">&nbsp;</td> </tr>
