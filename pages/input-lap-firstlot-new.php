@@ -410,7 +410,8 @@ if ($_POST['save'] == "save") {
 	// untuk mencegah data ter-input dobel.
 	$nodemand_post = $_POST['nodemand'];
 	$params = [$nodemand_post];
-	$cekSql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 id FROM db_qc.tbl_firstlot WHERE nodemand=?", $params, $params);
+	$cekSql = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 id FROM db_qc.tbl_firstlot WHERE nodemand=?", $params);
+	var_dump(sqlsrv_errors());
 	$cekExist = sqlsrv_fetch_array($cekSql) ? 1 : 0;
 	if ($cekExist > 0) {
 		echo "<script>
@@ -440,6 +441,9 @@ if ($_POST['save'] == "save") {
 		$pos = strpos($_POST['langganan'], "/");
 		$posbuyer = substr($_POST['langganan'], $pos + 1, 50);
 		$buyer = str_replace("'", "''", $posbuyer);
+		$lebar = (float) $_POST['lebar'];
+		$gramasi = (float) $_POST['gramasi'];
+
 		$file = $_FILES['spectro']['name'];
 		// ambil data file
 		$namaFile = $_FILES['spectro']['name'];
@@ -505,8 +509,8 @@ if ($_POST['save'] == "save") {
 		  	'$_POST[no_item]',
 		  	'$po',
 		  	'$jns',
-		  	'$_POST[lebar]',
-		  	'$_POST[gramasi]',
+		  	$lebar,
+		  	$gramasi,
 		  	'$lot',
 		  	'$warna',
 		  	'$nowarna',
@@ -563,8 +567,8 @@ if ($_POST['save'] == "save") {
 				'$_POST[no_item]',
 				'$poPTG',
 				'$jnsPTG',
-				'$_POST[lebar]',
-				'$_POST[gramasi]',
+				$lebar,
+				$gramasi,
 				'$lotPTG',
 				'$warnaPTG',
 				'$sts_potong',
@@ -614,6 +618,9 @@ if ($_POST['ubah'] == "ubah") {
 	$pos = strpos($_POST['langganan'], "/");
 	$posbuyer = substr($_POST['langganan'], $pos + 1, 50);
 	$buyer = str_replace("'", "''", $posbuyer);
+	$lebar = (float) $_POST['lebar'];
+	$gramasi = (float) $_POST['gramasi'];
+	
 	$file = $_FILES['spectro']['name'];
 	// ambil data file
 	$namaFile = $_FILES['spectro']['name'];
@@ -636,8 +643,8 @@ if ($_POST['ubah'] == "ubah") {
 					no_item					='$_POST[no_item]',
 					po							='$po',
 					jenis_kain			='$jns',
-					lebar						='$_POST[lebar]',
-					gramasi					='$_POST[gramasi]',
+					lebar						=$lebar,
+					gramasi					=$gramasi,
 					lot							='$lot',
 					warna						='$warna',
 					no_warna				='$nowarna',
@@ -694,8 +701,8 @@ if ($_POST['ubah'] == "ubah") {
 					'$_POST[no_item]',
 					'$poPTG',
 					'$jnsPTG',
-					'$_POST[lebar]',
-					'$_POST[gramasi]',
+					$lebar,
+					$gramasi,
 					'$lotPTG',
 					'$warnaPTG',
 					'$sts_potong',
