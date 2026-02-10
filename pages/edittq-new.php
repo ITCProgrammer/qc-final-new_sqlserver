@@ -339,13 +339,14 @@ echo '</pre>';
 		
 					
         if($cekMB>0){
-            foreach($dMBs as $dMB){
-            $detail=explode(",",$dMB['physical']);
-            $detail1=explode(",",$dMB['functional']);
-            $detail2=explode(",",$dMB['colorfastness']);
-			
-			$id_master_test = $dMB['id'];
-		?>
+		if ($dMBs) {
+		$detail  = array_filter(array_map('trim', explode(',', (string)($dMBs['physical'] ?? ''))));
+		$detail1 = array_filter(array_map('trim', explode(',', (string)($dMBs['functional'] ?? ''))));
+		$detail2 = array_filter(array_map('trim', explode(',', (string)($dMBs['colorfastness'] ?? ''))));
+
+		$id_master_test = $dMBs['id'];
+
+			?>
 		<form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
            <input type="hidden" name="id_master_test" value="<?=$id_master_test?>">
 			<div class="form-group">
