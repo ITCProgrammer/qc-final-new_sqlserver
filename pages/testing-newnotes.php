@@ -1893,7 +1893,7 @@ $array_no_demand_other5_6 = [];
 $array_no_demand_other_no = 2;
 if ($nokk_demand_data > 0) {
 	$id_nokk = $nokk_demand_result['id_nokk'];
-	$demand_other = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM tbl_tq_nokk_demand WHERE id_nokk = ? and id_nokk > 0  ORDER BY id ", [$id_nokk]);
+	$demand_other = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_tq_nokk_demand WHERE id_nokk = ? and id_nokk > 0  ORDER BY id ", [$id_nokk]);
 
 	while ($datas = sqlsrv_fetch_array($demand_other, SQLSRV_FETCH_ASSOC)) {
 
