@@ -41,6 +41,9 @@ $Pejabat	= isset($_POST['pejabat']) ? $_POST['pejabat'] : '';
 $Solusi	= isset($_POST['solusi']) ? $_POST['solusi'] : '';
 $Kategori	= isset($_POST['kategori']) ? $_POST['kategori'] : '';
 $MasalahDominan = isset($_POST['masalah_dominan']) ? $_POST['masalah_dominan'] : '';
+
+$Where = "";
+$WhereKategori = "";
 	
 if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";}	
 ?>
@@ -93,22 +96,24 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
             <select class="form-control select2" name="pejabat" id="pejabat">
               <option value="">Pilih Pejabat</option>
                 <?php 
-                  $qryp=mysqli_query($con,"SELECT nama FROM tbl_personil_aftersales WHERE jenis='pejabat' ORDER BY nama ASC");
-                  while($rp=mysqli_fetch_array($qryp)){
+                  $qryp = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_personil_aftersales WHERE jenis=? ORDER BY nama ASC", array('pejabat'));
+                  if ($qryp) {
+                    while ($rp = sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)) {
                 ?>
               <option value="<?php echo $rp['nama'];?>" <?php if($Pejabat==$rp['nama']){echo "SELECTED";}?>><?php echo $rp['nama'];?></option>	
-                <?php }?>
+                <?php } } ?>
             </select>
         </div>
         <div class="col-sm-2">
         <select class="form-control select2" name="solusi" id="solusi">
 							<option value="">Solusi</option>
 							<?php 
-							$qryp=mysqli_query($con,"SELECT solusi FROM tbl_solusi ORDER BY solusi ASC");
-							while($rp=mysqli_fetch_array($qryp)){
+							$qryp = sqlsrv_query($con_db_qc_sqlsrv, "SELECT solusi FROM db_qc.tbl_solusi ORDER BY solusi ASC");
+							if ($qryp) {
+								while ($rp = sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)) {
 							?>
 							<option value="<?php echo $rp['solusi'];?>" <?php if($Solusi==$rp['solusi']){echo "SELECTED";}?>><?php echo $rp['solusi'];?></option>	
-							<?php }?>
+							<?php } } ?>
 						</select>
         </div>
         <div class="col-sm-2">
@@ -126,13 +131,14 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
         <select class="form-control select2" name="masalah_dominan" id="masalah_dominan">
         <option value="">Pilih Masalah Dominan</option>
         <?php
-        $qryMasalah = mysqli_query($con, "SELECT DISTINCT masalah_dominan FROM tbl_aftersales_now ORDER BY masalah_dominan ASC");
-        while ($rowMasalah = mysqli_fetch_array($qryMasalah)) {
+        $qryMasalah = sqlsrv_query($con_db_qc_sqlsrv, "SELECT DISTINCT masalah_dominan FROM db_qc.tbl_aftersales_now ORDER BY masalah_dominan ASC");
+        if ($qryMasalah) {
+          while ($rowMasalah = sqlsrv_fetch_array($qryMasalah, SQLSRV_FETCH_ASSOC)) {
         ?>
             <option value="<?php echo $rowMasalah['masalah_dominan']; ?>" <?php if ($MasalahDominan == $rowMasalah['masalah_dominan']) echo "selected"; ?>>
                 <?php echo $rowMasalah['masalah_dominan']; ?>
             </option>
-        <?php } ?>
+        <?php } } ?>
     </select>
         </div>
       </div>
@@ -259,43 +265,41 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
             $no=1;
             // if($sts_red=="1"){ $stsred =" AND a.sts_red='1' "; }else{$stsred = " ";}
             if($sts_claim=="1"){ $stsclaim =" AND a.sts_claim='1' "; }else{$stsclaim =" ";}
-            if($Awal!=""){ $Where =" AND DATE_FORMAT( a.tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
+            if($Awal!=""){ $Where =" AND CONVERT(date, a.tgl_buat) BETWEEN '$Awal' AND '$Akhir' "; }
             if ($MasalahDominan != "") {
               $Where .= " AND a.masalah_dominan = '$MasalahDominan' ";
             }
             if($Kategori != "") {
-              $query4Kategori = mysqli_query($con, "SELECT
-                                                      a.*,
-                                                      b.pjg1
-                                                      FROM
-                                                      tbl_aftersales_now a
-                                                      LEFT JOIN tbl_ganti_kain_now b
-                                                      ON
-                                                      b.id_nsp = a.id
-                                                      WHERE
-                                                      DATE_FORMAT(a.tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir'
-                                                      GROUP BY
-                                                      a.po,
-                                                      a.no_hanger,
-                                                      a.warna,
-                                                      a.masalah_dominan,
-                                                      a.qty_order
-                                                      ORDER BY
-                                                      a.tgl_buat ASC");
+              $query4Kategori = sqlsrv_query(
+                $con_db_qc_sqlsrv,
+                "SELECT DISTINCT
+                    a.id,
+                    a.no_order,
+                    a.no_hanger,
+                    a.masalah_dominan,
+                    b.pjg1,
+                    a.tgl_buat
+                  FROM db_qc.tbl_aftersales_now a
+                  LEFT JOIN db_qc.tbl_ganti_kain_now b ON b.id_nsp = a.id
+                  WHERE CONVERT(date, a.tgl_buat) BETWEEN '$Awal' AND '$Akhir'
+                  ORDER BY a.tgl_buat ASC"
+              );
 
               $majorTemp = [];
               $sampleTemp = [];
               $repeatTemp = [];
               $generalTemp = [];
 
-              while($row = mysqli_fetch_assoc($query4Kategori)) {
-                  if($row['pjg1'] >= 500) {
-                      $majorTemp[] = $row;
-                  } elseif(in_array(substr($row['no_order'], 0, 3), ['SAM', 'SME'])) {
-                      $sampleTemp[] = $row;
-                  } else {
-                      $generalTemp[] = $row;
-                  }
+              if ($query4Kategori) {
+                while ($row = sqlsrv_fetch_array($query4Kategori, SQLSRV_FETCH_ASSOC)) {
+                    if($row['pjg1'] >= 500) {
+                        $majorTemp[] = $row;
+                    } elseif(in_array(substr($row['no_order'], 0, 3), ['SAM', 'SME'])) {
+                        $sampleTemp[] = $row;
+                    } else {
+                        $generalTemp[] = $row;
+                    }
+                }
               }
 
               $hanger_masalah_dominan = array_map(function($value) {
@@ -320,16 +324,16 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
 
               switch ($Kategori) {
                 case "MAJOR":
-                    $WhereKategori = "AND a.id IN (" . implode(",", $majorTemp) . ") ";
+                    $WhereKategori = empty($majorTemp) ? "AND 1=0 " : "AND a.id IN (" . implode(",", $majorTemp) . ") ";
                     break;
                 case "SAMPLE":
-                    $WhereKategori = "AND a.id IN (" . implode(",", $sampleTemp) . ") ";
+                    $WhereKategori = empty($sampleTemp) ? "AND 1=0 " : "AND a.id IN (" . implode(",", $sampleTemp) . ") ";
                     break;
                 case "REPEAT":
-                    $WhereKategori = "AND a.id IN (" . implode(",", $repeatTemp) . ") ";
+                    $WhereKategori = empty($repeatTemp) ? "AND 1=0 " : "AND a.id IN (" . implode(",", $repeatTemp) . ") ";
                     break;
                 case "GENERAL":
-                    $WhereKategori = "AND a.id IN (" . implode(",", $generalTemp) . ") ";
+                    $WhereKategori = empty($generalTemp) ? "AND 1=0 " : "AND a.id IN (" . implode(",", $generalTemp) . ") ";
                     break;
                 default:
                     // handle default case if necessary
@@ -338,41 +342,85 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
 
             // if($Awal!="" or $sts_red=="1" or $sts_claim=="1" or $Order!="" or $Hanger!="" or $PO!="" or $Langganan!="" or $Demand!="" or $Prodorder!="" or $Pejabat!="" or $Solusi!=""){
             if($Awal!=""  or $sts_claim=="1" or $Order!="" or $Hanger!="" or $PO!="" or $Langganan!="" or $Demand!="" or $Prodorder!="" or $Pejabat!="" or $Solusi!=""){
-              $qry1=mysqli_query($con,"SELECT a.*,
-                          c.personil1 as personil1_additional,
-                          c.personil2 as personil2_additional,
-                          c.personil3 as personil3_additional,
-                          c.personil4 as personil4_additional,
-                          c.personil5 as personil5_additional,
-                          c.personil6 as personil6_additional,
-                          CONCAT_WS(', ',
-                              NULLIF(c.personil1, ''),
-                              NULLIF(c.personil2, ''),
-                              NULLIF(c.personil3, ''),
-                              NULLIF(c.personil4, ''),
-                              NULLIF(c.personil5, ''),
-                              NULLIF(c.personil6, '')
-                          ) AS personil_additional,
-                          c.pejabat as pejabat_additional,
-                          c.shift1 as shift1_additional,
-                          c.shift2 as shift2_additional,
-                          c.hitung as hitung_additional,
-                          c.status as status_additional,
-                          c.analisis as analisis_additional,
-                          c.hasil_analisa as hasil_analisa_additional,
-                          GROUP_CONCAT( distinct b.no_ncp_gabungan separator ', ' ) as no_ncp,
-                          GROUP_CONCAT( distinct b.masalah_dominan separator ', ' ) as masalah_utama,
-                          GROUP_CONCAT( distinct b.akar_masalah separator ', ' ) as akar_masalah,
-                          GROUP_CONCAT( distinct b.solusi_panjang separator ', ' ) as solusi_panjang 
-              FROM tbl_aftersales_now a 
-              LEFT JOIN tbl_ncp_qcf_now b ON a.nodemand=b.nodemand 
-              LEFT JOIN tbl_add_kpe_qcf c ON c.no_demand = a.nodemand
-              WHERE a.no_order LIKE '%$Order%' AND a.po LIKE '%$PO%' AND a.no_hanger LIKE '%$Hanger%' AND a.langganan LIKE '%$Langganan%' AND a.nodemand LIKE '%$Demand%' AND a.nokk LIKE '%$Prodorder%' AND a.pejabat LIKE '%$Pejabat%' AND a.solusi LIKE '%$Solusi%' $Where $WhereKategori $stsclaim 
-              -- WHERE a.no_order LIKE '%$Order%' AND a.po LIKE '%$PO%' AND a.no_hanger LIKE '%$Hanger%' AND a.langganan LIKE '%$Langganan%' AND a.nodemand LIKE '%$Demand%' AND a.nokk LIKE '%$Prodorder%' AND a.pejabat LIKE '%$Pejabat%' AND a.solusi LIKE '%$Solusi%' $Where $WhereKategori $stsred $stsclaim 
-              GROUP BY a.nodemand, a.masalah_dominan
-              ORDER BY a.id ASC");
-              while($row1=mysqli_fetch_array($qry1)){
-                  $noorder=str_replace("/","&",$row1['no_order']);
+              $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "
+                WITH base AS (
+                  SELECT a.*,
+                         ROW_NUMBER() OVER (PARTITION BY a.nodemand, a.masalah_dominan ORDER BY a.id ASC) AS rn
+                  FROM db_qc.tbl_aftersales_now a
+                  WHERE a.no_order LIKE '%$Order%'
+                    AND a.po LIKE '%$PO%'
+                    AND a.no_hanger LIKE '%$Hanger%'
+                    AND a.langganan LIKE '%$Langganan%'
+                    AND a.nodemand LIKE '%$Demand%'
+                    AND a.nokk LIKE '%$Prodorder%'
+                    AND a.pejabat LIKE '%$Pejabat%'
+                    AND a.solusi LIKE '%$Solusi%'
+                    $Where $WhereKategori $stsclaim
+                )
+                SELECT base.*,
+                       c.personil1 as personil1_additional,
+                       c.personil2 as personil2_additional,
+                       c.personil3 as personil3_additional,
+                       c.personil4 as personil4_additional,
+                       c.personil5 as personil5_additional,
+                       c.personil6 as personil6_additional,
+                       c.pejabat as pejabat_additional,
+                       c.shift1 as shift1_additional,
+                       c.shift2 as shift2_additional,
+                       c.hitung as hitung_additional,
+                       c.status as status_additional,
+                       c.analisis as analisis_additional,
+                       c.hasil_analisa as hasil_analisa_additional,
+                       agg.no_ncp,
+                       agg.masalah_utama,
+                       agg.akar_masalah,
+                       agg.solusi_panjang
+                FROM base
+                LEFT JOIN db_qc.tbl_add_kpe_qcf c ON c.no_demand = base.nodemand
+                OUTER APPLY (
+                  SELECT
+                    no_ncp = STUFF((
+                      SELECT DISTINCT ', ' + b2.no_ncp_gabungan
+                      FROM db_qc.tbl_ncp_qcf_now b2
+                      WHERE b2.nodemand = base.nodemand AND b2.no_ncp_gabungan IS NOT NULL AND b2.no_ncp_gabungan <> ''
+                      FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, ''),
+                    masalah_utama = STUFF((
+                      SELECT DISTINCT ', ' + b2.masalah_dominan
+                      FROM db_qc.tbl_ncp_qcf_now b2
+                      WHERE b2.nodemand = base.nodemand AND b2.masalah_dominan IS NOT NULL AND b2.masalah_dominan <> ''
+                      FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, ''),
+                    akar_masalah = STUFF((
+                      SELECT DISTINCT ', ' + b2.akar_masalah
+                      FROM db_qc.tbl_ncp_qcf_now b2
+                      WHERE b2.nodemand = base.nodemand AND b2.akar_masalah IS NOT NULL AND b2.akar_masalah <> ''
+                      FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, ''),
+                    solusi_panjang = STUFF((
+                      SELECT DISTINCT ', ' + b2.solusi_panjang
+                      FROM db_qc.tbl_ncp_qcf_now b2
+                      WHERE b2.nodemand = base.nodemand AND b2.solusi_panjang IS NOT NULL AND b2.solusi_panjang <> ''
+                      FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '')
+                ) agg
+                WHERE base.rn = 1
+                ORDER BY base.id ASC
+              ");
+              if ($qry1) {
+                while ($row1 = sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)) {
+                  $personil_additional = array_filter([
+                    $row1['personil1_additional'] ?? '',
+                    $row1['personil2_additional'] ?? '',
+                    $row1['personil3_additional'] ?? '',
+                    $row1['personil4_additional'] ?? '',
+                    $row1['personil5_additional'] ?? '',
+                    $row1['personil6_additional'] ?? ''
+                  ], function ($v) {
+                    return $v !== null && $v !== '';
+                  });
+                  $row1['personil_additional'] = implode(', ', $personil_additional);
+                  $tgl_buat = $row1['tgl_buat'] ?? null;
+                  if ($tgl_buat instanceof DateTime) {
+                    $tgl_buat = $tgl_buat->format('Y-m-d');
+                  }
+                $noorder=str_replace("/","&",$row1['no_order']);
                   if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']!=""){ $tjawab=$row1['t_jawab']."+".$row1['t_jawab1']."+".$row1['t_jawab2'];
                   }else if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']==""){
                   $tjawab=$row1['t_jawab']."+".$row1['t_jawab1'];	
@@ -414,7 +462,7 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
             <a href="EditKPENew-<?php echo $row1['id']; ?>" class="btn btn-info btn-xs <?php if($_SESSION['akses']=='biasa' OR $_SESSION['lvl_id']!='AFTERSALES'){ echo "disabled"; } ?>" target="_blank"><i class="fa fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i> </a>
             <a href="#" class="btn btn-danger btn-xs <?php if($_SESSION['akses']=='biasa' OR $_SESSION['lvl_id']!='AFTERSALES'){ echo "disabled"; } ?>" onclick="confirm_delete('./HapusDataKPE-<?php echo $row1['id'] ?>');"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" title="Hapus"></i> </a>
             </div></td> -->
-            <td align="center"><?php echo $row1['tgl_buat'];?></td>
+            <td align="center"><?php echo $tgl_buat; ?></td>
             <?php 
               $pelanggan = explode('/', $row1['langganan'])[0]; 
               $buyer = explode('/', $row1['langganan'])[1];
@@ -496,7 +544,7 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
               <?= (int) $row1['pengurangan_poin']; ?>
             </td>
             </tr>
-          <?php	$no++;  }} ?>
+          <?php $no++; } } } ?>
         </tbody>
       </table>
       </div>
@@ -538,18 +586,22 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
                     <?php 
                         // Menyiapkan opsi untuk Personil QC
                         $personil_options_html = '<option value="">-- Pilih Personil --</option>';
-                        $qryp = mysqli_query($con, "SELECT UPPER(nama) AS nama FROM user_login WHERE dept ='QC' ORDER BY nama ASC");
-                        while ($row_personil = mysqli_fetch_assoc($qryp)) {
-                            $nama_personil = htmlspecialchars($row_personil['nama']);
-                            $personil_options_html .= "<option value='{$nama_personil}'>{$nama_personil}</option>";
+                        $qryp = sqlsrv_query($con_db_qc_sqlsrv, "SELECT UPPER(nama) AS nama FROM db_qc.user_login WHERE dept=? ORDER BY nama ASC", array('QC'));
+                        if ($qryp) {
+                          while ($row_personil = sqlsrv_fetch_array($qryp, SQLSRV_FETCH_ASSOC)) {
+                              $nama_personil = htmlspecialchars($row_personil['nama']);
+                              $personil_options_html .= "<option value='{$nama_personil}'>{$nama_personil}</option>";
+                          }
                         }
 
                         // Menyiapkan opsi untuk Pejabat
                         $personil_pejabat = '<option value="">-- Pilih Pejabat --</option>';
-                        $qrypjbt = mysqli_query($con, "SELECT nama FROM tbl_personil_aftersales WHERE jenis='pejabat' ORDER BY nama ASC");
-                        while ($row_personil_pejabat = mysqli_fetch_assoc($qrypjbt)) {
-                            $nama_personil_pejabat = htmlspecialchars($row_personil_pejabat['nama']);
-                            $personil_pejabat .= "<option value='{$nama_personil_pejabat}'>{$nama_personil_pejabat}</option>";
+                        $qrypjbt = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nama FROM db_qc.tbl_personil_aftersales WHERE jenis=? ORDER BY nama ASC", array('pejabat'));
+                        if ($qrypjbt) {
+                          while ($row_personil_pejabat = sqlsrv_fetch_array($qrypjbt, SQLSRV_FETCH_ASSOC)) {
+                              $nama_personil_pejabat = htmlspecialchars($row_personil_pejabat['nama']);
+                              $personil_pejabat .= "<option value='{$nama_personil_pejabat}'>{$nama_personil_pejabat}</option>";
+                          }
                         }
                     ?>
 

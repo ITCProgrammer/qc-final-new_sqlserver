@@ -43,13 +43,13 @@ $Pejabat=$_GET['pejabat'];
   </tr>
 	<?php 
 	$no=1;
-	if($Awal!=""){ $Where =" AND DATE_FORMAT( tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
+	if($Awal!=""){ $Where =" AND CONVERT(date, tgl_buat) BETWEEN '$Awal' AND '$Akhir' "; }
   if($Awal!="" or $Order!="" or $Hanger!="" or $PO!="" or $Langganan!="" or $Demand!="" or $Prodorder!="" or $Pejabat!=""){
-  $qry1=mysqli_query($con,"SELECT * FROM tbl_aftersales_now WHERE no_order LIKE '%$Order%' AND po LIKE '%$PO%' AND no_hanger LIKE '%$Hanger%' AND langganan LIKE '%$Langganan%' AND nodemand LIKE '%$Demand%' AND nokk LIKE '%$Prodorder%' AND pejabat='$Pejabat' $Where ORDER BY masalah_dominan ASC");
+  $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_aftersales_now WHERE no_order LIKE '%$Order%' AND po LIKE '%$PO%' AND no_hanger LIKE '%$Hanger%' AND langganan LIKE '%$Langganan%' AND nodemand LIKE '%$Demand%' AND nokk LIKE '%$Prodorder%' AND pejabat='$Pejabat' $Where ORDER BY masalah_dominan ASC");
   }else{
-  $qry1=mysqli_query($con,"SELECT * FROM tbl_aftersales_now WHERE no_order LIKE '$Order' AND po LIKE '$PO' AND no_hanger LIKE '$Hanger' AND langganan LIKE '$Langganan' AND nodemand LIKE '$Demand' AND nokk LIKE '$Prodorder' AND pejabat='$Pejabat' $Where ORDER BY masalah_dominan ASC");
+  $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_aftersales_now WHERE no_order LIKE '$Order' AND po LIKE '$PO' AND no_hanger LIKE '$Hanger' AND langganan LIKE '$Langganan' AND nodemand LIKE '$Demand' AND nokk LIKE '$Prodorder' AND pejabat='$Pejabat' $Where ORDER BY masalah_dominan ASC");
   }
-			while($row1=mysqli_fetch_array($qry1)){
+			while($row1 = sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
 				if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']!=""){ $tjawab=$row1['t_jawab'].",".$row1['t_jawab1'].", ".$row1['t_jawab2'];
 				}else if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']==""){
 				$tjawab=$row1['t_jawab'].",".$row1['t_jawab1'];	
@@ -69,7 +69,14 @@ $Pejabat=$_GET['pejabat'];
 	?>
     <tr>
       <td><?php echo $no;?></td>
-      <td><?php echo date("d/m/y", strtotime($row1['tgl_buat']));?></td>
+      <td><?php
+        $tgl_buat = $row1['tgl_buat'] ?? null;
+        if ($tgl_buat instanceof DateTime) {
+          echo $tgl_buat->format('d/m/y');
+        } else {
+          echo date("d/m/y", strtotime((string)$tgl_buat));
+        }
+      ?></td>
       <td><?php echo $row1['langganan'];?></td>
       <td><?php echo $row1['po'];?></td>
       <td><?php echo $row1['no_order'];?></td>

@@ -11,8 +11,10 @@ $Awal=$_GET['awal'];
 $Akhir=$_GET['akhir'];
 $Dept=$_GET['dept'];
 $Cancel=$_GET['cancel'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$rTgl = array(
+  'tgl_skrg' => date('Y-m-d'),
+  'jam_skrg' => date('H:i:s')
+);
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -154,19 +156,49 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
   $Demand=$_GET['demand'];
   $Prodorder=$_GET['prodorder'];
   $Pejabat=$_GET['pejabat'];
-  if($Awal!=""){ $Where =" AND DATE_FORMAT( a.tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
-  if($Awal!="" or $Order!="" or $Hanger!="" or $PO!="" or $Langganan!="" or $Demand!="" or $Prodorder!="" or $Pejabat!=""){
-  $qry1=mysqli_query($con,"SELECT a.*,
-  GROUP_CONCAT( DISTINCT b.no_ncp SEPARATOR ', ' ) AS no_ncp,
-  GROUP_CONCAT( DISTINCT b.masalah SEPARATOR ', ' ) AS masalah_ncp 
-  FROM tbl_aftersales_now a LEFT JOIN tbl_ncp_qcf_new b ON a.nodemand=b.nodemand 
-  WHERE a.no_order LIKE '%$Order%' AND a.po LIKE '%$PO%' AND a.no_hanger LIKE '%$Hanger%' AND a.langganan LIKE '%$Langganan%' AND a.nodemand LIKE '%$Demand%' AND a.nokk LIKE '%$Prodorder%' AND a.pejabat LIKE '%$Pejabat%' AND a.solusi LIKE '%$Solusi%' $Where
-  GROUP BY a.nodemand, a.masalah_dominan
-  ORDER BY a.id ASC");
+  $Solusi = isset($_GET['solusi']) ? $_GET['solusi'] : '';
+  $Where = "";
+  if($Awal!=""){ $Where =" AND CONVERT(date, a.tgl_buat) BETWEEN '$Awal' AND '$Akhir' "; }
+  if($Awal!="" or $Order!="" or $Hanger!="" or $PO!="" or $Langganan!="" or $Demand!="" or $Prodorder!="" or $Pejabat!="" or $Solusi!=""){
+    $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "
+      WITH base AS (
+        SELECT a.*,
+               ROW_NUMBER() OVER (PARTITION BY a.nodemand, a.masalah_dominan ORDER BY a.id ASC) AS rn
+        FROM db_qc.tbl_aftersales_now a
+        WHERE a.no_order LIKE '%$Order%'
+          AND a.po LIKE '%$PO%'
+          AND a.no_hanger LIKE '%$Hanger%'
+          AND a.langganan LIKE '%$Langganan%'
+          AND a.nodemand LIKE '%$Demand%'
+          AND a.nokk LIKE '%$Prodorder%'
+          AND a.pejabat LIKE '%$Pejabat%'
+          AND a.solusi LIKE '%$Solusi%'
+          $Where
+      )
+      SELECT base.*,
+             agg.no_ncp,
+             agg.masalah_ncp
+      FROM base
+      OUTER APPLY (
+        SELECT
+          no_ncp = STUFF((
+            SELECT DISTINCT ', ' + b2.no_ncp
+            FROM db_qc.tbl_ncp_qcf_new b2
+            WHERE b2.nodemand = base.nodemand AND b2.no_ncp IS NOT NULL AND b2.no_ncp <> ''
+            FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, ''),
+          masalah_ncp = STUFF((
+            SELECT DISTINCT ', ' + b2.masalah
+            FROM db_qc.tbl_ncp_qcf_new b2
+            WHERE b2.nodemand = base.nodemand AND b2.masalah IS NOT NULL AND b2.masalah <> ''
+            FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '')
+      ) agg
+      WHERE base.rn = 1
+      ORDER BY base.id ASC
+    ");
   }else{
-  $qry1=mysqli_query($con,"SELECT * FROM tbl_aftersales_now WHERE no_order LIKE '$Order' AND po LIKE '$PO' AND no_hanger LIKE '$Hanger' AND langganan LIKE '$Langganan' AND nodemand LIKE '$Demand' AND nokk LIKE '$Prodorder' AND pejabat LIKE '%$Pejabat%' $Where ORDER BY masalah_dominan ASC");
+    $qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_aftersales_now a WHERE a.no_order LIKE '$Order' AND a.po LIKE '$PO' AND a.no_hanger LIKE '$Hanger' AND a.langganan LIKE '$Langganan' AND a.nodemand LIKE '$Demand' AND a.nokk LIKE '$Prodorder' AND a.pejabat LIKE '%$Pejabat%' $Where ORDER BY a.masalah_dominan ASC");
   }
-			while($row1=mysqli_fetch_array($qry1)){
+			while($row1 = sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC)){
 				if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']!=""){ $tjawab=$row1['t_jawab'].",".$row1['t_jawab1'].", ".$row1['t_jawab2'];
 				}else if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']==""){
 				$tjawab=$row1['t_jawab'].",".$row1['t_jawab1'];	
@@ -186,7 +218,14 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
 		 ?>
           <tr valign="top">
             <td align="center"><font size="-2"><?php echo $no; ?></font></td>
-            <td align="center"><font size="-2"><?php echo date("d/m/y", strtotime($row1['tgl_buat']));?></font></td>
+            <td align="center"><font size="-2"><?php
+              $tgl_buat = $row1['tgl_buat'] ?? null;
+              if ($tgl_buat instanceof DateTime) {
+                echo $tgl_buat->format('d/m/y');
+              } else {
+                echo date("d/m/y", strtotime((string)$tgl_buat));
+              }
+            ?></font></td>
             <td><font size="-2"><?php echo strtoupper($row1['langganan']);?></font></td>
             <td><font size="-2"><?php echo strtoupper($row1['po']);?></font></td>
             <td align="center"><font size="-2"><?php echo strtoupper($row1['no_order']);?></font></td>
