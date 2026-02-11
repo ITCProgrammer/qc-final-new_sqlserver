@@ -336,18 +336,18 @@ echo '</pre>';
 		// $cekMB=mysqli_num_rows($qMB);
 		$dMBs = sqlsrv_fetch_array($qMB, SQLSRV_FETCH_ASSOC);
 		$cekMB = $dMBs? 1: 0;
-		
 					
         if($cekMB>0){
-		if ($dMBs) {
-		$detail  = array_filter(array_map('trim', explode(',', (string)($dMBs['physical'] ?? ''))));
-		$detail1 = array_filter(array_map('trim', explode(',', (string)($dMBs['functional'] ?? ''))));
-		$detail2 = array_filter(array_map('trim', explode(',', (string)($dMBs['colorfastness'] ?? ''))));
+			if ($dMBs) {
+			$detail  = array_filter(array_map('trim', explode(',', (string)($dMBs['physical'] ?? ''))));
+			$detail1 = array_filter(array_map('trim', explode(',', (string)($dMBs['functional'] ?? ''))));
+			$detail2 = array_filter(array_map('trim', explode(',', (string)($dMBs['colorfastness'] ?? ''))));
 
-		$id_master_test = $dMBs['id'];
+			$id_master_test = $dMBs['id'];
 
 			?>
 		<form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
+			<input type="hidden" name="no_testmaster" value="<?=$_GET['no_test']?>">
            <input type="hidden" name="id_master_test" value="<?=$id_master_test?>">
 			<div class="form-group">
                 <span class='badge bg-blue'><label for="physical" class="col-sm-2">PHYSICAL</label></span>
@@ -486,6 +486,7 @@ echo '</pre>';
              <?php } ?>   
             <?php }else{ ?>
         <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form1" id="form1">
+			<input type="hidden" name="no_test" value="<?=$_GET['no_test']?>">
             <div class="form-group">
                 <span class='badge bg-blue'><label for="physical" class="col-sm-2">PHYSICAL</label></span>
             </div>
@@ -618,7 +619,7 @@ echo '</pre>';
 				</label>
 			</div>
 		</form>
-			<?php } ?>
+			<?php }?>
 </div>
 </div>
  	<?php if($_GET['no_test']!=""){ 	 
@@ -639,7 +640,6 @@ echo '</pre>';
 
 <?php
 if($_POST['save']=="save"){
-		
 		$nodemand_mulptiple = $_POST['nodemand_mulptiple'];
 		$id_nokk =  $_POST['id_tq_nokk'] ;
 		foreach ($nodemand_mulptiple as $key=>$multiple) {
@@ -686,6 +686,7 @@ if($_POST['save']=="save"){
 		
 		
 		$id_master_test = $_POST['id_master_test'];
+		$no_testmaster = $_POST['no_test'];
         $checkbox1=$_POST['physical'];
         $checkbox2=$_POST['functional'];
         $checkbox3=$_POST['colorfastness'];
@@ -700,6 +701,10 @@ if($_POST['save']=="save"){
 		$jns_kain=$_POST['jns_kain'];
 		$ip= $_SERVER['REMOTE_ADDR'];
 		$pelanggan=str_replace("'","''",$_POST['pelanggan']);
+		// echo $checkbox1;
+		// echo $checkbox2;
+		// echo $checkbox3;
+
 		if($_POST['is_demand_new']=="1"){$is_demand_new="1";}else{ $is_demand_new="0";}
         $chkp="";
         $chkf="";
@@ -708,6 +713,7 @@ if($_POST['save']=="save"){
    		{  
       		$chkp .= $chk1.",";  
         }
+		
         foreach($checkbox2 as $chk2)  
    		{  
       		$chkf .= $chk2.",";  
@@ -716,16 +722,44 @@ if($_POST['save']=="save"){
    		{  
       		$chkc .= $chk3.",";  
    		}
-    $sqlData=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_master_test
-		SET
-			buyer         = '$buyer',
-			no_itemtest   = '$noitem',
-			physical      = '$chkp',
-			functional    = '$chkf',
-			colorfastness = '$chkc',
-			tgl_update    = GETDATE()
-		WHERE id = '$id_master_test'
-	");
+		
+		// echo $chkf;
+		// echo $chkc;
+		// die();
+    	$id_master_test = isset($id_master_test) ? trim((string)$id_master_test) : '';
+
+		if ($id_master_test === '' || $id_master_test === '0') {
+			// INSERT (id identity)
+			$sql = "
+				INSERT INTO db_qc.tbl_master_test
+					(buyer, no_itemtest, no_testmaster, physical, functional, colorfastness, tgl_update)
+				VALUES
+					(?, ?, ?, ?, ?, ?, GETDATE());
+			";
+
+			$params = [$buyer, $noitem, $no_testmaster, $chkp, $chkf, $chkc];
+		} else {
+			// UPDATE
+			$sql = "
+				UPDATE db_qc.tbl_master_test
+				SET
+					buyer = ?,
+					no_itemtest = ?,
+					physical = ?,
+					functional = ?,
+					colorfastness = ?,
+					tgl_update = GETDATE()
+				WHERE id = ?;
+			";
+
+			$params = [$buyer, $noitem, $chkp, $chkf, $chkc, (int)$id_master_test];
+		}
+
+		$sqlData = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+		if ($sqlData === false) {
+			die(print_r(sqlsrv_errors(), true));
+		}
 
 	$sqlData1=sqlsrv_query($con_db_qc_sqlsrv,"
 	UPDATE db_qc.tbl_tq_nokk
