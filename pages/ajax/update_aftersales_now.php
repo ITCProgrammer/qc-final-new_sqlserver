@@ -7,25 +7,16 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once "../../koneksi.php";
 
-$mysqli = null;
-foreach (['conn', 'con', 'koneksi', 'mysqli', 'db'] as $v) {
-    if (isset($$v) && $$v instanceof mysqli) {
-        $mysqli = $$v;
-        break;
-    }
-}
-if (!$mysqli && function_exists('mysqli_connect') && isset($koneksi)) {
-    if ($koneksi instanceof mysqli)
-        $mysqli = $koneksi;
-}
-
-if (!$mysqli) {
+if (!$con_db_qc_sqlsrv) {
     ob_end_clean();
-    echo json_encode(['status' => 'error', 'message' => 'Koneksi MySQL (mysqli) tidak ketemu. Cek koneksi.php ($conn/$con/$koneksi).']);
+    $errors = sqlsrv_errors();
+    $msg = 'Koneksi SQL Server (db_qc) gagal.';
+    if ($errors) {
+        $msg .= ' ' . print_r($errors, true);
+    }
+    echo json_encode(['status' => 'error', 'message' => $msg]);
     exit;
 }
-
-mysqli_set_charset($mysqli, 'utf8mb4');
 
 // INPUT
 $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
@@ -55,22 +46,32 @@ if (!in_array($field, $allowedFields, true)) {
 }
 
 // UPDATE
-$sql = "UPDATE tbl_aftersales_now SET `$field`=? WHERE `id`=?";
-
-$stmt = $mysqli->prepare($sql);
+$sql = "UPDATE db_qc.tbl_aftersales_now SET $field=? WHERE id=?";
+$stmt = sqlsrv_prepare($con_db_qc_sqlsrv, $sql, array($value, $id));
 if (!$stmt) {
     ob_end_clean();
-    echo json_encode(['status' => 'error', 'message' => 'Prepare gagal: ' . $mysqli->error]);
+    $errors = sqlsrv_errors();
+    $msg = 'Prepare gagal.';
+    if ($errors) {
+        $msg .= ' ' . print_r($errors, true);
+    }
+    echo json_encode(['status' => 'error', 'message' => $msg]);
     exit;
 }
 
-$stmt->bind_param("ii", $value, $id);
-
-if (!$stmt->execute()) {
+if (!sqlsrv_execute($stmt)) {
     ob_end_clean();
-    echo json_encode(['status' => 'error', 'message' => 'Execute gagal: ' . $stmt->error]);
+    $errors = sqlsrv_errors();
+    $msg = 'Execute gagal.';
+    if ($errors) {
+        $msg .= ' ' . print_r($errors, true);
+    }
+    echo json_encode(['status' => 'error', 'message' => $msg]);
     exit;
 }
+
+$affected = sqlsrv_rows_affected($stmt);
+sqlsrv_free_stmt($stmt);
 
 ob_end_clean();
-echo json_encode(['status' => 'ok', 'affected' => $stmt->affected_rows]);
+echo json_encode(['status' => 'ok', 'affected' => $affected]);
