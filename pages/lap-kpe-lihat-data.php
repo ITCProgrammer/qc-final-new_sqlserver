@@ -749,12 +749,25 @@ $(document).ready(function () {
             type: 'POST',
             data: $(this).serialize(),
             success: function(response) {
-                alert(response);
-                $('#editKpeModal').modal('hide');
-                location.reload();
+                var payload = response;
+                if (typeof response === 'string') {
+                    try {
+                        payload = JSON.parse(response);
+                    } catch (e) {
+                        payload = null;
+                    }
+                }
+                if (payload && payload.status === 'ok') {
+                    alert(payload.message || 'Data berhasil disimpan.');
+                    $('#editKpeModal').modal('hide');
+                    location.reload();
+                } else {
+                    var msg = (payload && payload.message) ? payload.message : 'Gagal menyimpan data.';
+                    alert(msg);
+                }
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                alert('Terjadi kesalahan saat menyimpan data: ' + textStatus);
+                alert('Gagal menyimpan data: ' + textStatus);
                 console.error(errorThrown);
             }
         });
