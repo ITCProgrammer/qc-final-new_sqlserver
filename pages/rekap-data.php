@@ -758,7 +758,14 @@ if ($Delay == "1") {
      <td align="center"><?php echo $r['lebar'];?></td>
      <td align="center"><?php echo $r['gramasi'];?></td>
      <td align="center">
-        <?php echo $r['tgl_masuk']->format('Y-m-d'); ?>
+        <?php
+        $tglMasuk = $r['tgl_masuk'] ?? null;
+        if ($tglMasuk instanceof DateTime) {
+            echo $tglMasuk->format('Y-m-d');
+        } elseif (is_string($tglMasuk) && $tglMasuk !== '') {
+            echo substr($tglMasuk, 0, 10);
+        }
+        ?>
      </td>
      <td align="right"><?php echo $r['rol'];?></td>
      <td align="right"><?php echo $r['netto'];?></td>
