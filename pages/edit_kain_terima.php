@@ -25,10 +25,31 @@ $diterima   = $_POST['diterima_oleh'] ?? null;
 $usrid = $_SESSION['usrid'] ?? null;
 
 $success = true;
+$errMsg = '';
+
+if (!$con_db_laborat_sqlsrv) {
+    $success = false;
+    $errors = sqlsrv_errors(SQLSRV_ERR_ERRORS);
+    $errMsg = $errors ? $errors[0]['message'] : 'Koneksi DB laborat gagal.';
+}
+
+if ($success && (!$id || !$sts || !$no_counter)) {
+    $success = false;
+    $errMsg = 'Data tidak lengkap. Mohon ulangi input.';
+}
+
+if ($success && $sts === 'Sudah Terima Kain') {
+    if (!$penerima || !$diterima) {
+        $success = false;
+        $errMsg = 'Pengirim dan Penerima wajib diisi.';
+    }
+}
 
 // mulai transaksi
-if (!sqlsrv_begin_transaction($con_db_laborat_sqlsrv)) {
+if ($success && !sqlsrv_begin_transaction($con_db_laborat_sqlsrv)) {
     $success = false;
+    $errors = sqlsrv_errors(SQLSRV_ERR_ERRORS);
+    $errMsg = $errors ? $errors[0]['message'] : 'Gagal memulai transaksi.';
 }
 
 $sqlupdate = "
@@ -46,10 +67,10 @@ $sqlupdate = "
     $params_update = [$sts, $penerima, $diterima, $usrid, $id];
     $stmt_update = sqlsrv_query($con_db_laborat_sqlsrv, $sqlupdate, $params_update);
 
-// $result_update = mysqli_query($con_db_laborat_sqlsrv, $sqlupdate);
-
-if (!$result_update) {
-	$success = false;
+if (!$stmt_update) {
+    $success = false;
+    $errors = sqlsrv_errors(SQLSRV_ERR_ERRORS);
+    $errMsg = $errors ? $errors[0]['message'] : 'Gagal update data.';
 }
 
 if ($success) {
@@ -65,6 +86,8 @@ if ($success) {
 
     if ($stmt_log === false) {
         $success = false;
+        $errors = sqlsrv_errors(SQLSRV_ERR_ERRORS);
+        $errMsg = $errors ? $errors[0]['message'] : 'Gagal simpan log.';
     }
 }
 
@@ -73,10 +96,6 @@ if ($success) {
     echo "<script>window.location='KainInLab';</script>";
 } else {
     sqlsrv_rollback($con_db_laborat_sqlsrv);
-
-    // optional: ambil pesan error biar ketahuan penyebabnya
-    $errors = sqlsrv_errors(SQLSRV_ERR_ERRORS);
-    $errMsg = $errors ? $errors[0]['message'] : 'Terjadi kesalahan, coba lagi nanti.';
 
     echo "<script>swal({
         title: 'Gagal terima kain!!',
