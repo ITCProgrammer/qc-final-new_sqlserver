@@ -21,8 +21,8 @@
 <?php
 ini_set("error_reporting", 1);
 include"koneksi.php";
-	$qryCek=mysqli_query($con,"SELECT * FROM tbl_aftersales_now WHERE `id`='$_GET[id]'");
-	$rCek=mysqli_fetch_array($qryCek);
+	$qryCek=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_aftersales_now WHERE id='$_GET[id]'");
+	$rCek=sqlsrv_fetch_array($qryCek);
 	 ?>
 <?php
 date_default_timezone_set("Asia/Jakarta");
@@ -33,9 +33,16 @@ $tahun = date("y");
 $thn=date("Y");
 $nomor="/QCF/TPUKPE/".$romawi."/".$tahun;
 //Cari nomor terakhir pada database
-$sql = "SELECT no_tpukpe FROM tbl_tpukpe_now WHERE SUBSTR(no_tpukpe,-2) like '%".$tahun."%' ORDER BY no_tpukpe DESC LIMIT 1";
-$hasil = mysqli_query($con,$sql) or die (mysqli_error());
-$data = mysqli_fetch_array($hasil);
+$sql = "SELECT TOP 1 no_tpukpe
+    FROM db_qc.tbl_tpukpe_now
+    WHERE RIGHT(no_tpukpe, 2) LIKE '%$tahun%'
+    ORDER BY no_tpukpe DESC";
+$hasil = sqlsrv_query($con_db_qc_sqlsrv, $sql);
+
+if ($hasil === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+$data = sqlsrv_fetch_array($hasil);
 $notpukpe= $data['no_tpukpe'];
 $noUrut=$notpukpe + 1;
 $kode =  sprintf("%03s", $noUrut);
@@ -58,44 +65,66 @@ $nomorbaru = $kode.$nomor;
 		$kpi=str_replace("'","''",$_POST['no_kpi']);
 		$ft=str_replace("'","''",$_POST['no_ft']);
 		$kpe=str_replace("'","''",$_POST['no_kpe']);
-		$qry1=mysqli_query($con,"INSERT INTO tbl_tpukpe_now SET
-		`id_nsp`='$_GET[id]',
-		`no_tpukpe`='$no_tpukpe',
-		`masalah`='$masalah',
-		`penyelidik_qcf`='$penyelidik_qcf',
-		`penyelidik_terkait`='$penyelidik_terkait',
-		`tindakan_perbaikan`='$tindakan_perbaikan',
-		`cegah_qcf`='$cegah_qcf',
-		`cegah_terkait`='$cegah_terkait',
-		`langganan`='$langganan',
-		`no_order`='$order',
-		`no_po`='$po',
-		`jenis_kain`='$jenis_kain',
-		`warna`='$warna',
-		`lot`='$lot',
-		`no_kpi`='$kpi',
-        `no_ft`='$ft',
-        `no_kpe`='$kpe',
-		`masalah_dominan`='$_POST[masalah_dominan]',
-		`t_jawab`='$_POST[t_jawab]',
-		`t_jawab1`='$_POST[t_jawab1]',
-		`t_jawab2`='$_POST[t_jawab2]',
-		`tgl_buat`=now(),
-		`tgl_update`=now()
-		");	
-		if($qry1){	
-	echo "<script>swal({
-  title: 'Data Telah disimpan',   
-  text: 'Klik Ok untuk input data kembali',
-  type: 'success',
-  }).then((result) => {
-  if (result.value) {
-      window.open('pages/cetak/cetak_tpukpe.php?no_tpukpe=$no_tpukpe','_blank');
-      window.location.href='TambahTPUKPE-$_GET[id]';
-	 
-  }
-});</script>";
+		$sql = "
+		INSERT INTO db_qc.tbl_tpukpe_now (
+			id_nsp, no_tpukpe, masalah, penyelidik_qcf, penyelidik_terkait,
+			tindakan_perbaikan, cegah_qcf, cegah_terkait, langganan,
+			no_order, no_po, jenis_kain, warna, lot, no_kpi, no_ft, no_kpe,
+			masalah_dominan, t_jawab, t_jawab1, t_jawab2,
+			tgl_buat, tgl_update
+		) VALUES (
+			?, ?, ?, ?, ?,
+			?, ?, ?, ?,
+			?, ?, ?, ?, ?, ?, ?, ?,
+			?, ?, ?, ?,
+			GETDATE(), GETDATE()
+		)
+		";
+
+		$params = [
+			$_GET['id'] ?? null,
+			$no_tpukpe ?? null,
+			$masalah ?? null,
+			$penyelidik_qcf ?? null,
+			$penyelidik_terkait ?? null,
+			$tindakan_perbaikan ?? null,
+			$cegah_qcf ?? null,
+			$cegah_terkait ?? null,
+			$langganan ?? null,
+			$order ?? null,
+			$po ?? null,
+			$jenis_kain ?? null,
+			$warna ?? null,
+			$lot ?? null,
+			$kpi ?? null,
+			$ft ?? null,
+			$kpe ?? null,
+			$_POST['masalah_dominan'] ?? null,
+			$_POST['t_jawab'] ?? null,
+			$_POST['t_jawab1'] ?? null,
+			$_POST['t_jawab2'] ?? null,
+		];
+
+		$qry1 = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+		if ($qry1 === false) {
+			echo "<pre>";
+			print_r(sqlsrv_errors());
+			echo "</pre>";
+			exit;
 		}
+
+		// sukses
+		echo "<script>swal({
+		title: 'Data Telah disimpan',
+		text: 'Klik Ok untuk input data kembali',
+		type: 'success',
+		}).then((result) => {
+		if (result.value) {
+			window.open('pages/cetak/cetak_tpukpe.php?no_tpukpe=" . addslashes($no_tpukpe) . "','_blank');
+			window.location.href='TambahTPUKPE-" . addslashes($_GET['id'] ?? '') . "';
+		}
+		});</script>";
 	}
 ?>	
 
@@ -121,8 +150,8 @@ $nomorbaru = $kode.$nomor;
 						<select class="form-control select2" name="masalah_dominan" id="masalah_dominan">
 							<option value="">Pilih</option>
 							<?php 
-							$qrym=mysqli_query($con,"SELECT masalah FROM tbl_masalah_aftersales ORDER BY masalah ASC");
-							while($rm=mysqli_fetch_array($qrym)){
+							$qrym=sqlsrv_query($con_db_qc_sqlsrv,"SELECT masalah FROM db_qc.tbl_masalah_aftersales ORDER BY masalah ASC");
+							while($rm=sqlsrv_fetch_array($qrym)){
 							?>
 							<option value="<?php echo $rm['masalah'];?>" <?php if($rcek['masalah_dominan']==$rm['masalah']){echo "SELECTED";}?>><?php echo $rm['masalah'];?></option>	
 							<?php }?>
@@ -137,8 +166,8 @@ $nomorbaru = $kode.$nomor;
 						<select class="form-control select2" name="t_jawab">
 							<option value="">Pilih</option>
 							<?php 
-							$qryDept=mysqli_query($con,"SELECT * FROM filter_dept ORDER BY nama ASC");
-							while($rDept=mysqli_fetch_array($qryDept)){
+							$qryDept=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.filter_dept ORDER BY nama ASC");
+							while($rDept=sqlsrv_fetch_array($qryDept)){
 							?>
 							<option value="<?php echo $rDept['nama'];?>" <?php if($rcek['t_jawab']==$rDept['nama']){echo "SELECTED";}?>><?php echo $rDept['nama'];?></option>	
 							<?php }?>
@@ -151,8 +180,8 @@ $nomorbaru = $kode.$nomor;
 						<select class="form-control select2" name="t_jawab1">
 							<option value="">Pilih</option>
 							<?php 
-							$qryDept1=mysqli_query($con,"SELECT * FROM filter_dept ORDER BY nama ASC");
-							while($rDept1=mysqli_fetch_array($qryDept1)){
+							$qryDept1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.filter_dept ORDER BY nama ASC");
+							while($rDept1=sqlsrv_fetch_array($qryDept1)){
 							?>
 							<option value="<?php echo $rDept1['nama'];?>" <?php if($rcek['t_jawab1']==$rDept1['nama']){echo "SELECTED";}?>><?php echo $rDept1['nama'];?></option>	
 							<?php }?>
@@ -165,8 +194,8 @@ $nomorbaru = $kode.$nomor;
 						<select class="form-control select2" name="t_jawab2">
 							<option value="">Pilih</option>
 							<?php 
-							$qryDept2=mysqli_query($con,"SELECT * FROM filter_dept ORDER BY nama ASC");
-							while($rDept2=mysqli_fetch_array($qryDept2)){
+							$qryDept2=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.filter_dept ORDER BY nama ASC");
+							while($rDept2=sqlsrv_fetch_array($qryDept2)){
 							?>
 							<option value="<?php echo $rDept2['nama'];?>" <?php if($rcek['t_jawab2']==$rDept2['nama']){echo "SELECTED";}?>><?php echo $rDept2['nama'];?></option>	
 							<?php }?>
@@ -262,8 +291,8 @@ $nomorbaru = $kode.$nomor;
 					</thead>
 				<tbody>
 					<?php 
-					$sql=mysqli_query($con,"SELECT * FROM tbl_tpukpe_now WHERE id_nsp='$_GET[id]' ORDER BY tgl_buat ASC");
-					while($r=mysqli_fetch_array($sql)){
+					$sql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_tpukpe_now WHERE id_nsp='$_GET[id]' ORDER BY tgl_buat ASC");
+					while($r=sqlsrv_fetch_array($sql)){
 			
 					$no++;
 					$bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';	  
@@ -343,20 +372,28 @@ $nomorbaru = $kode.$nomor;
 </div>
 <?php 
 if($_POST['simpan_masalah']=="Simpan"){
-	$masalah=strtoupper($_POST['masalah_dominan']);
-	$sqlData1=mysqli_query($con,"INSERT INTO tbl_masalah_aftersales SET 
-		  masalah='$masalah'");
-	if($sqlData1){	
-	echo "<script>swal({
-  title: 'Data Telah Tersimpan',   
+$masalah = strtoupper($_POST['masalah_dominan'] ?? '');
+
+$sql = "INSERT INTO db_qc.tbl_masalah_aftersales (masalah) VALUES (?)";
+$params = [$masalah];
+
+$sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+
+if ($sqlData1 === false) {
+    echo "<pre>";
+    print_r(sqlsrv_errors());
+    echo "</pre>";
+    exit;
+}
+
+echo "<script>swal({
+  title: 'Data Telah Tersimpan',
   text: 'Klik Ok untuk input data kembali',
   type: 'success',
-  }).then((result) => {
+}).then((result) => {
   if (result.value) {
-         window.location.href='KPENew-$nodemand';
-	 
+     window.location.href='KPENew-" . addslashes($nodemand) . "';
   }
 });</script>";
-		}
 }
 ?>

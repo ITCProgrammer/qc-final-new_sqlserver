@@ -12,13 +12,31 @@ $Akhir=$_GET['akhir'];
 //$Dept=$_GET['dept'];
 //$Cancel=$_GET['cancel'];
 //$id=$_GET['id'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+$qTgl = sqlsrv_query(
+    $con_db_qc_sqlsrv,
+    "SELECT 
+        CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+        CONVERT(varchar(8), GETDATE(), 108) AS jam_skrg"
+);
+
+if ($qTgl === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+
+$rTgl = sqlsrv_fetch_array($qTgl, SQLSRV_FETCH_ASSOC);
 //$tgl=$rTgl['tgl_skrg'];//tambahan 
 //$jam=$rTgl['jam_skrg'];//tambahan
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
-$qry=mysqli_query($con,"SELECT * FROM tbl_tpukpe_now WHERE no_tpukpe='$_GET[no_tpukpe]'");
-$r=mysqli_fetch_array($qry);
+$no_tpukpe = $_GET['no_tpukpe'] ?? '';
+
+$sql  = "SELECT TOP 1 * FROM db_qc.tbl_tpukpe_now WHERE no_tpukpe = ?";
+$stmt = sqlsrv_query($con_db_qc_sqlsrv, $sql, [$no_tpukpe]);
+
+if ($stmt === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+
+$r = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC); // hasil associative array
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
