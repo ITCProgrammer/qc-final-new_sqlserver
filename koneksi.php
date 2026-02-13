@@ -106,10 +106,10 @@ else{
 }
 
 // $con=mysqli_connect("localhost","root","password","db_qc");
-$cona=mysqli_connect("10.0.0.10","dit","4dm1n","db_adm");
+// $cona=mysqli_connect("10.0.0.10","dit","4dm1n","db_adm");
 // $con=mysqli_connect("localhost","root","","db_qc");
-$condye=mysqli_connect("10.0.0.10","dit","4dm1n","db_dying");
-$conlab=mysqli_connect("10.0.0.10","dit","4dm1n","db_laborat");
+// $condye=mysqli_connect("10.0.0.10","dit","4dm1n","db_dying");
+// $conlab=mysqli_connect("10.0.0.10","dit","4dm1n","db_laborat");
 if (mysqli_connect_errno()) {
 printf("Connect failed: %s\n", mysqli_connect_error());
 exit();
