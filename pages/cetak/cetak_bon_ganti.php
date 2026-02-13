@@ -15,8 +15,8 @@ $po=$_GET['po'];
 $cek1=$_GET['id_cek'];
 $cek2=$_GET['id_cek1'];
 $cek3=$_GET['id_cek2'];
-$qTgl=mysqli_query($con,"SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl=mysqli_fetch_array($qTgl);
+ $qTgl = sqlsrv_query($con_db_qc_sqlsrv, "SELECT CONVERT(varchar(10), GETDATE(), 23) as tgl_skrg, CONVERT(varchar(8), GETDATE(), 108) as jam_skrg");
+ $rTgl = sqlsrv_fetch_array($qTgl, SQLSRV_FETCH_ASSOC);
 //$tgl=$rTgl['tgl_skrg'];//tambahan 
 //$jam=$rTgl['jam_skrg'];//tambahan
 if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; $jam=$rTgl['jam_skrg'];}
@@ -24,13 +24,14 @@ if($Awal!=""){$tgl=substr($Awal,0,10); $jam=$Awal;}else{$tgl=$rTgl['tgl_skrg']; 
 //INNER JOIN tbl_ganti_kain b ON a.id=b.id_nsp
 //WHERE b.no_bon='$_GET[no_bon]'");
 //$r=mysqli_fetch_array($qry);
-$qry_sql = "SELECT * FROM tbl_aftersales_now WHERE id='$idnsp' ";
-$qry1=mysqli_query($con,$qry_sql);
-$r1=mysqli_fetch_array($qry1);
-$qry2=mysqli_query($con,"SELECT * FROM tbl_ganti_kain_now WHERE id_nsp='$idnsp' LIMIT 1");
-$r2=mysqli_fetch_array($qry2);
-$qry3=mysqli_query($con,"SELECT * FROM tbl_ganti_kain_now WHERE id='$cek1' LIMIT 1");
-$r3=mysqli_fetch_array($qry3);
+ $qry1 = sqlsrv_query($con_db_qc_sqlsrv, $qry_sql);
+ $r1 = sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC);
+
+ $qry2 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_ganti_kain_now WHERE id_nsp='$idnsp'");
+ $r2 = sqlsrv_fetch_array($qry2, SQLSRV_FETCH_ASSOC);
+
+ $qry3 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_ganti_kain_now WHERE id='$cek1'");
+ $r3 = sqlsrv_fetch_array($qry3, SQLSRV_FETCH_ASSOC);
 
 $pos=strpos($r1['langganan'], "/");
 $posbuyer=substr($r1['langganan'],$pos+1,10);
@@ -404,9 +405,9 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
             <td style="border-top:0px #000000 solid; 
 	border-bottom:0px #000000 solid;
 	border-left:0px #000000 solid; 
-  border-right:0px #000000 solid;">: <?php 
-                                      $sqldt=mysqli_query($con,"SELECT kd_ganti FROM tbl_ganti_kain_now WHERE id_nsp='$_GET[id_nsp]' ORDER BY id DESC LIMIT 1");
-                                      $row = mysqli_fetch_array($sqldt);
+  border-right:0px #000000 solid;">: <?php
+                                      $sqldt = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 kd_ganti FROM db_qc.tbl_ganti_kain_now WHERE id_nsp='$_GET[id_nsp]' ORDER BY id DESC");
+                                      $row = sqlsrv_fetch_array($sqldt, SQLSRV_FETCH_ASSOC);
                                       ?>
                                       <?php 
                                       echo $r1['no_order'];?> / <?php if($r1['alasan']=="Reject Buyer"){echo $row['kd_ganti'];}else{echo $row['kd_ganti'];}
@@ -548,9 +549,9 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
           <!-- Warna 1 Begin -->
           <?php
           $cek1=$_GET['id_cek'];
-          $qr1=mysqli_query($con,"SELECT * FROM tbl_ganti_kain_now WHERE id='$cek1'");
-          $c1=mysqli_num_rows($qr1);
-          $rk1=mysqli_fetch_array($qr1);
+          $qr1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_ganti_kain_now WHERE id='$cek1'", [], ["Scrollable" => SQLSRV_CURSOR_KEYSET]);
+          $c1 = sqlsrv_num_rows($qr1);
+          $rk1 = sqlsrv_fetch_array($qr1, SQLSRV_FETCH_ASSOC);
 		  
           ?>
           <?php if($c1>0){?>
@@ -586,9 +587,9 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
             <?php
           $cek2=$_GET['id_cek1'];
           $cek3=$_GET['id_cek2'];
-          $qr2=mysqli_query($con,"SELECT * FROM tbl_ganti_kain_now WHERE id='$cek2'");
-          $c2=mysqli_num_rows($qr2);
-          $rk2=mysqli_fetch_array($qr2);
+            $qr2 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_ganti_kain_now WHERE id='$cek2'", [], ["Scrollable" => SQLSRV_CURSOR_KEYSET]);
+            $c2 = sqlsrv_num_rows($qr2);
+            $rk2 = sqlsrv_fetch_array($qr2, SQLSRV_FETCH_ASSOC);
           ?>
           <?php if($c2>0){?>
             <td width="11%" colspan="2" valign="top" style="height: 0.5in; border-right:0px #000000 solid;">2. Warna = <span style="font-size: 8px;"><?php echo $rk2['warna1'];?></span><br>
@@ -627,9 +628,9 @@ $nmBln=array(1 => "JANUARI","FEBUARI","MARET","APRIL","MEI","JUNI","JULI","AGUST
             <!-- Warna 3 Begin -->
             <?php
           $cek3=$_GET['id_cek2'];
-          $qr3=mysqli_query($con,"SELECT * FROM tbl_ganti_kain_now WHERE id='$cek3'");
-          $c3=mysqli_num_rows($qr3);
-          $rk3=mysqli_fetch_array($qr3);
+            $qr3 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_ganti_kain_now WHERE id='$cek3'", [], ["Scrollable" => SQLSRV_CURSOR_KEYSET]);
+            $c3 = sqlsrv_num_rows($qr3);
+            $rk3 = sqlsrv_fetch_array($qr3, SQLSRV_FETCH_ASSOC);
           ?>
           <?php if($c3>0){?>
             <td width="20%" valign="top" style="border-right:0px #000000 solid;"><span style="height: 0.5in; border-right:0px #000000 solid;">3. Warna = <span style="font-size: 8px;"><?php echo $rk3['warna1'];?></span><br>
