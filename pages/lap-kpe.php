@@ -81,8 +81,8 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
             <select class="form-control select2" name="pejabat" id="pejabat">
               <option value="">Pilih Pejabat</option>
                 <?php 
-                  $qryp=mysqli_query($con,"SELECT nama FROM tbl_personil_aftersales WHERE jenis='pejabat' ORDER BY nama ASC");
-                  while($rp=mysqli_fetch_array($qryp)){
+                  $qryp=sqlsrv_query($con_db_qc_sqlsrv,"SELECT nama FROM db_qc.tbl_personil_aftersales WHERE jenis='pejabat' ORDER BY nama ASC");
+                  while($rp=sqlsrv_fetch_array($qryp)){
                 ?>
               <option value="<?php echo $rp['nama'];?>" <?php if($Pejabat==$rp['nama']){echo "SELECTED";}?>><?php echo $rp['nama'];?></option>	
                 <?php }?>
@@ -92,8 +92,8 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
         <select class="form-control select2" name="solusi" id="solusi">
 							<option value="">Solusi</option>
 							<?php 
-							$qryp=mysqli_query($con,"SELECT solusi FROM tbl_solusi ORDER BY solusi ASC");
-							while($rp=mysqli_fetch_array($qryp)){
+							$qryp=sqlsrv_query($con_db_qc_sqlsrv,"SELECT solusi FROM db_qc.tbl_solusi ORDER BY solusi ASC");
+							while($rp=sqlsrv_fetch_array($qryp)){
 							?>
 							<option value="<?php echo $rp['solusi'];?>" <?php if($Solusi==$rp['solusi']){echo "SELECTED";}?>><?php echo $rp['solusi'];?></option>	
 							<?php }?>
@@ -226,34 +226,27 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
             $no=1;
             // if($sts_red=="1"){ $stsred =" AND a.sts_red='1' "; }else{$stsred = " ";}
             if($sts_claim=="1"){ $stsclaim =" AND a.sts_claim='1' "; }else{$stsclaim =" ";}
-            if($Awal!=""){ $Where =" AND DATE_FORMAT( a.tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
+            if($Awal!=""){ $Where =" AND CAST( a.tgl_buat AS DATE ) BETWEEN '$Awal' AND '$Akhir' "; }
 
             if($Kategori != "") {
-              $query4Kategori = mysqli_query($con, "SELECT
+              $query4Kategori = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
                                                       a.*,
                                                       b.pjg1
                                                       FROM
-                                                      tbl_aftersales_now a
-                                                      LEFT JOIN tbl_ganti_kain_now b
+                                                      db_qc.tbl_aftersales_now a
+                                                      LEFT JOIN db_qc.tbl_ganti_kain_now b
                                                       ON
                                                       b.id_nsp = a.id
                                                       WHERE
-                                                      DATE_FORMAT(a.tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir'
-                                                      GROUP BY
-                                                      a.po,
-                                                      a.no_hanger,
-                                                      a.warna,
-                                                      a.masalah_dominan,
-                                                      a.qty_order
+                                                      CAST(a.tgl_buat AS DATE ) BETWEEN '$Awal' AND '$Akhir'
                                                       ORDER BY
                                                       a.tgl_buat ASC");
-
               $majorTemp = [];
               $sampleTemp = [];
               $repeatTemp = [];
               $generalTemp = [];
 
-              while($row = mysqli_fetch_assoc($query4Kategori)) {
+              while($row = sqlsrv_fetch_array($query4Kategori, SQLSRV_FETCH_ASSOC)) {
                   if($row['pjg1'] >= 500) {
                       $majorTemp[] = $row;
                   } elseif(in_array(substr($row['no_order'], 0, 3), ['SAM', 'SME'])) {
@@ -303,18 +296,45 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
 
             // if($Awal!="" or $sts_red=="1" or $sts_claim=="1" or $Order!="" or $Hanger!="" or $PO!="" or $Langganan!="" or $Demand!="" or $Prodorder!="" or $Pejabat!="" or $Solusi!=""){
             if($Awal!=""  or $sts_claim=="1" or $Order!="" or $Hanger!="" or $PO!="" or $Langganan!="" or $Demand!="" or $Prodorder!="" or $Pejabat!="" or $Solusi!=""){
-              $qry1=mysqli_query($con,"SELECT a.*,
-                          GROUP_CONCAT( distinct b.no_ncp_gabungan separator ', ' ) as no_ncp,
-                          GROUP_CONCAT( distinct b.masalah_dominan separator ', ' ) as masalah_utama,
-                          GROUP_CONCAT( distinct b.akar_masalah separator ', ' ) as akar_masalah,
-                          GROUP_CONCAT( distinct b.solusi_panjang separator ', ' ) as solusi_panjang 
-              FROM tbl_aftersales_now a 
-              LEFT JOIN tbl_ncp_qcf_now b ON a.nodemand=b.nodemand 
-              WHERE a.no_order LIKE '%$Order%' AND a.po LIKE '%$PO%' AND a.no_hanger LIKE '%$Hanger%' AND a.langganan LIKE '%$Langganan%' AND a.nodemand LIKE '%$Demand%' AND a.nokk LIKE '%$Prodorder%' AND a.pejabat LIKE '%$Pejabat%' AND a.solusi LIKE '%$Solusi%' $Where $WhereKategori $stsclaim 
-              -- WHERE a.no_order LIKE '%$Order%' AND a.po LIKE '%$PO%' AND a.no_hanger LIKE '%$Hanger%' AND a.langganan LIKE '%$Langganan%' AND a.nodemand LIKE '%$Demand%' AND a.nokk LIKE '%$Prodorder%' AND a.pejabat LIKE '%$Pejabat%' AND a.solusi LIKE '%$Solusi%' $Where $WhereKategori $stsred $stsclaim 
-              GROUP BY a.nodemand, a.masalah_dominan
-              ORDER BY a.id ASC");
-              while($row1=mysqli_fetch_array($qry1)){
+              $query_sqlserver = "SELECT
+                                        a.*,
+                                        ncp.no_ncp,
+                                        ncp.masalah_utama,
+                                        ncp.akar_masalah,
+                                        ncp.solusi_panjang
+                                    FROM db_qc.tbl_aftersales_now a
+                                    LEFT JOIN (
+                                        SELECT
+                                            b.nodemand,
+                                            STRING_AGG(b.no_ncp_gabungan, ', ') AS no_ncp,
+                                            STRING_AGG(b.masalah_dominan, ', ') AS masalah_utama,
+                                            STRING_AGG(b.akar_masalah, ', ') AS akar_masalah,
+                                            STRING_AGG(b.solusi_panjang, ', ') AS solusi_panjang
+                                        FROM (
+                                            SELECT DISTINCT
+                                                nodemand,
+                                                no_ncp_gabungan,
+                                                masalah_dominan,
+                                                akar_masalah,
+                                                solusi_panjang
+                                            FROM db_qc.tbl_ncp_qcf_now
+                                        ) b
+                                        GROUP BY b.nodemand
+                                    ) ncp
+                                        ON ncp.nodemand = a.nodemand
+                                    WHERE
+                                        a.no_order   LIKE '%' + ? + '%'
+                                        AND a.po     LIKE '%' + ? + '%'
+                                        AND a.no_hanger LIKE '%' + ? + '%'
+                                        AND a.langganan LIKE '%' + ? + '%'
+                                        AND a.nodemand LIKE '%' + ? + '%'
+                                        AND a.nokk   LIKE '%' + ? + '%'
+                                        AND a.pejabat LIKE '%' + ? + '%'
+                                        AND a.solusi LIKE '%' + ? + '%'
+                                        $Where $stsclaim 
+                                    ORDER BY a.id ASC;";
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv, $query_sqlserver, [$Order, $PO, $Hanger, $Langganan, $Demand, $Prodorder, $Pejabat, $Solusi]);
+              while($row1=sqlsrv_fetch_array($qry1)){
                   $noorder=str_replace("/","&",$row1['no_order']);
                   if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']!=""){ $tjawab=$row1['t_jawab']."+".$row1['t_jawab1']."+".$row1['t_jawab2'];
                   }else if($row1['t_jawab']!="" and $row1['t_jawab1']!="" and $row1['t_jawab2']==""){
@@ -343,7 +363,17 @@ if($_POST['gshift']=="ALL"){$shft=" ";}else{$shft=" AND b.g_shift = '$GShift' ";
             <a href="EditKPENew-<?php echo $row1['id']; ?>" class="btn btn-info btn-xs <?php if($_SESSION['akses']=='biasa' OR $_SESSION['lvl_id']!='AFTERSALES'){ echo "disabled"; } ?>" target="_blank"><i class="fa fa-edit" data-toggle="tooltip" data-placement="top" title="Edit"></i> </a>
             <a href="#" class="btn btn-danger btn-xs <?php if($_SESSION['akses']=='biasa' OR $_SESSION['lvl_id']!='AFTERSALES'){ echo "disabled"; } ?>" onclick="confirm_delete('./HapusDataKPE-<?php echo $row1['id'] ?>');"><i class="fa fa-trash" data-toggle="tooltip" data-placement="top" title="Hapus"></i> </a>
             </div></td>
-            <td align="center"><?php echo $row1['tgl_buat'];?></td>
+            <td align="center">
+              <?php 
+              if (!empty($row1['tgl_buat'])) {
+                  if ($row1['tgl_buat'] instanceof DateTime) {
+                      echo $row1['tgl_buat']->format('Y-m-d');
+                  } else {
+                      echo date('d-m-Y H:i:s', strtotime($row1['tgl_buat']));
+                  }
+              }
+              ?>
+            </td>
             <?php 
               $pelanggan = explode('/', $row1['langganan'])[0]; 
               $buyer = explode('/', $row1['langganan'])[1];
