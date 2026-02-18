@@ -23,8 +23,8 @@ function aktif1(){
 <?php
 include"koneksi.php";
 ini_set("error_reporting", 1);
-	$qryCek=mysqli_query($con,"SELECT * FROM tbl_aftersales_now WHERE `id`='$_GET[id]'");
-	$rCek=mysqli_fetch_array($qryCek);
+$qryCek = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_aftersales_now WHERE id='$_GET[id]'");
+$rCek = sqlsrv_fetch_array($qryCek, SQLSRV_FETCH_ASSOC);
 	 ?>
 <?php
 date_default_timezone_set("Asia/Jakarta");
@@ -32,10 +32,10 @@ date_default_timezone_set("Asia/Jakarta");
 $bln = date("Y-m");
 $today = date("Y-m-d");
 //Cari noretur terakhir pada hari ini
-$sql = "SELECT max(no_retur) FROM tbl_detail_retur_now WHERE tgl_buat LIKE '$bln%'";
-$query = mysqli_query($con,$sql) or die (mysqli_error());
+$sql = "SELECT MAX(no_retur) FROM db_qc.tbl_detail_retur_now WHERE CONVERT(varchar(7), tgl_buat, 23) = '$bln'";
+$query = sqlsrv_query($con_db_qc_sqlsrv, $sql) or die(print_r(sqlsrv_errors(), true));
 
-$rno = mysqli_fetch_array($query);
+$rno = sqlsrv_fetch_array($query, SQLSRV_FETCH_NUMERIC);
 
 if($rno){
   $nilai = substr($rno[0], 8);
@@ -49,9 +49,15 @@ if($rno){
 } else {
   $auto_kode = "RT20/01/000";
 }
-$qryb=mysqli_query($con,"SELECT no_retur FROM tbl_detail_retur_now WHERE id_nsp='$_GET[id]' AND tgl_buat LIKE '$today%' LIMIT 1");
-$cekb=mysqli_num_rows($qryb);
-$rb=mysqli_fetch_array($qryb);
+$qryb = sqlsrv_query(
+	$con_db_qc_sqlsrv,
+	"SELECT TOP 1 no_retur FROM db_qc.tbl_detail_retur_now 
+     WHERE id_nsp='$_GET[id]' AND CONVERT(varchar(10), tgl_buat, 23) = '$today'",
+	[],
+	["Scrollable" => SQLSRV_CURSOR_KEYSET]
+);
+$cekb = sqlsrv_num_rows($qryb);
+$rb = sqlsrv_fetch_array($qryb, SQLSRV_FETCH_ASSOC);
 	if($_POST['save']=="save"){	
 		if($cekb>0){
 			$kdbon=$rb['no_retur'];
@@ -96,36 +102,16 @@ $rb=mysqli_fetch_array($qryb);
 		$qty_tu=str_replace("'","''",$_POST['qty_tu']);
 		$t_jawab=$_POST['t_jawab'];
 		//$valjawab= array_values($t_jawab);
-		$qry1=mysqli_query($con,"INSERT INTO tbl_detail_retur_now SET
-		`id_nsp`='$_GET[id]',
-		`no_retur`='$kdbon',
-		`po`='$po',
-		`no_order`='$order',
-		`langganan`='$langganan',
-		`no_hanger`='$no_hanger',
-		`no_item`='$no_item',
-		`buyer`='$buyer',
-		`masalah`='$masalah',
-		`jenis_kain`='$jenis_kain',
-		`warna`='$warna',
-		`lot`='$lot',
-		`kg`='$kg',
-		`pjg`='$pjg',
-		`satuan`='$satuan',
-		`roll`='$roll',
-		`nodemand`='$kk',
-		`nodemand_ncp`='$_POST[nodemand_ncp]',
-		`t_jawab`='$_POST[t_jawab]',
-		`t_jawab1`='$_POST[t_jawab1]',
-		`t_jawab2`='$_POST[t_jawab2]',
-		`qty_order`='$_POST[qty_order]',
-		`qty_kirim`='$_POST[qty_kirim]',
-		`qty_claim`='$_POST[qty_claim]',
-		`qty_foc`='$_POST[qty_foc]',
-		`masalah_dominan`='$_POST[masalah_dominan]',
-		`nodemand_akj`='$_POST[nodemand_akj]',
-		`tgl_buat`=now(),
-		`tgl_update`=now()
+		$qry1 = sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_detail_retur_now (
+				id_nsp, no_retur, po, no_order, langganan, no_hanger, no_item, buyer, masalah, jenis_kain, warna, lot,
+				kg, pjg, satuan, roll, nodemand, nodemand_ncp, t_jawab, t_jawab1, t_jawab2,
+				qty_order, qty_kirim, qty_claim, qty_foc, masalah_dominan, nodemand_akj, tgl_buat, tgl_update
+			) VALUES (
+				'$_GET[id]', '$kdbon', '$po', '$order', '$langganan', '$no_hanger', '$no_item', '$buyer', '$masalah', '$jenis_kain', '$warna', '$lot',
+				'$kg', '$pjg', '$satuan', '$roll', '$kk', '$_POST[nodemand_ncp]', '$_POST[t_jawab]', '$_POST[t_jawab1]', '$_POST[t_jawab2]',
+				'$_POST[qty_order]', '$_POST[qty_kirim]', '$_POST[qty_claim]', '$_POST[qty_foc]', '$_POST[masalah_dominan]', '$_POST[nodemand_akj]',
+				GETDATE(), GETDATE()
+			)
 		");	
 		if($qry1){	
 	echo "<script>swal({
@@ -158,8 +144,8 @@ $rb=mysqli_fetch_array($qryb);
                   	<div class="col-sm-3">
                     	<select class="form-control select2" name="warna" required>
 							<option value="">Pilih</option>
-							<?php $sqlw1=mysqli_query($con,"SELECT warna,nodemand,jenis_kain FROM tbl_aftersales_now WHERE po='$rCek[po]' and no_order='$rCek[no_order]' ORDER BY warna");
-							while ($rwarna=mysqli_fetch_array($sqlw1)){ ?>
+							<?php $sqlw1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT warna,nodemand,jenis_kain FROM db_qc.tbl_aftersales_now WHERE po='$rCek[po]' and no_order='$rCek[no_order]' ORDER BY warna");
+							while ($rwarna = sqlsrv_fetch_array($sqlw1, SQLSRV_FETCH_ASSOC)) { ?>
 							<option value="<?php echo $rwarna['warna'].";".$rwarna['nodemand'].":".$rwarna['jenis_kain'];?>"><?php echo $rwarna['warna']." ; ".$rwarna['jenis_kain'];?></option>
 							<?php } ?>
 						</select>
@@ -170,8 +156,8 @@ $rb=mysqli_fetch_array($qryb);
                   	<div class="col-sm-2">
                     	<select class="form-control select2" name="nodemand_ncp" required>
 							<option value="">Pilih</option>
-							<?php $sqlkkncp=mysqli_query($con,"SELECT nodemand FROM tbl_aftersales_now WHERE po='$rCek[po]' and no_order='$rCek[no_order]' ORDER BY nodemand");
-							while ($rkkncp=mysqli_fetch_array($sqlkkncp)){ ?>
+							<?php $sqlkkncp = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nodemand FROM db_qc.tbl_aftersales_now WHERE po='$rCek[po]' and no_order='$rCek[no_order]' ORDER BY nodemand");
+							while ($rkkncp = sqlsrv_fetch_array($sqlkkncp, SQLSRV_FETCH_ASSOC)) { ?>
 							<option value="<?php echo $rkkncp['nodemand'];?>"><?php echo $rkkncp['nodemand'];?></option>
 							<?php } ?>
 						</select>
@@ -226,8 +212,8 @@ $rb=mysqli_fetch_array($qryb);
 						<select class="form-control select2" name="masalah_dominan" id="masalah_dominan">
 							<option value="">Pilih</option>
 							<?php 
-							$qrym=mysqli_query($con,"SELECT masalah FROM tbl_masalah_aftersales ORDER BY masalah ASC");
-							while($rm=mysqli_fetch_array($qrym)){
+							$qrym= sqlsrv_query($con_db_qc_sqlsrv,"SELECT masalah FROM db_qc.tbl_masalah_aftersales ORDER BY masalah ASC");
+							while($rm= sqlsrv_fetch_array($qrym, SQLSRV_FETCH_ASSOC)){
 							?>
 							<option value="<?php echo $rm['masalah'];?>" <?php if($rcek['masalah_dominan']==$rm['masalah']){echo "SELECTED";}?>><?php echo $rm['masalah'];?></option>	
 							<?php }?>
@@ -241,9 +227,9 @@ $rb=mysqli_fetch_array($qryb);
 					<div class="col-sm-2">
 						<select class="form-control select2" name="t_jawab">
 							<option value="">Pilih</option>
-							<?php 
-							$sqlDept = mysqli_query($con, "SELECT * FROM filter_dept");
-							while ($rDept = mysqli_fetch_array($sqlDept)) { ?>
+							<?php
+							$sqlDept = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.filter_dept");
+							while ($rDept = sqlsrv_fetch_array($sqlDept, SQLSRV_FETCH_ASSOC)) { ?>
 								<option value="<?php echo $rDept['nama']; ?>" <?php if($rcek['t_jawab'] == $rDept['nama']) { echo "SELECTED"; } ?>><?php echo $rDept['nama']; ?></option>
 							<?php } ?>
 						</select>
@@ -255,8 +241,8 @@ $rb=mysqli_fetch_array($qryb);
 						<select class="form-control select2" name="t_jawab1">
 							<option value="">Pilih</option>
 							<?php 
-							$sqlDept1 = mysqli_query($con, "SELECT * FROM filter_dept");
-							while ($rDept1 = mysqli_fetch_array($sqlDept1)) { ?>
+							$sqlDept1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.filter_dept");
+							while ($rDept1 = sqlsrv_fetch_array($sqlDept1, SQLSRV_FETCH_ASSOC)) { ?>
 								<option value="<?php echo $rDept1['nama']; ?>" <?php if($rcek['t_jawab1'] == $rDept1['nama']) { echo "SELECTED"; } ?>><?php echo $rDept1['nama']; ?></option>
 							<?php } ?>
 						</select>
@@ -268,8 +254,8 @@ $rb=mysqli_fetch_array($qryb);
 						<select class="form-control select2" name="t_jawab2">
 							<option value="">Pilih</option>
 							<?php 
-							$sqlDept2 = mysqli_query($con, "SELECT * FROM filter_dept");
-							while ($rDept2 = mysqli_fetch_array($sqlDept2)) { ?>
+							$sqlDept2 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.filter_dept");
+							while ($rDept2 = sqlsrv_fetch_array($sqlDept2, SQLSRV_FETCH_ASSOC)) { ?>
 								<option value="<?php echo $rDept2['nama']; ?>" <?php if($rcek['t_jawab2'] == $rDept2['nama']) { echo "SELECTED"; } ?>><?php echo $rDept2['nama']; ?></option>
 							<?php } ?>
 						</select>
@@ -278,9 +264,14 @@ $rb=mysqli_fetch_array($qryb);
 		</div>
 <!-- /.box-footer -->
 <div class="box-footer">
-	<?php 
-	$qrycek1=mysqli_query($con,"SELECT * FROM tbl_detail_retur_now WHERE no_order='$rCek[no_order]' AND po='$rCek[po]' AND id_nsp='$_GET[id]'");
-	$cek1=mysqli_num_rows($qrycek1);
+	<?php
+	$qrycek1 = sqlsrv_query(
+		$con_db_qc_sqlsrv,
+		"SELECT * FROM db_qc.tbl_detail_retur_now WHERE no_order='$rCek[no_order]' AND po='$rCek[po]' AND id_nsp='$_GET[id]'",
+		[],
+		["Scrollable" => SQLSRV_CURSOR_KEYSET]
+	);
+	$cek1 = sqlsrv_num_rows($qrycek1);
 	?>
 	<button type="submit" class="btn btn-primary pull-right" <?php if($cek1>=10){echo "disabled";} ?> name="save" value="save">Simpan <i class="fa fa-save"></i></button> 
 	<!--<input type="submit" value="Simpan" name="save" id="save" class="btn btn-primary pull-right" >
@@ -320,9 +311,9 @@ $rb=mysqli_fetch_array($qryb);
 					</tr>
 					</thead>
 				<tbody>
-					<?php 
-					$sql=mysqli_query($con," SELECT * FROM tbl_detail_retur_now WHERE id_nsp='$rCek[id]' AND po='$rCek[po]' AND no_order='$rCek[no_order]' ORDER BY tgl_buat ASC");
-					while($r=mysqli_fetch_array($sql)){
+					<?php
+					$sql = sqlsrv_query($con_db_qc_sqlsrv, " SELECT * FROM db_qc.tbl_detail_retur_now WHERE id_nsp='$rCek[id]' AND po='$rCek[po]' AND no_order='$rCek[no_order]' ORDER BY tgl_buat ASC");
+					while ($r = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
 			
 					$no++;
 					$bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';	  
@@ -410,8 +401,8 @@ $rb=mysqli_fetch_array($qryb);
 <?php 
 if($_POST['simpan_masalah']=="Simpan"){
 	$masalah=strtoupper($_POST['masalah_dominan']);
-	$sqlData1=mysqli_query($con,"INSERT INTO tbl_masalah_aftersales SET 
-		  masalah='$masalah'");
+	$sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_masalah_aftersales (masalah) 
+	VALUES ('$masalah')");
 	if($sqlData1){	
 	echo "<script>swal({
   title: 'Data Telah Tersimpan',   

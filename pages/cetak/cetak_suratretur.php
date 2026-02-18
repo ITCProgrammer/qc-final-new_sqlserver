@@ -11,8 +11,11 @@ $Awal = $_GET['Awal'];
 $Akhir = $_GET['akhir'];
 //$Dept=$_GET['dept'];
 //$Cancel=$_GET['cancel'];
-$qTgl = mysqli_query($con, "SELECT DATE_FORMAT(now(),'%Y-%m-%d') as tgl_skrg,DATE_FORMAT(now(),'%H:%i:%s') as jam_skrg");
-$rTgl = mysqli_fetch_array($qTgl);
+$qTgl = sqlsrv_query($con_db_qc_sqlsrv, "SELECT 
+    CONVERT(varchar(10), GETDATE(), 23) AS tgl_skrg,
+    CONVERT(varchar(8),  GETDATE(), 108) AS jam_skrg
+");
+$rTgl = sqlsrv_fetch_array($qTgl, SQLSRV_FETCH_ASSOC);
 //$tgl=$rTgl['tgl_skrg'];//tambahan 
 //$jam=$rTgl['jam_skrg'];//tambahan
 if ($Awal != "") {
@@ -22,15 +25,16 @@ if ($Awal != "") {
     $tgl = $rTgl['tgl_skrg'];
     $jam = $rTgl['jam_skrg'];
 }
-$qry = mysqli_query($con, "SELECT a.langganan, b.* FROM tbl_aftersales_now a
-INNER JOIN tbl_detail_retur_now b ON a.id=b.id_nsp
+$qry = sqlsrv_query($con_db_qc_sqlsrv, "SELECT a.langganan, b.* FROM db_qc.tbl_aftersales_now a
+INNER JOIN db_qc.tbl_detail_retur_now b ON a.id=b.id_nsp
 WHERE b.id_nsp='$_GET[id_nsp]' AND b.po='$_GET[po]' AND b.no_order='$_GET[no_order]'");
-$r = mysqli_fetch_array($qry);
-$qry1 = mysqli_query($con, "SELECT * FROM tbl_detail_retur_now WHERE id_nsp='$_GET[id_nsp]' LIMIT 1");
-$r1 = mysqli_fetch_array($qry1);
+$r = sqlsrv_fetch_array($qry, SQLSRV_FETCH_ASSOC);
 
-$qrybon = mysqli_query($con, "SELECT * FROM tbl_detail_retur_now WHERE id='$_GET[id_cek]' LIMIT 1");
-$rbon = mysqli_fetch_array($qrybon);
+$qry1 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_detail_retur_now WHERE id_nsp='$_GET[id_nsp]'");
+$r1 = sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC);
+
+$qrybon = sqlsrv_query($con_db_qc_sqlsrv, "SELECT TOP 1 * FROM db_qc.tbl_detail_retur_now WHERE id='$_GET[id_cek]'");
+$rbon = sqlsrv_fetch_array($qrybon, SQLSRV_FETCH_ASSOC);
 ?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -338,22 +342,35 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                             </tr>
                             <?php
                             if ($_GET['id_cek'] != "") {
-                                $qry1 = mysqli_query($con, "SELECT * FROM tbl_detail_retur_now
-                    WHERE id='$_GET[id_cek]'");
-                                $cek = mysqli_num_rows($qry1);
-                                $row = mysqli_fetch_array($qry1);
+                                $qry1 = sqlsrv_query(
+                                    $con_db_qc_sqlsrv,
+                                    "SELECT * FROM db_qc.tbl_detail_retur_now WHERE id='$_GET[id_cek]'",
+                                    [],
+                                    ["Scrollable" => SQLSRV_CURSOR_KEYSET]
+                                );
+                                $cek = sqlsrv_num_rows($qry1);
+                                $row = sqlsrv_fetch_array($qry1, SQLSRV_FETCH_ASSOC);
                             }
                             if ($_GET['id_cek1'] != "") {
-                                $qry2 = mysqli_query($con, "SELECT * FROM tbl_detail_retur_now
-                    WHERE id='$_GET[id_cek1]'");
-                                $cek2 = mysqli_num_rows($qry2);
-                                $row1 = mysqli_fetch_array($qry2);
+                                $qry2 = sqlsrv_query(
+                                    $con_db_qc_sqlsrv,
+                                    "SELECT * FROM db_qc.tbl_detail_retur_now WHERE id='$_GET[id_cek1]'",
+                                    [],
+                                    ["Scrollable" => SQLSRV_CURSOR_KEYSET]
+                                );
+                                $cek2 = sqlsrv_num_rows($qry2);
+                                $row1 = sqlsrv_fetch_array($qry2, SQLSRV_FETCH_ASSOC);
                             }
                             if ($_GET['id_cek2'] != "") {
-                                $qry3 = mysqli_query($con, "SELECT * FROM tbl_detail_retur_now
-                    WHERE id='$_GET[id_cek2]'");
-                                $cek3 = mysqli_num_rows($qry3);
-                                $row2 = mysqli_fetch_array($qry3);
+                                $qry3 = sqlsrv_query(
+                                    $con_db_qc_sqlsrv,
+                                    "SELECT * FROM db_qc.tbl_detail_retur_now WHERE id='$_GET[id_cek2]'",
+                                    [],
+                                    ["Scrollable" => SQLSRV_CURSOR_KEYSET]
+                                );
+                                $cek3 = sqlsrv_num_rows($qry3);
+                                $row2 = sqlsrv_fetch_array($qry3, SQLSRV_FETCH_ASSOC);
+
                             }
                             ?>
                             <?php if ($cek != 0) { ?>
@@ -508,15 +525,15 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                                     <table width="100%">
                                         <tbody>
                                             <?php
-                                            $qry4 = mysqli_query($con, "SELECT * FROM tbl_detail_retur_now 
-                                WHERE id='$_GET[id_cek]'");
-                                            $row4 = mysqli_fetch_array($qry4);
-                                            $qry5 = mysqli_query($con, "SELECT * FROM tbl_detail_retur_now 
-                                WHERE id='$_GET[id_cek1]'");
-                                            $row5 = mysqli_fetch_array($qry5);
-                                            $qry6 = mysqli_query($con, "SELECT * FROM tbl_detail_retur_now 
-                                WHERE id='$_GET[id_cek2]'");
-                                            $row6 = mysqli_fetch_array($qry6);
+                                            $qry4 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_detail_retur_now WHERE id='$_GET[id_cek]'");
+                                            $row4 = sqlsrv_fetch_array($qry4, SQLSRV_FETCH_ASSOC);
+
+                                            $qry5 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_detail_retur_now WHERE id='$_GET[id_cek1]'");
+                                            $row5 = sqlsrv_fetch_array($qry5, SQLSRV_FETCH_ASSOC);
+
+                                            $qry6 = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_detail_retur_now WHERE id='$_GET[id_cek2]'");
+                                            $row6 = sqlsrv_fetch_array($qry6, SQLSRV_FETCH_ASSOC);
+
                                             ?>
                                             <tr>
                                                 <td width="14%" align="left" valign="top" style="border-top:0px #000000 solid; 
@@ -570,51 +587,56 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                 <tr>
                     <td>Nama</td>
                     <td align="center">
-                        <?php $row_qc_staff = mysqli_query($con, "SELECT * FROM tbl_digital_signature WHERE id='$row[qc_staff]'");
-                        $data_qc_staff = mysqli_fetch_array($row_qc_staff) ?>
+                        <?php $row_qc_staff = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_digital_signature WHERE id='$row[qc_staff]'");
+                        $data_qc_staff = sqlsrv_fetch_array($row_qc_staff, SQLSRV_FETCH_ASSOC);
+                        ?>
                         <input name="nama5" type="text" value="<?= $data_qc_staff['nama'] ?>" size="12" />
                     </td>
                     <td align="center">
-                        <?php $row_gkj_staff = mysqli_query($con, "SELECT * FROM tbl_digital_signature WHERE id='$row[gkj]'");
-                        $data_gkj_staff = mysqli_fetch_array($row_gkj_staff) ?>
+                        <?php $row_gkj_staff = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_digital_signature WHERE id='$row[gkj]'");
+                        $data_gkj_staff = sqlsrv_fetch_array($row_gkj_staff, SQLSRV_FETCH_ASSOC);
+                        ?>
                         <input name="nama13" type="text" value="<?= $data_gkj_staff['nama'] ?>" size="10" />
                     </td>
                     <td align="center">
                         <?php
-                        $qmng = "SELECT * FROM tbl_digital_signature t
+                        $qmng = "SELECT * FROM db_qc.tbl_digital_signature t
                                         WHERE t.dept = 'QCF'
                                         AND t.jabatan IN ('Manager', 'Ast. Supervisor')
                                         AND t.status_aktif = 1";
-                        $r_qmng = mysqli_query($con, $qmng);
-                        $dmng = mysqli_fetch_array($r_qmng);
+                        $r_qmng = sqlsrv_query($con_db_qc_sqlsrv, $qmng);
+                        $dmng = sqlsrv_fetch_array($r_qmng, SQLSRV_FETCH_ASSOC);
+
                         ?>
                         <input name="nama3" type="text" value="<?= $dmng['nama'] ?>" size="10" />
                     </td>
                     <td align="center">
                         <?php
                         if(!empty($row['sales'])){
-                            $sstaf = "SELECT * FROM tbl_digital_signature t
+                            $sstaf = "SELECT * FROM db_qc.tbl_digital_signature t
                                     WHERE t.id = '$row[sales]'";
-                            $r_sstaff = mysqli_query($con, $sstaf);
-                            $dstaff = mysqli_fetch_array($r_sstaff);
+                            $r_sstaff = sqlsrv_query($con_db_qc_sqlsrv, $sstaf);
+                            $dstaff = sqlsrv_fetch_array($r_sstaff, SQLSRV_FETCH_ASSOC);
+
                         } ;
                         ?>
                         <input name="nama6" type="text" value="<?= $dstaff['nama'] ?>" size="10" />
                     </td>
                     <td align="center">
                         <?php
-                        $gmng = mysqli_query($con, "SELECT * FROM tbl_digital_signature WHERE id='$row[mkt_ppc_manager]'");
-                        $data_manager = mysqli_fetch_array($gmng)?>
+                        $gmng = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_digital_signature WHERE id='$row[mkt_ppc_manager]'");
+                        $data_manager = sqlsrv_fetch_array($gmng, SQLSRV_FETCH_ASSOC);                
+                        ?>
                         <input name="nama8" type="text" value="<?= $data_manager['nama'] ?>" size="10" />
                     </td>
                     <td align="center">
-                        <?php $qdmf = mysqli_query($con, "SELECT * FROM tbl_digital_signature WHERE id='$row[dmf]'");
-                        $ddmf = mysqli_fetch_array($qdmf); ?>
+                        <?php $qdmf = sqlsrv_query($con_db_qc_sqlsrv, "SELECT * FROM db_qc.tbl_digital_signature WHERE id='$row[dmf]'");
+                        $ddmf = sqlsrv_fetch_array($qdmf, SQLSRV_FETCH_ASSOC); ?>
                         <input name="nama10" type="text" value="<?= $ddmf['nama'] ?>" size="10" />
                     </td>
                 </tr>
                 <tr>
-
+<!-- tinggal ini -->
                     <?php ?>
                     <td>Tanggal</td>
                     <?php
@@ -629,24 +651,25 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                     } else {
                         $id_approve3 = "";
                     }
-                    $qcek_approve = "SELECT 
-                                        * 
-                                            FROM tbl_email_bon_retur
-                                        WHERE 
-                                            id_cek = '$_GET[id_cek]' 
+                    $qcek_approve = "SELECT TOP 1
+                                        *
+                                            FROM db_qc.tbl_email_bon_retur
+                                        WHERE
+                                            id_cek = '$_GET[id_cek]'
                                             $id_approve2
                                             $id_approve3
-                                        AND status_email_qc = '1' 
-                                            ORDER BY id DESC
-                                        LIMIT 1";
-                    $query_approve1 = mysqli_query($con, $qcek_approve); 
-                    $data_approve1 = mysqli_fetch_array($query_approve1)?>
-                    <td align="center"><?php if(!empty($data_approve1['tanggal_approve_qc'])){
-                        $tanggal_approve_qc = new DateTime($data_approve1['tanggal_approve_qc']);
+                                        AND status_email_qc = '1'
+                                            ORDER BY id DESC";
+                    $query_approve1 = sqlsrv_query($con_db_qc_sqlsrv, $qcek_approve);
+                    $data_approve1 = sqlsrv_fetch_array($query_approve1, SQLSRV_FETCH_ASSOC); ?>
+                    <td align="center"><?php if (!empty($data_approve1['tanggal_approve_qc'])) {
+                        $tanggal_approve_qc = ($data_approve1['tanggal_approve_qc'] instanceof DateTime)
+                            ? $data_approve1['tanggal_approve_qc']
+                            : new DateTime($data_approve1['tanggal_approve_qc']);
                         echo $tanggal_approve_qc->format('d-m-y');
                     } else {
                         echo 'Not Yet Approve';
-                    }?>
+                    } ?>
                     </td>
                     <?php
                     if ($cek2 != 0) {
@@ -659,21 +682,22 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                     } else {
                         $id_approve3 = "";
                     }
-                    $qcek_approve2 = "SELECT 
-                                        * 
-                                            FROM tbl_email_bon_retur
-                                        WHERE 
-                                            id_cek = '$_GET[id_cek]' 
+                    $qcek_approve2 = "SELECT TOP 1
+                                        *
+                                            FROM db_qc.tbl_email_bon_retur
+                                        WHERE
+                                            id_cek = '$_GET[id_cek]'
                                             $id_approve2
                                             $id_approve3
                                         AND status_email_qc = '1'
-                                        AND status_email_gkj = '1' 
-                                            ORDER BY id DESC
-                                        LIMIT 1";
-                    $query_approve2 = mysqli_query($con, $qcek_approve2);
-                    $data_approve2 = mysqli_fetch_array($query_approve2) ?>
+                                        AND status_email_gkj = '1'
+                                            ORDER BY id DESC";
+                    $query_approve2 = sqlsrv_query($con_db_qc_sqlsrv, $qcek_approve2);
+                    $data_approve2 = sqlsrv_fetch_array($query_approve2, SQLSRV_FETCH_ASSOC); ?>
                     <td align="center"><?php if (!empty($data_approve2['tanggal_approve_gkj'])) {
-                        $tanggal_approve_gkj = new DateTime($data_approve2['tanggal_approve_gkj']);
+                        $tanggal_approve_gkj = ($data_approve2['tanggal_approve_gkj'] instanceof DateTime)
+                            ? $data_approve2['tanggal_approve_gkj']
+                            : new DateTime($data_approve2['tanggal_approve_gkj']);
                         echo $tanggal_approve_gkj->format('d-m-y');
                     } else {
                         echo 'Not Yet Approve';
@@ -690,22 +714,23 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                     } else {
                         $id_approve3 = "";
                     }
-                    $qcek_approve3 = "SELECT 
-                                        * 
-                                            FROM tbl_email_bon_retur
-                                        WHERE 
-                                            id_cek = '$_GET[id_cek]' 
+                    $qcek_approve3 = "SELECT TOP 1
+                                        *
+                                            FROM db_qc.tbl_email_bon_retur
+                                        WHERE
+                                            id_cek = '$_GET[id_cek]'
                                             $id_approve2
                                             $id_approve3
                                         AND status_email_qc = '1'
                                         AND status_email_gkj = '1'
-                                        AND status_email_qc_mng = '1' 
-                                            ORDER BY id DESC
-                                        LIMIT 1";
-                    $query_approve3 = mysqli_query($con, $qcek_approve3);
-                    $data_approve3 = mysqli_fetch_array($query_approve3) ?>
+                                        AND status_email_qc_mng = '1'
+                                            ORDER BY id DESC";
+                    $query_approve3 = sqlsrv_query($con_db_qc_sqlsrv, $qcek_approve3);
+                    $data_approve3 = sqlsrv_fetch_array($query_approve3, SQLSRV_FETCH_ASSOC); ?>
                     <td align="center"><?php if (!empty($data_approve3['tanggal_approve_mng_qcf'])) {
-                        $tanggal_approve_mng_qcf = new DateTime($data_approve3['tanggal_approve_mng_qcf']);
+                        $tanggal_approve_mng_qcf = ($data_approve3['tanggal_approve_mng_qcf'] instanceof DateTime)
+                            ? $data_approve3['tanggal_approve_mng_qcf']
+                            : new DateTime($data_approve3['tanggal_approve_mng_qcf']);
                         echo $tanggal_approve_mng_qcf->format('d-m-y');
                     } else {
                         echo 'Not Yet Approve';
@@ -722,28 +747,29 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                     } else {
                         $id_approve3 = "";
                     }
-                    $qcek_approve4 = "SELECT 
-                                        * 
-                                            FROM tbl_email_bon_retur
-                                        WHERE 
-                                            id_cek = '$_GET[id_cek]' 
+                    $qcek_approve4 = "SELECT TOP 1
+                                        *
+                                            FROM db_qc.tbl_email_bon_retur
+                                        WHERE
+                                            id_cek = '$_GET[id_cek]'
                                             $id_approve2
                                             $id_approve3
                                         AND status_email_qc = '1'
                                         AND status_email_gkj = '1'
-                                        AND status_email_qc_mng = '1' 
-                                            ORDER BY id DESC
-                                        LIMIT 1";
-                    $query_approve4 = mysqli_query($con, $qcek_approve4);
-                    $data_approve4 = mysqli_fetch_array($query_approve4) ?>
+                                        AND status_email_qc_mng = '1'
+                                            ORDER BY id DESC";
+                    $query_approve4 = sqlsrv_query($con_db_qc_sqlsrv, $qcek_approve4);
+                    $data_approve4 = sqlsrv_fetch_array($query_approve4, SQLSRV_FETCH_ASSOC); ?>
                      <td align="center"><?php if (!empty($data_approve4['tanggal_approve_sales'])) {
-                        $tanggal_approve_sales = new DateTime($data_approve4['tanggal_approve_sales']);
-                        echo $tanggal_approve_sales->format('d-m-y');
-                    } else if(!empty($row['sales'])){
-                        echo 'Not Yet Approve';
-                    } else {
-                        '';
-                    }?>
+                         $tanggal_approve_sales = ($data_approve4['tanggal_approve_sales'] instanceof DateTime)
+                             ? $data_approve4['tanggal_approve_sales']
+                             : new DateTime($data_approve4['tanggal_approve_sales']);
+                         echo $tanggal_approve_sales->format('d-m-y');
+                     } else if (!empty($row['sales'])) {
+                         echo 'Not Yet Approve';
+                     } else {
+                         '';
+                     } ?>
                     </td>
                     <?php
                     if ($cek2 != 0) {
@@ -756,23 +782,24 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                     } else {
                         $id_approve3 = "";
                     }
-                    $qcek_approve5 = "SELECT 
-                                        * 
-                                            FROM tbl_email_bon_retur
-                                        WHERE 
-                                            id_cek = '$_GET[id_cek]' 
+                    $qcek_approve5 = "SELECT TOP 1
+                                        *
+                                            FROM db_qc.tbl_email_bon_retur
+                                        WHERE
+                                            id_cek = '$_GET[id_cek]'
                                             $id_approve2
                                             $id_approve3
                                         AND status_email_qc = '1'
                                         AND status_email_gkj = '1'
-                                        AND status_email_qc_mng = '1' 
-                                        AND status_email_mkt_ppc_mng = '1' 
-                                            ORDER BY id DESC
-                                        LIMIT 1";
-                    $query_approve5 = mysqli_query($con, $qcek_approve5);
-                    $data_approve5 = mysqli_fetch_array($query_approve5) ?>
+                                        AND status_email_qc_mng = '1'
+                                        AND status_email_mkt_ppc_mng = '1'
+                                            ORDER BY id DESC";
+                    $query_approve5 = sqlsrv_query($con_db_qc_sqlsrv, $qcek_approve5);
+                    $data_approve5 = sqlsrv_fetch_array($query_approve5, SQLSRV_FETCH_ASSOC); ?>
                     <td align="center"><?php if (!empty($data_approve5['tanggal_approve_mng_mkt_ppc'])) {
-                        $tanggal_approve_mng_mkt_ppc = new DateTime($data_approve5['tanggal_approve_mng_mkt_ppc']);
+                        $tanggal_approve_mng_mkt_ppc = ($data_approve5['tanggal_approve_mng_mkt_ppc'] instanceof DateTime)
+                            ? $data_approve5['tanggal_approve_mng_mkt_ppc']
+                            : new DateTime($data_approve5['tanggal_approve_mng_mkt_ppc']);
                         echo $tanggal_approve_mng_mkt_ppc->format('d-m-y');
                     } else if (!empty($row['mkt_ppc_manager'])) {
                         echo 'Not Yet Approve';
@@ -791,23 +818,24 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                     } else {
                         $id_approve3 = "";
                     }
-                    $qcek_approve6 = "SELECT 
-                                        * 
-                                            FROM tbl_email_bon_retur
-                                        WHERE 
-                                            id_cek = '$_GET[id_cek]' 
+                    $qcek_approve6 = "SELECT TOP 1
+                                        *
+                                            FROM db_qc.tbl_email_bon_retur
+                                        WHERE
+                                            id_cek = '$_GET[id_cek]'
                                             $id_approve2
                                             $id_approve3
                                         AND status_email_qc = '1'
                                         AND status_email_gkj = '1'
-                                        AND status_email_qc_mng = '1' 
-                                        AND status_email_dmf = '1' 
-                                            ORDER BY id DESC
-                                        LIMIT 1";
-                    $query_approve6 = mysqli_query($con, $qcek_approve6);
-                    $data_approve6 = mysqli_fetch_array($query_approve6) ?>
+                                        AND status_email_qc_mng = '1'
+                                        AND status_email_dmf = '1'
+                                            ORDER BY id DESC";
+                    $query_approve6 = sqlsrv_query($con_db_qc_sqlsrv, $qcek_approve6);
+                    $data_approve6 = sqlsrv_fetch_array($query_approve6, SQLSRV_FETCH_ASSOC); ?>
                     <td align="center"><?php if (!empty($data_approve6['tanggal_approve_dmf'])) {
-                        $tanggal_approve_dmf = new DateTime($data_approve6['tanggal_approve_dmf']);
+                        $tanggal_approve_dmf = ($data_approve6['tanggal_approve_dmf'] instanceof DateTime)
+                            ? $data_approve6['tanggal_approve_dmf']
+                            : new DateTime($data_approve6['tanggal_approve_dmf']);
                         echo $tanggal_approve_dmf->format('d-m-y');
                     } else if (!empty($row['dmf'])) {
                         echo 'Not Yet Approve';
@@ -842,21 +870,25 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                         }
 
                         // Query untuk memeriksa apakah sudah ada data yang cocok
-                        $qcek_approve = "SELECT * 
-                                            FROM tbl_email_bon_retur
-                                            WHERE 
-                                            id_cek = '$_GET[id_cek]' 
+                        $qcek_approve = "SELECT TOP 1 *
+                                            FROM db_qc.tbl_email_bon_retur
+                                            WHERE
+                                            id_cek = '$_GET[id_cek]'
                                             $id_approve2
                                             $id_approve3
-                                            AND status_email_qc = '1' 
-                                            ORDER BY id DESC
-                                            LIMIT 1";
+                                            AND status_email_qc = '1'
+                                            ORDER BY id DESC";
 
-                        // Menjalankan query
-                        $query_approve1 = mysqli_query($con, $qcek_approve);
+                        // Menjalankan query (Scrollable untuk num_rows)
+                        $query_approve1 = sqlsrv_query(
+                            $con_db_qc_sqlsrv,
+                            $qcek_approve,
+                            [],
+                            array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+                        );
 
                         // Menyimpan hasil query untuk menghitung jumlah baris
-                        $row_approve_qc = mysqli_num_rows($query_approve1);
+                        $row_approve_qc = sqlsrv_num_rows($query_approve1);
 
                         // Menetapkan nilai step
                         $step = 1;
@@ -864,57 +896,57 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                         // Menampilkan tombol jika hasil query tidak ditemukan (row_approve_qc < 1)
                         if ($row_approve_qc < 1) {
                             ?>
-                            <!-- Menampilkan tombol Approve jika tidak ada data yang cocok -->
-                            <button onclick="approveBonRetur()">Approve</button>
+                                <!-- Menampilkan tombol Approve jika tidak ada data yang cocok -->
+                                <button onclick="approveBonRetur()">Approve</button>
 
-                            <script>
-                                // Fungsi untuk mengirim data dengan AJAX
-                                function approveBonRetur() {
-                                    // Mendapatkan nilai cek dan step dari PHP ke JavaScript
-                                    // var cek = <?php echo $cek; ?>;
-                                    var step = <?php echo $row_approve_qc; ?>;
+                                <script>
+                                    // Fungsi untuk mengirim data dengan AJAX
+                                    function approveBonRetur() {
+                                        // Mendapatkan nilai cek dan step dari PHP ke JavaScript
+                                        // var cek = <?php echo $cek; ?>;
+                                        var step = <?php echo $row_approve_qc; ?>;
 
-                                    // Cek data yang akan dikirim
-                                    // console.log("cek: " + cek);
-                                    console.log("step: " + step);
-                                    console.log("no_order: <?php echo $_GET['no_order']; ?>");
-                                    console.log("po: <?php echo $_GET['po']; ?>");
-                                    console.log("id_nsp: <?php echo $_GET['id_nsp']; ?>");
-                                    console.log("id_cek: <?php echo $_GET['id_cek']; ?>");
-                                    console.log("id_cek1: <?php echo $_GET['id_cek1']; ?>");
-                                    console.log("id_cek2: <?php echo $_GET['id_cek2']; ?>");
+                                        // Cek data yang akan dikirim
+                                        // console.log("cek: " + cek);
+                                        console.log("step: " + step);
+                                        console.log("no_order: <?php echo $_GET['no_order']; ?>");
+                                        console.log("po: <?php echo $_GET['po']; ?>");
+                                        console.log("id_nsp: <?php echo $_GET['id_nsp']; ?>");
+                                        console.log("id_cek: <?php echo $_GET['id_cek']; ?>");
+                                        console.log("id_cek1: <?php echo $_GET['id_cek1']; ?>");
+                                        console.log("id_cek2: <?php echo $_GET['id_cek2']; ?>");
 
-                                    // Membuat request AJAX
-                                    var xhr = new XMLHttpRequest();
-                                    xhr.open("POST", "approve_bon_retur.php", true);
-                                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                                        // Membuat request AJAX
+                                        var xhr = new XMLHttpRequest();
+                                        xhr.open("POST", "approve_bon_retur.php", true);
+                                        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-                                    // Mengirimkan data dalam format URL-encoded
-                                    xhr.send(
-                                        // "cek=" + cek +
-                                        "step=" + step + // Mengirimkan parameter step
-                                        "&no_order=" + encodeURIComponent("<?php echo $_GET['no_order']; ?>") +
-                                        "&po=" + encodeURIComponent("<?php echo $_GET['po']; ?>") +
-                                        "&id_nsp=" + encodeURIComponent("<?php echo $_GET['id_nsp']; ?>") +
-                                        "&id_cek=" + encodeURIComponent("<?php echo $_GET['id_cek']; ?>") +
-                                        "&id_cek1=" + encodeURIComponent("<?php echo $_GET['id_cek1']; ?>") +
-                                        "&id_cek2=" + encodeURIComponent("<?php echo $_GET['id_cek2']; ?>"));
+                                        // Mengirimkan data dalam format URL-encoded
+                                        xhr.send(
+                                            // "cek=" + cek +
+                                            "step=" + step + // Mengirimkan parameter step
+                                            "&no_order=" + encodeURIComponent("<?php echo $_GET['no_order']; ?>") +
+                                            "&po=" + encodeURIComponent("<?php echo $_GET['po']; ?>") +
+                                            "&id_nsp=" + encodeURIComponent("<?php echo $_GET['id_nsp']; ?>") +
+                                            "&id_cek=" + encodeURIComponent("<?php echo $_GET['id_cek']; ?>") +
+                                            "&id_cek1=" + encodeURIComponent("<?php echo $_GET['id_cek1']; ?>") +
+                                            "&id_cek2=" + encodeURIComponent("<?php echo $_GET['id_cek2']; ?>"));
 
-                                    // Setelah AJAX selesai, tangani responsenya
-                                    xhr.onload = function () {
-                                        if (xhr.status === 200) {
-                                            console.log(xhr.responseText);  // Tampilkan respons dari server di console
-                                            alert('Data berhasil diproses!');
-                                            location.reload(); // Reload halaman setelah sukses
-                                        } else {
-                                            console.error("Error: " + xhr.status + " " + xhr.statusText);
-                                            alert('Terjadi kesalahan. Status: ' + xhr.status);
-                                        }
-                                    };
-                                }
-                            </script>
+                                        // Setelah AJAX selesai, tangani responsenya
+                                        xhr.onload = function () {
+                                            if (xhr.status === 200) {
+                                                console.log(xhr.responseText);  // Tampilkan respons dari server di console
+                                                alert('Data berhasil diproses!');
+                                                location.reload(); // Reload halaman setelah sukses
+                                            } else {
+                                                console.error("Error: " + xhr.status + " " + xhr.statusText);
+                                                alert('Terjadi kesalahan. Status: ' + xhr.status);
+                                            }
+                                        };
+                                    }
+                                </script>
 
-                            <?php
+                                <?php
                         } else {
                             echo '<img src="../../dist/img/' . htmlspecialchars($data_qc_staff['image']) . '" alt="Gambar Tidak Ditemukan">';
 
@@ -937,29 +969,33 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                         }
 
                         // Query untuk memeriksa apakah sudah ada data yang cocok
-                        $qcek_approve = "SELECT * 
-                    FROM tbl_email_bon_retur
-                    WHERE 
-                    id_cek = '$_GET[id_cek]' 
+                        $qcek_approve = "SELECT TOP 1 *
+                    FROM db_qc.tbl_email_bon_retur
+                    WHERE
+                    id_cek = '$_GET[id_cek]'
                     $id_approve2
                     $id_approve3
                     AND status_email_gkj = '1'
-                    ORDER BY id DESC
-                    LIMIT 1";
+                    ORDER BY id DESC";
 
                         // Menjalankan query
-                        $query_approve1 = mysqli_query($con, $qcek_approve);
-                        $data_approve1 = mysqli_fetch_array($query_approve1);
+                        $query_approve1 = sqlsrv_query(
+                            $con_db_qc_sqlsrv,
+                            $qcek_approve,
+                            [],
+                            array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+                        );
+                        $data_approve1 = sqlsrv_fetch_array($query_approve1, SQLSRV_FETCH_ASSOC);
 
                         // Menyimpan hasil query untuk menghitung jumlah baris
-                        $row_approve_gkj = mysqli_num_rows($query_approve1);
+                        $row_approve_gkj = sqlsrv_num_rows($query_approve1);
 
                         // Menampilkan tombol jika hasil query tidak ditemukan (row_approve_qc < 1)
-                        if ($row_approve_gkj < 1 ) {
-                            if($data_approve1['status_email_gkj']=='0'){
+                        if ($row_approve_gkj < 1) {
+                            if ($data_approve1['status_email_gkj'] == '0') {
                                 echo 'REJECTED';
-                            }else{
-                                echo  'NOT YET APPROVE';
+                            } else {
+                                echo 'NOT YET APPROVE';
                             }
                         } else {
                             echo '<img width="50" height="50" src="../../dist/img/' . htmlspecialchars($data_gkj_staff['image']) . '" alt="Gambar Tidak Ditemukan">';
@@ -982,26 +1018,30 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                         }
 
                         // Query untuk memeriksa apakah sudah ada data yang cocok
-                        $qcek_approve = "SELECT * 
-                    FROM tbl_email_bon_retur
-                    WHERE 
-                    id_cek = '$_GET[id_cek]' 
+                        $qcek_approve = "SELECT TOP 1 *
+                    FROM db_qc.tbl_email_bon_retur
+                    WHERE
+                    id_cek = '$_GET[id_cek]'
                     $id_approve2
                     $id_approve3
                     AND status_email_qc_mng = '1'
-                    ORDER BY id DESC
-                    LIMIT 1";
+                    ORDER BY id DESC";
 
                         // Menjalankan query
-                        $query_approve2 = mysqli_query($con, $qcek_approve);
-                        $data_approve2 = mysqli_fetch_array($query_approve2);
+                        $query_approve2 = sqlsrv_query(
+                            $con_db_qc_sqlsrv,
+                            $qcek_approve,
+                            [],
+                            array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+                        );
+                        $data_approve2 = sqlsrv_fetch_array($query_approve2, SQLSRV_FETCH_ASSOC);
 
                         // Menyimpan hasil query untuk menghitung jumlah baris
-                        $row_approve_qc_mng = mysqli_num_rows($query_approve2);
+                        $row_approve_qc_mng = sqlsrv_num_rows($query_approve2);
 
                         // Menampilkan tombol jika hasil query tidak ditemukan (row_approve_qc < 1)
                         if ($row_approve_qc_mng < 1) {
-                                echo 'NOT YET APPROVE';
+                            echo 'NOT YET APPROVE';
                         } else {
                             echo '<img width="50" height="50" src="../../dist/img/' . htmlspecialchars($dmng['image']) . '" alt="Gambar Tidak Ditemukan">';
                         }
@@ -1022,24 +1062,28 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                             }
 
                             // Query untuk memeriksa apakah sudah ada data yang cocok
-                            $qcek_approve = "SELECT * 
-                    FROM tbl_email_bon_retur
-                    WHERE 
-                    id_cek = '$_GET[id_cek]' 
+                            $qcek_approve = "SELECT TOP 1 *
+                    FROM db_qc.tbl_email_bon_retur
+                    WHERE
+                    id_cek = '$_GET[id_cek]'
                     $id_approve2
                     $id_approve3
-                    AND status_email_qc = '1' 
+                    AND status_email_qc = '1'
                     AND status_email_gkj = '1'
                     AND status_email_qc_mng = '1'
                     AND status_email_sales = '1'
-                    ORDER BY id DESC
-                    LIMIT 1";
+                    ORDER BY id DESC";
 
                             // Menjalankan query
-                            $query_approve3 = mysqli_query($con, $qcek_approve);
+                            $query_approve3 = sqlsrv_query(
+                                $con_db_qc_sqlsrv,
+                                $qcek_approve,
+                                [],
+                                array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+                            );
 
                             // Menyimpan hasil query untuk menghitung jumlah baris
-                            $row_approve_sales = mysqli_num_rows($query_approve3);
+                            $row_approve_sales = sqlsrv_num_rows($query_approve3);
 
                             // Menampilkan tombol jika hasil query tidak ditemukan (row_approve_qc < 1)
                             if ($row_approve_sales < 1) {
@@ -1067,24 +1111,28 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                             }
 
                             // Query untuk memeriksa apakah sudah ada data yang cocok
-                            $qcek_approve = "SELECT * 
-                                                FROM tbl_email_bon_retur
-                                                WHERE 
-                                                id_cek = '$_GET[id_cek]' 
+                            $qcek_approve = "SELECT TOP 1 *
+                                                FROM db_qc.tbl_email_bon_retur
+                                                WHERE
+                                                id_cek = '$_GET[id_cek]'
                                                 $id_approve2
                                                 $id_approve3
-                                                AND status_email_qc = '1' 
+                                                AND status_email_qc = '1'
                                                 AND status_email_gkj = '1'
                                                 AND status_email_qc_mng = '1'
                                                 AND status_email_mkt_ppc_mng = '1'
-                                                ORDER BY id DESC
-                                                LIMIT 1";
+                                                ORDER BY id DESC";
 
                             // Menjalankan query
-                            $query_approve3 = mysqli_query($con, $qcek_approve);
+                            $query_approve3 = sqlsrv_query(
+                                $con_db_qc_sqlsrv,
+                                $qcek_approve,
+                                [],
+                                array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+                            );
 
                             // Menyimpan hasil query untuk menghitung jumlah baris
-                            $row_approve_mkt_ppc = mysqli_num_rows($query_approve3);
+                            $row_approve_mkt_ppc = sqlsrv_num_rows($query_approve3);
 
                             // Menampilkan tombol jika hasil query tidak ditemukan (row_approve_qc < 1)
                             if ($row_approve_mkt_ppc < 1) {
@@ -1112,21 +1160,25 @@ $nmBln = array(1 => "JANUARI", "FEBUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI
                             }
 
                             // Query untuk memeriksa apakah sudah ada data yang cocok
-                            $qcek_approve = "SELECT * 
-                                                FROM tbl_email_bon_retur
-                                                WHERE 
-                                                id_cek = '$_GET[id_cek]' 
+                            $qcek_approve = "SELECT TOP 1 *
+                                                FROM db_qc.tbl_email_bon_retur
+                                                WHERE
+                                                id_cek = '$_GET[id_cek]'
                                                 $id_approve2
                                                 $id_approve3
                                                 AND status_email_dmf = '1'
-                                                ORDER BY id DESC
-                                                LIMIT 1";
+                                                ORDER BY id DESC";
 
                             // Menjalankan query
-                            $query_approve4 = mysqli_query($con, $qcek_approve);
+                            $query_approve4 = sqlsrv_query(
+                                $con_db_qc_sqlsrv,
+                                $qcek_approve,
+                                [],
+                                array("Scrollable" => SQLSRV_CURSOR_KEYSET)
+                            );
 
                             // Menyimpan hasil query untuk menghitung jumlah baris
-                            $row_approve_dmf = mysqli_num_rows($query_approve4);
+                            $row_approve_dmf = sqlsrv_num_rows($query_approve4);
 
                             // Menampilkan tombol jika hasil query tidak ditemukan (row_approve_qc < 1)
                             if ($row_approve_dmf < 1) {
