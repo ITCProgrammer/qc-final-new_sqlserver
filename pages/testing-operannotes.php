@@ -1191,10 +1191,7 @@ if ($sqlCek === false) {
 
 $rcek = sqlsrv_fetch_array($sqlCek, SQLSRV_FETCH_ASSOC);
 $cek  = $rcek ? 1 : 0;
-
-echo("SQL Cek Result: " . $cek);
-?>
-
+?>	
 <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" name="form0" id="form0">
 <div class="box box-info">
    	<div class="box-header with-border">
@@ -1425,7 +1422,7 @@ $cekD = $rcekD ? 1 : 0;
 
 // ===================== CEK COMMENT =====================
 $sqlCmt = "SELECT TOP 1 *,
-CONCAT(apperss_note) AS note_apperss
+CONCAT(apperss_note, ',') AS note_apperss
 FROM db_qc.tbl_tq_test
 WHERE id_nokk = ?
 ORDER BY id DESC";
@@ -1472,6 +1469,23 @@ $result_count = $rResult ? 1 : 0;
           					<label for="jnstest" class="col-sm-2 control-label">JENIS TES</label>
           					<div class="col-sm-4">
 			  					<select name="jns_test" class="form-control select2" id="jns_test" onChange="tampil();" style="width: 100%;">
+              					<option selected="selected" value="">Pilih</option>
+								<?php
+								$sql = "SELECT a.*, b.*
+											FROM db_qc.tbl_tq_nokk a
+											INNER JOIN db_qc.tbl_master_test b ON a.no_test = b.no_testmaster
+											WHERE nodemand = ?";
+								$params = array($Nokkold);
+								$stmt = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+								while($row=mysqli_fetch_array($result)){ 
+								$detail=explode(",",$row['physical']);?>
+								<?php foreach($detail as $key => $value):
+									echo '<option value="'.$value.'">'.$value.'</option>';
+								endforeach;
+								?>
+								<?php }?>  
+			  					</select>
+								<select name="jns_test" class="form-control select2" id="jns_test" onChange="tampil();" style="width: 100%;">
               					<option selected="selected" value="">Pilih</option>
 								<?php
 									$sql = "SELECT a.*, b.*
@@ -2067,19 +2081,8 @@ $result_count = $rResult ? 1 : 0;
 								<?php
 								$id_tq_test_2 = $rcekold['id'];
 								
-								$sql = "SELECT id_nokk, spirality_status
-												FROM db_qc.tbl_tq_test_2
-												WHERE id_nokk = ?";
-
-										$params = array($id_tq_test_2);
-
-										$stmt = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
-
-										if ($stmt === false) {
-											die(print_r(sqlsrv_errors(), true));
-										}
-
-										$tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+								$tq_test_2_sql	 = mysqli_query($con,"select id_nokk, spirality_status from tbl_tq_test_2 where id_nokk = '$id_tq_test_2'");
+								$tq_test_2_array = mysqli_fetch_array($tq_test_2_sql);
 
 								$spirality_status = ['DISPOSISI','A','R','PASS','FAIL','RANDOM']; ?>
 									
@@ -3945,30 +3948,20 @@ $result_count = $rResult ? 1 : 0;
 							<label for="jns_test2" class="col-sm-2 control-label">JENIS TES</label>
 								<div class="col-sm-3">
 									<select name="jns_test2" class="form-control select2" id="jns_test2" onChange="tampil2();" style="width: 100%;">
-										<option value="">Pilih</option>	  
-										<?php
-										$sql = "SELECT a.*, b.*
-												FROM db_qc.tbl_tq_nokk a
-												INNER JOIN db_qc.tbl_master_test b ON a.no_test = b.no_testmaster
-												WHERE nodemand = ?";
-
-										$params = array($Nokkold);
-										$stmt = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
-
-										if ($stmt === false) {
-											die(print_r(sqlsrv_errors(), true));
-										}
-
-										while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) { 
-											$detail = explode(",", $row['colorfastness']);
-											foreach ($detail as $key => $value) {
-												echo '<option value="'.$value.'">'.$value.'</option>';
-											}
-										}
-										?>   
+									<option value="">Pilih</option>	  
+									<?php
+										$sql = "SELECT a.*, b.* From tbl_tq_nokk a INNER JOIN tbl_master_test b ON a.no_test=b.no_testmaster WHERE nodemand='$Nokkold'";
+										$result=mysqli_query($con,$sql);
+										while($row=mysqli_fetch_array($result)){ 
+										$detail=explode(",",$row['colorfastness']);?>
+										<?php foreach($detail as $key => $value):
+											echo '<option value="'.$value.'">'.$value.'</option>';
+										endforeach;
+										?>
+									<?php }?>   
 									</select>
 								</div>
-							 </div>
+						</div>
 						<!-- WASHING BEGIN-->
 						<div class="form-group" id="c1" style="display:none;">
 							<label for="washing" class="col-sm-2 control-label">WASHING FASTNESS</label>
@@ -4917,28 +4910,17 @@ $result_count = $rResult ? 1 : 0;
 							<label for="jnstest1" class="col-sm-2 control-label">JENIS TES</label>
 							<div class="col-sm-3">
 								<select name="jns_test1" class="form-control select2" id="jns_test1" onChange="tampil1();" style="width: 100%;">
-									<option value="">Pilih</option>	  
-									<?php
-									$sql = "SELECT a.*, b.*
-											FROM db_qc.tbl_tq_nokk a
-											INNER JOIN db_qc.tbl_master_test b ON a.no_test = b.no_testmaster
-											WHERE nodemand = ?";
-
-									$params = array($Nokkold);
-									$stmt = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
-
-									if ($stmt === false) {
-										die(print_r(sqlsrv_errors(), true));
-									}
-
-									while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) { 
-										$detail = !empty($row['functional']) ? explode(",", $row['functional']) : array();
-
-										foreach ($detail as $key => $value) {
+								<option value="">Pilih</option>	  
+								<?php
+										$sql = "SELECT a.*, b.* From tbl_tq_nokk a INNER JOIN tbl_master_test b ON a.no_test=b.no_testmaster WHERE nodemand='$Nokkold'";
+										$result=mysqli_query($con,$sql);
+										while($row=mysqli_fetch_array($result)){ 
+										$detail=explode(",",$row['functional']);?>
+										<?php foreach($detail as $key => $value):
 											echo '<option value="'.$value.'">'.$value.'</option>';
-										}
-									}
-									?>   
+										endforeach;
+										?>
+										<?php }?>   
 								</select>
 							</div>
 						</div>
@@ -6723,64 +6705,30 @@ if($cek1>0 and $result_count > 0 ){
         </div>
 <?php
 
-if ($_POST['physical_save'] == "save") {
-
-    $spirality_status = $_POST['spirality_status'];
-    $id_nokk_new      = $_POST['id_nokk_new'];
-
-    // ================= CEK DATA =================
-    $sqlCek = "SELECT id_nokk, spirality_status 
-               FROM db_qc.tbl_tq_test_2 
-               WHERE id_nokk = ?";
-
-    $paramsCek = array($id_nokk_new);
-    $stmtCek   = sqlsrv_query($con_db_qc_sqlsrv, $sqlCek, $paramsCek);
-
-    if ($stmtCek === false) {
-        die(print_r(sqlsrv_errors(), true));
-    }
-
-    $tq_test_2_array = sqlsrv_fetch_array($stmtCek, SQLSRV_FETCH_ASSOC);
-
-    if ($tq_test_2_array) {
-
-        if ($_POST['spirality_status'] == '0') { // UPDATE jadi deleted
-
-            $second = '/deleted' . date('is');
-
-            $sqlUpdate = "UPDATE db_qc.tbl_tq_test_2 
-                          SET id_nokk = CONCAT(?, ?) 
-                          WHERE id_nokk = ?";
-
-            $paramsUpdate = array($id_nokk_new, $second, $id_nokk_new);
-            $stmtUpdate   = sqlsrv_query($con_db_qc_sqlsrv, $sqlUpdate, $paramsUpdate);
-
-        } else { // UPDATE spirality_status
-
-            $sqlUpdate = "UPDATE db_qc.tbl_tq_test_2 
-                          SET spirality_status = ? 
-                          WHERE id_nokk = ?";
-
-            $paramsUpdate = array($spirality_status, $id_nokk_new);
-            $stmtUpdate   = sqlsrv_query($con_db_qc_sqlsrv, $sqlUpdate, $paramsUpdate);
-        }
-
-    } else {
-
-        if ($_POST['spirality_status'] != '0') { // INSERT
-
-            $sqlInsert = "INSERT INTO db_qc.tbl_tq_test_2 (id_nokk, spirality_status) 
-                          VALUES (?, ?)";
-
-            $paramsInsert = array($id_nokk_new, $spirality_status);
-            $stmtInsert   = sqlsrv_query($con_db_qc_sqlsrv, $sqlInsert, $paramsInsert);
-        }
-    }
+if($_POST['physical_save']=="save") {
+	$spirality_status = $_POST['spirality_status'];
+	$id_nokk_new = $_POST['id_nokk_new'];
+	
+	$tq_test_2_sql	 = mysqli_query($con,"select id_nokk, spirality_status from tbl_tq_test_2 where id_nokk = '$id_nokk_new' ");
+	$tq_test_2_array = mysqli_fetch_array($tq_test_2_sql);
+	
+	if ($tq_test_2_array) {
+		if ($_POST['spirality_status']=='0') { //update
+			$second = '/deleted'.date('is');
+			$sqlPHY=mysqli_query($con,"UPDATE tbl_tq_test_2 SET id_nokk = concat($id_nokk_new,'$second') WHERE id_nokk='$id_nokk_new'");
+		}else  {
+			$sqlPHY=mysqli_query($con,"UPDATE tbl_tq_test_2 SET spirality_status='$spirality_status' WHERE id_nokk='$id_nokk_new'");
+		}	
+	} else {
+		if ($_POST['spirality_status']!='0') { //insert 
+		$sql_no_demand =mysqli_query($con,"INSERT INTO tbl_tq_test_2 (id_nokk,spirality_status) VALUES ('$id_nokk_new','$spirality_status')");				
+		}
+	}
 }
 ?>		
 <?php
 if($_POST['physical_save']=="save" AND $cekNew>0){
-	$sqlPHY=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_tq_test SET 
+	$sqlPHY=mysqli_query($con,"UPDATE tbl_tq_test SET 
 		  `flamability`='$_POST[flamability]',
 		  `fla_note`='$_POST[fla_note]',
 		  `fc_cott`='$_POST[fc_cott]',
@@ -7046,7 +6994,7 @@ if($_POST['physical_save']=="save" AND $cekNew>0){
 		  `tgl_update`=now()
 		  WHERE `id_nokk`='$rcek[id]'");
 		  if($sqlPHY){
-			$sqlPHYD=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_tq_disptest SET 
+			$sqlPHYD=mysqli_query($con,"UPDATE tbl_tq_disptest SET 
 		`dflamability`='$_POST[dflamability]',
 		`dfla_note`='$_POST[dfla_note]',
 		`dfc_cott`='$_POST[dfc_cott]',
@@ -7286,7 +7234,7 @@ if($_POST['physical_save']=="save" AND $cekNew>0){
 		`tgl_update`=now()
 		WHERE `id_nokk`='$rcek[id]'");
 
-	$sqlPHYDI=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_disptest SET 	
+	$sqlPHYDI=mysqli_query($con,"INSERT INTO tbl_tq_disptest SET 	
 		`id_nokk`='$rcek[id]',
 		`dflamability`='$_POST[dflamability]',
 		`dfla_note`='$_POST[dfla_note]',
@@ -7539,7 +7487,7 @@ if($_POST['physical_save']=="save" AND $cekNew>0){
 		});</script>";
 	}
 }else if($_POST['physical_save']=="save"){
-	$sqlPHY=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_test SET 
+	$sqlPHY=mysqli_query($con,"INSERT INTO tbl_tq_test SET 
 		  `id_nokk`='$rcek[id]',
 		  `flamability`='$_POST[flamability]',
 		  `fla_note`='$_POST[fla_note]',
@@ -7834,7 +7782,7 @@ if($_POST['physical_save']=="save" AND $cekNew>0){
 		  `tgl_update`=now()");
 
 		if($sqlPHY){
-			$sqlPHYD=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_tq_disptest SET 
+			$sqlPHYD=mysqli_query($con,"UPDATE tbl_tq_disptest SET 
 		`dflamability`='$_POST[dflamability]',
 		`dfla_note`='$_POST[dfla_note]',
 		`dfc_cott`='$_POST[dfc_cott]',
@@ -8074,7 +8022,7 @@ if($_POST['physical_save']=="save" AND $cekNew>0){
 		`tgl_update`=now()
 		WHERE `id_nokk`='$rcek[id]'");
 
-	$sqlPHYDI=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_disptest SET 	
+	$sqlPHYDI=mysqli_query($con,"INSERT INTO tbl_tq_disptest SET 	
 		`id_nokk`='$rcek[id]',
 		`dflamability`='$_POST[dflamability]',
 		`dfla_note`='$_POST[dfla_note]',
@@ -8339,7 +8287,7 @@ if($_POST['physical_save']=="save" AND $cekNew>0){
 		}
 }
 if($_POST['colorfastness_save']=="save" and $cekNew>0){
-	$sqlCLR=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_tq_test SET
+	$sqlCLR=mysqli_query($con,"UPDATE tbl_tq_test SET
 	`wash_temp`='$_POST[wash_temp]',
 	`wash_colorchange`='$_POST[wash_colorchange]',
 	`wash_acetate`='$_POST[wash_acetate]',
@@ -8433,7 +8381,7 @@ if($_POST['colorfastness_save']=="save" and $cekNew>0){
 	WHERE `id_nokk`='$rcek[id]'
 	");
 	if($sqlCLR){
-		$sqlCLRD=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_tq_disptest SET
+		$sqlCLRD=mysqli_query($con,"UPDATE tbl_tq_disptest SET
 	`dwash_temp`='$_POST[dwash_temp]',
 	`dwash_colorchange`='$_POST[dwash_colorchange]',
 	`dwash_acetate`='$_POST[dwash_acetate]',
@@ -8512,7 +8460,7 @@ if($_POST['colorfastness_save']=="save" and $cekNew>0){
 	WHERE `id_nokk`='$rcek[id]'
 	");
 
-$sqlCLRDI=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_disptest SET
+$sqlCLRDI=mysqli_query($con,"INSERT INTO tbl_tq_disptest SET
 `id_nokk`='$rcek[id]',
 `dwash_temp`='$_POST[dwash_temp]',
 `dwash_colorchange`='$_POST[dwash_colorchange]',
@@ -8604,7 +8552,7 @@ $sqlCLRDI=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_disptest SET
 	});</script>";
 	}
 }else if($_POST['colorfastness_save']=="save"){
-	$sqlCLR=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_test SET
+	$sqlCLR=mysqli_query($con,"INSERT INTO tbl_tq_test SET
 	`id_nokk`='$rcek[id]',
 	`wash_temp`='$_POST[wash_temp]',
 	`wash_colorchange`='$_POST[wash_colorchange]',
@@ -8700,7 +8648,7 @@ $sqlCLRDI=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_disptest SET
 	");
 	
 	if($sqlCLR){
-		$sqlCLRD=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_tq_disptest SET
+		$sqlCLRD=mysqli_query($con,"UPDATE tbl_tq_disptest SET
 	`dwash_temp`='$_POST[dwash_temp]',
 	`dwash_colorchange`='$_POST[dwash_colorchange]',
 	`dwash_acetate`='$_POST[dwash_acetate]',
@@ -8779,7 +8727,7 @@ $sqlCLRDI=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_disptest SET
 	WHERE `id_nokk`='$rcek[id]'
 	");
 
-$sqlCLRDI=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_disptest SET
+$sqlCLRDI=mysqli_query($con,"INSERT INTO tbl_tq_disptest SET
 `id_nokk`='$rcek[id]',
 `dwash_temp`='$_POST[dwash_temp]',
 `dwash_colorchange`='$_POST[dwash_colorchange]',
@@ -8872,7 +8820,7 @@ $sqlCLRDI=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_disptest SET
 			}
 	}
 if($_POST['functional_save']=="save" and $cekNew>0){
-	$sqlFPH=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_tq_test SET
+	$sqlFPH=mysqli_query($con,"UPDATE tbl_tq_test SET
 	`wick_l1` = '$_POST[wick_l1]',
 	`wick_w1` = '$_POST[wick_w1]',
 	`wick_l2` = '$_POST[wick_l2]',
@@ -8924,7 +8872,7 @@ if($_POST['functional_save']=="save" and $cekNew>0){
     WHERE `id_nokk`='$rcek[id]'
 	");
 	if($sqlFPH){
-$sqlFPHD=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_tq_disptest SET
+$sqlFPHD=mysqli_query($con,"UPDATE tbl_tq_disptest SET
 	`dwick_l1` = '$_POST[dwick_l1]',
 	`dwick_w1` = '$_POST[dwick_w1]',
 	`dwick_l2` = '$_POST[dwick_l2]',
@@ -8962,7 +8910,7 @@ $sqlFPHD=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_tq_disptest SET
 	`tgl_update`=now()
 	WHERE `id_nokk`='$rcek[id]'
 	");
-$sqlFPHDI=sqlsrv_query($con,"INSERT INTO tbl_tq_disptest SET
+$sqlFPHDI=mysqli_query($con,"INSERT INTO tbl_tq_disptest SET
 	`id_nokk`='$rcek[id]',
 	`dwick_l1` = '$_POST[dwick_l1]',
 	`dwick_w1` = '$_POST[dwick_w1]',
@@ -9013,7 +8961,7 @@ $sqlFPHDI=sqlsrv_query($con,"INSERT INTO tbl_tq_disptest SET
 	});</script>";
 	}
 }else if($_POST['functional_save']=="save"){
-	$sqlFPH=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_test SET
+	$sqlFPH=mysqli_query($con,"INSERT INTO tbl_tq_test SET
 	`id_nokk`='$rcek[id]',
 	`wick_l1` = '$_POST[wick_l1]',
 	`wick_w1` = '$_POST[wick_w1]',
@@ -9067,7 +9015,7 @@ $sqlFPHDI=sqlsrv_query($con,"INSERT INTO tbl_tq_disptest SET
 	");
 
 		if($sqlFPH){
-			$sqlFPHD=sqlsrv_query($con_db_qc_sqlsrv,"UPDATE db_qc.tbl_tq_disptest SET
+			$sqlFPHD=mysqli_query($con,"UPDATE tbl_tq_disptest SET
 	`dwick_l1` = '$_POST[dwick_l1]',
 	`dwick_w1` = '$_POST[dwick_w1]',
 	`dwick_l2` = '$_POST[dwick_l2]',
@@ -9105,7 +9053,7 @@ $sqlFPHDI=sqlsrv_query($con,"INSERT INTO tbl_tq_disptest SET
 	`tgl_update`=now()
 	WHERE `id_nokk`='$rcek[id]'
 	");
-$sqlFPHDI=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_disptest SET
+$sqlFPHDI=mysqli_query($con,"INSERT INTO tbl_tq_disptest SET
 	`id_nokk`='$rcek[id]',
 	`dwick_l1` = '$_POST[dwick_l1]',
 	`dwick_w1` = '$_POST[dwick_w1]',
