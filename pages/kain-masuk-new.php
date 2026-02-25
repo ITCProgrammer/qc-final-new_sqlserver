@@ -871,13 +871,21 @@ if($rcekNoTes){
 						</label>
 						<label><input type="checkbox" class="minimal" name="colorfastness[]" value="PERSPIRATION ACID"> Perpiration Fastness Acid &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 						</label>
-						<label><input type="checkbox" class="minimal" name="colorfastness[]" value="PERSPIRATION ALKALINE"> Perpiration Fastness Alkaline
+						<label><input type="checkbox" class="minimal" name="colorfastness[]" value="PERSPIRATION ACID ISO"> Perpiration Fastness Acid ISO &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+						</label>
+						<label><input type="checkbox" class="minimal" name="colorfastness[]" value="PERSPIRATION ALKALINE"> Perpiration Fastness Alkaline &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+						</label>
+						<label><input type="checkbox" class="minimal" name="colorfastness[]" value="PERSPIRATION ALKALINE ISO"> Perpiration Fastness Alkaline ISO
 						</label>
 					</div>
 					<div class="form-group">
 						<label><input type="checkbox" class="minimal" name="colorfastness[]" value="WATER"> Water Fastness &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 						</label>
-						<label><input type="checkbox" class="minimal" name="colorfastness[]" value="CROCKING"> Crocking Fastness &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+						<label><input type="checkbox" class="minimal" name="colorfastness[]" value="WATER ISO"> Water Fastness ISO &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;
+						</label>
+						<label><input type="checkbox" class="minimal" name="colorfastness[]" value="CROCKING"> Crocking Fastness &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+						</label>
+						<label><input type="checkbox" class="minimal" name="colorfastness[]" value="CROCKING ISO"> Crocking Fastness ISO &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 						</label>
 						<label><input type="checkbox" class="minimal" name="colorfastness[]" value="PHENOLIC YELLOWING"> Phenolic Yellowing 
 						</label>
@@ -1135,33 +1143,59 @@ $nourut=nourut();
 		return $no1;
 	}
 	
+	// function autono_test_save()
+	// {
+	// 	include "koneksi.php";
+	// 	date_default_timezone_set('Asia/Jakarta');
+	// 	$bln= date("Ym");
+	// 	$today= date("Ymd");
+	// 	$sqlnotes = sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 no_test FROM db_qc.tbl_tq_nokk WHERE SUBSTRING(no_test,1,6) like '%".$bln."%' ORDER BY no_test DESC") or die(p(sqlsrv_errors()));
+	// 	$rd=sqlsrv_fetch_array($sqlnotes,SQLSRV_FETCH_ASSOC);
+	// 	if ($rd) {
+	// 		$rd=sqlsrv_fetch_array($sqlnotes,SQLSRV_FETCH_ASSOC);
+	// 		$dt=$rd['no_test'];
+	// 		$strd=substr($dt, 8, 4);
+	// 		$Urutd = (int)$strd;
+	// 	} else {
+	// 		$Urutd = 0;
+	// 	}
+	// 	$Urutd = $Urutd + 1;
+	// 	$Nold="";
+	// 	$nilaid=4-strlen($Urutd);
+	// 	for ($i=1;$i<=$nilaid;$i++) {
+	// 		$Nold= $Nold."0";
+	// 	}
+	// 	$no2 =$today.$Nold.$Urutd;
+	// 	//$no2 =$today.str_pad($Urutd, 4, "0",  STR_PAD_LEFT);
+	// 	return $no2;
+	// }
+
 	function autono_test_save()
 	{
-		include"koneksi.php";
+		include "koneksi.php";
 		date_default_timezone_set('Asia/Jakarta');
-		$bln= date("Ym");
-		$today= date("Ymd");
-		$sqlnotes = sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 no_test FROM db_qc.tbl_tq_nokk WHERE SUBSTRING(no_test,1,6) like '%".$bln."%' ORDER BY no_test DESC") or die(p(sqlsrv_errors()));
-		$rd=sqlsrv_fetch_array($sqlnotes,SQLSRV_FETCH_ASSOC);
-		if ($rd) {
-			$rd=sqlsrv_fetch_array($sqlnotes,SQLSRV_FETCH_ASSOC);
-			$dt=$rd['no_test'];
-			$strd=substr($dt, 8, 4);
-			$Urutd = (int)$strd;
-		} else {
-			$Urutd = 0;
-		}
-		$Urutd = $Urutd + 1;
-		$Nold="";
-		$nilaid=4-strlen($Urutd);
-		for ($i=1;$i<=$nilaid;$i++) {
-			$Nold= $Nold."0";
-		}
-		$no2 =$today.$Nold.$Urutd;
-		//$no2 =$today.str_pad($Urutd, 4, "0",  STR_PAD_LEFT);
-		return $no2;
-	}
+		$today = date("Ymd");
+		$prefix = date("Ym"); 
+		$sql = "SELECT TOP 1 no_test FROM db_qc.tbl_tq_nokk 
+				WHERE no_test LIKE ? 
+				ORDER BY no_test DESC";
 		
+		$params = array($prefix . "%");
+		$sqlnotes = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+		$rd = sqlsrv_fetch_array($sqlnotes, SQLSRV_FETCH_ASSOC);
+		
+		if ($rd && !empty($rd['no_test'])) {
+			$last_no = substr($rd['no_test'], -4);
+			$next_no = (int)$last_no + 1;
+		} else {
+			$next_no = 1;
+		}
+
+		$counter = str_pad($next_no, 4, "0", STR_PAD_LEFT);
+		
+		return $today . $counter;
+	}
+
 	  $nourut=nourut();	
 	  $notest = autono_test_save();
 	  $warna=str_replace("'","''",$_POST['warna']);
@@ -1193,7 +1227,11 @@ $nourut=nourut();
       		$chkc .= $chk3.",";  
    		}		
   	  	$sqlData=sqlsrv_query($con_db_qc_sqlsrv,"INSERT INTO db_qc.tbl_tq_nokk
-	  	  (no_id,nokk,nodemand,no_test,pelanggan,no_order,no_hanger,no_item,no_po,jenis_kain,lebar,gramasi,lot,berat,rol,warna,no_warna
+	  	  (no_id,
+		  nokk,
+		  nodemand,
+		  no_test,
+		  pelanggan,no_order,no_hanger,no_item,no_po,jenis_kain,lebar,gramasi,lot,berat,rol,warna,no_warna
 		  ,tgl_fin,proses_fin,suhu,tgl_masuk,buyer,development,tgl_target,kk_legacy,lot_legacy,ip,tgl_update)
 		  VALUES('$nourut','$_POST[nokk]','$_POST[nodemand]','$notest','$_POST[pelanggan]','$_POST[no_order]','$_POST[no_hanger]','$_POST[no_item]'
 		  ,'$po','$jns','$_POST[lebar]','$_POST[grms]','$lot','$_POST[berat]','$_POST[rol]','$warna','$nowarna',CURRENT_TIMESTAMP,'$_POST[proses]'

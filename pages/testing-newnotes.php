@@ -148,32 +148,32 @@
 					$("[name=wash_nylon]").val(val);
 					$("[name=wash_acrylic]").val(val);
 					// $("[name=wash_staining]").val(val);
-				}else if(document.forms['form2']['jns_test2'].value == "PERSPIRATION ACID"){
-					$("[name=acid_colorchange]").val(val);
-					$("[name=acid_cotton]").val(val);
-					$("[name=acid_poly]").val(val);
-					$("[name=acid_wool]").val(val);
-					$("[name=acid_acetate]").val(val);
-					$("[name=acid_nylon]").val(val);
-					$("[name=acid_acrylic]").val(val);
+				}else if(document.forms['form2']['jns_test2'].value == "PERSPIRATION ACID ISO"){
+					$("[name=acid_colorchange2]").val(val);
+					$("[name=acid_cotton2]").val(val);
+					$("[name=acid_poly2]").val(val);
+					$("[name=acid_wool2]").val(val);
+					$("[name=acid_acetate2]").val(val);
+					$("[name=acid_nylon2]").val(val);
+					$("[name=acid_acrylic2]").val(val);
 					// $("[name=acid_staining]").val(val);
-				}else if(document.forms['form2']['jns_test2'].value == "PERSPIRATION ALKALINE"){
-					$("[name=alkaline_colorchange]").val(val);
-					$("[name=alkaline_cotton]").val(val);
-					$("[name=alkaline_poly]").val(val);
-					$("[name=alkaline_wool]").val(val);
-					$("[name=alkaline_acetate]").val(val);
-					$("[name=alkaline_nylon]").val(val);
-					$("[name=alkaline_acrylic]").val(val);
+				}else if(document.forms['form2']['jns_test2'].value == "PERSPIRATION ALKALINE ISO"){
+					$("[name=alkaline_colorchange2]").val(val);
+					$("[name=alkaline_cotton2]").val(val);
+					$("[name=alkaline_poly2]").val(val);
+					$("[name=alkaline_wool2]").val(val);
+					$("[name=alkaline_acetate2]").val(val);
+					$("[name=alkaline_nylon2]").val(val);
+					$("[name=alkaline_acrylic2]").val(val);
 					// $("[name=alkaline_staining]").val(val);
-				}else if(document.forms['form2']['jns_test2'].value == "WATER"){
-					$("[name=water_colorchange]").val(val);
-					$("[name=water_cotton]").val(val);
-					$("[name=water_poly]").val(val);
-					$("[name=water_wool]").val(val);
-					$("[name=water_acetate]").val(val);
-					$("[name=water_nylon]").val(val);
-					$("[name=water_acrylic]").val(val);
+				}else if(document.forms['form2']['jns_test2'].value == "WATER ISO"){
+					$("[name=water_colorchange2]").val(val);
+					$("[name=water_cotton2]").val(val);
+					$("[name=water_poly2]").val(val);
+					$("[name=water_wool2]").val(val);
+					$("[name=water_acetate2]").val(val);
+					$("[name=water_nylon2]").val(val);
+					$("[name=water_acrylic2]").val(val);
 					// $("[name=water_staining]").val(val);
 				}else if(document.forms['form2']['jns_test2'].value == "DYE TRANSFER"){
 					$("[name=dye_tf_acetate]").val(val);
@@ -1499,6 +1499,32 @@
 			$("#ranwtr").css("display", "none");  // To hide
 			$("#marwtr").css("display", "none");  // To hide
 		}
+		if (document.forms['form2']['jns_test2'].value == "WATER ISO") {
+			if (document.forms['form2']['stat_wtr2'].value == "RANDOM") {
+				$("#ranwtr2").css("display", "");  // To unhide
+			} else {
+				$("#ranwtr2").css("display", "none");  // To hide
+			}
+			if (document.forms['form2']['stat_wtr2'].value == "DISPOSISI") {
+				$("#diswtr2").css("display", "");  // To unhide
+			} else {
+				$("#diswtr2").css("display", "none");  // To hide
+			}
+			if (document.forms['form2']['stat_wtr2'].value == "MARGINAL PASS") {
+				$("#marwtr2").css("display", "");  // To unhide
+			} else {
+				$("#marwtr2").css("display", "none");  // To hide
+			}
+			$("#c2v1").css("display", "");  // To unhide
+			$("#stat_wtr2").css("display", "");  // To unhide
+			$(".div-autocheck").css("display", ""); // To unhide
+		} else {
+			$("#c2v1").css("display", "none");  // To hide
+			$("#stat_wtr2").css("display", "none");  // To hide
+			$("#diswtr2").css("display", "none");  // To hide
+			$("#ranwtr2").css("display", "none");  // To hide
+			$("#marwtr2").css("display", "none");  // To hide
+		}
 		if (document.forms['form2']['jns_test2'].value == "PERSPIRATION ACID") {
 			if (document.forms['form2']['stat_pac'].value == "RANDOM") {
 				$("#ranpac").css("display", "");  // To unhide
@@ -1524,6 +1550,32 @@
 			$("#dispac").css("display", "none");  // To hide
 			$("#ranpac").css("display", "none");  // To hide
 			$("#marpac").css("display", "none");  // To hide
+		}
+		if (document.forms['form2']['jns_test2'].value == "PERSPIRATION ACID ISO") {
+			if (document.forms['form2']['stat_pac2'].value == "RANDOM") {
+				$("#ranpac2").css("display", "");  // To unhide
+			} else {
+				$("#ranpac2").css("display", "none");  // To hide
+			}
+			if (document.forms['form2']['stat_pac2'].value == "DISPOSISI") {
+				$("#dispac2").css("display", "");  // To unhide
+			} else {
+				$("#dispac2").css("display", "none");  // To hide
+			}
+			if (document.forms['form2']['stat_pac2'].value == "MARGINAL PASS") {
+				$("#marpac").css("display", "");  // To unhide
+			} else {
+				$("#marpac").css("display", "none");  // To hide
+			}
+			$("#c3v1").css("display", "");  // To unhide
+			$("#stat_pac2").css("display", "");  // To unhide
+			$(".div-autocheck").css("display", ""); // To unhide
+		} else {
+			$("#c3v1").css("display", "none");  // To hide
+			$("#stat_pac2").css("display", "none");  // To hide
+			$("#dispac2").css("display", "none");  // To hide
+			$("#ranpac2").css("display", "none");  // To hide
+			$("#marpac2").css("display", "none");  // To hide
 		}
 		if (document.forms['form2']['jns_test2'].value == "PERSPIRATION ALKALINE") {
 			if (document.forms['form2']['stat_pal'].value == "RANDOM") {
@@ -1551,6 +1603,32 @@
 			$("#ranpal").css("display", "none");  // To hide
 			$("#marpal").css("display", "none");  // To hide
 		}
+		if (document.forms['form2']['jns_test2'].value == "PERSPIRATION ALKALINE ISO") {
+			if (document.forms['form2']['stat_pal2'].value == "RANDOM") {
+				$("#ranpal2").css("display", "");  // To unhide
+			} else {
+				$("#ranpal2").css("display", "none");  // To hide
+			}
+			if (document.forms['form2']['stat_pal2'].value == "DISPOSISI") {
+				$("#dispal2").css("display", "");  // To unhide
+			} else {
+				$("#dispal2").css("display", "none");  // To hide
+			}
+			if (document.forms['form2']['stat_pal2'].value == "MARGINAL PASS") {
+				$("#marpal2").css("display", "");  // To unhide
+			} else {
+				$("#marpal2").css("display", "none");  // To hide
+			}
+			$("#c4v1").css("display", "");  // To unhide
+			$("#stat_pal2").css("display", "");  // To unhide
+			$(".div-autocheck").css("display", ""); // To unhide
+		} else {
+			$("#c4v1").css("display", "none");  // To hide
+			$("#stat_pal2").css("display", "none");  // To hide
+			$("#dispal2").css("display", "none");  // To hide
+			$("#ranpal2").css("display", "none");  // To hide
+			$("#marpal2").css("display", "none");  // To hide
+		}
 		if (document.forms['form2']['jns_test2'].value == "CROCKING") {
 			if (document.forms['form2']['stat_cr'].value == "RANDOM") {
 				$("#rancr").css("display", "");  // To unhide
@@ -1575,6 +1653,31 @@
 			$("#discr").css("display", "none");  // To hide
 			$("#rancr").css("display", "none");  // To hide
 			$("#marcr").css("display", "none");  // To hide
+		}
+		if (document.forms['form2']['jns_test2'].value == "CROCKING ISO") {
+			if (document.forms['form2']['stat_cr2'].value == "RANDOM") {
+				$("#rancr2").css("display", "");  // To unhide
+			} else {
+				$("#rancr2").css("display", "none");  // To hide
+			}
+			if (document.forms['form2']['stat_cr2'].value == "DISPOSISI") {
+				$("#discr2").css("display", "");  // To unhide
+			} else {
+				$("#discr2").css("display", "none");  // To hide
+			}
+			if (document.forms['form2']['stat_cr2'].value == "MARGINAL PASS") {
+				$("#marcr2").css("display", "");  // To unhide
+			} else {
+				$("#marcr2").css("display", "none");  // To hide
+			}
+			$("#c5v1").css("display", "");  // To unhide
+			$("#stat_cr2").css("display", "");  // To unhide
+		} else {
+			$("#c5v1").css("display", "none");  // To hide
+			$("#stat_cr2").css("display", "none");  // To hide
+			$("#discr2").css("display", "none");  // To hide
+			$("#rancr2").css("display", "none");  // To hide
+			$("#marcr2").css("display", "none");  // To hide
 		}
 	// Ini untuk nampilin formnya
 		// if (document.forms['form2']['jns_test2'].value == "FIBER SHEDDING") {
@@ -2251,6 +2354,7 @@ $sql = "
         b.dtight_growth_l1,
         b.dgrowth_w3,
         b.dgrowth_l3,
+		b.*,
         CONCAT(
             a.dfc_note, ' ', a.dph_note, ' ', a.dabr_note, ' ', a.dbas_note, ' ',
             a.ddry_note, ' ', a.dfla_note, ' ', a.dfwe_note, ' ', a.dfwi_note, ' ',
@@ -9546,9 +9650,177 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 								</div>
 							</div>
 						<!-- WATER END-->
+						<!-- WATER ISO BEGIN-->
+							<div class="form-group" id="c2v1" style="display:none;">
+								<label for="water" class="col-sm-2 control-label">WATER ISO</label>
+								<div class="col-sm-2">
+									<input name="water_colorchange2" type="text" class="form-control" id="water_colorchange2"
+										value="<?php echo $rcek1['water_colorchange2']; ?>" placeholder="4-5 Color Change">
+									<input name="water_acetate2" type="text" class="form-control" id="water_acetate2"
+										value="<?php echo $rcek1['water_acetate2']; ?>" placeholder="4 Acetate">
+								</div>
+								<div class="col-sm-2">
+									<input name="water_cotton2" type="text" class="form-control" id="water_cotton2"
+										value="<?php echo $rcek1['water_cotton2']; ?>" placeholder="4 Cotton">
+									<input name="water_nylon2" type="text" class="form-control" id="water_nylon2"
+										value="<?php echo $rcek1['water_nylon2']; ?>" placeholder="4 Nylon">
+								</div>
+								<div class="col-sm-2">
+									<input name="water_poly2" type="text" class="form-control" id="water_poly2"
+										value="<?php echo $rcek1['water_poly2']; ?>" placeholder="4 Polyester">
+									<input name="water_acrylic2" type="text" class="form-control" id="water_acrylic2"
+										value="<?php echo $rcek1['water_acrylic2']; ?>" placeholder="4 Acrylic">
+								</div>
+								<div class="col-sm-2">
+									<input name="water_wool2" type="text" class="form-control" id="water_wool2"
+										value="<?php echo $rcek1['water_wool2']; ?>" placeholder="4 Wool">
+									<input name="water_staining2" type="text" class="form-control" id="water_staining2"
+										value="<?php echo $rcek1['water_staining2']; ?>" placeholder="S.Staining">
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="water_note2" maxlength="50"
+										rows="1"><?php echo $rcek1['water_note2']; ?></textarea>
+								</div>
+							</div>
+							<div class="form-group" id="stat_wtr2" style="display:none;">
+								<label for="stat_wtr2" class="col-sm-2 control-label">STATUS</label>
+								<div class="col-sm-2">
+									<select name="stat_wtr2" class="form-control select2" id="stat_wtr2" onChange="tampil2();"
+										style="width: 100%;">
+										<option <?php if ($rcek1['stat_wtr2'] == "") { ?> selected=selected <?php }
+										; ?>value="">
+											Pilih</option>
+										<option <?php if ($rcek1['stat_wtr2'] == "DISPOSISI") { ?> selected=selected <?php }
+										; ?>value="DISPOSISI">DISPOSISI</option>
+										<option <?php if ($rcek1['stat_wtr2'] == "A") { ?> selected=selected <?php }
+										; ?>value="A">A
+										</option>
+										<option <?php if ($rcek1['stat_wtr2'] == "R") { ?> selected=selected <?php }
+										; ?>value="R">R
+										</option>
+										<option <?php if ($rcek1['stat_wtr2'] == "PASS") { ?> selected=selected <?php }
+										; ?>value="PASS">PASS</option>
+										<option <?php if ($rcek1['stat_wtr2'] == "MARGINAL PASS") { ?> selected=selected <?php }
+										; ?>value="MARGINAL PASS">MARGINAL PASS</option>
+										<option <?php if ($rcek1['stat_wtr2'] == "DATA") { ?> selected=selected <?php }
+										; ?>value="DATA">DATA</option>
+										<option <?php if ($rcek1['stat_wtr2'] == "FAIL") { ?> selected=selected <?php }
+										; ?>value="FAIL">FAIL</option>
+										<option <?php if ($rcek1['stat_wtr2'] == "RANDOM") { ?> selected=selected <?php }
+										; ?>value="RANDOM">RANDOM</option>
+										<option <?php if ($rcek1['stat_wtr2'] == "ESS PASS") { ?> selected=selected <?php }
+										; ?>value="ESS PASS">ESS PASS</option>
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<input name="user_water2" type="text" class="form-control" id="user_water2" placeholder="NAMA" readonly> *Apabila terdapat perubahan, nama pengedit akan berubah
+									<input name="nama_water2" type="hidden" class="form-control" id="nama_water2" value="<?php echo $rcek1['nama_water2']; ?>" placeholder="Nama BOW">
+								</div>
+							</div>
+							<div class="form-group" id="diswtr2" style="display:none;">
+								<label for="diswtr2" class="col-sm-2 control-label">WATER (DIS)</label>
+								<div class="col-sm-2">
+									<input name="dwater_colorchange2" type="text" class="form-control"
+										id="dwater_colorchange2" value="<?php echo $rcekD['dwater_colorchange2']; ?>"
+										placeholder="4-5 Color Change">
+									<input name="dwater_acetate2" type="text" class="form-control" id="dwater_acetate2"
+										value="<?php echo $rcekD['dwater_acetate2']; ?>" placeholder="4 Acetate">
+								</div>
+								<div class="col-sm-2">
+									<input name="dwater_cotton2" type="text" class="form-control" id="dwater_cotton2"
+										value="<?php echo $rcekD['dwater_cotton2']; ?>" placeholder="4 Cotton">
+									<input name="dwater_nylon2" type="text" class="form-control" id="dwater_nylon2"
+										value="<?php echo $rcekD['dwater_nylon2']; ?>" placeholder="4 Nylon">
+								</div>
+								<div class="col-sm-2">
+									<input name="dwater_poly2" type="text" class="form-control" id="dwater_poly2"
+										value="<?php echo $rcekD['dwater_poly2']; ?>" placeholder="4 Polyester">
+									<input name="dwater_acrylic2" type="text" class="form-control" id="dwater_acrylic2"
+										value="<?php echo $rcekD['dwater_acrylic2']; ?>" placeholder="4 Acrylic">
+								</div>
+								<div class="col-sm-2">
+									<input name="dwater_wool2" type="text" class="form-control" id="dwater_wool2"
+										value="<?php echo $rcekD['dwater_wool2']; ?>" placeholder="4 Wool">
+									<input name="dwater_staining2" type="text" class="form-control" id="dwater_staining2"
+										value="<?php echo $rcekD['dwater_staining2']; ?>" placeholder="S.Staining">
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="dwater_note2" maxlength="50"
+										rows="1"><?php echo $rcekD['dwater_note2']; ?></textarea>
+								</div>
+							</div>
+							<div class="form-group" id="marwtr2" style="display:none;">
+								<label for="marwtr2" class="col-sm-2 control-label">WATER (MARGINAL)</label>
+								<div class="col-sm-2">
+									<input name="mwater_colorchange2" type="text" class="form-control"
+										id="mwater_colorchange2" value="<?php echo $rcekM['mwater_colorchange2']; ?>"
+										placeholder="4-5 Color Change">
+									<input name="mwater_acetate2" type="text" class="form-control" id="mwater_acetate2"
+										value="<?php echo $rcekM['mwater_acetate2']; ?>" placeholder="4 Acetate">
+								</div>
+								<div class="col-sm-2">
+									<input name="mwater_cotton2" type="text" class="form-control" id="mwater_cotton2"
+										value="<?php echo $rcekM['mwater_cotton2']; ?>" placeholder="4 Cotton">
+									<input name="mwater_nylon2" type="text" class="form-control" id="mwater_nylon2"
+										value="<?php echo $rcekM['mwater_nylon2']; ?>" placeholder="4 Nylon">
+								</div>
+								<div class="col-sm-2">
+									<input name="mwater_poly2" type="text" class="form-control" id="mwater_poly2"
+										value="<?php echo $rcekM['mwater_poly2']; ?>" placeholder="4 Polyester">
+									<input name="mwater_acrylic2" type="text" class="form-control" id="mwater_acrylic2"
+										value="<?php echo $rcekM['mwater_acrylic2']; ?>" placeholder="4 Acrylic">
+								</div>
+								<div class="col-sm-2">
+									<input name="mwater_wool2" type="text" class="form-control" id="mwater_wool2"
+										value="<?php echo $rcekM['mwater_wool2']; ?>" placeholder="4 Wool">
+									<input name="mwater_staining2" type="text" class="form-control" id="mwater_staining2"
+										value="<?php echo $rcekM['mwater_staining2']; ?>" placeholder="S.Staining">
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="mwater_note2" maxlength="50"
+										rows="1"><?php echo $rcekM['mwater_note2']; ?></textarea>
+								</div>
+							</div>
+							<div class="form-group" id="ranwtr2" style="display:none;">
+								<label for="ranwtr2" class="col-sm-2 control-label">WATER (RAN)</label>
+								<div class="col-sm-2">
+									<input name="rwater_colorchange2" type="text" class="form-control"
+										id="rwater_colorchange2" value="<?php echo $rcekR['rwater_colorchange2']; ?>"
+										placeholder="4-5 Color Change" readonly>
+									<input name="rwater_acetate2" type="text" class="form-control" id="rwater_acetate2"
+										value="<?php echo $rcekR['rwater_acetate2']; ?>" placeholder="4 Acetate" readonly>
+								</div>
+								<div class="col-sm-2">
+									<input name="rwater_cotton2" type="text" class="form-control" id="rwater_cotton2"
+										value="<?php echo $rcekR['rwater_cotton2']; ?>" placeholder="4 Cotton" readonly>
+									<input name="rwater_nylon2" type="text" class="form-control" id="rwater_nylon2"
+										value="<?php echo $rcekR['rwater_nylon2']; ?>" placeholder="4 Nylon" readonly>
+								</div>
+								<div class="col-sm-2">
+									<input name="rwater_poly2" type="text" class="form-control" id="rwater_poly2"
+										value="<?php echo $rcekR['rwater_poly2']; ?>" placeholder="4 Polyester" readonly>
+									<input name="rwater_acrylic2" type="text" class="form-control" id="rwater_acrylic2"
+										value="<?php echo $rcekR['rwater_acrylic2']; ?>" placeholder="4 Acrylic" readonly>
+								</div>
+								<div class="col-sm-2">
+									<input name="rwater_wool2" type="text" class="form-control" id="rwater_wool2"
+										value="<?php echo $rcekR['rwater_wool2']; ?>" placeholder="4 Wool" readonly>
+									<input name="rwater_staining2" type="text" class="form-control" id="rwater_staining2"
+										value="<?php echo $rcekR['rwater_staining2']; ?>" placeholder="S.Staining" readonly>
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="rwater_note2" maxlength="50" rows="1"
+										readonly><?php echo $rcekR['rwater_note2']; ?></textarea>
+								</div>
+							</div>
+						<!-- WATER ISO END-->
 						<!-- PERSPIRATION ACID BEGIN-->
 							<div class="form-group" id="c3" style="display:none;">
-								<label for="acid" class="col-sm-2 control-label">PERSPIRATION ACID</label>
+								<label for="acid" class="col-sm-2 control-label">PERSPIRATION ACID AATCC</label>
 								<div class="col-sm-2">
 									<input name="acid_colorchange" type="text" class="form-control" id="acid_colorchange"
 										value="<?php echo $rcek1['acid_colorchange']; ?>" placeholder="4-5 Color Change">
@@ -9712,6 +9984,172 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 								</div>
 							</div>
 						<!-- PERSPIRATION ACID END-->
+						<!-- PERSPIRATION ACID ISO BEGIN-->
+							<div class="form-group" id="c3v1" style="display:none;">
+								<label for="acid" class="col-sm-2 control-label">PERSPIRATION ACID ISO</label>
+								<div class="col-sm-2">
+									<input name="acid_colorchange2" type="text" class="form-control" id="acid_colorchange2"
+										value="<?php echo $rcek1['acid_colorchange2']; ?>" placeholder="4-5 Color Change">
+									<input name="acid_acetate2" type="text" class="form-control" id="acid_acetate2"
+										value="<?php echo $rcek1['acid_acetate2']; ?>" placeholder="4 Acetate">
+								</div>
+								<div class="col-sm-2">
+									<input name="acid_cotton2" type="text" class="form-control" id="acid_cotton2"
+										value="<?php echo $rcek1['acid_cotton2']; ?>" placeholder="4 Cotton">
+									<input name="acid_nylon2" type="text" class="form-control" id="acid_nylon2"
+										value="<?php echo $rcek1['acid_nylon2']; ?>" placeholder="4 Nylon">
+								</div>
+								<div class="col-sm-2">
+									<input name="acid_poly2" type="text" class="form-control" id="acid_poly2"
+										value="<?php echo $rcek1['acid_poly2']; ?>" placeholder="4 Polyester">
+									<input name="acid_acrylic2" type="text" class="form-control" id="acid_acrylic2"
+										value="<?php echo $rcek1['acid_acrylic2']; ?>" placeholder="4 Acrylic">
+								</div>
+								<div class="col-sm-2">
+									<input name="acid_wool2" type="text" class="form-control" id="acid_wool2"
+										value="<?php echo $rcek1['acid_wool2']; ?>" placeholder="4 Wool">
+									<input name="acid_staining2" type="text" class="form-control" id="acid_staining2"
+										value="<?php echo $rcek1['acid_staining2']; ?>" placeholder="S.Staining">
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="acid_note2" maxlength="50"
+										rows="1"><?php echo $rcek1['acid_note2']; ?></textarea>
+								</div>
+							</div>
+							<div class="form-group" id="stat_pac2" style="display:none;">
+								<label for="stat_pac2" class="col-sm-2 control-label">STATUS</label>
+								<div class="col-sm-2">
+									<select name="stat_pac2" class="form-control select2" id="stat_pac2" onChange="tampil2();"
+										style="width: 100%;">
+										<option <?php if ($rcek1['stat_pac2'] == "") { ?> selected=selected <?php }
+										; ?>value="">
+											Pilih</option>
+										<option <?php if ($rcek1['stat_pac2'] == "DISPOSISI") { ?> selected=selected <?php }
+										; ?>value="DISPOSISI">DISPOSISI</option>
+										<option <?php if ($rcek1['stat_pac2'] == "A") { ?> selected=selected <?php }
+										; ?>value="A">A
+										</option>
+										<option <?php if ($rcek1['stat_pac2'] == "R") { ?> selected=selected <?php }
+										; ?>value="R">R
+										</option>
+										<option <?php if ($rcek1['stat_pac2'] == "PASS") { ?> selected=selected <?php }
+										; ?>value="PASS">PASS</option>
+										<option <?php if ($rcek1['stat_pac2'] == "MARGINAL PASS") { ?> selected=selected <?php }
+										; ?>value="MARGINAL PASS">MARGINAL PASS</option>
+										<option <?php if ($rcek1['stat_pac2'] == "DATA") { ?> selected=selected <?php }
+										; ?>value="DATA">DATA</option>
+										<option <?php if ($rcek1['stat_pac2'] == "FAIL") { ?> selected=selected <?php }
+										; ?>value="FAIL">FAIL</option>
+										<option <?php if ($rcek1['stat_pac2'] == "RANDOM") { ?> selected=selected <?php }
+										; ?>value="RANDOM">RANDOM</option>
+										<option <?php if ($rcek1['stat_pac2'] == "ESS PASS") { ?> selected=selected <?php }
+										; ?>value="ESS PASS">ESS PASS</option>
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<input name="user_acid2" type="text" class="form-control" id="user_acid2" placeholder="NAMA" readonly> *Apabila terdapat perubahan, nama pengedit akan berubah
+									<input name="nama_acid2" type="hidden" class="form-control" id="nama_acid2" value="<?php echo $rcek1['nama_acid2']; ?>" placeholder="Nama BOW">
+								</div>
+							</div>
+							<div class="form-group" id="dispac2" style="display:none;">
+								<label for="dispac2" class="col-sm-2 control-label">PERSPIRATION ACID (DIS)</label>
+								<div class="col-sm-2">
+									<input name="dacid_colorchange2" type="text" class="form-control" id="dacid_colorchange2"
+										value="<?php echo $rcekD['dacid_colorchange2']; ?>" placeholder="4-5 Color Change DISNI">
+									<input name="dacid_acetate2" type="text" class="form-control" id="dacid_acetate2"
+										value="<?php echo $rcekD['dacid_acetate2']; ?>" placeholder="4 Acetate">
+								</div>
+								<div class="col-sm-2">
+									<input name="dacid_cotton2" type="text" class="form-control" id="dacid_cotton2"
+										value="<?php echo $rcekD['dacid_cotton2']; ?>" placeholder="4 Cotton">
+									<input name="dacid_nylon2" type="text" class="form-control" id="dacid_nylon2"
+										value="<?php echo $rcekD['dacid_nylon2']; ?>" placeholder="4 Nylon">
+								</div>
+								<div class="col-sm-2">
+									<input name="dacid_poly2" type="text" class="form-control" id="dacid_poly2"
+										value="<?php echo $rcekD['dacid_poly2']; ?>" placeholder="4 Polyester">
+									<input name="dacid_acrylic2" type="text" class="form-control" id="dacid_acrylic2"
+										value="<?php echo $rcekD['dacid_acrylic2']; ?>" placeholder="4 Acrylic">
+								</div>
+								<div class="col-sm-2">
+									<input name="dacid_wool2" type="text" class="form-control" id="dacid_wool2"
+										value="<?php echo $rcekD['dacid_wool2']; ?>" placeholder="4 Wool">
+									<input name="dacid_staining2" type="text" class="form-control" id="dacid_staining2"
+										value="<?php echo $rcekD['dacid_staining2']; ?>" placeholder="S.Staining">
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="dacid_note2" maxlength="50"
+										rows="1"><?php echo $rcekD['dacid_note2']; ?></textarea>
+								</div>
+							</div>
+							<div class="form-group" id="marpac2" style="display:none;">
+								<label for="marpac2" class="col-sm-2 control-label">PERSPIRATION ACID (MARGINAL)</label>
+								<div class="col-sm-2">
+									<input name="macid_colorchange2" type="text" class="form-control" id="macid_colorchange2"
+										value="<?php echo $rcekM['macid_colorchange2']; ?>" placeholder="4-5 Color Change">
+									<input name="macid_acetate2" type="text" class="form-control" id="macid_acetate2"
+										value="<?php echo $rcekM['macid_acetate2']; ?>" placeholder="4 Acetate">
+								</div>
+								<div class="col-sm-2">
+									<input name="macid_cotton2" type="text" class="form-control" id="macid_cotton2"
+										value="<?php echo $rcekM['macid_cotton2']; ?>" placeholder="4 Cotton">
+									<input name="macid_nylon2" type="text" class="form-control" id="macid_nylon2"
+										value="<?php echo $rcekM['macid_nylon2']; ?>" placeholder="4 Nylon">
+								</div>
+								<div class="col-sm-2">
+									<input name="macid_poly2" type="text" class="form-control" id="macid_poly2"
+										value="<?php echo $rcekM['macid_poly2']; ?>" placeholder="4 Polyester">
+									<input name="macid_acrylic2" type="text" class="form-control" id="macid_acrylic2"
+										value="<?php echo $rcekM['macid_acrylic2']; ?>" placeholder="4 Acrylic">
+								</div>
+								<div class="col-sm-2">
+									<input name="macid_wool2" type="text" class="form-control" id="macid_wool2"
+										value="<?php echo $rcekM['macid_wool2']; ?>" placeholder="4 Wool">
+									<input name="macid_staining2" type="text" class="form-control" id="macid_staining2"
+										value="<?php echo $rcekM['macid_staining2']; ?>" placeholder="S.Staining">
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="macid_note2" maxlength="50"
+										rows="1"><?php echo $rcekM['macid_note2']; ?></textarea>
+								</div>
+							</div>
+							<div class="form-group" id="ranpac" style="display:none;">
+								<label for="ranpac" class="col-sm-2 control-label">PERSPIRATION ACID (RAN)</label>
+								<div class="col-sm-2">
+									<input name="racid_colorchange2" type="text" class="form-control" id="racid_colorchange2"
+										value="<?php echo $rcekR['racid_colorchange2']; ?>" placeholder="4-5 Color Change"
+										readonly>
+									<input name="racid_acetate2" type="text" class="form-control" id="racid_acetate2"
+										value="<?php echo $rcekR['racid_acetate2']; ?>" placeholder="4 Acetate" readonly>
+								</div>
+								<div class="col-sm-2">
+									<input name="racid_cotton2" type="text" class="form-control" id="racid_cotton2"
+										value="<?php echo $rcekR['racid_cotton2']; ?>" placeholder="4 Cotton" readonly>
+									<input name="racid_nylon2" type="text" class="form-control" id="racid_nylon2"
+										value="<?php echo $rcekR['racid_nylon2']; ?>" placeholder="4 Nylon" readonly>
+								</div>
+								<div class="col-sm-2">
+									<input name="racid_poly2" type="text" class="form-control" id="racid_poly2"
+										value="<?php echo $rcekR['racid_poly2']; ?>" placeholder="4 Polyester" readonly>
+									<input name="racid_acrylic2" type="text" class="form-control" id="racid_acrylic2"
+										value="<?php echo $rcekR['racid_acrylic2']; ?>" placeholder="4 Acrylic" readonly>
+								</div>
+								<div class="col-sm-2">
+									<input name="racid_wool2" type="text" class="form-control" id="racid_wool2"
+										value="<?php echo $rcekR['racid_wool2']; ?>" placeholder="4 Wool" readonly>
+									<input name="racid_staining2" type="text" class="form-control" id="racid_staining2"
+										value="<?php echo $rcekR['racid_staining2']; ?>" placeholder="S.Staining" readonly>
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="racid_note2" maxlength="50" rows="1"
+										readonly><?php echo $rcekR['racid_note2']; ?></textarea>
+								</div>
+							</div>
+						<!-- PERSPIRATION ACID ISO END-->
 						<!-- PERSPIRATION ALKALINE BEGIN-->
 							<div class="form-group" id="c4" style="display:none;">
 								<label for="alkaline" class="col-sm-2 control-label">PERSPIRATION ALKALINE</label>
@@ -9884,6 +10322,178 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 								</div>
 							</div>
 						<!-- PERSPIRATION ALKALINE END-->
+						<!-- PERSPIRATION ALKALINE ISO BEGIN-->
+							<div class="form-group" id="c4v1" style="display:none;">
+								<label for="alkaline" class="col-sm-2 control-label">PERSPIRATION ALKALINE ISO</label>
+								<div class="col-sm-2">
+									<input name="alkaline_colorchange2" type="text" class="form-control" id="alkaline_colorchange2" 
+										value="<?php echo $rcek1['alkaline_colorchange2']; ?>"
+										placeholder="4-5 Color Change">
+									<input name="alkaline_acetate2" type="text" class="form-control" id="alkaline_acetate2"
+										value="<?php echo $rcek1['alkaline_acetate2']; ?>" placeholder="4 Acetate">
+								</div>
+								<div class="col-sm-2">
+									<input name="alkaline_cotton2" type="text" class="form-control" id="alkaline_cotton2"
+										value="<?php echo $rcek1['alkaline_cotton2']; ?>" placeholder="4 Cotton">
+									<input name="alkaline_nylon2" type="text" class="form-control" id="alkaline_nylon2"
+										value="<?php echo $rcek1['alkaline_nylon2']; ?>" placeholder="4 Nylon">
+								</div>
+								<div class="col-sm-2">
+									<input name="alkaline_poly2" type="text" class="form-control" id="alkaline_poly2"
+										value="<?php echo $rcek1['alkaline_poly2']; ?>" placeholder="4 Polyester">
+									<input name="alkaline_acrylic2" type="text" class="form-control" id="alkaline_acrylic2"
+										value="<?php echo $rcek1['alkaline_acrylic2']; ?>" placeholder="4 Acrylic">
+								</div>
+								<div class="col-sm-2">
+									<input name="alkaline_wool2" type="text" class="form-control" id="alkaline_wool2"
+										value="<?php echo $rcek1['alkaline_wool2']; ?>" placeholder="4 Wool">
+									<input name="alkaline_staining2" type="text" class="form-control" id="alkaline_staining2"
+										value="<?php echo $rcek1['alkaline_staining2']; ?>" placeholder="S.Staining">
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="alkaline_note2" maxlength="50"
+										rows="1"><?php echo $rcek1['alkaline_note2']; ?></textarea>
+								</div>
+							</div>
+							<div class="form-group" id="stat_pal2" style="display:none;">
+								<label for="stat_pal2" class="col-sm-2 control-label">STATUS</label>
+								<div class="col-sm-2">
+									<select name="stat_pal2" class="form-control select2" id="stat_pal2" onChange="tampil2();"
+										style="width: 100%;">
+										<option <?php if ($rcek1['stat_pal2'] == "") { ?> selected=selected <?php }
+										; ?>value="">
+											Pilih</option>
+										<option <?php if ($rcek1['stat_pal2'] == "DISPOSISI") { ?> selected=selected <?php }
+										; ?>value="DISPOSISI">DISPOSISI</option>
+										<option <?php if ($rcek1['stat_pal2'] == "A") { ?> selected=selected <?php }
+										; ?>value="A">A
+										</option>
+										<option <?php if ($rcek1['stat_pal2'] == "R") { ?> selected=selected <?php }
+										; ?>value="R">R
+										</option>
+										<option <?php if ($rcek1['stat_pal2'] == "PASS") { ?> selected=selected <?php }
+										; ?>value="PASS">PASS</option>
+										<option <?php if ($rcek1['stat_pal2'] == "MARGINAL PASS") { ?> selected=selected <?php }
+										; ?>value="MARGINAL PASS">MARGINAL PASS</option>
+										<option <?php if ($rcek1['stat_pal2'] == "DATA") { ?> selected=selected <?php }
+										; ?>value="DATA">DATA</option>
+										<option <?php if ($rcek1['stat_pal2'] == "FAIL") { ?> selected=selected <?php }
+										; ?>value="FAIL">FAIL</option>
+										<option <?php if ($rcek1['stat_pal2'] == "RANDOM") { ?> selected=selected <?php }
+										; ?>value="RANDOM">RANDOM</option>
+										<option <?php if ($rcek1['stat_pal2'] == "ESS PASS") { ?> selected=selected <?php }
+										; ?>value="ESS PASS">ESS PASS</option>
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<input name="user_alkaline2" type="text" class="form-control" id="user_alkaline2" placeholder="NAMA" readonly> *Apabila terdapat perubahan, nama pengedit akan berubah
+									<input name="nama_alkaline2" type="hidden" class="form-control" id="nama_alkaline2" value="<?php echo $rcek1['nama_alkaline2']; ?>" placeholder="Nama BOW">
+								</div>
+							</div>
+							<div class="form-group" id="dispal2" style="display:none;">
+								<label for="dispal2" class="col-sm-2 control-label">PERSPIRATION ALKALINE (DIS)</label>
+								<div class="col-sm-2">
+									<input name="dalkaline_colorchange2" type="text" class="form-control"
+										id="dalkaline_colorchange2" value="<?php echo $rcekD['dalkaline_colorchange2']; ?>"
+										placeholder="4-5 Color Change">
+									<input name="dalkaline_acetate2" type="text" class="form-control" id="dalkaline_acetate2"
+										value="<?php echo $rcekD['dalkaline_acetate2']; ?>" placeholder="4 Acetate">
+								</div>
+								<div class="col-sm-2">
+									<input name="dalkaline_cotton2" type="text" class="form-control" id="dalkaline_cotton2"
+										value="<?php echo $rcekD['dalkaline_cotton2']; ?>" placeholder="4 Cotton">
+									<input name="dalkaline_nylon2" type="text" class="form-control" id="dalkaline_nylon2"
+										value="<?php echo $rcekD['dalkaline_nylon2']; ?>" placeholder="4 Nylon">
+								</div>
+								<div class="col-sm-2">
+									<input name="dalkaline_poly2" type="text" class="form-control" id="dalkaline_poly2"
+										value="<?php echo $rcekD['dalkaline_poly2']; ?>" placeholder="4 Polyester">
+									<input name="dalkaline_acrylic2" type="text" class="form-control" id="dalkaline_acrylic2"
+										value="<?php echo $rcekD['dalkaline_acrylic2']; ?>" placeholder="4 Acrylic">
+								</div>
+								<div class="col-sm-2">
+									<input name="dalkaline_wool2" type="text" class="form-control" id="dalkaline_wool2"
+										value="<?php echo $rcekD['dalkaline_wool2']; ?>" placeholder="4 Wool">
+									<input name="dalkaline_staining2" type="text" class="form-control"
+										id="dalkaline_staining2" value="<?php echo $rcekD['dalkaline_staining2']; ?>"
+										placeholder="S.Staining">
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="dalkaline_note2" maxlength="50"
+										rows="1"><?php echo $rcekD['dalkaline_note2']; ?></textarea>
+								</div>
+							</div>
+							<div class="form-group" id="marpal2" style="display:none;">
+								<label for="marpal2" class="col-sm-2 control-label">PERSPIRATION ALKALINE (MARGINAL)</label>
+								<div class="col-sm-2">
+									<input name="malkaline_colorchange2" type="text" class="form-control"
+										id="malkaline_colorchange2" value="<?php echo $rcekM['malkaline_colorchange2']; ?>"
+										placeholder="4-5 Color Change">
+									<input name="malkaline_acetate2" type="text" class="form-control" id="malkaline_acetate2"
+										value="<?php echo $rcekM['malkaline_acetate2']; ?>" placeholder="4 Acetate">
+								</div>
+								<div class="col-sm-2">
+									<input name="malkaline_cotton2" type="text" class="form-control" id="malkaline_cotton2"
+										value="<?php echo $rcekM['malkaline_cotton2']; ?>" placeholder="4 Cotton">
+									<input name="malkaline_nylon2" type="text" class="form-control" id="malkaline_nylon2"
+										value="<?php echo $rcekM['malkaline_nylon2']; ?>" placeholder="4 Nylon">
+								</div>
+								<div class="col-sm-2">
+									<input name="malkaline_poly2" type="text" class="form-control" id="malkaline_poly2"
+										value="<?php echo $rcekM['malkaline_poly2']; ?>" placeholder="4 Polyester">
+									<input name="malkaline_acrylic2" type="text" class="form-control" id="malkaline_acrylic2"
+										value="<?php echo $rcekM['malkaline_acrylic2']; ?>" placeholder="4 Acrylic">
+								</div>
+								<div class="col-sm-2">
+									<input name="malkaline_wool2" type="text" class="form-control" id="malkaline_wool2"
+										value="<?php echo $rcekM['malkaline_wool2']; ?>" placeholder="4 Wool">
+									<input name="malkaline_staining2" type="text" class="form-control"
+										id="malkaline_staining2" value="<?php echo $rcekM['malkaline_staining2']; ?>"
+										placeholder="S.Staining">
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="malkaline_note2" maxlength="50"
+										rows="1"><?php echo $rcekM['malkaline_note2']; ?></textarea>
+								</div>
+							</div>
+							<div class="form-group" id="ranpal2" style="display:none;">
+								<label for="ranpal2" class="col-sm-2 control-label">PERSPIRATION ALKALINE (RAN)</label>
+								<div class="col-sm-2">
+									<input name="ralkaline_colorchange2" type="text" class="form-control"
+										id="ralkaline_colorchange2" value="<?php echo $rcekR['ralkaline_colorchange2']; ?>"
+										placeholder="4-5 Color Change" readonly>
+									<input name="ralkaline_acetate2" type="text" class="form-control" id="ralkaline_acetate2"
+										value="<?php echo $rcekR['ralkaline_acetate2']; ?>" placeholder="4 Acetate" readonly>
+								</div>
+								<div class="col-sm-2">
+									<input name="ralkaline_cotton2" type="text" class="form-control" id="ralkaline_cotton2"
+										value="<?php echo $rcekR['ralkaline_cotton2']; ?>" placeholder="4 Cotton" readonly>
+									<input name="ralkaline_nylon2" type="text" class="form-control" id="ralkaline_nylon2"
+										value="<?php echo $rcekR['ralkaline_nylon2']; ?>" placeholder="4 Nylon" readonly>
+								</div>
+								<div class="col-sm-2">
+									<input name="ralkaline_poly2" type="text" class="form-control" id="ralkaline_poly2"
+										value="<?php echo $rcekR['ralkaline_poly2']; ?>" placeholder="4 Polyester" readonly>
+									<input name="ralkaline_acrylic2" type="text" class="form-control" id="ralkaline_acrylic2"
+										value="<?php echo $rcekR['ralkaline_acrylic2']; ?>" placeholder="4 Acrylic" readonly>
+								</div>
+								<div class="col-sm-2">
+									<input name="ralkaline_wool2" type="text" class="form-control" id="ralkaline_wool2"
+										value="<?php echo $rcekR['ralkaline_wool2']; ?>" placeholder="4 Wool" readonly>
+									<input name="ralkaline_staining2" type="text" class="form-control"
+										id="ralkaline_staining2" value="<?php echo $rcekR['ralkaline_staining2']; ?>"
+										placeholder="S.Staining">
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="ralkaline_note2" maxlength="50" rows="1"
+										readonly><?php echo $rcekR['ralkaline_note2']; ?></textarea>
+								</div>
+							</div>
+						<!-- PERSPIRATION ALKALINE ISO END-->
 						<!-- CROCKING BEGIN-->
 							<div class="form-group" id="c5" style="display:none;">
 								<label for="crocking" class="col-sm-2 control-label">CROCKING</label>
@@ -10014,6 +10624,136 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 								</div>
 							</div>
 						<!-- CROCKING END-->
+						<!-- CROCKING ISO BEGIN-->
+							<div class="form-group" id="c5v1" style="display:none;">
+								<label for="crocking" class="col-sm-2 control-label">CROCKING ISO</label>
+								<div class="col-sm-1">LEN 1
+									<input name="crock_len12" type="text" class="form-control" id="crock_len12"
+										value="<?php echo $rcek1['crock_len12']; ?>" placeholder="4 Dry">
+								</div>
+								<div class="col-sm-1">WID 1
+									<input name="crock_wid12" type="text" class="form-control" id="crock_wid12"
+										value="<?php echo $rcek1['crock_wid12']; ?>" placeholder="4 Dry">
+								</div>
+								<div class="col-sm-1">LEN 2
+									<input name="crock_len22" type="text" class="form-control" id="crock_len22"
+										value="<?php echo $rcek1['crock_len22']; ?>" placeholder="3 Wet">
+								</div>
+								<div class="col-sm-1">WID 2
+									<input name="crock_wid22" type="text" class="form-control" id="crock_wid22"
+										value="<?php echo $rcek1['crock_wid22']; ?>" placeholder="3 Wet">
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="crock_note2" maxlength="50"><?php echo $rcek1['crock_note2']; ?></textarea>
+								</div>
+							</div>
+							<div class="form-group" id="stat_cr2" style="display:none;">
+								<label for="stat_cr2" class="col-sm-2 control-label">STATUS</label>
+								<div class="col-sm-2">
+									<select name="stat_cr2" class="form-control select2" id="stat_cr2" onChange="tampil2();"
+										style="width: 100%;">
+										<option <?php if ($rcek1['stat_cr2'] == "") { ?> selected=selected <?php }
+										; ?>value="">
+											Pilih</option>
+										<option <?php if ($rcek1['stat_cr2'] == "DISPOSISI") { ?> selected=selected <?php }
+										; ?>value="DISPOSISI">DISPOSISI</option>
+										<option <?php if ($rcek1['stat_cr2'] == "A") { ?> selected=selected <?php }
+										; ?>value="A">A
+										</option>
+										<option <?php if ($rcek1['stat_cr2'] == "R") { ?> selected=selected <?php }
+										; ?>value="R">R
+										</option>
+										<option <?php if ($rcek1['stat_cr2'] == "PASS") { ?> selected=selected <?php }
+										; ?>value="PASS">PASS</option>
+										<option <?php if ($rcek1['stat_cr2'] == "MARGINAL PASS") { ?> selected=selected <?php }
+										; ?>value="MARGINAL PASS">MARGINAL PASS</option>
+										<option <?php if ($rcek1['stat_cr2'] == "DATA") { ?> selected=selected <?php }
+										; ?>value="DATA">DATA</option>
+										<option <?php if ($rcek1['stat_cr2'] == "FAIL") { ?> selected=selected <?php }
+										; ?>value="FAIL">FAIL</option>
+										<option <?php if ($rcek1['stat_cr2'] == "RANDOM") { ?> selected=selected <?php }
+										; ?>value="RANDOM">RANDOM</option>
+										<option <?php if ($rcek1['stat_cr2'] == "ESS PASS") { ?> selected=selected <?php }
+										; ?>value="ESS PASS">ESS PASS</option>
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<input name="user_crocking2" type="text" class="form-control" id="user_crocking2" placeholder="NAMA" readonly> *Apabila terdapat perubahan, nama pengedit akan berubah
+									<input name="nama_crocking2" type="hidden" class="form-control" id="nama_crocking2" value="<?php echo $rcek1['nama_crocking2']; ?>" placeholder="Nama BOW">
+								</div>
+							</div>
+							<div class="form-group" id="discr2" style="display:none;">
+								<label for="discr2" class="col-sm-2 control-label">CROCKING (DIS)</label>
+								<div class="col-sm-1">LEN 1
+									<input name="dcrock_len12" type="text" class="form-control" id="dcrock_len12"
+										value="<?php echo $rcekD['dcrock_len12']; ?>" placeholder="4 Dry">
+								</div>
+								<div class="col-sm-1">WID 1
+									<input name="dcrock_wid12" type="text" class="form-control" id="dcrock_wid12"
+										value="<?php echo $rcekD['dcrock_wid12']; ?>" placeholder="4 Dry">
+								</div>
+								<div class="col-sm-1">LEN 2
+									<input name="dcrock_len22" type="text" class="form-control" id="dcrock_len22"
+										value="<?php echo $rcekD['dcrock_len22']; ?>" placeholder="3 Wet">
+								</div>
+								<div class="col-sm-1">WID 2
+									<input name="dcrock_wid22" type="text" class="form-control" id="dcrock_wid22"
+										value="<?php echo $rcekD['dcrock_wid22']; ?>" placeholder="3 Wet">
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="dcrock_note2" maxlength="50"><?php echo $rcekD['dcrock_note2']; ?></textarea>
+								</div>
+							</div>
+							<div class="form-group" id="marcr2" style="display:none;">
+								<label for="marcr2" class="col-sm-2 control-label">CROCKING (MARGINAL)</label>
+								<div class="col-sm-1">LEN 1
+									<input name="mcrock_len12" type="text" class="form-control" id="mcrock_len12"
+										value="<?php echo $rcekM['mcrock_len12']; ?>" placeholder="4 Dry">
+								</div>
+								<div class="col-sm-1">WID 1
+									<input name="mcrock_wid12" type="text" class="form-control" id="mcrock_wid12"
+										value="<?php echo $rcekM['mcrock_wid12']; ?>" placeholder="4 Dry">
+								</div>
+								<div class="col-sm-1">LEN 2
+									<input name="mcrock_len22" type="text" class="form-control" id="mcrock_len22"
+										value="<?php echo $rcekM['mcrock_len22']; ?>" placeholder="3 Wet">
+								</div>
+								<div class="col-sm-1">WID 2
+									<input name="mcrock_wid22" type="text" class="form-control" id="mcrock_wid22"
+										value="<?php echo $rcekM['mcrock_wid22']; ?>" placeholder="3 Wet">
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="mcrock_note2" maxlength="50"><?php echo $rcekM['mcrock_note2']; ?></textarea>
+								</div>
+							</div>
+							<div class="form-group" id="rancr2" style="display:none;">
+								<label for="rancr2" class="col-sm-2 control-label">CROCKING (RAN)</label>
+								<div class="col-sm-1">LEN 1
+									<input name="rcrock_len12" type="text" class="form-control" id="rcrock_len12"
+										value="<?php echo $rcekR['rcrock_len12']; ?>" placeholder="4 Dry" readonly>
+								</div>
+								<div class="col-sm-1">WID 1
+									<input name="rcrock_wid12" type="text" class="form-control" id="rcrock_wid12"
+										value="<?php echo $rcekR['rcrock_wid12']; ?>" placeholder="4 Dry" readonly>
+								</div>
+								<div class="col-sm-1">LEN 2
+									<input name="rcrock_len22" type="text" class="form-control" id="rcrock_len22"
+										value="<?php echo $rcekR['rcrock_len22']; ?>" placeholder="3 Wet" readonly>
+								</div>
+								<div class="col-sm-1">WID 2
+									<input name="rcrock_wid22" type="text" class="form-control" id="rcrock_wid22"
+										value="<?php echo $rcekR['rcrock_wid22']; ?>" placeholder="3 Wet" readonly>
+								</div>
+								<div class="col-sm-2">
+									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
+										name="rcrock_note2" maxlength="50"
+										readonly><?php echo $rcekR['rcrock_note2']; ?></textarea>
+								</div>
+							</div>
+						<!-- CROCKING ISO END-->
 						<!-- PHENOLIC YELLOWING BEGIN-->
 							<div class="form-group" id="c6" style="display:none;">
 								<label for="phenolic" class="col-sm-2 control-label">PHENOLIC YELLOWING</label>
@@ -15990,7 +16730,19 @@ if ($_POST['functional_save'] == "save") {
 
 // Save Colorfatness
 if ($_POST['colorfastness_save'] == "save") {
-	$fields = array('classification_shedding', 'syringe_shedding', 'observation_shedding', 'avg_gr_shedding', 'avg_per_shedding', 'nama_rub', 'status_rub', 'bleeding_root');
+	$fields = array(
+		'water_colorchange2','water_acetate2','water_cotton2','water_nylon2','water_poly2','water_acrylic2','water_wool2','water_staining2','stat_wtr2','water_note2',
+		'acid_colorchange2','acid_acetate2','acid_cotton2','acid_nylon2','acid_poly2','acid_acrylic2','acid_wool2','acid_staining2','stat_pac2','acid_note2',
+		'alkaline_colorchange2','alkaline_acetate2','alkaline_cotton2','alkaline_nylon2','alkaline_poly2','alkaline_acrylic2','alkaline_wool2','alkaline_staining2','alkaline_note2','stat_pal2',
+		'crock_len12','crock_wid12','crock_len22','crock_wid22','stat_cr2','crock_note2',
+		'classification_shedding', 'syringe_shedding', 'observation_shedding', 
+		'avg_gr_shedding', 'avg_per_shedding', 'nama_rub', 'status_rub', 'bleeding_root');
+	$fields_disp = array(
+		'diswtr2','dwater_colorchange2','dwater_acetate2','dwater_cotton2','dwater_nylon2','dwater_poly2','dwater_acrylic2','dwater_wool2','dwater_staining2','dwater_note2',
+		'dispac2','dacid_colorchange2','dacid_acetate2','dacid_cotton2','dacid_nylon2','dacid_poly2','dacid_acrylic2','dacid_wool2','dacid_staining2','dacid_note2',
+		'dispal2','dalkaline_colorchange2','dalkaline_acetate2','dalkaline_cotton2','dalkaline_nylon2','dalkaline_poly2','dalkaline_acrylic2','dalkaline_wool2','dalkaline_staining2','dalkaline_note2',
+		'discr2','dcrock_len12','dcrock_wid12','dcrock_len22','dcrock_wid22','dcrock_note2',
+		'dbleeding_root');
     foreach ($fields as $field) {
         $value = trim($_POST[$field]);
 
@@ -16049,7 +16801,7 @@ if ($_POST['colorfastness_save'] == "save") {
 		}
     }
 
-	$fields_disp = array('dbleeding_root');
+	
     foreach ($fields_disp as $fieldDisp) {
         $value_disp = trim($_POST[$fieldDisp]);
 
@@ -16064,7 +16816,9 @@ if ($_POST['colorfastness_save'] == "save") {
 			$paramsCheck = [$id_tq_test_2];
 			$result_disp = sqlsrv_query($con_db_qc_sqlsrv, $selectSql_disp, $paramsCheck);
 
-			
+			if ($result_disp === false) {
+				die(print_r(sqlsrv_errors(), true));
+			}
 
 			if (sqlsrv_has_rows($result_disp)) {
 
@@ -16110,7 +16864,8 @@ if ($_POST['colorfastness_save'] == "save") {
 
     }
 
-	$fields_nama = array('nama_washing','nama_water','nama_acid','nama_alkaline','nama_crocking','nama_phenolic','nama_cmo','nama_cm','nama_light',
+	$fields_nama = array('nama_washing','nama_water', 'nama_water2','nama_acid','nama_alkaline','nama_acid2','nama_alkaline2',
+	'nama_crocking', 'nama_crocking2','nama_phenolic','nama_cmo','nama_cm','nama_light',
 	'nama_saliva','nama_bleeding','nama_chlorin','nama_nchl','nama_transfer','nama_fibershe',);
 
     foreach ($fields_nama as $field_nama) {
@@ -22335,10 +23090,106 @@ if ($notes != "" and $cek == 0) {
 	});
 	</script>
 <!-- End -->
+<!-- SCRIPT Water ISO -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const fieldNames = [
+			'water_colorchange2',
+			'dwater_colorchange2',
+			'mwater_colorchange2',
+			'rwater_colorchange2',
+			'water_acetate2',
+			'dwater_acetate2',
+			'mwater_acetate2',
+			'rwater_acetate2',
+			'water_cotton2',
+			'dwater_cotton2',
+			'mwater_cotton2',
+			'rwater_cotton2',
+			'water_nylon2',
+			'dwater_nylon2',
+			'mwater_nylon2',
+			'rwater_nylon2',
+			'water_poly2',
+			'dwater_poly2',
+			'mwater_poly2',
+			'rwater_poly2',
+			'water_acrylic2',
+			'dwater_acrylic2',
+			'mwater_acrylic2',
+			'rwater_acrylic2',
+			'water_wool2',
+			'dwater_wool2',
+			'mwater_wool2',
+			'rwater_wool2',
+			'water_staining2',
+			'dwater_staining2',
+			'mwater_staining2',
+			'rwater_staining2',
+			'water_note2',
+			'dwater_note2',
+			'mwater_note2',
+			'rwater_note2',
+			'stat_wtr2',
+		];
+		const namaBowInput = document.querySelector('input[name="nama_water2"]');
+		const userIdInput = document.getElementById('user_water2');
+		const sessionUserId = '<?= $_SESSION['user_id']; ?>';
+		function fetchUserName(namaBow) {
+			fetch('pages/ajax/get_user.php?nama_bow=' + encodeURIComponent(namaBow))
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						userIdInput.value = data.nama_user;
+					} else {
+						userIdInput.value = 'User tidak ditemukan';
+					}
+				})
+				.catch(err => {
+					console.error('AJAX Error:', err);
+					userIdInput.value = 'Error';
+				});
+		}
+		function forceUpdateNamaBow() {
+			namaBowInput.value = sessionUserId;
+			namaBowInput.dispatchEvent(new Event('input'));
+			fetchUserName(sessionUserId);
+		}
+		fieldNames.forEach(name => {
+			const field = document.querySelector(`[name="${name}"]`);
+			if (field) {
+				field.addEventListener('input', forceUpdateNamaBow);
+				field.addEventListener('change', forceUpdateNamaBow);
+			}
+		});
+		namaBowInput.addEventListener('input', function () {
+			const namaBow = namaBowInput.value.trim();
+			if (namaBow !== '') {
+				fetchUserName(namaBow);
+			} else {
+				userIdInput.value = '';
+			}
+		});
+		const initialNamaBow = namaBowInput.value.trim();
+		if (initialNamaBow !== '') {
+			fetchUserName(initialNamaBow);
+		}
+	});
+	</script>
+<!-- End -->
 <!-- SCRIPT Acid -->
 	<script>
 	document.addEventListener('DOMContentLoaded', function () {
 		const fieldNames = [
+			'acid_colorchange',
+			'acid_acetate',
+			'acid_cotton',
+			'acid_nylon',
+			'acid_poly',
+			'acid_acrylic',
+			'acid_wool',
+			'acid_staining',
+			'acid_note',
 			'dacid_colorchange',
 			'dacid_acetate',
 			'dacid_cotton',
@@ -22370,6 +23221,93 @@ if ($notes != "" and $cek == 0) {
 		];
 		const namaBowInput = document.querySelector('input[name="nama_acid"]');
 		const userIdInput = document.getElementById('user_acid');
+		const sessionUserId = '<?= $_SESSION['user_id']; ?>';
+		function fetchUserName(namaBow) {
+			fetch('pages/ajax/get_user.php?nama_bow=' + encodeURIComponent(namaBow))
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						userIdInput.value = data.nama_user;
+					} else {
+						userIdInput.value = 'User tidak ditemukan';
+					}
+				})
+				.catch(err => {
+					console.error('AJAX Error:', err);
+					userIdInput.value = 'Error';
+				});
+		}
+		function forceUpdateNamaBow() {
+			namaBowInput.value = sessionUserId;
+			namaBowInput.dispatchEvent(new Event('input'));
+			fetchUserName(sessionUserId);
+		}
+		fieldNames.forEach(name => {
+			const field = document.querySelector(`[name="${name}"]`);
+			if (field) {
+				field.addEventListener('input', forceUpdateNamaBow);
+				field.addEventListener('change', forceUpdateNamaBow);
+			}
+		});
+		namaBowInput.addEventListener('input', function () {
+			const namaBow = namaBowInput.value.trim();
+			if (namaBow !== '') {
+				fetchUserName(namaBow);
+			} else {
+				userIdInput.value = '';
+			}
+		});
+		const initialNamaBow = namaBowInput.value.trim();
+		if (initialNamaBow !== '') {
+			fetchUserName(initialNamaBow);
+		}
+	});
+	</script>
+<!-- End -->
+<!-- SCRIPT Acid ISO -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const fieldNames = [
+			'dacid_colorchange2',
+			'dacid_acetate2',
+			'dacid_cotton2',
+			'dacid_nylon2',
+			'dacid_poly2',
+			'dacid_acrylic2',
+			'dacid_wool2',
+			'dacid_staining2',
+			'dacid_note2',
+			'acid_colorchange2',
+			'acid_acetate2',
+			'acid_cotton2',
+			'acid_nylon2',
+			'acid_poly2',
+			'acid_acrylic2',
+			'acid_wool2',
+			'acid_staining2',
+			'acid_note2',
+			'macid_colorchange2',
+			'macid_acetate2',
+			'macid_cotton2',
+			'macid_nylon2',
+			'macid_poly2',
+			'macid_acrylic2',
+			'macid_wool2',
+			'macid_staining2',
+			'macid_note2',
+			'racid_colorchange2',
+			'racid_acetate2',
+			'racid_cotton2',
+			'racid_nylon2',
+			'racid_poly2',
+			'racid_acrylic2',
+			'racid_wool2',
+			'racid_staining2',
+			'racid_note2',
+			'stat_pac2',
+		];
+		const namaBowInput = document.querySelector('input[name="nama_acid2"]');
+		const userIdInput = document.getElementById('user_acid2');
 		const sessionUserId = '<?= $_SESSION['user_id']; ?>';
 		function fetchUserName(namaBow) {
 			fetch('pages/ajax/get_user.php?nama_bow=' + encodeURIComponent(namaBow))
@@ -22500,6 +23438,93 @@ if ($notes != "" and $cek == 0) {
 	});
 	</script>
 <!-- End -->
+<!-- SCRIPT Alkaline ISO -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const fieldNames = [
+			'alkaline_colorchange2',
+			'dalkaline_colorchange2',
+			'ralkaline_colorchange2',
+			'malkaline_colorchange2',
+			'alkaline_acetate2',
+			'dalkaline_acetate2',
+			'ralkaline_acetate2',
+			'malkaline_acetate2',
+			'alkaline_cotton2',
+			'dalkaline_cotton2',
+			'ralkaline_cotton2',
+			'malkaline_cotton2',
+			'alkaline_nylon2',
+			'dalkaline_nylon2',
+			'ralkaline_nylon2',
+			'malkaline_nylon2',
+			'alkaline_poly2',
+			'dalkaline_poly2',
+			'ralkaline_poly2',
+			'malkaline_poly2',
+			'alkaline_acrylic2',
+			'dalkaline_acrylic2',
+			'ralkaline_acrylic2',
+			'malkaline_acrylic2',
+			'alkaline_wool2',
+			'dalkaline_wool2',
+			'ralkaline_wool2',
+			'malkaline_wool2',
+			'alkaline_staining2',
+			'dalkaline_staining2',
+			'ralkaline_staining2',
+			'malkaline_staining2',
+			'alkaline_note2',
+			'dalkaline_note2',
+			'ralkaline_note2',
+			'malkaline_note2',
+			'stat_pal2',
+		];
+		const namaBowInput = document.querySelector('input[name="nama_alkaline2"]');
+		const userIdInput = document.getElementById('user_alkaline2');
+		const sessionUserId = '<?= $_SESSION['user_id']; ?>';
+		function fetchUserName(namaBow) {
+			fetch('pages/ajax/get_user.php?nama_bow=' + encodeURIComponent(namaBow))
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						userIdInput.value = data.nama_user;
+					} else {
+						userIdInput.value = 'User tidak ditemukan';
+					}
+				})
+				.catch(err => {
+					console.error('AJAX Error:', err);
+					userIdInput.value = 'Error';
+				});
+		}
+		function forceUpdateNamaBow() {
+			namaBowInput.value = sessionUserId;
+			namaBowInput.dispatchEvent(new Event('input'));
+			fetchUserName(sessionUserId);
+		}
+		fieldNames.forEach(name => {
+			const field = document.querySelector(`[name="${name}"]`);
+			if (field) {
+				field.addEventListener('input', forceUpdateNamaBow);
+				field.addEventListener('change', forceUpdateNamaBow);
+			}
+		});
+		namaBowInput.addEventListener('input', function () {
+			const namaBow = namaBowInput.value.trim();
+			if (namaBow !== '') {
+				fetchUserName(namaBow);
+			} else {
+				userIdInput.value = '';
+			}
+		});
+		const initialNamaBow = namaBowInput.value.trim();
+		if (initialNamaBow !== '') {
+			fetchUserName(initialNamaBow);
+		}
+	});
+	</script>
+<!-- End -->
 <!-- SCRIPT Crocking -->
 	<script>
 	document.addEventListener('DOMContentLoaded', function () {
@@ -22528,6 +23553,77 @@ if ($notes != "" and $cek == 0) {
 		];
 		const namaBowInput = document.querySelector('input[name="nama_crocking"]');
 		const userIdInput = document.getElementById('user_crocking');
+		const sessionUserId = '<?= $_SESSION['user_id']; ?>';
+		function fetchUserName(namaBow) {
+			fetch('pages/ajax/get_user.php?nama_bow=' + encodeURIComponent(namaBow))
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						userIdInput.value = data.nama_user;
+					} else {
+						userIdInput.value = 'User tidak ditemukan';
+					}
+				})
+				.catch(err => {
+					console.error('AJAX Error:', err);
+					userIdInput.value = 'Error';
+				});
+		}
+		function forceUpdateNamaBow() {
+			namaBowInput.value = sessionUserId;
+			namaBowInput.dispatchEvent(new Event('input'));
+			fetchUserName(sessionUserId);
+		}
+		fieldNames.forEach(name => {
+			const field = document.querySelector(`[name="${name}"]`);
+			if (field) {
+				field.addEventListener('input', forceUpdateNamaBow);
+				field.addEventListener('change', forceUpdateNamaBow);
+			}
+		});
+		namaBowInput.addEventListener('input', function () {
+			const namaBow = namaBowInput.value.trim();
+			if (namaBow !== '') {
+				fetchUserName(namaBow);
+			} else {
+				userIdInput.value = '';
+			}
+		});
+		const initialNamaBow = namaBowInput.value.trim();
+		if (initialNamaBow !== '') {
+			fetchUserName(initialNamaBow);
+		}
+	});
+	</script>
+<!-- End -->
+<!-- SCRIPT Crocking ISO -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const fieldNames = [
+			'crock_len12',
+			'dcrock_len12',
+			'rcrock_len12',
+			'mcrock_len12',
+			'crock_wid12',
+			'dcrock_wid12',
+			'rcrock_wid12',
+			'mcrock_wid12',
+			'crock_len22',
+			'dcrock_len22',
+			'rcrock_len22',
+			'mcrock_len22',
+			'crock_wid22',
+			'dcrock_wid22',
+			'rcrock_wid22',
+			'mcrock_wid22',
+			'crock_note2',
+			'dcrock_note2',
+			'rcrock_note2',
+			'mcrock_note2',
+			'stat_cr2',
+		];
+		const namaBowInput = document.querySelector('input[name="nama_crocking2"]');
+		const userIdInput = document.getElementById('user_crocking2');
 		const sessionUserId = '<?= $_SESSION['user_id']; ?>';
 		function fetchUserName(namaBow) {
 			fetch('pages/ajax/get_user.php?nama_bow=' + encodeURIComponent(namaBow))

@@ -1554,6 +1554,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		'physical_save',
 		'prev_rpt',
 		'protocol',
+		'cstandar',
 		'restricted_substance',
 		'revisi',
 		'running_color',
@@ -1604,6 +1605,7 @@ $Color_Abbrev   = isset($_POST['color_abbrev']) ? $_POST['color_abbrev'] : '';
 $Fabric_Finish  = isset($_POST['fabric_finish']) ? $_POST['fabric_finish'] : '';
 $Extension      = isset($_POST['extension']) ? $_POST['extension'] : '';
 $Protocol      	= isset($_POST['protocol']) ? $_POST['protocol'] : '';
+$Cstandar      	= isset($_POST['cstandar']) ? $_POST['cstandar'] : '';
 $Enduse      	= isset($_POST['enduse']) ? $_POST['enduse'] : '';
 $Jns_Kain       = isset($_POST['jns_kain']) ? $_POST['jns_kain'] : '';
 $ReportLulu     = isset($_POST['no_rptlulu']) ? $_POST['no_rptlulu'] : '';
@@ -2103,6 +2105,19 @@ $cekM = $rowCntM['total'];
                 </div>				   
 		    </div>
 			<div class="form-group">
+                <label for="protocol" class="col-sm-3 control-label">Color Standar</label>
+                <div class="col-sm-6">
+                    <div class="input-group">  
+                        <select name="cstandar" id="cstandar" class="form-control select2" required>
+                            <option selected="selected" value="">Pilih</option>
+                            <option value="LIGHT" <?php if($rcek['cstandar']=="LIGHT" OR $Cstandar=="LIGHT"){echo "SELECTED";}?>>LIGHT</option>
+                            <option value="MEDIUM" <?php if($rcek['cstandar']=="MEDIUM" OR $Cstandar=="MEDIUM"){echo "SELECTED";}?>>MEDIUM</option>
+                            <option value="DARK" <?php if($rcek['cstandar']=="DARK" OR $Cstandar=="DARK"){echo "SELECTED";}?>>DARK</option>
+                        </select>
+                    </div>
+                </div>				   
+		    </div>
+			<div class="form-group">
                 <label for="enduse" class="col-sm-3 control-label">End Use</label>
                 <div class="col-sm-6">
                     <div class="input-group">  
@@ -2320,6 +2335,7 @@ $cekM = $rowCntM['total'];
 		<?php } ?>
 		<?php if($rcekNew['status']!=""){ ?>
 			<a href="pages/cetak/cetak_report_lululemon.php?idkk=<?php echo $rcek['id'];?>&noitem=<?php echo $rcek['no_item'];?>&nohanger=<?php echo $rcek['no_hanger'];?>" target="_blank" class="btn btn-primary"><i class="fa fa-print"></i> Print Report Lululemon</a>
+			<a href="pages/cetak/cetak_report_lululemon2.php?idkk=<?php echo $rcek['id'];?>&noitem=<?php echo $rcek['no_item'];?>&nohanger=<?php echo $rcek['no_hanger'];?>" target="_blank" class="btn btn-warning"><i class="fa fa-print"></i> Print Report Lululemon NEW</a>
 		<?php } ?>
    	</div>
     <!-- /.box-footer -->
@@ -11058,6 +11074,7 @@ if($_POST['save1']=="save"){
 	date_in=TRY_CONVERT(date, NULLIF('$date_in','')),
 	fabric_finish='$fabric_fin',
 	protocol='$Protocol',
+	cstandar='$Cstandar',
 	extension='$Extension',
 	enduse='$Enduse',
     cover='$file_cover',
