@@ -105,7 +105,9 @@ $nomorbaru = $kode.$nomor;
 			$_POST['t_jawab2'] ?? null,
 		];
 
-		$qry1 = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
+		print_r($params);
+		die();
+		// $qry1 = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 
 		if ($qry1 === false) {
 			echo "<pre>";
