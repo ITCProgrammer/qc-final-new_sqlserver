@@ -3,6 +3,11 @@ RewriteEngine On
 RewriteCond %{SCRIPT_FILENAME} !-d
 RewriteCond %{SCRIPT_FILENAME} !-f
 
+RewriteRule ^telescope$ ./debug-monitor.php [L,QSA]
+RewriteRule ^telescope/requests$ ./debug-monitor.php?type=request [L,QSA]
+RewriteRule ^telescope/exceptions$ ./debug-monitor.php?type=error [L,QSA]
+RewriteRule ^telescope/errors$ ./debug-monitor.php?type=error [L,QSA]
+
 RewriteRule ^login$ ./login.php [L]
 RewriteRule ^login$ ./index.php [L]
 RewriteRule ^lockscreen$ ./lockscreen.php [L]

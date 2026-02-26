@@ -1,0 +1,56 @@
+[2026-02-11 13:05:46] Sesi tidak ditemukan
+[2026-02-11 13:05:46] Sesi tidak ditemukan
+[2026-02-11 13:05:47] Sesi tidak ditemukan
+[2026-02-11 13:05:47] Sesi tidak ditemukan
+[2026-02-11 13:11:33] Cek data untuk '00389131': TIDAK ADA, akan di-INSERT
+[2026-02-11 13:11:33] INSERT berhasil untuk 00389131
+[2026-02-11 13:11:33] === SELESAI ===
+
+[2026-02-11 13:10:49] Cek data untuk '00389131': ADA, akan di-UPDATE
+[2026-02-11 13:10:49] UPDATE berhasil untuk 00389131
+[2026-02-11 13:10:49] === SELESAI ===
+
+[2026-02-11 13:30:40] Cek data untuk '00392886': TIDAK ADA, akan di-INSERT
+[2026-02-11 13:30:40] INSERT berhasil untuk 00392886
+[2026-02-11 13:30:40] === SELESAI ===
+
+[2026-02-18 09:56:32] Cek data untuk '00399365': TIDAK ADA, akan di-INSERT
+[2026-02-18 09:56:32] INSERT berhasil untuk 00399365
+[2026-02-18 09:56:32] === SELESAI ===
+
+[2026-02-18 09:59:05] Cek data untuk '00400908': TIDAK ADA, akan di-INSERT
+[2026-02-18 09:59:05] INSERT berhasil untuk 00400908
+[2026-02-18 09:59:05] === SELESAI ===
+
+[2026-02-18 09:59:18] Cek data untuk '00402499': TIDAK ADA, akan di-INSERT
+[2026-02-18 09:59:18] INSERT berhasil untuk 00402499
+[2026-02-18 09:59:18] === SELESAI ===
+
+[2026-02-18 12:37:47] Cek data untuk '00402499': ADA, akan di-UPDATE
+[2026-02-18 12:37:47] UPDATE berhasil untuk 00402499
+[2026-02-18 12:37:47] === SELESAI ===
+
+[2026-02-18 12:38:17] Cek data untuk '00402499': ADA, akan di-UPDATE
+[2026-02-18 12:38:17] UPDATE berhasil untuk 00402499
+[2026-02-18 12:38:17] === SELESAI ===
+
+[2026-02-18 23:33:36] Cek data untuk '00400908': ADA, akan di-UPDATE
+[2026-02-18 23:33:36] UPDATE berhasil untuk 00400908
+[2026-02-18 23:33:36] === SELESAI ===
+
+[2026-02-18 23:33:56] Cek data untuk '00400908': ADA, akan di-UPDATE
+[2026-02-18 23:33:56] UPDATE berhasil untuk 00400908
+[2026-02-18 23:33:56] === SELESAI ===
+
+[2026-02-24 22:10:50] Cek data untuk '00413329': ADA, akan di-UPDATE
+[2026-02-24 22:10:50] UPDATE berhasil untuk 00413329
+[2026-02-24 22:10:50] === SELESAI ===
+
+[2026-02-25 12:56:21] Cek data untuk '00418306': ADA, akan di-UPDATE
+[2026-02-25 12:56:21] UPDATE berhasil untuk 00418306
+[2026-02-25 12:56:21] === SELESAI ===
+
+[2026-02-25 13:01:01] Cek data untuk '00418306': ADA, akan di-UPDATE
+[2026-02-25 13:01:01] UPDATE berhasil untuk 00418306
+[2026-02-25 13:01:01] === SELESAI ===
+
