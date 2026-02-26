@@ -114,4 +114,10 @@ if (mysqli_connect_errno()) {
 printf("Connect failed: %s\n", mysqli_connect_error());
 exit();
 } 
+
+// Mini Telescope for native PHP: request/error monitor bootstrap.
+$qcfDebugBootstrap = __DIR__ . DIRECTORY_SEPARATOR . 'observability' . DIRECTORY_SEPARATOR . 'debug_bootstrap.php';
+if (is_file($qcfDebugBootstrap)) {
+    include_once $qcfDebugBootstrap;
+}
 ?>

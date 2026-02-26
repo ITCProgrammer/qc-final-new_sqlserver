@@ -2,3 +2,4 @@
 dist/
 vendor_bkp/
 bower_components/
+temp/debug-monitor.log
