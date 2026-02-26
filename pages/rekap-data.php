@@ -405,7 +405,7 @@ $Prodorder = isset($_POST['prodorder']) ? $_POST['prodorder'] : '';
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title></title>
-
+<link href="bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 <body>
 <div class="box box-info">
@@ -576,6 +576,7 @@ order by a.id desc";
         <div class="pull-right">
             <a href="pages/cetak/rekap-data.php?order=<?php echo $Order; ?>&po=<?php echo $PO; ?>&item=<?php echo $Item; ?>&warna=<?php echo $Warna; ?>&buyer=<?php echo $Langganan; ?>" target="_blank"><span class="btn btn-primary"><i class="fa fa-file-pdf-o"></i> Cetak</span></a>
             <a href="pages/cetak/cetak_lapkkdelay.php?awal=<?php echo $_POST['awal']; ?>&akhir=<?php echo $_POST['akhir']; ?>" class="btn btn-primary <?php if($_POST['awal']=="") { echo "disabled"; }?>" target="_blank">Cetak Lap KK Delay</a> 
+            <a href="pages/cetak/report_grouping_form.php?awal=<?php echo $_POST['awal']; ?>&akhir=<?php echo $_POST['akhir']; ?>" class="btn btn-primary <?php if($_POST['awal']=="") { echo "disabled"; }?>" target="_blank">Cetak Groping Form CQA</a> 
         </div>
 		    
       </div>
@@ -591,6 +592,9 @@ order by a.id desc";
       <th width="78" rowspan="2"><div align="center">Buyer</div></th>
       <th width="78" rowspan="2"><div align="center">Order</div></th>
       <th width="78" rowspan="2"><div align="center">PO</div></th>
+      <th width="70" rowspan="2"><div align="center">List Demand Kanan</div></th>
+      <th width="70" rowspan="2"><div align="center">Group</div></th>
+      <th width="70" rowspan="2"><div align="center">Hue</div></th>
       <th width="78" rowspan="2"><div align="center">Qty Order</div></th>
       <th width="88" rowspan="2"><div align="center">Jml Bruto</div></th>
       <th width="111" rowspan="2"><div align="center">Hanger</div></th>
@@ -710,7 +714,12 @@ if ($Delay == "1") {
      <td>
      <div class="btn-group">
      <a href="#" id="<?php echo $r['id'] ?>" class="btn btn-info btn-sm data_edit <?php if($_SESSION['akses']=='biasa'){ echo "disabled"; } ?>"><i class="fa fa-edit"></i> </a>
-     <a href="#" class="btn btn-danger btn-sm <?php if($_SESSION['akses']=='biasa'){ echo "disabled"; } ?>" onclick="confirm_delete('./HapusData-<?php echo $r['id'] ?>');"><i class="fa fa-trash"></i> </a></div>
+     <a href="#" class="btn btn-danger btn-sm <?php if($_SESSION['akses']=='biasa'){ echo "disabled"; } ?>" onclick="confirm_delete('./HapusData-<?php echo $r['id'] ?>');"><i class="fa fa-trash"></i> </a>
+     <button type="button"
+            class="btn btn-success btn-sm data_edit_report"
+            id="<?php echo $r['id'] ?>">
+        <i class="fa fa-edit"></i> Edit2
+    </button></div>
      </td>
      <td align="center"><?php echo $r['nokk'];?></br>
       <?php if($tgl_warna>$tgl_pack){ ?>
@@ -726,6 +735,9 @@ if ($Delay == "1") {
      <td><?php echo $r['pelanggan'];?></td>
      <td><?php echo $r['no_order'];?></td>
      <td><?php echo $r['no_po'];?></td>
+     <td><?php echo $r['list_kanan'];?></td>
+     <td><?php echo $r['group'];?></td>
+     <td><?php echo $r['hue'];?></td>
      <td align="right"><?php //echo $r['berat_order']."x".$r['panjang_order']." ".$r['satuan_order'];
 	 /*
 	 if (array_key_exists($r['nodemand'],$qtyoutput)) {
@@ -868,16 +880,216 @@ if ($Delay == "1") {
   </div>
   <!-- Modal Popup untuk Edit-->
   <div id="DataEdit" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-
-  </div>
 </div>
 </body>
+ <!-- Modal Edit Grouping CQA -->
+   <div class="modal fade" id="modalEditDataQCF" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="form_edit_report">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Edit Report Configuration</h4>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="edit_id">
+                        
+                        <div class="form-group">
+                            <label>Group</label>
+                            <input type="text" name="group_report" id="edit_group" class="form-control" placeholder="Contoh: A">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Hue</label>
+                            <input type="text" name="hue_report" id="edit_hue" class="form-control" placeholder="Contoh: RED">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Demand Kanan (Ketik & Tekan Enter)</label>
+                            <input type="text" id="search_demand" class="form-control" placeholder="Cari No. Demand...">
+                            <div id="demand_tags_container" style="margin-top: 10px;">
+                                </div>
+                            <input type="hidden" name="demand_kanan" id="final_demand_input">
+                        </div>
+
+                        <ul id="search_results_list" class="list-group" style="position: absolute; z-index: 9999; width: 90%; display: none;"></ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+  </div>
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
 <script type="text/javascript">
-    function confirm_delete(delete_url)
-    {
-      $('#modal_delete').modal('show', {backdrop: 'static'});
-      document.getElementById('delete_link').setAttribute('href' , delete_url);
+function confirm_delete(delete_url)
+{
+    $('#modal_delete').modal('show', {backdrop: 'static'});
+    document.getElementById('delete_link').setAttribute('href' , delete_url);
+}
+
+// Global variable untuk tracking selected demands
+var selectedDemands = [];
+
+$(document).ready(function() {
+    console.log('Page ready. Initializing event handlers...');
+
+    // Fungsi untuk merender tag ke layar
+    function renderTags() {
+        var html = '';
+        selectedDemands.forEach(function(val, index) {
+            html += '<span class="badge bg-blue" style="margin-right:5px; padding:8px;">' + 
+                    val + ' <i class="fa fa-times remove-tag" data-index="'+index+'" style="cursor:pointer; margin-left:5px;"></i></span>';
+        });
+        $('#demand_tags_container').html(html);
+        $('#final_demand_input').val(selectedDemands.join(',')); // Simpan ke hidden input
+        console.log('Tags rendered, current demands:', selectedDemands);
     }
 
+    // Input pencarian manual untuk demand
+    $(document).on('keyup', '#search_demand', function() {
+        var query = $(this).val();
+        console.log('Searching for:', query);
+        
+        if (query.length >= 2) {
+            $.ajax({
+                url: "pages/ajax/ajax_get_demand_qcf_list.php",
+                method: "GET",
+                data: { q: query },
+                dataType: "json",
+                success: function(data) {
+                    console.log('Search results:', data);
+                    var listHtml = '';
+                    data.forEach(function(item) {
+                        listHtml += '<a href="#" class="list-group-item add-demand-item" data-val="'+item.id+'">'+item.text+'</a>';
+                    });
+                    $('#search_results_list').html(listHtml).show();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Search error:', error);
+                }
+            });
+        } else {
+            $('#search_results_list').hide();
+        }
+    });
+
+    // Klik hasil pencarian untuk menambah tag
+    $(document).on('click', '.add-demand-item', function(e) {
+        e.preventDefault();
+        var val = $(this).data('val');
+        console.log('Adding demand:', val);
+        
+        if (!selectedDemands.includes(val)) {
+            selectedDemands.push(val);
+            renderTags();
+        }
+        $('#search_results_list').hide();
+        $('#search_demand').val('');
+    });
+
+    // Hapus tag
+    $(document).on('click', '.remove-tag', function() {
+        var index = $(this).data('index');
+        console.log('Removing demand at index:', index);
+        selectedDemands.splice(index, 1);
+        renderTags();
+    });
+
+    // Handle klik tombol Edit2
+    $(document).on('click', '.data_edit_report', function(e) {
+        e.preventDefault();
+        var id = $(this).attr('id');
+        console.log('Edit button clicked, ID:', id);
+        
+        // Reset demands untuk edit baru
+        selectedDemands = [];
+        
+        $.ajax({
+            url: "pages/ajax/ajax_get_data_qc.php",
+            method: "POST",
+            data: {id: id},
+            dataType: "json",
+            success: function(data) {
+                console.log('Data received from server:', data);
+                
+                if (data && data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                // Isi input text
+                $('#edit_id').val(data.id);
+                $('#edit_group').val(data.group_report || '');
+                $('#edit_hue').val(data.hue_report || '');
+                
+                // Load existing demands
+                if(data.demand_kanan && data.demand_kanan.trim() !== '') {
+                    selectedDemands = data.demand_kanan.split(',').map(function(v) {
+                        return v.trim();
+                    }).filter(function(v) {
+                        return v !== '';
+                    });
+                    console.log('Loaded existing demands:', selectedDemands);
+                }
+                
+                renderTags();
+                $('#modalEditDataQCF').modal('show');
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading data:', status, error);
+                console.error('Response:', xhr.responseText);
+                alert("Gagal mengambil data: " + error + "\n\nResponse: " + xhr.responseText);
+            }
+        });
+    });
+
+    // Handle Simpan Data
+    $(document).on('submit', '#form_edit_report', function(e) {
+        e.preventDefault();
+        
+        var id = $('#edit_id').val();
+        if(!id) {
+            alert('ID tidak valid!');
+            return;
+        }
+        
+        console.log('Form submit - Selected demands:', selectedDemands);
+        console.log('Form data:', $(this).serialize());
+        
+        $.ajax({
+            url: "pages/ajax/update_report_qc.php",
+            method: "POST",
+            data: $(this).serialize(),
+            dataType: "json",
+            success: function(response) {
+                console.log('Response from server:', response);
+                
+                if(response && response.status === 'success') {
+                    alert(response.message + " (Updated: " + response.rows_affected + " row)");
+                    setTimeout(function() {
+                        location.reload();
+                    }, 500);
+                } else if(response && response.status === 'error') {
+                    alert("Error: " + response.message);
+                } else {
+                    alert("Response tidak valid: " + JSON.stringify(response));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error);
+                console.error('Response Text:', xhr.responseText);
+                alert("Gagal menyimpan data. Error: " + error + "\n\nResponse: " + xhr.responseText);
+            }
+        });
+    });
+    
+    console.log('All event handlers initialized');
+});
 </script>
 </html>
