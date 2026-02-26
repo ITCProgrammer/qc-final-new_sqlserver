@@ -63,6 +63,31 @@
 include "koneksi.php";
 // ini_set("error_reporting", 1);
 
+if (!function_exists('qcf_date_input_value')) {
+    function qcf_date_input_value($value, $format = 'Y-m-d')
+    {
+        if ($value instanceof DateTimeInterface) {
+            return $value->format($format);
+        }
+
+        if ($value === null) {
+            return '';
+        }
+
+        $text = trim((string) $value);
+        if ($text === '') {
+            return '';
+        }
+
+        $ts = strtotime($text);
+        if ($ts !== false) {
+            return date($format, $ts);
+        }
+
+        return $text;
+    }
+}
+
 
 if ($_POST['simpan'] == "simpan") {
     $errors = [];
@@ -963,9 +988,9 @@ $rowtoBS = db2_fetch_assoc($stmt2BS);
                             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
                             <input name="awal" type="text" class="form-control pull-right" id="datepicker"
                                 placeholder="0000-00-00" value="<?php if ($crow > 0) {
-                                    echo $row['tgl_pengiriman'];
+                                    echo qcf_date_input_value($row['tgl_pengiriman']);
                                 } else if ($_GET['nodemand'] != "" and $rowdb20['DELIVERYDATE'] != "") {
-                                    echo date('Y-m-d', strtotime($rowdb20['DELIVERYDATE']));
+                                    echo qcf_date_input_value($rowdb20['DELIVERYDATE']);
                                 } ?>" required />
                         </div>
                     </div>
@@ -977,7 +1002,7 @@ $rowtoBS = db2_fetch_assoc($stmt2BS);
                             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
                             <input name="tgl" type="text" class="form-control pull-right" id="datepicker1"
                                 placeholder="0000-00-00" value="<?php if ($crow > 0) {
-                                    echo $row['tgl_update'];
+                                    echo qcf_date_input_value($row['tgl_update']);
                                 } else {
                                     echo date('Y-m-d');
                                 } ?>" required />
@@ -1035,9 +1060,9 @@ $rowtoBS = db2_fetch_assoc($stmt2BS);
                             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
                             <input name="tgl_mulai" type="text" class="form-control pull-right" id="datepicker2"
                                 placeholder="0000-00-00" value="<?php if ($crow > 0) {
-                                    echo $row['tgl_mulai'];
+                                    echo qcf_date_input_value($row['tgl_mulai']);
                                 } else {
-                                    echo $rowto['TGL_AWAL_INSPEK'];
+                                    echo qcf_date_input_value($rowto['TGL_AWAL_INSPEK']);
                                 } ?>" required />
                         </div>
                     </div>
@@ -1073,9 +1098,9 @@ $rowtoBS = db2_fetch_assoc($stmt2BS);
                             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
                             <input name="tgl_selesai" type="text" class="form-control pull-right" id="datepicker3"
                                 placeholder="0000-00-00" value="<?php if ($crow > 0) {
-                                    echo $row['tgl_selesai'];
+                                    echo qcf_date_input_value($row['tgl_selesai']);
                                 } else {
-                                    echo $rowto['TGL_AKHIR_INSPEK'];
+                                    echo qcf_date_input_value($rowto['TGL_AKHIR_INSPEK']);
                                 } ?>" required />
                         </div>
                     </div>
