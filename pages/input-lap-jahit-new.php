@@ -46,6 +46,32 @@
 <?php
 include"koneksi.php";
 ini_set("error_reporting", 1);
+
+if (!function_exists('qcf_date_input_value')) {
+	function qcf_date_input_value($value, $format = 'Y-m-d')
+	{
+		if ($value instanceof DateTimeInterface) {
+			return $value->format($format);
+		}
+
+		if ($value === null) {
+			return '';
+		}
+
+		$text = trim((string) $value);
+		if ($text === '') {
+			return '';
+		}
+
+		$ts = strtotime($text);
+		if ($ts !== false) {
+			return date($format, $ts);
+		}
+
+		return $text;
+	}
+}
+
 if($_POST['simpan']=="simpan")
 {
     $ceksql=sqlsrv_query($con_db_qc_sqlsrv,"SELECT TOP 1 * FROM db_qc.tbl_jahit WHERE nodemand='$_GET[nodemand]' and shift='$_POST[shift]' AND TRY_CAST(tgl_jahit AS DATE) = CAST(GETDATE() AS DATE)");
@@ -284,7 +310,7 @@ $vallebar=substr($lebar,0,$posl);
                     <div class="col-sm-4">					  
                         <div class="input-group date">
                             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-                                <input name="tgl_jahit" type="text" class="form-control pull-right" id="datepicker1" placeholder="0000-00-00" value="<?php if($crow>0){echo $row['tgl_jahit'];}?>" required/>
+                                <input name="tgl_jahit" type="text" class="form-control pull-right" id="datepicker1" placeholder="0000-00-00" value="<?php if($crow>0){echo qcf_date_input_value($row['tgl_jahit']);}?>" required/>
                         </div>
                     </div>
             </div>
@@ -303,7 +329,7 @@ $vallebar=substr($lebar,0,$posl);
             <div class="form-group">
                 <label for="tgl_fin" class="col-sm-3 control-label">Tgl Fin</label>
                 <div class="col-sm-5">
-                    <input name="tgl_fin" class="form-control" type="text" id="tgl_fin" value="<?php if($crow>0){echo $row['tgl_fin'];}?>" placeholder="Tgl Fin" required>
+                    <input name="tgl_fin" class="form-control" type="text" id="tgl_fin" value="<?php if($crow>0){echo qcf_date_input_value($row['tgl_fin']);}?>" placeholder="Tgl Fin" required>
                 </div>
             </div>
             <!--<div class="form-group">		  	
@@ -311,7 +337,7 @@ $vallebar=substr($lebar,0,$posl);
                     <div class="col-sm-4">					  
                         <div class="input-group date">
                             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
-                                <input name="tgl_fin" type="text" class="form-control pull-right" id="datepicker" placeholder="0000-00-00" value="<?php if($crow>0){echo $row['tgl_fin'];}?>" required/>
+                                <input name="tgl_fin" type="text" class="form-control pull-right" id="datepicker" placeholder="0000-00-00" value="<?php if($crow>0){echo qcf_date_input_value($row['tgl_fin']);}?>" required/>
                         </div>
                     </div>
             </div>-->
