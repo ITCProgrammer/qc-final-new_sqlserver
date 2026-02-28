@@ -326,12 +326,12 @@ $rd = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
                     <?php echo number_format((float)$rcekR['rf_weight'] / 33.906, 2); ?> oz/yd<sup>2</sup>
                   <?php } ?>
                   <!-- <?php if ($rcek1['stat_fwss2'] == "DISPOSISI") {
-                    echo $rcekD['df_weight']; ?> gr/m<sup>2</sup> = <?php echo round($rcekD['df_weight'] / 33.906, 2); ?> oz/yd<sup>2</sup> <?php } ?> -->
+                    echo $rcekD['df_weight']; ?> gr/m<sup>2</sup> = <?php echo round((float)$rcekD['df_weight'] / 33.906, 2); ?> oz/yd<sup>2</sup> <?php } ?> -->
                   <?php if ($rcek1['stat_fwss2'] != "DISPOSISI" or $rcek1['stat_fwss2'] != "RANDOM") {
                     echo $rcek1['f_weight']; ?> gr/m<sup>2</sup> =
                     <?php echo number_format((float)$rcek1['f_weight'] / 33.906, 2); ?> oz/yd<sup>2</sup>
                   <?php } ?>
-                  <!--<?php echo $rcek1['f_weight']; ?> gr/m<sup>2</sup> = <?php echo round($rcek1['f_weight'] / 33.906, 2); ?> oz/yd<sup>2</sup>-->
+                  <!--<?php echo $rcek1['f_weight']; ?> gr/m<sup>2</sup> = <?php echo round((float)$rcek1['f_weight'] / 33.906, 2); ?> oz/yd<sup>2</sup>-->
                 </td>
               </tr>
             <?php } ?>
