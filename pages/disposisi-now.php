@@ -3,6 +3,16 @@ ini_set("error_reporting", 1);
 session_start();
 include"koneksi.php";
 
+if (!function_exists('qcf_date_display')) {
+  function qcf_date_display($value, $format = 'Y-m-d')
+  {
+    if ($value instanceof DateTimeInterface) {
+      return $value->format($format);
+    }
+    return (string)$value;
+  }
+}
+
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -151,7 +161,8 @@ $Warna	= isset($_POST['warna']) ? $_POST['warna'] : '';
           </thead>
           <tbody>
           <?php
-            if($Awal!=""){ $Where =" AND DATE_FORMAT( a.tgl_buat, '%Y-%m-%d' ) BETWEEN '$Awal' AND '$Akhir' "; }
+            $Where = "";
+            if($Awal!=""){ $Where =" AND CONVERT(date, a.tgl_buat) BETWEEN '$Awal' AND '$Akhir' "; }
             $no=1;
             if($Awal!= "" or $Demand!="" or $Lot!="" or $Order!="" or $Langganan!="" or $PO!="" or $ArticleGrup!="" or $ArticleCode!="" or $Warna!=""){
               $sql="SELECT a.*, b.masalah as masalah_aftersales, b.ket as ket_aftersales FROM db_qc.tbl_disposisi_now a 
@@ -164,10 +175,10 @@ $Warna	= isset($_POST['warna']) ? $_POST['warna'] : '';
                     WHERE a.no_demand LIKE '$Demand' AND a.prod_order LIKE '$Lot' AND a.no_order LIKE '$Order' AND a.langganan LIKE '$Langganan' AND a.no_po LIKE '$PO' AND a.article_group LIKE '$ArticleGrup' AND a.article_code LIKE '$ArticleCode' AND a.warna LIKE '$Warna' $Where
                     ORDER BY a.no_demand ASC";
             }
-                $sqlData1=mysqli_query($con,$sql);
-                while($row1=mysqli_fetch_array($sqlData1)){
-					   $noorder=str_replace("/","&",$row1['no_order']);
-              ?>
+                $sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, $sql);
+                while($sqlData1 && ($row1 = sqlsrv_fetch_array($sqlData1, SQLSRV_FETCH_ASSOC))){
+						   $noorder=str_replace("/","&",$row1['no_order']);
+	              ?>
           <tr bgcolor="<?php echo $bgcolor; ?>">
             <td align="center"><div class="btn-group">
 
@@ -194,7 +205,7 @@ $Warna	= isset($_POST['warna']) ? $_POST['warna'] : '';
             <td align="center"><?php echo $row1['warna'];?></td>
             <td align="center"><?php echo $row1['qty_kg'];?></td>
             <td align="center"><?php echo $row1['qty_yard'];?></td>
-            <td align="center"><?php echo $row1['tgl_buat'];?></td>
+            <td align="center"><?php echo qcf_date_display($row1['tgl_buat']);?></td>
             <td align="center"><?php echo $row1['masalah'];?></td>
             <td align="center"><?php echo $row1['keputusan'];?></td>
             <td align="center"><?php echo $row1['pejabat1'];?></td>
