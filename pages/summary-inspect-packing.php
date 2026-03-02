@@ -11,6 +11,57 @@ $Customer = isset($_POST['customer']) ? $_POST['customer'] : '';
 $Buyer = isset($_POST['buyer']) ? $_POST['buyer'] : '';
 $PO = isset($_POST['po']) ? $_POST['po'] : '';
 $Item = isset($_POST['item']) ? $_POST['item'] : '';
+
+if (!function_exists('qcf_db2_quote')) {
+  function qcf_db2_quote($value)
+  {
+    return str_replace("'", "''", (string) $value);
+  }
+}
+
+if (!function_exists('qcf_decimal_integer_part')) {
+  function qcf_decimal_integer_part($value)
+  {
+    if ($value === null || $value === '') {
+      return '0';
+    }
+    $parts = explode('.', (string) $value, 2);
+    return $parts[0];
+  }
+}
+
+if (!function_exists('qcf_num_or_zero')) {
+  function qcf_num_or_zero($value)
+  {
+    if ($value === null || $value === '') {
+      return 0;
+    }
+    return $value;
+  }
+}
+
+if (!function_exists('qcf_map_get')) {
+  function qcf_map_get($map, $key, $field, $default = '')
+  {
+    if (isset($map[$key]) && isset($map[$key][$field])) {
+      return $map[$key][$field];
+    }
+    return $default;
+  }
+}
+
+if (!function_exists('qcf_db2_in_list')) {
+  function qcf_db2_in_list($values)
+  {
+    $quoted = array();
+    foreach ($values as $value) {
+      $quoted[] = "'" . qcf_db2_quote($value) . "'";
+    }
+    return implode(',', $quoted);
+  }
+}
+
+$db2Conn = function_exists('qcf_get_db2_conn') ? qcf_get_db2_conn() : $conn1;
 ?>
 <!DOCTYPE html
   PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -336,30 +387,41 @@ $Item = isset($_POST['item']) ? $_POST['item'] : '';
             <tbody>
               <?php
               $no = 1;
-              if ($Awal != "") {
-                $Where = " AND VARCHAR_FORMAT (B.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir' ";
-              }
-              if ($PO != "") {
-                $ponumber = " AND (PO_HEADER = '$PO' OR PO_LINE= '$PO') ";
-              } else {
-                $ponumber = " ";
-              }
-              if ($Customer != "") {
-                $cus = " AND D.LEGALNAME1 = '$Customer' ";
-              } else {
-                $cus = " ";
-              }
-              if ($Buyer != "") {
-                $buy = " AND D.LONGDESCRIPTION = '$Buyer' ";
-              } else {
-                $buy = " ";
-              }
-              if ($Item != "") {
-                $noitem = " AND D.SHORTDESCRIPTION = '$Item' ";
-              } else {
-                $noitem = " ";
-              }
-              if ($Awal != "" or $Customer != "" or $Buyer != "" or $PO != "") {
+              $summaryRows = array();
+              $rollMap = array();
+              $gradeMap = array();
+              $defectMap = array();
+              $requestAttrMap = array();
+              $inspectAttrMap = array();
+              $lotMap = array();
+
+              $safeAwal = qcf_db2_quote($Awal);
+              $safeAkhir = qcf_db2_quote($Akhir);
+              $safeCustomer = qcf_db2_quote($Customer);
+              $safeBuyer = qcf_db2_quote($Buyer);
+              $safePO = qcf_db2_quote($PO);
+              $safeItem = qcf_db2_quote($Item);
+
+              $filterApplied = ($Awal != '' || $Customer != '' || $Buyer != '' || $PO != '' || $Item != '');
+              if ($filterApplied) {
+                $whereParts = array("LENGTH(TRIM(B.ELEMENTCODE))=13");
+                if ($Awal != '' && $Akhir != '') {
+                  $whereParts[] = "VARCHAR_FORMAT(B.INSPECTIONSTARTDATETIME,'YYYY-MM-DD') BETWEEN '$safeAwal' AND '$safeAkhir'";
+                }
+                if ($PO != '') {
+                  $whereParts[] = "(D.PO_HEADER = '$safePO' OR D.PO_LINE = '$safePO')";
+                }
+                if ($Customer != '') {
+                  $whereParts[] = "D.LEGALNAME1 = '$safeCustomer'";
+                }
+                if ($Buyer != '') {
+                  $whereParts[] = "D.LONGDESCRIPTION = '$safeBuyer'";
+                }
+                if ($Item != '') {
+                  $whereParts[] = "D.SHORTDESCRIPTION = '$safeItem'";
+                }
+                $whereSql = implode(' AND ', $whereParts);
+
                 $sql = "SELECT 
                   A.CODE,
                   LEFT(B.INSPECTIONSTARTDATETIME,10) AS TGL_INSPEK,
@@ -381,10 +443,9 @@ $Item = isset($_POST['item']) ? $_POST['item'] : '';
                   TRIM(E.LONGDESCRIPTION) AS WARNA
                 FROM PRODUCTIONDEMAND A 
                 LEFT JOIN ELEMENTSINSPECTION B
-                ON A.CODE = B.DEMANDCODE 
-                LEFT JOIN 
-                ELEMENTSINSPECTIONEVENT C 
-                ON B.ELEMENTCODE = C.ELEMENTSINSPECTIONELEMENTCODE 
+                  ON A.CODE = B.DEMANDCODE 
+                LEFT JOIN ELEMENTSINSPECTIONEVENT C 
+                  ON B.ELEMENTCODE = C.ELEMENTSINSPECTIONELEMENTCODE 
                 LEFT JOIN
                   (SELECT SALESORDER.CODE,SALESORDER.ORDERPARTNERBRANDCODE,ORDERPARTNERBRAND.LONGDESCRIPTION,BUSINESSPARTNER.LEGALNAME1,
                   SALESORDER.EXTERNALREFERENCE AS PO_HEADER,SALESORDERLINE.EXTERNALREFERENCE AS PO_LINE,SALESORDERLINE.INTERNALREFERENCE, 
@@ -401,11 +462,11 @@ $Item = isset($_POST['item']) ? $_POST['item'] : '';
                   SALESORDERLINE.SUBCODE10 = ORDERITEMORDERPARTNERLINK.SUBCODE10
                   GROUP BY SALESORDER.CODE,SALESORDER.ORDERPARTNERBRANDCODE,ORDERPARTNERBRAND.LONGDESCRIPTION,
                   SALESORDER.EXTERNALREFERENCE,SALESORDERLINE.EXTERNALREFERENCE,SALESORDERLINE.ITEMDESCRIPTION,BUSINESSPARTNER.LEGALNAME1,SALESORDERLINE.INTERNALREFERENCE, SALESORDERLINE.ORDERLINE,SALESORDERLINE.SUBCODE02,SALESORDERLINE.SUBCODE03,ORDERITEMORDERPARTNERLINK.SHORTDESCRIPTION) D 
-                ON A.ORIGDLVSALORDLINESALORDERCODE = D.CODE AND A.ORIGDLVSALORDERLINEORDERLINE = D.ORDERLINE
+                  ON A.ORIGDLVSALORDLINESALORDERCODE = D.CODE AND A.ORIGDLVSALORDERLINEORDERLINE = D.ORDERLINE
                 LEFT JOIN 
                   (SELECT USERGENERICGROUP.CODE,USERGENERICGROUP.LONGDESCRIPTION FROM USERGENERICGROUP USERGENERICGROUP) E
-                ON A.SUBCODE05 = E.CODE
-                WHERE LENGTH(TRIM(B.ELEMENTCODE))=13 $Where $ponumber $cus $buy $noitem
+                  ON A.SUBCODE05 = E.CODE
+                WHERE $whereSql
                 GROUP BY 
                   A.CODE,
                   LEFT(B.INSPECTIONSTARTDATETIME,10),
@@ -422,574 +483,266 @@ $Item = isset($_POST['item']) ? $_POST['item'] : '';
                   D.SUBCODE02,
                   D.SUBCODE03,
                   E.LONGDESCRIPTION";
-                $stmt = db2_exec($conn1, $sql, array('cursor' => DB2_SCROLLABLE));
-              } else {
+
+                $stmt = db2_exec($db2Conn, $sql, array('cursor' => DB2_SCROLLABLE));
+                $demandCodeSet = array();
+                if ($stmt) {
+                  while ($row = db2_fetch_assoc($stmt)) {
+                    $summaryRows[] = $row;
+                    $demandCodeSet[$row['CODE']] = $row['CODE'];
+                  }
+                }
+
+                if (!empty($demandCodeSet)) {
+                  $demandCodes = array_values($demandCodeSet);
+                  $demandChunks = array_chunk($demandCodes, 300);
+                  $inspectionDateFilter = "";
+                  if ($Awal != '' && $Akhir != '') {
+                    $inspectionDateFilter = " AND VARCHAR_FORMAT(EI.INSPECTIONSTARTDATETIME,'YYYY-MM-DD') BETWEEN '$safeAwal' AND '$safeAkhir' ";
+                  }
+
+                  foreach ($demandChunks as $chunkCodes) {
+                    $inList = qcf_db2_in_list($chunkCodes);
+
+                    $sqlRoll = "SELECT
+                      EI.DEMANDCODE,
+                      COUNT(EI.ELEMENTCODE) AS TOTAL_ROLL,
+                      MAX(EI.WIDTHNET) AS WIDTHNET
+                      FROM ELEMENTSINSPECTION EI
+                      WHERE LENGTH(TRIM(EI.ELEMENTCODE))=13
+                      AND EI.DEMANDCODE IN ($inList)
+                      GROUP BY EI.DEMANDCODE";
+                    $stmtRoll = db2_exec($db2Conn, $sqlRoll, array('cursor' => DB2_SCROLLABLE));
+                    while ($rowRoll = db2_fetch_assoc($stmtRoll)) {
+                      $rollMap[$rowRoll['DEMANDCODE']] = $rowRoll;
+                    }
+
+                    $sqlGrade = "SELECT
+                      EI.DEMANDCODE,
+                      SUM(CASE WHEN EI.QUALITYCODE = '1' THEN 1 ELSE 0 END) AS JML_A,
+                      SUM(CASE WHEN EI.QUALITYCODE = '1' THEN EI.WEIGHTNET ELSE 0 END) AS JML_KG_A,
+                      SUM(CASE WHEN EI.QUALITYCODE = '1' THEN EI.LENGTHGROSS ELSE 0 END) AS JML_YARD_A,
+                      SUM(CASE WHEN EI.QUALITYCODE = '2' THEN 1 ELSE 0 END) AS JML_B,
+                      SUM(CASE WHEN EI.QUALITYCODE = '2' THEN EI.WEIGHTNET ELSE 0 END) AS JML_KG_B,
+                      SUM(CASE WHEN EI.QUALITYCODE = '2' THEN EI.LENGTHGROSS ELSE 0 END) AS JML_YARD_B,
+                      SUM(CASE WHEN EI.QUALITYCODE = '3' THEN 1 ELSE 0 END) AS JML_C,
+                      SUM(CASE WHEN EI.QUALITYCODE = '3' THEN EI.WEIGHTNET ELSE 0 END) AS JML_KG_C,
+                      SUM(CASE WHEN EI.QUALITYCODE = '3' THEN EI.LENGTHGROSS ELSE 0 END) AS JML_YARD_C
+                      FROM ELEMENTSINSPECTION EI
+                      WHERE LENGTH(TRIM(EI.ELEMENTCODE))=13
+                      AND EI.DEMANDCODE IN ($inList)
+                      $inspectionDateFilter
+                      GROUP BY EI.DEMANDCODE";
+                    $stmtGrade = db2_exec($db2Conn, $sqlGrade, array('cursor' => DB2_SCROLLABLE));
+                    while ($rowGrade = db2_fetch_assoc($stmtGrade)) {
+                      $gradeMap[$rowGrade['DEMANDCODE']] = $rowGrade;
+                    }
+
+                    $sqlDefect = "SELECT
+                      EI.DEMANDCODE,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'Y01' THEN EIE.POINTS ELSE 0 END) AS POINTS_Y01,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'Y02' THEN EIE.POINTS ELSE 0 END) AS POINTS_Y02,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'Y03' THEN EIE.POINTS ELSE 0 END) AS POINTS_Y03,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'Y04' THEN EIE.POINTS ELSE 0 END) AS POINTS_Y04,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'Y05' THEN EIE.POINTS ELSE 0 END) AS POINTS_Y05,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'T01' THEN EIE.POINTS ELSE 0 END) AS POINTS_T01,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'T02' THEN EIE.POINTS ELSE 0 END) AS POINTS_T02,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'T03' THEN EIE.POINTS ELSE 0 END) AS POINTS_T03,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'T04' THEN EIE.POINTS ELSE 0 END) AS POINTS_T04,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'T05' THEN EIE.POINTS ELSE 0 END) AS POINTS_T05,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'T06' THEN EIE.POINTS ELSE 0 END) AS POINTS_T06,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'T07' THEN EIE.POINTS ELSE 0 END) AS POINTS_T07,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'D01' THEN EIE.POINTS ELSE 0 END) AS POINTS_D01,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'D02' THEN EIE.POINTS ELSE 0 END) AS POINTS_D02,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'D03' THEN EIE.POINTS ELSE 0 END) AS POINTS_D03,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'D04' THEN EIE.POINTS ELSE 0 END) AS POINTS_D04,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'D05' THEN EIE.POINTS ELSE 0 END) AS POINTS_D05,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'D06' THEN EIE.POINTS ELSE 0 END) AS POINTS_D06,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'D07' THEN EIE.POINTS ELSE 0 END) AS POINTS_D07,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'D08' THEN EIE.POINTS ELSE 0 END) AS POINTS_D08,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'D09' THEN EIE.POINTS ELSE 0 END) AS POINTS_D09,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'D10' THEN EIE.POINTS ELSE 0 END) AS POINTS_D10,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'C01' THEN EIE.POINTS ELSE 0 END) AS POINTS_C01,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'C02' THEN EIE.POINTS ELSE 0 END) AS POINTS_C02,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'C03' THEN EIE.POINTS ELSE 0 END) AS POINTS_C03,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'C04' THEN EIE.POINTS ELSE 0 END) AS POINTS_C04,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'C05' THEN EIE.POINTS ELSE 0 END) AS POINTS_C05,
+                      SUM(CASE WHEN EIE.CODEEVENTCODE = 'P01' THEN EIE.POINTS ELSE 0 END) AS POINTS_P01
+                      FROM ELEMENTSINSPECTION EI
+                      LEFT JOIN ELEMENTSINSPECTIONEVENT EIE
+                        ON EI.ELEMENTCODE = EIE.ELEMENTSINSPECTIONELEMENTCODE
+                      WHERE LENGTH(TRIM(EI.ELEMENTCODE))=13
+                      AND EI.DEMANDCODE IN ($inList)
+                      $inspectionDateFilter
+                      GROUP BY EI.DEMANDCODE";
+                    $stmtDefect = db2_exec($db2Conn, $sqlDefect, array('cursor' => DB2_SCROLLABLE));
+                    while ($rowDefect = db2_fetch_assoc($stmtDefect)) {
+                      $defectMap[$rowDefect['DEMANDCODE']] = $rowDefect;
+                    }
+
+                    $sqlRequestAttr = "SELECT
+                      PD.CODE AS DEMANDCODE,
+                      MAX(CASE WHEN ADSTORAGE.NAMENAME = 'GSM' THEN ADSTORAGE.VALUEDECIMAL END) AS GSM_REQ,
+                      MAX(CASE WHEN ADSTORAGE.NAMENAME = 'Width' THEN ADSTORAGE.VALUEDECIMAL END) AS WIDTH_REQ
+                      FROM PRODUCTIONDEMAND PD
+                      LEFT JOIN PRODUCT PRODUCT
+                        ON PD.ITEMTYPEAFICODE = PRODUCT.ITEMTYPECODE
+                        AND PD.SUBCODE01 = PRODUCT.SUBCODE01
+                        AND PD.SUBCODE02 = PRODUCT.SUBCODE02
+                        AND PD.SUBCODE03 = PRODUCT.SUBCODE03
+                        AND PD.SUBCODE04 = PRODUCT.SUBCODE04
+                        AND PD.SUBCODE05 = PRODUCT.SUBCODE05
+                        AND PD.SUBCODE06 = PRODUCT.SUBCODE06
+                        AND PD.SUBCODE07 = PRODUCT.SUBCODE07
+                        AND PD.SUBCODE08 = PRODUCT.SUBCODE08
+                        AND PD.SUBCODE09 = PRODUCT.SUBCODE09
+                        AND PD.SUBCODE10 = PRODUCT.SUBCODE10
+                      LEFT JOIN ADSTORAGE ADSTORAGE
+                        ON PRODUCT.ABSUNIQUEID = ADSTORAGE.UNIQUEID
+                      WHERE PD.CODE IN ($inList)
+                      AND ADSTORAGE.NAMENAME IN ('GSM', 'Width')
+                      GROUP BY PD.CODE";
+                    $stmtReqAttr = db2_exec($db2Conn, $sqlRequestAttr, array('cursor' => DB2_SCROLLABLE));
+                    while ($rowReqAttr = db2_fetch_assoc($stmtReqAttr)) {
+                      $requestAttrMap[$rowReqAttr['DEMANDCODE']] = $rowReqAttr;
+                    }
+
+                    $sqlInspectAttr = "SELECT
+                      A.ENTRYDOCUMENTNUMBER AS DEMANDCODE,
+                      MAX(ADSTORAGE.VALUEDECIMAL) AS GSM_INSPEK
+                      FROM ELEMENTS A
+                      LEFT JOIN ADSTORAGE ADSTORAGE
+                        ON A.ABSUNIQUEID = ADSTORAGE.UNIQUEID
+                      WHERE A.ENTRYDOCUMENTNUMBER IN ($inList)
+                      AND TRIM(ADSTORAGE.NAMENAME) = 'GSM'
+                      GROUP BY A.ENTRYDOCUMENTNUMBER";
+                    $stmtInspectAttr = db2_exec($db2Conn, $sqlInspectAttr, array('cursor' => DB2_SCROLLABLE));
+                    while ($rowInspectAttr = db2_fetch_assoc($stmtInspectAttr)) {
+                      $inspectAttrMap[$rowInspectAttr['DEMANDCODE']] = $rowInspectAttr;
+                    }
+
+                    $sqlLot = "SELECT
+                      PRODUCTIONDEMANDSTEP.PRODUCTIONDEMANDCODE AS DEMANDCODE,
+                      MAX(PRODUCTIONDEMANDSTEP.PRODUCTIONORDERCODE) AS PRODUCTIONORDERCODE
+                      FROM PRODUCTIONDEMANDSTEP PRODUCTIONDEMANDSTEP
+                      WHERE PRODUCTIONDEMANDSTEP.PRODUCTIONDEMANDCODE IN ($inList)
+                      GROUP BY PRODUCTIONDEMANDSTEP.PRODUCTIONDEMANDCODE";
+                    $stmtLot = db2_exec($db2Conn, $sqlLot, array('cursor' => DB2_SCROLLABLE));
+                    while ($rowLot = db2_fetch_assoc($stmtLot)) {
+                      $lotMap[$rowLot['DEMANDCODE']] = $rowLot;
+                    }
+                  }
+                }
               }
               $col = 0;
-              while ($r = db2_fetch_assoc($stmt)) {
+              foreach ($summaryRows as $r) {
                 $bgcolor = ($col++ & 1) ? 'gainsboro' : 'antiquewhite';
-                $totalpoin = explode(".", $r['TOTAL_POIN']);
-                //Query Total Roll & Lebar Inspek
-                $sqlr = "SELECT 
-    ELEMENTSINSPECTION.DEMANDCODE,
-    COUNT(ELEMENTSINSPECTION.DEMANDCODE) AS TOTAL_ROLL,
-    ELEMENTSINSPECTION.WIDTHNET
-    FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-    WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 
-    AND ELEMENTSINSPECTION.DEMANDCODE='$r[CODE]'
-    GROUP BY
-    ELEMENTSINSPECTION.DEMANDCODE,
-    ELEMENTSINSPECTION.WIDTHNET";
-                $stmt1 = db2_exec($conn1, $sqlr, array('cursor' => DB2_SCROLLABLE));
-                $rr = db2_fetch_assoc($stmt1);
-                $posWN = strpos($rr['WIDTHNET'], '.');
-                $WidthNet = substr($rr['WIDTHNET'], 0, $posWN);
+                $totalpoin = explode('.', (string) $r['TOTAL_POIN']);
+                $demandCode = $r['CODE'];
 
-                //Query Gramasi Inspek
-                $sqlgi = "SELECT
-    ADSTORAGE.VALUEDECIMAL
-    FROM ELEMENTS A
-    LEFT JOIN ADSTORAGE ADSTORAGE 
-    ON A.ABSUNIQUEID = ADSTORAGE.UNIQUEID 
-    WHERE TRIM(ADSTORAGE.NAMENAME) ='GSM' AND A.ENTRYDOCUMENTNUMBER ='$r[CODE]' LIMIT 1";
-                $stmt2 = db2_exec($conn1, $sqlgi, array('cursor' => DB2_SCROLLABLE));
-                $rgi = db2_fetch_assoc($stmt2);
-                $posGSM = strpos($rgi['VALUEDECIMAL'], '.');
-                $Gramasi = substr($rgi['VALUEDECIMAL'], 0, $posGSM);
+                $rr = array(
+                  'TOTAL_ROLL' => qcf_map_get($rollMap, $demandCode, 'TOTAL_ROLL', 0),
+                  'WIDTHNET' => qcf_map_get($rollMap, $demandCode, 'WIDTHNET', '')
+                );
 
-                //Query Gramasi Permintaan
-                $sqlgp = "SELECT
-    ADSTORAGE.VALUEDECIMAL
-    FROM PRODUCTIONDEMAND PRODUCTIONDEMAND
-    LEFT JOIN PRODUCT PRODUCT
-    ON PRODUCTIONDEMAND.ITEMTYPEAFICODE = PRODUCT.ITEMTYPECODE AND 
-    PRODUCTIONDEMAND.SUBCODE01 = PRODUCT.SUBCODE01 AND
-    PRODUCTIONDEMAND.SUBCODE02 = PRODUCT.SUBCODE02 AND
-    PRODUCTIONDEMAND.SUBCODE03 = PRODUCT.SUBCODE03 AND
-    PRODUCTIONDEMAND.SUBCODE04 = PRODUCT.SUBCODE04 AND
-    PRODUCTIONDEMAND.SUBCODE05 = PRODUCT.SUBCODE05 AND
-    PRODUCTIONDEMAND.SUBCODE06 = PRODUCT.SUBCODE06 AND
-    PRODUCTIONDEMAND.SUBCODE07 = PRODUCT.SUBCODE07 AND
-    PRODUCTIONDEMAND.SUBCODE08 = PRODUCT.SUBCODE08 AND
-    PRODUCTIONDEMAND.SUBCODE09 = PRODUCT.SUBCODE09 AND
-    PRODUCTIONDEMAND.SUBCODE10 = PRODUCT.SUBCODE10
-    LEFT JOIN ADSTORAGE ADSTORAGE
-    ON PRODUCT.ABSUNIQUEID = ADSTORAGE.UNIQUEID 
-    WHERE PRODUCTIONDEMAND.CODE='$r[CODE]' AND ADSTORAGE.NAMENAME ='GSM'";
-                $stmt3 = db2_exec($conn1, $sqlgp, array('cursor' => DB2_SCROLLABLE));
-                $rgp = db2_fetch_assoc($stmt3);
-                $posGSMP = strpos($rgp['VALUEDECIMAL'], '.');
-                $GramasiPermintaan = substr($rgp['VALUEDECIMAL'], 0, $posGSMP);
+                $WidthNet = qcf_decimal_integer_part($rr['WIDTHNET']);
+                $Gramasi = qcf_decimal_integer_part(qcf_map_get($inspectAttrMap, $demandCode, 'GSM_INSPEK', ''));
+                $GramasiPermintaan = qcf_decimal_integer_part(qcf_map_get($requestAttrMap, $demandCode, 'GSM_REQ', ''));
+                $LebarPermintaan = qcf_decimal_integer_part(qcf_map_get($requestAttrMap, $demandCode, 'WIDTH_REQ', ''));
 
-                //Query Lebar Permintaan
-                $sqllp = "SELECT
-    ADSTORAGE.VALUEDECIMAL
-    FROM PRODUCTIONDEMAND PRODUCTIONDEMAND
-    LEFT JOIN PRODUCT PRODUCT
-    ON PRODUCTIONDEMAND.ITEMTYPEAFICODE = PRODUCT.ITEMTYPECODE AND 
-    PRODUCTIONDEMAND.SUBCODE01 = PRODUCT.SUBCODE01 AND
-    PRODUCTIONDEMAND.SUBCODE02 = PRODUCT.SUBCODE02 AND
-    PRODUCTIONDEMAND.SUBCODE03 = PRODUCT.SUBCODE03 AND
-    PRODUCTIONDEMAND.SUBCODE04 = PRODUCT.SUBCODE04 AND
-    PRODUCTIONDEMAND.SUBCODE05 = PRODUCT.SUBCODE05 AND
-    PRODUCTIONDEMAND.SUBCODE06 = PRODUCT.SUBCODE06 AND
-    PRODUCTIONDEMAND.SUBCODE07 = PRODUCT.SUBCODE07 AND
-    PRODUCTIONDEMAND.SUBCODE08 = PRODUCT.SUBCODE08 AND
-    PRODUCTIONDEMAND.SUBCODE09 = PRODUCT.SUBCODE09 AND
-    PRODUCTIONDEMAND.SUBCODE10 = PRODUCT.SUBCODE10
-    LEFT JOIN ADSTORAGE ADSTORAGE
-    ON PRODUCT.ABSUNIQUEID = ADSTORAGE.UNIQUEID 
-    WHERE PRODUCTIONDEMAND.CODE='$r[CODE]' AND ADSTORAGE.NAMENAME ='Width'";
-                $stmt4 = db2_exec($conn1, $sqllp, array('cursor' => DB2_SCROLLABLE));
-                $rlp = db2_fetch_assoc($stmt4);
-                $posLP = strpos($rlp['VALUEDECIMAL'], '.');
-                $LebarPermintaan = substr($rlp['VALUEDECIMAL'], 0, $posLP);
+                $rY = array(
+                  'POINTS_Y01' => qcf_map_get($defectMap, $demandCode, 'POINTS_Y01', ''),
+                  'POINTS_Y02' => qcf_map_get($defectMap, $demandCode, 'POINTS_Y02', ''),
+                  'POINTS_Y03' => qcf_map_get($defectMap, $demandCode, 'POINTS_Y03', ''),
+                  'POINTS_Y04' => qcf_map_get($defectMap, $demandCode, 'POINTS_Y04', ''),
+                  'POINTS_Y05' => qcf_map_get($defectMap, $demandCode, 'POINTS_Y05', '')
+                );
+                $ASLUB = explode('.', (string) qcf_num_or_zero($rY['POINTS_Y01']));
+                $ABARRE = explode('.', (string) qcf_num_or_zero($rY['POINTS_Y02']));
+                $AUNEVEN = explode('.', (string) qcf_num_or_zero($rY['POINTS_Y03']));
+                $AYARN = explode('.', (string) qcf_num_or_zero($rY['POINTS_Y04']));
+                $ANEPS = explode('.', (string) qcf_num_or_zero($rY['POINTS_Y05']));
 
-                //QUERY DEFECT Y
-                $sqlY = "SELECT 
-        A.DEMANDCODE, B.POINTS_Y01, C.POINTS_Y02, D.POINTS_Y03, E.POINTS_Y04, F.POINTS_Y05 FROM
-        ELEMENTSINSPECTION A
-        LEFT JOIN
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_Y01
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'Y01'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) B
-        ON A.DEMANDCODE = B.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_Y02
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'Y02'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) C
-        ON A.DEMANDCODE = C.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_Y03
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'Y03'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) D
-        ON A.DEMANDCODE = D.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_Y04
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'Y04'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) E
-        ON A.DEMANDCODE = E.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_Y05
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'Y05'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) F
-        ON A.DEMANDCODE = F.DEMANDCODE
-        WHERE A.DEMANDCODE = '$r[CODE]'
-        GROUP BY 
-        A.DEMANDCODE, B.POINTS_Y01, C.POINTS_Y02, D.POINTS_Y03, E.POINTS_Y04, F.POINTS_Y05";
-                $stmt5 = db2_exec($conn1, $sqlY, array('cursor' => DB2_SCROLLABLE));
-                $rY = db2_fetch_assoc($stmt5);
-                $ASLUB = explode(".", $rY['POINTS_Y01']);
-                $ABARRE = explode(".", $rY['POINTS_Y02']);
-                $AUNEVEN = explode(".", $rY['POINTS_Y03']);
-                $AYARN = explode(".", $rY['POINTS_Y04']);
-                $ANEPS = explode(".", $rY['POINTS_Y05']);
+                $rT = array(
+                  'POINTS_T01' => qcf_map_get($defectMap, $demandCode, 'POINTS_T01', ''),
+                  'POINTS_T02' => qcf_map_get($defectMap, $demandCode, 'POINTS_T02', ''),
+                  'POINTS_T03' => qcf_map_get($defectMap, $demandCode, 'POINTS_T03', ''),
+                  'POINTS_T04' => qcf_map_get($defectMap, $demandCode, 'POINTS_T04', ''),
+                  'POINTS_T05' => qcf_map_get($defectMap, $demandCode, 'POINTS_T05', ''),
+                  'POINTS_T06' => qcf_map_get($defectMap, $demandCode, 'POINTS_T06', ''),
+                  'POINTS_T07' => qcf_map_get($defectMap, $demandCode, 'POINTS_T07', '')
+                );
+                $BMISSING = explode('.', (string) qcf_num_or_zero($rT['POINTS_T01']));
+                $BHOLES = explode('.', (string) qcf_num_or_zero($rT['POINTS_T02']));
+                $BSTREAK = explode('.', (string) qcf_num_or_zero($rT['POINTS_T03']));
+                $BMISSKNIT = explode('.', (string) qcf_num_or_zero($rT['POINTS_T04']));
+                $BKNOT = explode('.', (string) qcf_num_or_zero($rT['POINTS_T05']));
+                $BOIL = explode('.', (string) qcf_num_or_zero($rT['POINTS_T06']));
+                $BFLY = explode('.', (string) qcf_num_or_zero($rT['POINTS_T07']));
 
-                //QUERY DEFECT T
-                $sqlT = "SELECT 
-        A.DEMANDCODE, B.POINTS_T01, C.POINTS_T02, D.POINTS_T03, E.POINTS_T04, F.POINTS_T05, G.POINTS_T06, H.POINTS_T07 FROM 
-        ELEMENTSINSPECTION A
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_T01
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'T01'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) B
-        ON A.DEMANDCODE = B.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_T02
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'T02'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) C
-        ON A.DEMANDCODE = C.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_T03
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'T03'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) D
-        ON A.DEMANDCODE = D.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_T04
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'T04'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) E
-        ON A.DEMANDCODE = E.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_T05
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'T05'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) F
-        ON A.DEMANDCODE = F.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_T06
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'T06'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) G
-        ON A.DEMANDCODE = G.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_T07
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'T07'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) H
-        ON A.DEMANDCODE = H.DEMANDCODE
-        WHERE A.DEMANDCODE = '$r[CODE]'
-        GROUP BY 
-        A.DEMANDCODE, B.POINTS_T01, C.POINTS_T02, D.POINTS_T03, E.POINTS_T04, F.POINTS_T05, G.POINTS_T06, H.POINTS_T07";
-                $stmt6 = db2_exec($conn1, $sqlT, array('cursor' => DB2_SCROLLABLE));
-                $rT = db2_fetch_assoc($stmt6);
-                $BMISSING = explode(".", $rT['POINTS_T01']);
-                $BHOLES = explode(".", $rT['POINTS_T02']);
-                $BSTREAK = explode(".", $rT['POINTS_T03']);
-                $BMISSKNIT = explode(".", $rT['POINTS_T04']);
-                $BKNOT = explode(".", $rT['POINTS_T05']);
-                $BOIL = explode(".", $rT['POINTS_T06']);
-                $BFLY = explode(".", $rT['POINTS_T07']);
+                $rD = array(
+                  'POINTS_D01' => qcf_map_get($defectMap, $demandCode, 'POINTS_D01', ''),
+                  'POINTS_D02' => qcf_map_get($defectMap, $demandCode, 'POINTS_D02', ''),
+                  'POINTS_D03' => qcf_map_get($defectMap, $demandCode, 'POINTS_D03', ''),
+                  'POINTS_D04' => qcf_map_get($defectMap, $demandCode, 'POINTS_D04', ''),
+                  'POINTS_D05' => qcf_map_get($defectMap, $demandCode, 'POINTS_D05', ''),
+                  'POINTS_D06' => qcf_map_get($defectMap, $demandCode, 'POINTS_D06', ''),
+                  'POINTS_D07' => qcf_map_get($defectMap, $demandCode, 'POINTS_D07', ''),
+                  'POINTS_D08' => qcf_map_get($defectMap, $demandCode, 'POINTS_D08', ''),
+                  'POINTS_D09' => qcf_map_get($defectMap, $demandCode, 'POINTS_D09', ''),
+                  'POINTS_D10' => qcf_map_get($defectMap, $demandCode, 'POINTS_D10', '')
+                );
+                $CHAIR = explode('.', (string) qcf_num_or_zero($rD['POINTS_D01']));
+                $CHOLES = explode('.', (string) qcf_num_or_zero($rD['POINTS_D02']));
+                $CCOLOR = explode('.', (string) qcf_num_or_zero($rD['POINTS_D03']));
+                $CABRA = explode('.', (string) qcf_num_or_zero($rD['POINTS_D04']));
+                $CDYE = explode('.', (string) qcf_num_or_zero($rD['POINTS_D05']));
+                $CWRINK = explode('.', (string) qcf_num_or_zero($rD['POINTS_D06']));
+                $CBOWING = explode('.', (string) qcf_num_or_zero($rD['POINTS_D07']));
+                $CPIN = explode('.', (string) qcf_num_or_zero($rD['POINTS_D08']));
+                $CPICK = explode('.', (string) qcf_num_or_zero($rD['POINTS_D09']));
+                $CKNOT = explode('.', (string) qcf_num_or_zero($rD['POINTS_D10']));
 
-                //QUERY DEFECT D
-                $sqlD = "SELECT 
-        A.DEMANDCODE, B.POINTS_D01, C.POINTS_D02, D.POINTS_D03, E.POINTS_D04, F.POINTS_D05, G.POINTS_D06, H.POINTS_D07, 
-        I.POINTS_D08, J.POINTS_D09, K.POINTS_D10 FROM ELEMENTSINSPECTION A
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_D01
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'D01'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) B
-        ON A.DEMANDCODE = B.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_D02
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'D02'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) C
-        ON A.DEMANDCODE = C.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_D03
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'D03'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) D
-        ON A.DEMANDCODE = D.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_D04
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'D04'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) E
-        ON A.DEMANDCODE = E.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_D05
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'D05'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) F
-        ON A.DEMANDCODE = F.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_D06
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'D06'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) G
-        ON A.DEMANDCODE = G.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_D07
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'D07'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) H
-        ON A.DEMANDCODE = H.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_D08
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'D08'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) I
-        ON A.DEMANDCODE = I.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_D09
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'D09'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) J
-        ON A.DEMANDCODE = J.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_D10
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'D10'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) K
-        ON A.DEMANDCODE = K.DEMANDCODE
-        WHERE A.DEMANDCODE = '$r[CODE]'
-        GROUP BY 
-        A.DEMANDCODE, B.POINTS_D01, C.POINTS_D02, D.POINTS_D03, E.POINTS_D04, F.POINTS_D05, G.POINTS_D06, H.POINTS_D07, 
-        I.POINTS_D08, J.POINTS_D09, K.POINTS_D10";
-                $stmt7 = db2_exec($conn1, $sqlD, array('cursor' => DB2_SCROLLABLE));
-                $rD = db2_fetch_assoc($stmt7);
-                $CHAIR = explode(".", $rD['POINTS_D01']);
-                $CHOLES = explode(".", $rD['POINTS_D02']);
-                $CCOLOR = explode(".", $rD['POINTS_D03']);
-                $CABRA = explode(".", $rD['POINTS_D04']);
-                $CDYE = explode(".", $rD['POINTS_D05']);
-                $CWRINK = explode(".", $rD['POINTS_D06']);
-                $CBOWING = explode(".", $rD['POINTS_D07']);
-                $CPIN = explode(".", $rD['POINTS_D08']);
-                $CPICK = explode(".", $rD['POINTS_D09']);
-                $CKNOT = explode(".", $rD['POINTS_D10']);
+                $rC = array(
+                  'POINTS_C01' => qcf_map_get($defectMap, $demandCode, 'POINTS_C01', ''),
+                  'POINTS_C02' => qcf_map_get($defectMap, $demandCode, 'POINTS_C02', ''),
+                  'POINTS_C03' => qcf_map_get($defectMap, $demandCode, 'POINTS_C03', ''),
+                  'POINTS_C04' => qcf_map_get($defectMap, $demandCode, 'POINTS_C04', ''),
+                  'POINTS_C05' => qcf_map_get($defectMap, $demandCode, 'POINTS_C05', '')
+                );
+                $DUNEVEN = explode('.', (string) qcf_num_or_zero($rC['POINTS_C01']));
+                $DSTAINS = explode('.', (string) qcf_num_or_zero($rC['POINTS_C02']));
+                $DOIL = explode('.', (string) qcf_num_or_zero($rC['POINTS_C03']));
+                $DDIRT = explode('.', (string) qcf_num_or_zero($rC['POINTS_C04']));
+                $DWATER = explode('.', (string) qcf_num_or_zero($rC['POINTS_C05']));
 
-                //QUERY DEFECT C
-                $sqlC = "SELECT 
-        A.DEMANDCODE, B.POINTS_C01, C.POINTS_C02, D.POINTS_C03, E.POINTS_C04, F.POINTS_C05 FROM
-        ELEMENTSINSPECTION A
-        LEFT JOIN
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_C01
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'C01'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) B
-        ON A.DEMANDCODE = B.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_C02
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'C02'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) C
-        ON A.DEMANDCODE = C.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_C03
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'C03'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) D
-        ON A.DEMANDCODE = D.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_C04
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'C04'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) E
-        ON A.DEMANDCODE = E.DEMANDCODE
-        LEFT JOIN 
-          (SELECT
-          ELEMENTSINSPECTION.DEMANDCODE,
-          SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS_C05
-          FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-          LEFT JOIN
-          ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-          ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-          WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]' 
-          AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'C05'
-          AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-          GROUP BY ELEMENTSINSPECTION.DEMANDCODE) F
-        ON A.DEMANDCODE = F.DEMANDCODE
-        WHERE A.DEMANDCODE = '$r[CODE]'
-        GROUP BY 
-        A.DEMANDCODE, B.POINTS_C01, C.POINTS_C02, D.POINTS_C03, E.POINTS_C04, F.POINTS_C05";
-                $stmt8 = db2_exec($conn1, $sqlC, array('cursor' => DB2_SCROLLABLE));
-                $rC = db2_fetch_assoc($stmt8);
-                $DUNEVEN = explode(".", $rC['POINTS_C01']);
-                $DSTAINS = explode(".", $rC['POINTS_C02']);
-                $DOIL = explode(".", $rC['POINTS_C03']);
-                $DDIRT = explode(".", $rC['POINTS_C04']);
-                $DWATER = explode(".", $rC['POINTS_C05']);
+                $rP01 = array(
+                  'POINTS' => qcf_map_get($defectMap, $demandCode, 'POINTS_P01', '')
+                );
+                $EPRINT = explode('.', (string) qcf_num_or_zero($rP01['POINTS']));
 
-                //QUERY DEFECT P
-                $sqlP01 = "SELECT
-    SUM(ELEMENTSINSPECTIONEVENT.POINTS) AS POINTS
-    FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-    LEFT JOIN
-    ELEMENTSINSPECTIONEVENT ELEMENTSINSPECTIONEVENT
-    ON ELEMENTSINSPECTION.ELEMENTCODE = ELEMENTSINSPECTIONEVENT.ELEMENTSINSPECTIONELEMENTCODE 
-    WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]'
-    AND ELEMENTSINSPECTIONEVENT.CODEEVENTCODE = 'P01'
-    AND VARCHAR_FORMAT(ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'";
-                $stmt9 = db2_exec($conn1, $sqlP01, array('cursor' => DB2_SCROLLABLE));
-                $rP01 = db2_fetch_assoc($stmt9);
-                $EPRINT = explode(".", $rP01['POINTS']);
-
-                //QUERY JUMLAH GRADE A, KG A, YD A
-                $sqlGA = "SELECT 
-    ELEMENTSINSPECTION.DEMANDCODE,
-    COUNT(ELEMENTSINSPECTION.ELEMENTCODE) AS JML_A,
-    SUM(ELEMENTSINSPECTION.LENGTHGROSS) AS JML_YARD_A,
-    SUM(ELEMENTSINSPECTION.WEIGHTNET) AS JML_KG_A
-    FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-    WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 
-    AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-    AND ELEMENTSINSPECTION.QUALITYCODE ='1' AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]'
-    GROUP BY
-    ELEMENTSINSPECTION.DEMANDCODE";
-                $stmt10 = db2_exec($conn1, $sqlGA, array('cursor' => DB2_SCROLLABLE));
-                $rGA = db2_fetch_assoc($stmt10);
-
-                //QUERY JUMLAH GRADE B, KG B, YD B
-                $sqlGB = "SELECT 
-      ELEMENTSINSPECTION.DEMANDCODE,
-      COUNT(ELEMENTSINSPECTION.ELEMENTCODE) AS JML_B,
-      SUM(ELEMENTSINSPECTION.LENGTHGROSS) AS JML_YARD_B,
-      SUM(ELEMENTSINSPECTION.WEIGHTNET) AS JML_KG_B
-      FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-      WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 
-      AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-      AND ELEMENTSINSPECTION.QUALITYCODE ='2' AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]'
-      GROUP BY
-      ELEMENTSINSPECTION.DEMANDCODE";
-                $stmt11 = db2_exec($conn1, $sqlGB, array('cursor' => DB2_SCROLLABLE));
-                $rGB = db2_fetch_assoc($stmt11);
-
-                //QUERY JUMLAH GRADE C, KG C, YD C
-                $sqlGC = "SELECT 
-    ELEMENTSINSPECTION.DEMANDCODE,
-    COUNT(ELEMENTSINSPECTION.ELEMENTCODE) AS JML_C,
-    SUM(ELEMENTSINSPECTION.LENGTHGROSS) AS JML_YARD_C,
-    SUM(ELEMENTSINSPECTION.WEIGHTNET) AS JML_KG_C
-    FROM ELEMENTSINSPECTION ELEMENTSINSPECTION
-    WHERE LENGTH(TRIM(ELEMENTSINSPECTION.ELEMENTCODE))=13 
-    AND VARCHAR_FORMAT (ELEMENTSINSPECTION.INSPECTIONSTARTDATETIME ,'YYYY-MM-DD') BETWEEN '$Awal' AND '$Akhir'
-    AND ELEMENTSINSPECTION.QUALITYCODE ='3' AND ELEMENTSINSPECTION.DEMANDCODE = '$r[CODE]'
-    GROUP BY
-    ELEMENTSINSPECTION.DEMANDCODE";
-                $stmt12 = db2_exec($conn1, $sqlGC, array('cursor' => DB2_SCROLLABLE));
-                $rGC = db2_fetch_assoc($stmt12);
-
-                //QUERY NO PRODUCTION ORDER / NO LOT 
-                $sqlLot = "SELECT PRODUCTIONDEMANDSTEP.PRODUCTIONDEMANDCODE, PRODUCTIONDEMANDSTEP.PRODUCTIONORDERCODE FROM PRODUCTIONDEMANDSTEP PRODUCTIONDEMANDSTEP
-    WHERE PRODUCTIONDEMANDSTEP.PRODUCTIONDEMANDCODE= '$r[CODE]' 
-    GROUP BY PRODUCTIONDEMANDSTEP.PRODUCTIONDEMANDCODE, PRODUCTIONDEMANDSTEP.PRODUCTIONORDERCODE
-    ORDER BY PRODUCTIONDEMANDSTEP.PRODUCTIONORDERCODE DESC LIMIT 1";
-                $stmt13 = db2_exec($conn1, $sqlLot, array('cursor' => DB2_SCROLLABLE));
-                $rLot = db2_fetch_assoc($stmt13);
+                $rGA = array(
+                  'JML_A' => qcf_map_get($gradeMap, $demandCode, 'JML_A', 0),
+                  'JML_KG_A' => qcf_map_get($gradeMap, $demandCode, 'JML_KG_A', 0),
+                  'JML_YARD_A' => qcf_map_get($gradeMap, $demandCode, 'JML_YARD_A', 0)
+                );
+                $rGB = array(
+                  'JML_B' => qcf_map_get($gradeMap, $demandCode, 'JML_B', 0),
+                  'JML_KG_B' => qcf_map_get($gradeMap, $demandCode, 'JML_KG_B', 0),
+                  'JML_YARD_B' => qcf_map_get($gradeMap, $demandCode, 'JML_YARD_B', 0)
+                );
+                $rGC = array(
+                  'JML_C' => qcf_map_get($gradeMap, $demandCode, 'JML_C', 0),
+                  'JML_KG_C' => qcf_map_get($gradeMap, $demandCode, 'JML_KG_C', 0),
+                  'JML_YARD_C' => qcf_map_get($gradeMap, $demandCode, 'JML_YARD_C', 0)
+                );
+                $rLot = array(
+                  'PRODUCTIONORDERCODE' => qcf_map_get($lotMap, $demandCode, 'PRODUCTIONORDERCODE', '')
+                );
+                $uom = 0;
+                if ((float) $r['TOTAL_YARD'] > 0) {
+                  $uom = ((float) $r['TOTAL_POIN'] * 100) / (float) $r['TOTAL_YARD'];
+                }
 
                 ?>
                 <tr bgcolor="<?php echo $bgcolor; ?>">
@@ -997,7 +750,7 @@ $Item = isset($_POST['item']) ? $_POST['item'] : '';
                     <?php echo $no; ?>
                   </td>
                   <td>
-                    <?php echo number_format(($r['TOTAL_POIN'] * 100) / $r['TOTAL_YARD'], 2); ?>
+                    <?php echo number_format($uom, 2); ?>
                   </td>
                   <td>
                     <?php echo $r['CODE']; ?>
