@@ -576,7 +576,7 @@ order by a.id desc";
         <div class="pull-right">
             <a href="pages/cetak/rekap-data.php?order=<?php echo $Order; ?>&po=<?php echo $PO; ?>&item=<?php echo $Item; ?>&warna=<?php echo $Warna; ?>&buyer=<?php echo $Langganan; ?>" target="_blank"><span class="btn btn-primary"><i class="fa fa-file-pdf-o"></i> Cetak</span></a>
             <a href="pages/cetak/cetak_lapkkdelay.php?awal=<?php echo $_POST['awal']; ?>&akhir=<?php echo $_POST['akhir']; ?>" class="btn btn-primary <?php if($_POST['awal']=="") { echo "disabled"; }?>" target="_blank">Cetak Lap KK Delay</a> 
-            <a href="pages/cetak/report_grouping_form.php?awal=<?php echo $_POST['awal']; ?>&akhir=<?php echo $_POST['akhir']; ?>" class="btn btn-primary" target="_blank">Cetak Groping Form CQA</a> 
+            <a href="pages/cetak/report_grouping_form.php?awal=<?php echo $Awal; ?>&akhir=<?php echo $Akhir; ?>&no_order=<?php echo $Order; ?>&no_po=<?php echo $PO; ?>&item=<?php echo $Item; ?>&warna=<?php echo $Warna; ?>&langganan=<?php echo $Langganan; ?>&delay=<?php echo $Delay; ?>&demand=<?php echo $Demand; ?>&prodorder=<?php echo $Prodorder; ?>" class="btn btn-primary" target="_blank">Cetak Groping Form CQA</a> 
         </div>
 		    
       </div>
@@ -686,7 +686,6 @@ if ($Delay == "1") {
 		$sql2=mysqli_query($con,$code2); */
 	}
 	$col=0;
-	
 	//$get_nodemand = get_nodemand($sql2);
 	//$nodemand = ['00190922','00000560','00000562','00000951'];
 	//$qtyoutput = qty_order($get_nodemand );
