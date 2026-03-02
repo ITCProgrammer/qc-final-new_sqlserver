@@ -46,17 +46,15 @@ $code = "SELECT a.*, b.berat_order_now, b.panjang_order_now
          ORDER BY a.[group] ASC, a.hue ASC, a.id ASC";
 
 $sql = sqlsrv_query($con_db_qc_sqlsrv, $code);
-
 $currentKey = ""; // Variable pembantu untuk grouping tabel
 ?>
 <div align="center"> <h2>GROUPING FORM LANGGANAN</h2></div>
 <br>
 <?php
 while ($row = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
-    
-    // Buat Unique Key berdasarkan kombinasi Group dan Hue
-    $groupHueKey = $row['group'] . "|" . $row['hue'];
-
+    $cleanGroup = strtoupper(trim($row['group']));
+    $cleanHue   = strtoupper(trim($row['hue']));
+    $groupHueKey = $cleanGroup . "|" . $cleanHue;
     // Jika Group/Hue berbeda dari data sebelumnya, tutup tabel lama (jika ada) dan buat header baru
     if ($currentKey != $groupHueKey) {
         if ($currentKey != "") { echo "</tbody></table><br>"; }
@@ -111,8 +109,7 @@ while ($row = sqlsrv_fetch_array($sql, SQLSRV_FETCH_ASSOC)) {
                 $data_kanan[] = $rk;
             }
         }
-    }
-
+    } 
     // Tentukan jumlah baris yang harus dirender
     $max_row = max(1, count($data_kanan));
     
@@ -142,10 +139,15 @@ if ($currentKey != "") { echo "</tbody></table>"; }?>
 <br>
 <table width="100%" style="font-family: Arial, sans-serif; font-size: 12px;">
     <tr>
+        <td width="50%" align="center"></td>
+        <td width="50%" align="center"></td>
         <td width="50%" align="center">
             Colorist,<br><br><br><br><br><br><br>
             DEWI
         </td>
+        <td width="50%" align="center"></td>
+        <td width="50%" align="center"></td>
+        <td width="50%" align="center"></td>
         <td width="50%" align="center">
             Mengetahui,<br><br><br><br><br><br><br>
             AGUNG C
