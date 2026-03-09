@@ -17,14 +17,24 @@ if(isset($_POST['id'])) {
     $demand_kanan = isset($_POST['demand_kanan']) ? trim($_POST['demand_kanan']) : '';
     $demand_kanan = ($demand_kanan === '') ? NULL : $demand_kanan;
 
+    // grade_kanan sudah dikirim sebagai string
+    $grade_kanan = isset($_POST['grade_kanan']) ? trim($_POST['grade_kanan']) : '';
+    $grade_kanan = ($grade_kanan === '') ? NULL : $grade_kanan;
+
+    // grade_kiri sudah dikirim sebagai string
+    $grade_kiri = isset($_POST['grade_kiri']) ? trim($_POST['grade_kiri']) : '';
+    $grade_kiri = ($grade_kiri === '') ? NULL : $grade_kiri;
+
     // UPDATE dengan escape column names (group adalah reserved keyword)
     $sql = "UPDATE db_qc.tbl_qcf SET 
             [group] = ?, 
             hue = ?, 
-            list_kanan = ? 
+            list_kanan = ?,
+            grade_kanan = ?,
+            grade_kiri = ?
             WHERE id = ?";
             
-    $params = array($group, $hue, $demand_kanan, $id);
+    $params = array($group, $hue, $demand_kanan, $grade_kanan, $grade_kiri, $id);
     $stmt = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
 
     if($stmt === false) {

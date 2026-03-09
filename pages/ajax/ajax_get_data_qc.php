@@ -7,7 +7,9 @@ if (isset($_POST['id'])) {
     $sql = "SELECT id, nodemand, no_po, no_item, warna, 
             [group] as group_report, 
             hue as hue_report, 
-            list_kanan as demand_kanan 
+            list_kanan as demand_kanan,
+            grade_kiri,
+            grade_kanan
             FROM db_qc.tbl_qcf WHERE id = ?";
             
     $params = array($id);

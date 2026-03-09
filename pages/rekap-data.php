@@ -904,11 +904,23 @@ if ($Delay == "1") {
                         </div>
 
                         <div class="form-group">
-                            <label>Demand Kanan (Ketik & Tekan Enter)</label>
+                            <label>Grade Kiri (Data Induk)</label>
+                            <input type="text" name="grade_kiri" id="edit_grade_kiri" class="form-control" placeholder="Contoh: A">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Grade Kanan (wajib diisi sebelum pilih demand)</label>
+                            <input type="text" id="input_grade_kanan" class="form-control" placeholder="Contoh: A">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Demand Kanan (Ketik & Pilih)</label>
                             <input type="text" id="search_demand" class="form-control" placeholder="Cari No. Demand...">
                             <div id="demand_tags_container" style="margin-top: 10px;">
                                 </div>
+                            <div id="grade_diff_info" style="margin-top:8px; font-size:12px;"></div>
                             <input type="hidden" name="demand_kanan" id="final_demand_input">
+                            <input type="hidden" name="grade_kanan" id="final_grade_input">
                         </div>
 
                         <ul id="search_results_list" class="list-group" style="position: absolute; z-index: 9999; width: 90%; display: none;"></ul>
@@ -932,21 +944,76 @@ function confirm_delete(delete_url)
     document.getElementById('delete_link').setAttribute('href' , delete_url);
 }
 
-// Global variable untuk tracking selected demands
+// Global variable untuk tracking selected demands + grade kanan
 var selectedDemands = [];
 
 $(document).ready(function() {
     console.log('Page ready. Initializing event handlers...');
 
+    function normalizeGrade(value) {
+        return $.trim(String(value || '')).toUpperCase();
+    }
+
+    function updateGradeDifferenceInfo() {
+        var gradeKiri = normalizeGrade($('#edit_grade_kiri').val());
+        var summary = {};
+
+        selectedDemands.forEach(function(item) {
+            var grade = normalizeGrade(item.grade);
+            if (grade === '') {
+                return;
+            }
+            if (!summary[grade]) {
+                summary[grade] = 0;
+            }
+            summary[grade]++;
+        });
+
+        var summaryParts = Object.keys(summary).map(function(grade) {
+            return grade + ' (' + summary[grade] + ')';
+        });
+
+        var diffDemands = selectedDemands.filter(function(item) {
+            var grade = normalizeGrade(item.grade);
+            if (grade === '') {
+                return false;
+            }
+            if (gradeKiri === '') {
+                return true;
+            }
+            return grade !== gradeKiri;
+        }).map(function(item) {
+            return item.demand + ':' + normalizeGrade(item.grade);
+        });
+
+        var infoHtml = '';
+        if (summaryParts.length > 0) {
+            infoHtml += '<div><b>List Grade Kanan:</b> ' + summaryParts.join(', ') + '</div>';
+        }
+
+        if (diffDemands.length > 0) {
+            var title = gradeKiri === ''
+                ? 'Demand dengan grade kanan (Grade Kiri belum diisi):'
+                : 'Demand dengan grade beda dari Grade Kiri (' + gradeKiri + '):';
+            infoHtml += '<div style="color:#b94a48;"><b>' + title + '</b> ' + diffDemands.join(', ') + '</div>';
+        } else if (selectedDemands.length > 0 && gradeKiri !== '') {
+            infoHtml += '<div style="color:#3c763d;"><b>Semua grade kanan sama dengan Grade Kiri (' + gradeKiri + ').</b></div>';
+        }
+
+        $('#grade_diff_info').html(infoHtml);
+    }
+
     // Fungsi untuk merender tag ke layar
     function renderTags() {
         var html = '';
-        selectedDemands.forEach(function(val, index) {
+        selectedDemands.forEach(function(item, index) {
             html += '<span class="badge bg-blue" style="margin-right:5px; padding:8px;">' + 
-                    val + ' <i class="fa fa-times remove-tag" data-index="'+index+'" style="cursor:pointer; margin-left:5px;"></i></span>';
+                    item.demand + ' (' + item.grade + ') <i class="fa fa-times remove-tag" data-index="'+index+'" style="cursor:pointer; margin-left:5px;"></i></span>';
         });
         $('#demand_tags_container').html(html);
-        $('#final_demand_input').val(selectedDemands.join(',')); // Simpan ke hidden input
+        $('#final_demand_input').val(selectedDemands.map(function(item){ return item.demand; }).join(','));
+        $('#final_grade_input').val(selectedDemands.map(function(item){ return item.grade; }).join(','));
+        updateGradeDifferenceInfo();
         console.log('Tags rendered, current demands:', selectedDemands);
     }
 
@@ -981,15 +1048,28 @@ $(document).ready(function() {
     // Klik hasil pencarian untuk menambah tag
     $(document).on('click', '.add-demand-item', function(e) {
         e.preventDefault();
-        var val = $(this).data('val');
-        console.log('Adding demand:', val);
+        var val = String($(this).data('val') || '').trim();
+        var gradeKanan = $.trim($('#input_grade_kanan').val());
+
+        if (gradeKanan === '') {
+            alert('Isi Grade Kanan terlebih dahulu sebelum memilih demand.');
+            $('#input_grade_kanan').focus();
+            return;
+        }
+
+        console.log('Adding demand:', val, 'with grade:', gradeKanan);
         
-        if (!selectedDemands.includes(val)) {
-            selectedDemands.push(val);
+        var isExists = selectedDemands.some(function(item) {
+            return item.demand === val;
+        });
+
+        if (!isExists) {
+            selectedDemands.push({ demand: val, grade: gradeKanan });
             renderTags();
         }
         $('#search_results_list').hide();
         $('#search_demand').val('');
+        $('#input_grade_kanan').val('');
     });
 
     // Hapus tag
@@ -1008,6 +1088,8 @@ $(document).ready(function() {
         
         // Reset demands untuk edit baru
         selectedDemands = [];
+        $('#input_grade_kanan').val('');
+        $('#grade_diff_info').html('');
         
         $.ajax({
             url: "pages/ajax/ajax_get_data_qc.php",
@@ -1026,13 +1108,28 @@ $(document).ready(function() {
                 $('#edit_id').val(data.id);
                 $('#edit_group').val(data.group_report || '');
                 $('#edit_hue').val(data.hue_report || '');
+                $('#edit_grade_kiri').val(data.grade_kiri || '');
                 
                 // Load existing demands
                 if(data.demand_kanan && data.demand_kanan.trim() !== '') {
-                    selectedDemands = data.demand_kanan.split(',').map(function(v) {
+                    var demandList = data.demand_kanan.split(',').map(function(v) {
                         return v.trim();
                     }).filter(function(v) {
                         return v !== '';
+                    });
+
+                    var gradeList = [];
+                    if (data.grade_kanan && data.grade_kanan.trim() !== '') {
+                        gradeList = data.grade_kanan.split(',').map(function(v) {
+                            return v.trim();
+                        });
+                    }
+
+                    selectedDemands = demandList.map(function(demand, index) {
+                        return {
+                            demand: demand,
+                            grade: gradeList[index] || ''
+                        };
                     });
                     console.log('Loaded existing demands:', selectedDemands);
                 }
@@ -1057,6 +1154,15 @@ $(document).ready(function() {
             alert('ID tidak valid!');
             return;
         }
+
+        var hasEmptyGrade = selectedDemands.some(function(item) {
+            return $.trim(item.grade || '') === '';
+        });
+
+        if (hasEmptyGrade) {
+            alert('Masih ada demand yang belum memiliki Grade Kanan.');
+            return;
+        }
         
         console.log('Form submit - Selected demands:', selectedDemands);
         console.log('Form data:', $(this).serialize());
@@ -1067,8 +1173,6 @@ $(document).ready(function() {
             data: $(this).serialize(),
             dataType: "json",
             success: function(response) {
-                console.log('Response from server:', response);
-                
                 if(response && response.status === 'success') {
                     alert(response.message + " (Updated: " + response.rows_affected + " row)");
                     setTimeout(function() {
@@ -1086,6 +1190,10 @@ $(document).ready(function() {
                 alert("Gagal menyimpan data. Error: " + error + "\n\nResponse: " + xhr.responseText);
             }
         });
+    });
+
+    $(document).on('keyup change', '#edit_grade_kiri', function() {
+        updateGradeDifferenceInfo();
     });
     
     console.log('All event handlers initialized');
