@@ -476,6 +476,35 @@ include "koneksi.php";
 	$GR2A");
   $qrySUM = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) as Lot, SUM(rol) as Rol,SUM(berat) as Berat FROM db_qc.tbl_ncp_qcf_now WHERE $Wdept $WKategori $WHanger TRY_CAST(tgl_buat AS DATETIME) BETWEEN '$start_date' AND '$stop_date' $sts ");
   $rSUM = sqlsrv_fetch_array($qrySUM);
+  $salorder_ids = [];
+  $data_ncp = [];
+  while ($row = sqlsrv_fetch_array($qry1)) {
+    $data_ncp[] = $row;
+    if (!empty($row['no_order'])) {
+        $salorder_ids[] = "'" . $row['no_order'] . "'";
+    }
+  }
+  $list_demand = implode(",", array_unique($salorder_ids));
+  $map_db2_season = [];
+  if (!empty($list_demand)) {
+      $query_db2_season = "SELECT
+                              s.CODE,
+                              TRIM(s.STATISTICALGROUPCODE ) || ' (' || TRIM(s2.LONGDESCRIPTION)|| ') ' AS KETERANGAN,
+                              TRIM(s.STATISTICALGROUPCODE ) AS STATISTICALGROUPCODE
+                            FROM
+                              SALESORDER s
+                            LEFT JOIN STATISTICALGROUP s2 ON s2.CODE = s.STATISTICALGROUPCODE 
+                            WHERE
+                              s.CODE IN ($list_demand)";
+                    
+      $sql_db2_season = db2_exec($conn1, $query_db2_season);
+      
+      if ($sql_db2_season) {
+          while ($row_db = db2_fetch_assoc($sql_db2_season)) {
+              $map_db2_season[$row_db['CODE']] = $row_db['KETERANGAN'];
+          }
+        }
+      }
   ?>
   <div class="row">
     <div class="col-xs-12">
@@ -543,6 +572,9 @@ include "koneksi.php";
                 </th>
                 <th>
                   <div align="center">Order</div>
+                </th>
+                <th>
+                  <div align="center">Season</div>
                 </th>
                 <th>
                   <div align="center">Hanger</div>
@@ -668,7 +700,8 @@ include "koneksi.php";
             <tbody>
               <?php
               $no = 1;
-              while ($row1 = sqlsrv_fetch_array($qry1)) {
+              foreach ($data_ncp as $row1) {
+                $season_ket = isset($map_db2_season[$row1['no_order']]) ? $map_db2_season[$row1['no_order']] : '';
                 if ($row1['nokk_salinan'] != "") {
                   $nokk1 = $row1['nokk_salinan'];
                 } else {
@@ -684,6 +717,9 @@ include "koneksi.php";
 					p.CODE = '$row1[nodemand]'";
                 $stmt = db2_exec($conn1, $sqlDB2, array('cursor' => DB2_SCROLLABLE));
                 $rowdb2 = db2_fetch_assoc($stmt);
+                if (!empty($row1['no_order'])) {
+                      $salorder[] = $row1['no_order'];
+                  }
               ?>
                 <tr bgcolor="<?php echo $bgcolor; ?>">
                   <td height="39" align="center">
@@ -744,6 +780,9 @@ include "koneksi.php";
                       </span></a></td>
                   <td align="center">
                     <?php echo $row1['no_order']; ?>
+                  </td>
+                  <td align="center">
+                    <?php echo $season_ket; ?>
                   </td>
                   <td align="center">
                     <?php echo $row1['no_hanger']; ?>
@@ -900,7 +939,7 @@ include "koneksi.php";
                   </td>
                 </tr>
               <?php $no++;
-              } ?>
+              }; ?>
             </tbody>
           </table>
         </div>
