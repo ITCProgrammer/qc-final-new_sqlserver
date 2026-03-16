@@ -12,6 +12,17 @@ if (!function_exists('bp_value')) {
         return ($value === null || $value === '') ? $default : $value;
     }
 }
+
+if (!function_exists('bp_decimal')) {
+    function bp_decimal($value)
+    {
+        if ($value === null || $value === '') {
+            return '0.00';
+        }
+
+        return number_format((float)$value, 2, '.', '');
+    }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -157,10 +168,10 @@ if (!function_exists('bp_value')) {
                     } else {
                     echo '';
                     }?></td>
-                <td style="border: 2px solid black;" align="center"><?php echo bp_value($r['berat_order']);?></td>
-                <td style="border: 2px solid black;" align="center"><?php echo bp_value($r['panjang_order']);?></td>
-                <td style="border: 2px solid black;" align="center"><?php echo bp_value($r['estimasi']);?></td>
-                <td style="border: 2px solid black;" align="center"><?php echo bp_value($r['panjang_estimasi']);?></td>
+                <td style="border: 2px solid black;" align="center"><?php echo bp_decimal($r['berat_order']);?></td>
+                <td style="border: 2px solid black;" align="center"><?php echo bp_decimal($r['panjang_order']);?></td>
+                <td style="border: 2px solid black;" align="center"><?php echo bp_decimal($r['estimasi']);?></td>
+                <td style="border: 2px solid black;" align="center"><?php echo bp_decimal($r['panjang_estimasi']);?></td>
                 <td style="border: 2px solid black;" align="center"><?php echo bp_value($r['lot_legacy']); // Lot-Legacy ?></td>
                 <td style="border: 2px solid black;" align="center"><?php echo bp_value($r['lot']); // Lot ?></td>
                 <td style="border: 2px solid black;" align="center"><?php echo bp_value($r['nodemand']); // Demand ?></td>
