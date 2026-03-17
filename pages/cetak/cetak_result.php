@@ -2444,6 +2444,87 @@ $rd = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
                 <!--<td colspan="2"><?php echo $rcek1['acid_staining']; ?></td>-->
               </tr>
             <?php } ?>
+            <!-- Perspiration Acid ISO -->
+            <?php if ($rcek1['acid_colorchange2'] != "" or $rcek1['acid_acetate2'] != "" or $rcek1['acid_cotton2'] != "" or $rcek1['acid_nylon2'] != "" or $rcek1['acid_poly2'] != "" or $rcek1['acid_acrylic2'] != "" or $rcek1['acid_wool2'] != "" or $rcek1['acid_staining2'] != "") { ?>
+              <tr>
+                <th rowspan="4" align="left" style="font-size: 7px;">Perspiration Acid ISO</th>
+                <td style="font-size: 7px;"><strong>CC</strong></td>
+                <td style="font-size: 7px;"><strong>Ace</strong></td>
+                <td style="font-size: 7px;"><strong>Cot</strong></td>
+                <td colspan="2" style="font-size: 7px;"><strong>Nyl</strong></td>
+                <td style="font-size: 7px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-size: 7px; <?= ($rcek1['stat_pac2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pac2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pac2'] == "RANDOM") {
+                    echo $rcekR['racid_colorchange2'];
+                  } else {
+                    echo $rcek1['acid_colorchange2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px; <?= ($rcek1['stat_pac2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pac2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pac2'] == "RANDOM") {
+                    echo $rcekR['racid_acetate2'];
+                  } else {
+                    echo $rcek1['acid_acetate2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px; <?= ($rcek1['stat_pac2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pac2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pac2'] == "RANDOM") {
+                    echo $rcekR['racid_cotton2'];
+                  } else {
+                    echo $rcek1['acid_cotton2'];
+                  } ?>
+                </td>
+                <td colspan="2" style="font-size: 7px; <?= ($rcek1['stat_pac2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pac2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pac2'] == "RANDOM") {
+                    echo $rcekR['racid_nylon2'];
+                  } else {
+                    echo $rcek1['acid_nylon2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-size: 7px;"><strong>Poly</strong></td>
+                <td style="font-size: 7px;"><strong>Acr</strong></td>
+                <td style="font-size: 7px;"><strong>Wool</strong></td>
+                <td colspan="2" style="font-size: 7px;"><strong>Sta</strong></td>
+                <td style="font-size: 7px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-size: 7px; <?= ($rcek1['stat_pac2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pac2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pac2'] == "RANDOM") {
+                    echo $rcekR['racid_poly2'];
+                  } else {
+                    echo $rcek1['acid_poly2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px; <?= ($rcek1['stat_pac2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pac2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pac2'] == "RANDOM") {
+                    echo $rcekR['racid_acrylic2'];
+                  } else {
+                    echo $rcek1['acid_acrylic2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px; <?= ($rcek1['stat_pac2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pac2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pac2'] == "RANDOM") {
+                    echo $rcekR['racid_wool2'];
+                  } else {
+                    echo $rcek1['acid_wool2'];
+                  } ?>
+                </td>
+                <td colspan="2" style="font-size: 7px; <?= ($rcek1['stat_pac2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pac2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pac2'] == "RANDOM") {
+                    echo $rcekR['racid_staining2'];
+                  } else {
+                    echo $rcek1['acid_staining2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px;">&nbsp;</td>
+                <!--<td colspan="2"><?php echo $rcek1['acid_staining2']; ?></td>-->
+              </tr>
+            <?php } ?>
             <?php if ($rcek1['alkaline_colorchange'] != "" or $rcek1['alkaline_acetate'] != "" or $rcek1['alkaline_cotton'] != "" or $rcek1['alkaline_nylon'] != "" or $rcek1['alkaline_poly'] != "" or $rcek1['alkaline_acrylic'] != "" or $rcek1['alkaline_wool'] != "" or $rcek1['alkaline_staining'] != "") { ?>
               <tr>
                 <th rowspan="4" align="left" style="font-size: 7px;">Perspiration Alkaline</th>
@@ -2524,6 +2605,88 @@ $rd = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
                 <!--<td colspan="2"><?php echo $rcek1['alkaline_staining']; ?></td>-->
               </tr>
             <?php } ?>
+            <!-- Result testing alkaline ISO -->
+            <?php if ($rcek1['alkaline_colorchange2'] != "" or $rcek1['alkaline_acetate2'] != "" or $rcek1['alkaline_cotton2'] != "" or $rcek1['alkaline_nylon2'] != "" or $rcek1['alkaline_poly2'] != "" or $rcek1['alkaline_acrylic2'] != "" or $rcek1['alkaline_wool2'] != "" or $rcek1['alkaline_staining2'] != "") { ?>
+              <tr>
+                <th rowspan="4" align="left" style="font-size: 7px;">Perspiration Alkaline ISO</th>
+                <td style="font-size: 7px;"><strong>CC</strong></td>
+                <td style="font-size: 7px;"><strong>Ace</strong></td>
+                <td style="font-size: 7px;"><strong>Cot</strong></td>
+                <td colspan="2" style="font-size: 7px;"><strong>Nyl</strong></td>
+                <td style="font-size: 7px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-size: 7px; <?= ($rcek1['stat_pal2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pal2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pal2'] == "RANDOM") {
+                    echo $rcekR['ralkaline_colorchange2'];
+                  } else {
+                    echo $rcek1['alkaline_colorchange2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px; <?= ($rcek1['stat_pal2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pal2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pal2'] == "RANDOM") {
+                    echo $rcekR['ralkaline_acetate2'];
+                  } else {
+                    echo $rcek1['alkaline_acetate2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px; <?= ($rcek1['stat_pal2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pal2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pal2'] == "RANDOM") {
+                    echo $rcekR['ralkaline_cotton2'];
+                  } else {
+                    echo $rcek1['alkaline_cotton2'];
+                  } ?>
+                </td>
+                <td colspan="2" style="font-size: 7px; <?= ($rcek1['stat_pal2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pal2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pal2'] == "RANDOM") {
+                    echo $rcekR['ralkaline_nylon2'];
+                  } else {
+                    echo $rcek1['alkaline_nylon2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-size: 7px;"><strong>Poly</strong></td>
+                <td style="font-size: 7px;"><strong>Acr</strong></td>
+                <td style="font-size: 7px;"><strong>Wool</strong></td>
+                <td colspan="2" style="font-size: 7px;"><strong>Sta</strong></td>
+                <td style="font-size: 7px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-size: 7px; <?= ($rcek1['stat_pal2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pal2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pal2'] == "RANDOM") {
+                    echo $rcekR['ralkaline_poly2'];
+                  } else {
+                    echo $rcek1['alkaline_poly2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px; <?= ($rcek1['stat_pal2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pal2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pal2'] == "RANDOM") {
+                    echo $rcekR['ralkaline_acrylic2'];
+                  } else {
+                    echo $rcek1['alkaline_acrylic2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px; <?= ($rcek1['stat_pal2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pal2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pal2'] == "RANDOM") {
+                    echo $rcekR['ralkaline_wool2'];
+                  } else {
+                    echo $rcek1['alkaline_wool2'];
+                  } ?>
+                </td>
+                <td colspan="2" style="font-size: 7px; <?= ($rcek1['stat_pal2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_pal2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_pal2'] == "RANDOM") {
+                    echo $rcekR['ralkaline_staining2'];
+                  } else {
+                    echo $rcek1['alkaline_staining2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px;">&nbsp;</td>
+                <!--<td colspan="2"><?php echo $rcek1['alkaline_staining2']; ?></td>-->
+              </tr>
+            <?php } ?>
+            <!-- Result Testing Water-->
             <?php if ($rcek1['water_colorchange'] != "" or $rcek1['water_acetate'] != "" or $rcek1['water_cotton'] != "" or $rcek1['water_nylon'] != "" or $rcek1['water_poly'] != "" or $rcek1['water_acrylic'] != "" or $rcek1['water_wool'] != "" or $rcek1['water_staining'] != "") { ?>
               <tr>
                 <th rowspan="4" align="left" style="font-size: 7px;">Water</th>
@@ -2598,6 +2761,87 @@ $rd = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
                     echo $rcekR['rwater_staining'];
                   } else {
                     echo $rcek1['water_staining'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px;">&nbsp;</td>
+                <!--<td><?php echo $rcek1['water_staining']; ?></td>-->
+              </tr>
+            <?php } ?>
+            <!-- Result Testing Water ISO-->
+            <?php if ($rcek1['water_colorchange2'] != "" or $rcek1['water_acetate2'] != "" or $rcek1['water_cotton2'] != "" or $rcek1['water_nylon2'] != "" or $rcek1['water_poly2'] != "" or $rcek1['water_acrylic2'] != "" or $rcek1['water_wool2'] != "" or $rcek1['water_staining2'] != "") { ?>
+              <tr>
+                <th rowspan="4" align="left" style="font-size: 7px;">Water ISO</th>
+                <td style="font-size: 7px;"><strong>CC</strong></td>
+                <td style="font-size: 7px;"><strong>Ace</strong></td>
+                <td style="font-size: 7px;"><strong>Cot</strong></td>
+                <td colspan="2" style="font-size: 7px;"><strong>Nyl</strong></td>
+                <td style="font-size: 7px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-size: 7px; <?= ($rcek1['stat_wtr2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_wtr2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_wtr2'] == "RANDOM") {
+                    echo $rcekR['rwater_colorchange2'];
+                  } else {
+                    echo $rcek1['water_colorchange2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px; <?= ($rcek1['stat_wtr2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_wtr2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_wtr2'] == "RANDOM") {
+                    echo $rcekR['rwater_acetate2'];
+                  } else {
+                    echo $rcek1['water_acetate2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px; <?= ($rcek1['stat_wtr2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_wtr2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_wtr2'] == "RANDOM") {
+                    echo $rcekR['rwater_cotton2'];
+                  } else {
+                    echo $rcek1['water_cotton2'];
+                  } ?>
+                </td>
+                <td colspan="2" style="font-size: 7px; <?= ($rcek1['stat_wtr2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_wtr2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_wtr2'] == "RANDOM") {
+                    echo $rcekR['rwater_nylon2'];
+                  } else {
+                    echo $rcek1['water_nylon2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-size: 7px;"><strong>Poly</strong></td>
+                <td style="font-size: 7px;"><strong>Acr</strong></td>
+                <td style="font-size: 7px;"><strong>Wool</strong></td>
+                <td colspan="2" style="font-size: 7px;"><strong>Sta</strong></td>
+                <td style="font-size: 7px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-size: 7px; <?= ($rcek1['stat_wtr2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_wtr2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_wtr2'] == "RANDOM") {
+                    echo $rcekR['rwater_poly2'];
+                  } else {
+                    echo $rcek1['water_poly2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px; <?= ($rcek1['stat_wtr2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_wtr2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_wtr2'] == "RANDOM") {
+                    echo $rcekR['rwater_acrylic2'];
+                  } else {
+                    echo $rcek1['water_acrylic2'];
+                  } ?>
+                </td>
+                <td style="font-size: 7px; <?= ($rcek1['stat_wtr2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_wtr2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_wtr2'] == "RANDOM") {
+                    echo $rcekR['rwater_wool2'];
+                  } else {
+                    echo $rcek1['water_wool2'];
+                  } ?>
+                </td>
+                <td colspan="2" style="font-size: 7px; <?= ($rcek1['stat_wtr2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_wtr2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_wtr2'] == "RANDOM") {
+                    echo $rcekR['rwater_staining2'];
+                  } else {
+                    echo $rcek1['water_staining2'];
                   } ?>
                 </td>
                 <td style="font-size: 7px;">&nbsp;</td>

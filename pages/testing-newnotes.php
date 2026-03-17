@@ -13183,6 +13183,7 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 		</div>
 		<!-- info row -->
 		<div class="row invoice-info">
+			<!-- Physical -->
 			<div class="col-sm-4 invoice-col">
 				<strong>PHYSICAL</strong>
 				<hr>
@@ -15229,6 +15230,8 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 				</div>
 			</div>
 			<!-- /.col -->
+			<!-- End Physical -->
+			<!-- FUNCTIONAL -->
 			<div class="col-sm-4 invoice-col">
 				<strong>FUNCTIONAL</strong>
 				<hr>
@@ -15564,6 +15567,7 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 
 				</address>
 			</div>
+			<!-- END FUNCTIONAL -->
 			<!-- /.col -->
 			<div class="col-sm-4 invoice-col">
 				<strong>COLORFASTNESS</strong>
@@ -15593,11 +15597,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 						</tr>
 						<tr>
 							<th>&nbsp;</th>
-							<!-- <td><?php //if($rcek1['stat_wf']=="RANDOM"){echo $rcekR['rwash_colorchange'];}else{echo $rcek1['wash_colorchange'];}  ?></td>
-				  <td colspan="2"><?php //if($rcek1['stat_wf']=="RANDOM"){echo $rcekR['rwash_acetate'];}else{echo $rcek1['wash_acetate'];}  ?></td>
-				<td><?php //if($rcek1['stat_wf']=="RANDOM"){echo $rcekR['rwash_cotton'];}else{echo $rcek1['wash_cotton'];}  ?></td>
-				  <td colspan="2"><?php //if($rcek1['stat_wf']=="RANDOM"){echo $rcekR['rwash_nylon'];}else{echo $rcek1['wash_nylon'];}  ?></td>
-				  <td>&nbsp;</td> -->
 							<td>
 								<?php if ($rcek1['wash_colorchange'] != "") {
 									echo $rcek1['wash_colorchange'];
@@ -15638,11 +15637,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 						</tr>
 						<tr>
 							<th>&nbsp;</th>
-							<!-- <td><?php //if($rcek1['stat_wf']=="RANDOM"){echo $rcekR['rwash_poly'];}else{echo $rcek1['wash_poly'];}  ?></td>
-				  <td colspan="2"><?php //if($rcek1['stat_wf']=="RANDOM"){echo $rcekR['rwash_acrylic'];}else{echo $rcek1['wash_acrylic'];}  ?></td>
-				<td><?php //if($rcek1['stat_wf']=="RANDOM"){echo $rcekR['rwash_wool'];}else{echo $rcek1['wash_wool'];}  ?></td>
-				  <td colspan="2"><?php //if($rcek1['stat_wf']=="RANDOM"){echo $rcekR['rwash_staining'];}else{echo $rcek1['wash_staining'];}  ?></td> -->
-
 							<td>
 								<?php if ($rcek1['wash_poly'] != "") {
 									echo $rcek1['wash_poly'];
@@ -15684,11 +15678,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<!-- <td ><?php //if($rcek1['stat_pac']=="RANDOM"){echo $rcekR['racid_colorchange'];}else{echo $rcek1['acid_colorchange'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_pac']=="RANDOM"){echo $rcekR['racid_acetate'];}else{echo $rcek1['acid_acetate'];}  ?></td>
-			<td><?php //if($rcek1['stat_pac']=="RANDOM"){echo $rcekR['racid_cotton'];}else{echo $rcek1['acid_cotton'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_pac']=="RANDOM"){echo $rcekR['racid_nylon'];}else{echo $rcek1['acid_nylon'];}  ?></td>
-			  <td>&nbsp;</td> -->
 							<td>
 								<?php if ($rcek1['acid_colorchange'] != "") {
 									echo $rcek1['acid_colorchange'];
@@ -15727,11 +15716,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<!-- <td><?php //if($rcek1['stat_pac']=="RANDOM"){echo $rcekR['racid_poly'];}else{echo $rcek1['acid_poly'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_pac']=="RANDOM"){echo $rcekR['racid_acrylic'];}else{echo $rcek1['acid_acrylic'];}  ?></td>
-			<td><?php //if($rcek1['stat_pac']=="RANDOM"){echo $rcekR['racid_wool'];}else{echo $rcek1['acid_wool'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_pac']=="RANDOM"){echo $rcekR['racid_staining'];}else{echo $rcek1['acid_staining'];}  ?></td> -->
-
 							<td>
 								<?php if ($rcek1['acid_poly'] != "") {
 									echo $rcek1['acid_poly'];
@@ -15761,7 +15745,85 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 								} ?>
 							</td>
 							<td>&nbsp;</td>
-							<!--<td colspan="2"><?php echo $rcek1['acid_staining']; ?></td>-->
+						</tr>
+					<?php } ?>
+					<?php if ($rcek1['acid_colorchange2'] != "" or $rcek1['acid_acetate2'] != "" or $rcek1['acid_cotton2'] != "" or $rcek1['acid_nylon2'] != "" or $rcek1['acid_poly2'] != "" or $rcek1['acid_acrylic2'] != "" or $rcek1['acid_wool2'] != "" or $rcek1['acid_staining2'] != "") { ?>
+						<tr>
+							<th rowspan="4" colspan="2">Perspiration Acid ISO</th>
+							<td><strong>CC</strong></td>
+							<td colspan="2"><strong>Ace</strong></td>
+							<td><strong>Cot</strong></td>
+							<td colspan="2"><strong>Nyl</strong></td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td>
+								<?php if ($rcek1['acid_colorchange2'] != "") {
+									echo $rcek1['acid_colorchange2'];
+								} else {
+									echo $rcekR['racid_colorchange'];
+								} ?>
+							</td>
+							<td colspan="2">
+								<?php if ($rcek1['acid_acetate2'] != "") {
+									echo $rcek1['acid_acetate2'];
+								} else {
+									echo $rcekR['racid_acetate'];
+								} ?>
+							</td>
+							<td>
+								<?php if ($rcek1['acid_cotton2'] != "") {
+									echo $rcek1['acid_cotton2'];
+								} else {
+									echo $rcekR['racid_cotton'];
+								} ?>
+							</td>
+							<td colspan="2">
+								<?php if ($rcek1['acid_nylon2'] != "") {
+									echo $rcek1['acid_nylon2'];
+								} else {
+									echo $rcekR['racid_nylon'];
+								} ?>
+							</td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td><strong>Poly</strong></td>
+							<td colspan="2"><strong>Acr</strong></td>
+							<td><strong>Wool</strong></td>
+							<td colspan="2"><strong>Sta</strong></td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td>
+								<?php if ($rcek1['acid_poly2'] != "") {
+									echo $rcek1['acid_poly2'];
+								} else {
+									echo $rcekR['racid_poly'];
+								} ?>
+							</td>
+							<td colspan="2">
+								<?php if ($rcek1['acid_acrylic2'] != "") {
+									echo $rcek1['acid_acrylic2'];
+								} else {
+									echo $rcekR['racid_acrylic'];
+								} ?>
+							</td>
+							<td>
+								<?php if ($rcek1['acid_wool2'] != "") {
+									echo $rcek1['acid_wool2'];
+								} else {
+									echo $rcekR['racid_wool'];
+								} ?>
+							</td>
+							<td colspan="2">
+								<?php if ($rcek1['acid_staining2'] != "") {
+									echo $rcek1['acid_staining2'];
+								} else {
+									echo $rcekR['racid_staining'];
+								} ?>
+							</td>
+							<td>&nbsp;</td>
 						</tr>
 					<?php } ?>
 					<?php if ($rcek1['alkaline_colorchange'] != "" or $rcek1['alkaline_acetate'] != "" or $rcek1['alkaline_cotton'] != "" or $rcek1['alkaline_nylon'] != "" or $rcek1['alkaline_poly'] != "" or $rcek1['alkaline_acrylic'] != "" or $rcek1['alkaline_wool'] != "" or $rcek1['alkaline_staining'] != "") { ?>
@@ -15774,11 +15836,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<!-- <td><?php //if($rcek1['stat_pal']=="RANDOM"){echo $rcekR['ralkaline_colorchange'];}else{echo $rcek1['alkaline_colorchange'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_pal']=="RANDOM"){echo $rcekR['ralkaline_acetate'];}else{echo $rcek1['alkaline_acetate'];}  ?></td>
-			<td><?php //if($rcek1['stat_pal']=="RANDOM"){echo $rcekR['ralkaline_cotton'];}else{echo $rcek1['alkaline_cotton'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_pal']=="RANDOM"){echo $rcekR['ralkaline_nylon'];}else{echo $rcek1['alkaline_nylon'];}  ?></td>
-			  <td>&nbsp;</td> -->
 							<td>
 								<?php if ($rcek1['alkaline_colorchange'] != "") {
 									echo $rcek1['alkaline_colorchange'];
@@ -15817,11 +15874,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<!-- <td><?php //if($rcek1['stat_pal']=="RANDOM"){echo $rcekR['ralkaline_poly'];}else{echo $rcek1['alkaline_poly'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_pal']=="RANDOM"){echo $rcekR['ralkaline_acrylic'];}else{echo $rcek1['alkaline_acrylic'];}  ?></td>
-			<td><?php //if($rcek1['stat_pal']=="RANDOM"){echo $rcekR['ralkaline_wool'];}else{echo $rcek1['alkaline_wool'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_pal']=="RANDOM"){echo $rcekR['ralkaline_staining'];}else{echo $rcek1['alkaline_staining'];}  ?></td>
-			  <td>&nbsp;</td> -->
 							<td>
 								<?php if ($rcek1['alkaline_poly'] != "") {
 									echo $rcek1['alkaline_poly'];
@@ -15851,7 +15903,85 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 								} ?>
 							</td>
 							<td>&nbsp;</td>
-							<!--<td colspan="2"><?php echo $rcek1['alkaline_staining']; ?></td>-->
+						</tr>
+					<?php } ?>
+					<?php if ($rcek1['alkaline_colorchange2'] != "" or $rcek1['alkaline_acetate2'] != "" or $rcek1['alkaline_cotton2'] != "" or $rcek1['alkaline_nylon2'] != "" or $rcek1['alkaline_poly2'] != "" or $rcek1['alkaline_acrylic2'] != "" or $rcek1['alkaline_wool2'] != "" or $rcek1['alkaline_staining2'] != "") { ?>
+						<tr>
+							<th rowspan="4" colspan="2">Perspiration Alkaline ISO</th>
+							<td><strong>CC</strong></td>
+							<td colspan="2"><strong>Ace</strong></td>
+							<td><strong>Cot</strong></td>
+							<td colspan="2"><strong>Nyl</strong></td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td>
+								<?php if ($rcek1['alkaline_colorchange2'] != "") {
+									echo $rcek1['alkaline_colorchange2'];
+								} else {
+									echo $rcekR['ralkaline_colorchange'];
+								} ?>
+							</td>
+							<td colspan="2">
+								<?php if ($rcek1['alkaline_acetate2'] != "") {
+									echo $rcek1['alkaline_acetate2'];
+								} else {
+									echo $rcekR['ralkaline_acetate'];
+								} ?>
+							</td>
+							<td>
+								<?php if ($rcek1['alkaline_cotton2'] != "") {
+									echo $rcek1['alkaline_cotton2'];
+								} else {
+									echo $rcekR['ralkaline_cotton'];
+								} ?>
+							</td>
+							<td colspan="2">
+								<?php if ($rcek1['alkaline_nylon2'] != "") {
+									echo $rcek1['alkaline_nylon2'];
+								} else {
+									echo $rcekR['ralkaline_nylon'];
+								} ?>
+							</td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td><strong>Poly</strong></td>
+							<td colspan="2"><strong>Acr</strong></td>
+							<td><strong>Wool</strong></td>
+							<td colspan="2"><strong>Sta</strong></td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td>
+								<?php if ($rcek1['alkaline_poly2'] != "") {
+									echo $rcek1['alkaline_poly2'];
+								} else {
+									echo $rcekR['ralkaline_poly'];
+								} ?>
+							</td>
+							<td colspan="2">
+								<?php if ($rcek1['alkaline_acrylic2'] != "") {
+									echo $rcek1['alkaline_acrylic2'];
+								} else {
+									echo $rcekR['ralkaline_acrylic'];
+								} ?>
+							</td>
+							<td>
+								<?php if ($rcek1['alkaline_wool2'] != "") {
+									echo $rcek1['alkaline_wool2'];
+								} else {
+									echo $rcekR['ralkaline_wool'];
+								} ?>
+							</td>
+							<td colspan="2">
+								<?php if ($rcek1['alkaline_staining2'] != "") {
+									echo $rcek1['alkaline_staining2'];
+								} else {
+									echo $rcekR['ralkaline_staining'];
+								} ?>
+							</td>
+							<td>&nbsp;</td>
 						</tr>
 					<?php } ?>
 					<?php if ($rcek1['water_colorchange'] != "" or $rcek1['water_acetate'] != "" or $rcek1['water_cotton'] != "" or $rcek1['water_nylon'] != "" or $rcek1['water_poly'] != "" or $rcek1['water_acrylic'] != "" or $rcek1['water_wool'] != "" or $rcek1['water_staining'] != "") { ?>
@@ -15864,11 +15994,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<!-- <td><?php //if($rcek1['stat_wtr']=="RANDOM"){echo $rcekR['rwater_colorchange'];}else{echo $rcek1['water_colorchange'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_wtr']=="RANDOM"){echo $rcekR['rwater_acetate'];}else{echo $rcek1['water_acetate'];}  ?></td>
-			<td><?php //if($rcek1['stat_wtr']=="RANDOM"){echo $rcekR['rwater_cotton'];}else{echo $rcek1['water_cotton'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_wtr']=="RANDOM"){echo $rcekR['rwater_nylon'];}else{echo $rcek1['water_nylon'];}  ?></td> -->
-
 							<td>
 								<?php if ($rcek1['water_colorchange'] != "") {
 									echo $rcek1['water_colorchange'];
@@ -15907,11 +16032,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
-							<!-- <td><?php //if($rcek1['stat_wtr']=="RANDOM"){echo $rcekR['rwater_poly'];}else{echo $rcek1['water_poly'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_wtr']=="RANDOM"){echo $rcekR['rwater_acrylic'];}else{echo $rcek1['water_acrylic'];}  ?></td>
-			<td><?php //if($rcek1['stat_wtr']=="RANDOM"){echo $rcekR['rwater_wool'];}else{echo $rcek1['water_wool'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_wtr']=="RANDOM"){echo $rcekR['rwater_staining'];}else{echo $rcek1['water_staining'];}  ?></td> -->
-
 							<td>
 								<?php if ($rcek1['water_poly'] != "") {
 									echo $rcek1['water_poly'];
@@ -15941,7 +16061,85 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 								} ?>
 							</td>
 							<td>&nbsp;</td>
-							<!--<td><?php echo $rcek1['water_staining']; ?></td>-->
+						</tr>
+					<?php } ?>
+					<?php if ($rcek1['water_colorchange2'] != "" or $rcek1['water_acetate2'] != "" or $rcek1['water_cotton2'] != "" or $rcek1['water_nylon2'] != "" or $rcek1['water_poly2'] != "" or $rcek1['water_acrylic2'] != "" or $rcek1['water_wool2'] != "" or $rcek1['water_staining2'] != "") { ?>
+						<tr>
+							<th rowspan="4" colspan="2">Water ISO</th>
+							<td><strong>CC</strong></td>
+							<td colspan="2"><strong>Ace</strong></td>
+							<td><strong>Cot</strong></td>
+							<td colspan="2"><strong>Nyl</strong></td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td>
+								<?php if ($rcek1['water_colorchange2'] != "") {
+									echo $rcek1['water_colorchange2'];
+								} else {
+									echo $rcekR['rwater_colorchange'];
+								} ?>
+							</td>
+							<td colspan="2">
+								<?php if ($rcek1['water_acetate2'] != "") {
+									echo $rcek1['water_acetate2'];
+								} else {
+									echo $rcekR['rwater_acetate'];
+								} ?>
+							</td>
+							<td>
+								<?php if ($rcek1['water_cotton2'] != "") {
+									echo $rcek1['water_cotton2'];
+								} else {
+									echo $rcekR['rwater_cotton'];
+								} ?>
+							</td>
+							<td colspan="2">
+								<?php if ($rcek1['water_nylon2'] != "") {
+									echo $rcek1['water_nylon2'];
+								} else {
+									echo $rcekR['rwater_nylon'];
+								} ?>
+							</td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td><strong>Poly</strong></td>
+							<td colspan="2"><strong>Acr</strong></td>
+							<td><strong>Wool</strong></td>
+							<td colspan="2"><strong>Sta</strong></td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td>
+								<?php if ($rcek1['water_poly2'] != "") {
+									echo $rcek1['water_poly2'];
+								} else {
+									echo $rcekR['rwater_poly'];
+								} ?>
+							</td>
+							<td colspan="2">
+								<?php if ($rcek1['water_acrylic2'] != "") {
+									echo $rcek1['water_acrylic2'];
+								} else {
+									echo $rcekR['rwater_acrylic'];
+								} ?>
+							</td>
+							<td>
+								<?php if ($rcek1['water_wool2'] != "") {
+									echo $rcek1['water_wool2'];
+								} else {
+									echo $rcekR['rwater_wool'];
+								} ?>
+							</td>
+							<td colspan="2">
+								<?php if ($rcek1['water_staining2'] != "") {
+									echo $rcek1['water_staining2'];
+								} else {
+									echo $rcekR['rwater_staining'];
+								} ?>
+							</td>
+							<td>&nbsp;</td>
 						</tr>
 					<?php } ?>
 					<?php if ($rcek1['crock_len1'] != "" or $rcek1['crock_wid1'] != "" or $rcek1['crock_len2'] != "" or $rcek1['crock_wid2'] != "") { ?>
@@ -15953,8 +16151,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 						</tr>
 						<tr>
 							<th>Len</th>
-							<!-- <td><?php //if($rcek1['stat_cr']=="RANDOM"){echo $rcekR['rcrock_len1'];}else{echo $rcek1['crock_len1'];}  ?></td>
-				  <td colspan="2"><?php //if($rcek1['stat_cr']=="RANDOM"){echo $rcekR['rcrock_len2'];}else{echo $rcek1['crock_len2'];}  ?></td> -->
 							<td>
 								<?php if ($rcek1['crock_len1'] != "") {
 									echo $rcek1['crock_len1'];
@@ -15972,8 +16168,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 						</tr>
 						<tr>
 							<th>Wid</th>
-							<!-- <td><?php //if($rcek1['stat_cr']=="RANDOM"){echo $rcekR['rcrock_wid1'];}else{echo $rcek1['crock_wid1'];}  ?></td>
-				<td colspan="3"><?php //if($rcek1['stat_cr']=="RANDOM"){echo $rcekR['rcrock_wid2'];}else{echo $rcek1['crock_wid2'];}  ?></td> -->
 							<td>
 								<?php if ($rcek1['crock_wid1'] != "") {
 									echo $rcek1['crock_wid1'];
@@ -15994,7 +16188,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 						<tr>
 							<th>Phenolic Yellowing</th>
 							<th><strong>CC</strong></th>
-							<!-- <td colspan="4"><?php //if($rcek1['stat_py']=="RANDOM"){echo $rcekR['rphenolic_colorchange'];}else{echo $rcek1['phenolic_colorchange'];}  ?></td> -->
 							<td colspan="4">
 								<?php if ($rcek1['phenolic_colorchange'] != "") {
 									echo $rcek1['phenolic_colorchange'];
@@ -16008,8 +16201,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 						<tr>
 							<th>Light</th>
 							<th>&nbsp;</th>
-							<!-- <td><?php //if($rcek1['stat_lg']=="RANDOM"){echo $rcekR['rlight_rating1'];}else{echo $rcek1['light_rating1'];}  ?></td>
-				 <td colspan="2"><?php //if($rcek1['stat_lg']=="RANDOM"){echo $rcekR['rlight_rating2'];}else{echo $rcek1['light_rating2'];}  ?></td> -->
 							<td>
 								<?php if ($rcek1['light_rating1'] != "") {
 									echo $rcek1['light_rating1'];
@@ -16030,8 +16221,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 						<tr>
 							<th>Color Migration Oven</th>
 							<th>&nbsp;</th>
-							<!-- <td colspan="3"><?php //if($rcek1['stat_cmo']=="RANDOM"){echo $rcekR['rcm_printing_colorchange'];}else{echo $rcek1['cm_printing_colorchange'];}  ?></td>
-				  <td><?php //if($rcek1['stat_cmo']=="RANDOM"){echo $rcekR['rcm_printing_staining'];}else{echo $rcek1['cm_printing_staining'];}  ?></td> -->
 							<td colspan="3">
 								<?php if ($rcek1['cm_printing_colorchange'] != "") {
 									echo $rcek1['cm_printing_colorchange'];
@@ -16068,8 +16257,6 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 						</tr>
 						<tr>
 							<th>&nbsp;</th>
-							<!-- <td><?php //if($rcek1['stat_cm']=="RANDOM"){echo $rcekR['rcm_dye_colorchange'];}else{echo $rcek1['cm_dye_colorchange'];}  ?></td>
-				  <td colspan="4"><?php //if($rcek1['stat_cm']=="RANDOM"){echo $rcekR['rcm_dye_stainingface'];}else{echo $rcek1['cm_dye_stainingface'];}  ?></td> -->
 							<td>
 								<?php if ($rcek1['cm_dye_colorchange'] != "") {
 									echo $rcek1['cm_dye_colorchange'];
@@ -16084,14 +16271,12 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 									echo $rcekR['rcm_dye_stainingface'];
 								} ?>
 							</td>
-							<!--<td><?php echo $rcek1['cm_dye_stainingback']; ?></td>-->
 						</tr>
 					<?php } ?>
 					<?php if ($rcek1['light_pers_colorchange'] != "") { ?>
 						<tr>
 							<th>Light Perspiration</th>
 							<th><strong>CC</strong></th>
-							<!-- <td colspan="4"><?php //if($rcek1['stat_lp']=="RANDOM"){echo $rcekR['rlight_pers_colorchange'];}else{echo $rcek1['light_pers_colorchange'];}  ?></td> -->
 							<td colspan="4">
 								<?php if ($rcek1['light_pers_colorchange'] != "") {
 									echo $rcek1['light_pers_colorchange'];
