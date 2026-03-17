@@ -184,52 +184,33 @@
 					$("[name=dye_tf_poly]").val(val);
 					$("[name=dye_tf_wool]").val(val);
 					// $("[name=dye_tf_cstaining]").val(val);
-				}
-				if(document.forms['form2']['jns_test'].value == "WASHING"){
-					$("[name=wash_colorchange]").val(val);
-					$("[name=wash_cotton]").val(val);
-					$("[name=wash_poly]").val(val);
-					$("[name=wash_wool]").val(val);
-					$("[name=wash_acetate]").val(val);
-					$("[name=wash_nylon]").val(val);
-					$("[name=wash_acrylic]").val(val);
-					// $("[name=wash_staining]").val(val);
-				}else if(document.forms['form2']['jns_test'].value == "PERSPIRATION ACID"){
-					$("[name=acid_colorchange2]").val(val);
-					$("[name=acid_cotton2]").val(val);
-					$("[name=acid_poly2]").val(val);
-					$("[name=acid_wool2]").val(val);
-					$("[name=acid_acetate2]").val(val);
-					$("[name=acid_nylon2]").val(val);
-					$("[name=acid_acrylic2]").val(val);
+				}else if(document.forms['form2']['jns_test2'].value == "PERSPIRATION ACID"){
+					$("[name=acid_colorchange]").val(val);
+					$("[name=acid_cotton]").val(val);
+					$("[name=acid_poly]").val(val);
+					$("[name=acid_wool]").val(val);
+					$("[name=acid_acetate]").val(val);
+					$("[name=acid_nylon]").val(val);
+					$("[name=acid_acrylic]").val(val);
 					// $("[name=acid_staining]").val(val);
-				}else if(document.forms['form2']['jns_test'].value == "PERSPIRATION ALKALINE"){
-					$("[name=alkaline_colorchange2]").val(val);
-					$("[name=alkaline_cotton2]").val(val);
-					$("[name=alkaline_poly2]").val(val);
-					$("[name=alkaline_wool2]").val(val);
-					$("[name=alkaline_acetate2]").val(val);
-					$("[name=alkaline_nylon2]").val(val);
-					$("[name=alkaline_acrylic2]").val(val);
+				}else if(document.forms['form2']['jns_test2'].value == "PERSPIRATION ALKALINE"){
+					$("[name=alkaline_colorchange]").val(val);
+					$("[name=alkaline_cotton]").val(val);
+					$("[name=alkaline_poly]").val(val);
+					$("[name=alkaline_wool]").val(val);
+					$("[name=alkaline_acetate]").val(val);
+					$("[name=alkaline_nylon]").val(val);
+					$("[name=alkaline_acrylic]").val(val);
 					// $("[name=alkaline_staining]").val(val);
-				}else if(document.forms['form2']['jns_test'].value == "WATER"){
-					$("[name=water_colorchange2]").val(val);
-					$("[name=water_cotton2]").val(val);
-					$("[name=water_poly2]").val(val);
-					$("[name=water_wool2]").val(val);
-					$("[name=water_acetate2]").val(val);
-					$("[name=water_nylon2]").val(val);
-					$("[name=water_acrylic2]").val(val);
+				}else if(document.forms['form2']['jns_test2'].value == "WATER"){
+					$("[name=water_colorchange]").val(val);
+					$("[name=water_cotton]").val(val);
+					$("[name=water_poly]").val(val);
+					$("[name=water_wool]").val(val);
+					$("[name=water_acetate]").val(val);
+					$("[name=water_nylon]").val(val);
+					$("[name=water_acrylic]").val(val);
 					// $("[name=water_staining]").val(val);
-				}else if(document.forms['form2']['jns_test'].value == "DYE TRANSFER"){
-					$("[name=dye_tf_acetate]").val(val);
-					$("[name=dye_tf_nylon]").val(val);
-					$("[name=dye_tf_acrylic]").val(val);
-					$("[name=dye_tf_sstaining]").val(val);
-					$("[name=dye_tf_cotton]").val(val);
-					$("[name=dye_tf_poly]").val(val);
-					$("[name=dye_tf_wool]").val(val);
-					// $("[name=dye_tf_cstaining]").val(val);
 				}
 				
 				if(!loading){
