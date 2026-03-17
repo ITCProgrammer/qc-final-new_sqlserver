@@ -3,6 +3,37 @@ ini_set("error_reporting", 1);
 session_start();
 include"koneksi.php";
 
+$Awal = isset($_POST['awal']) ? $_POST['awal'] : '';
+$Akhir = isset($_POST['akhir']) ? $_POST['akhir'] : '';
+$jamA = isset($_POST['jam_awal']) ? $_POST['jam_awal'] : '';
+$jamAr = isset($_POST['jam_akhir']) ? $_POST['jam_akhir'] : '';
+$Langganan = isset($_POST['pelanggan']) ? $_POST['pelanggan'] : '';
+$Warna = isset($_POST['warna']) ? $_POST['warna'] : '';
+$PO = isset($_POST['no_po']) ? $_POST['no_po'] : '';
+$Order = isset($_POST['no_order']) ? $_POST['no_order'] : '';
+$Item = isset($_POST['no_item']) ? $_POST['no_item'] : '';
+$Hanger = isset($_POST['no_hanger']) ? $_POST['no_hanger'] : '';
+$GShift1 = isset($_POST['gshift']) ? $_POST['gshift'] : '';
+$start_date = trim($Awal." ".$jamA);
+$stop_date = trim($Akhir." ".$jamAr);
+
+if($Langganan!=""){ $lgn=" AND pelanggan LIKE '%$Langganan%' ";}else{$lgn=" ";}
+if($Item!=""){ $noitem=" AND no_item LIKE '%$Item%' ";}else{$noitem=" ";}
+if($Hanger!=""){ $nohanger=" AND no_hanger LIKE '%$Hanger%' ";}else{$nohanger=" ";}
+if($Warna!=""){ $wn=" AND warna LIKE '%$Warna%' ";}else{$wn=" ";}
+if($PO!=""){ $nopo=" AND no_po LIKE '%$PO%' ";}else{$nopo=" ";}
+if($Order!=""){ $noorder=" AND no_order LIKE '%$Order%' ";}else{$noorder=" ";}
+if($GShift1!="" AND $GShift1!="ALL"){ $shft=" AND groupshift='$GShift1' ";}else{$shft=" ";}
+
+$summary_where = "WHERE FORMAT(tgl_update, 'yyyy-MM-dd HH:mm') BETWEEN '$start_date' AND '$stop_date' $lgn $noitem $nohanger $wn $nopo $noorder $shft";
+$qry_total_hgr = sqlsrv_query($con_db_qc_sqlsrv, "SELECT COUNT(*) as total FROM db_qc.tbl_lap_beda_roll $summary_where");
+$row_total_hgr = sqlsrv_fetch_array($qry_total_hgr);
+$total_hgr = ($row_total_hgr) ? (int)$row_total_hgr['total'] : 0;
+$qry_hgr = sqlsrv_query($con_db_qc_sqlsrv, "SELECT no_hanger, COUNT(*) as jumlah FROM db_qc.tbl_lap_beda_roll $summary_where GROUP BY no_hanger ORDER BY jumlah DESC");
+$qry_warna = sqlsrv_query($con_db_qc_sqlsrv, "SELECT no_warna, COUNT(*) as jumlah FROM db_qc.tbl_lap_beda_roll $summary_where GROUP BY no_warna ORDER BY jumlah DESC");
+$qry_item = sqlsrv_query($con_db_qc_sqlsrv, "SELECT no_item, COUNT(*) as jumlah FROM db_qc.tbl_lap_beda_roll $summary_where GROUP BY no_item ORDER BY jumlah DESC");
+$qry_status = sqlsrv_query($con_db_qc_sqlsrv, "SELECT ISNULL(status, 0) as status, COUNT(*) as jumlah FROM db_qc.tbl_lap_beda_roll $summary_where GROUP BY ISNULL(status, 0) ORDER BY status ASC");
+
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -12,21 +43,6 @@ include"koneksi.php";
 <title>Laporan Beda Roll</title>
 </head>
 <body>
-<?php
-$Awal	= isset($_POST['awal']) ? $_POST['awal'] : '';
-$Akhir	= isset($_POST['akhir']) ? $_POST['akhir'] : '';
-$jamA	= isset($_POST['jam_awal']) ? $_POST['jam_awal'] : '';
-$jamAr	= isset($_POST['jam_akhir']) ? $_POST['jam_akhir'] : '';
-$Langganan	= isset($_POST['pelanggan']) ? $_POST['pelanggan'] : '';
-$Warna	= isset($_POST['warna']) ? $_POST['warna'] : '';
-$PO	= isset($_POST['no_po']) ? $_POST['no_po'] : '';
-$Order	= isset($_POST['no_order']) ? $_POST['no_order'] : '';
-$Item	= isset($_POST['no_item']) ? $_POST['no_item'] : '';	
-$Hanger	= isset($_POST['no_hanger']) ? $_POST['no_hanger'] : '';
-$GShift1= isset($_POST['gshift']) ? $_POST['gshift'] : '';	
-$start_date = $Awal." ".$jamA;
-$stop_date  = $Akhir." ".$jamAr;
-?>
 <div class="row">
   <div class="col-xs-12">
     <div class="box">
@@ -176,6 +192,7 @@ $stop_date  = $Akhir." ".$jamAr;
               <th><div align="center">Qty Bruto</div></th>
               <th><div align="center">Roll Cek Shading</div></th>
               <th><div align="center">Operator</div></th>
+              <th><div align="center">Status</div></th>
               <th><div align="center">Disposisi</div></th>
               <th><div align="center">Review</div></th>
               <th><div align="center">Remark</div></th>
@@ -187,13 +204,6 @@ $stop_date  = $Akhir." ".$jamAr;
           <tbody>
           <?php
             $no=1;
-            if($Langganan!=""){ $lgn=" AND pelanggan LIKE '%$Langganan%' ";}else{$lgn=" ";}
-            if($Item!=""){ $noitem=" AND no_item LIKE '%$Item%' ";}else{$noitem=" ";}
-            if($Hanger!=""){ $nohanger=" AND no_hanger LIKE '%$Hanger%' ";}else{$nohanger=" ";}
-            if($Warna!=""){ $wn=" AND warna LIKE '%$Warna%' ";}else{$wn=" ";}
-            if($PO!=""){ $nopo=" AND no_po LIKE '%$PO%' ";}else{$nopo=" ";}
-            if($Order!=""){ $noorder=" AND no_order LIKE '%$Order%' ";}else{$noorder=" ";}
-			if($GShift1!="ALL"){ $shft=" AND groupshift='$GShift1' ";}else{$shft=" ";}  
             if($Awal!="" or $Langganan!="" or $Item!="" or $Hanger!="" or $Warna!="" or $PO!="" or $Order!=""){
               $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT *, FORMAT(tgl_update, 'yyyy-MM-dd') AS tglp FROM db_qc.tbl_lap_beda_roll WHERE FORMAT(tgl_update, 'yyyy-MM-dd HH:mm') BETWEEN '$start_date' AND '$stop_date' $lgn $noitem $nohanger $wn $nopo $noorder $shft ORDER BY id ASC");
             }else{
@@ -230,6 +240,17 @@ $stop_date  = $Akhir." ".$jamAr;
               <td align="center"><?php echo $row1['bruto'];?></td>
               <td align="center"><?php echo $row1['roll_inspek'];?></td>
               <td align="center"><?php echo $row1['operator'] ?></td>
+              <td align="center">
+                  <a data-pk="<?php echo $row1['id'] ?? ''; ?>" data-value="<?php echo $row1['status'] ?? ''; ?>" class="status_beda_roll" href="javascript:void(0)">
+                      <?php 
+                          if (!isset($row1['status']) || $row1['status'] === '' || $row1['status'] === null) {
+                              echo ''; 
+                          } else {
+                              echo ($row1['status'] == 1 ? 'OK' : ($row1['status'] == 2 ? 'TIDAK OK' : ''));
+                          }
+                      ?>
+                  </a>
+              </td>
               <td align="center"><a data-pk="<?php echo $row1['id'] ?>" data-value="<?php echo $row1['disposisi'] ?>" class="disposisi_beda_roll" href="javascipt:void(0)"><?php echo $row1['disposisi'] ?></a></td>
               <td align="center"><a data-pk="<?php echo $row1['id'] ?>" data-value="<?php echo $row1['review'] ?>" class="review_beda_roll" href="javascipt:void(0)"><?php echo $row1['review'] ?></a></td>
               <td align="center"><a data-pk="<?php echo $row1['id'] ?>" data-value="<?php echo $row1['remark'] ?>" class="remark_beda_roll" href="javascipt:void(0)"><?php echo $row1['remark'] ?></a></td>
@@ -239,6 +260,209 @@ $stop_date  = $Akhir." ".$jamAr;
             </tr>
           <?php	$no++;  } ?>
           </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <!-- === Persentase per No Hanger === -->
+  <div class="col-xs-12 col-md-3">
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <h3 class="box-title">Persentase per No Hanger</h3>
+        <div class="box-tools pull-right">
+          <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+      </div>
+      <div class="box-body">
+        <table class="table table-bordered table-hover table-striped" id="summaryHanger" style="width:100%;">
+          <thead class="bg-blue">
+            <tr>
+              <th><div align="center">No</div></th>
+              <th><div align="center">No Hanger</div></th>
+              <th><div align="center">Jumlah</div></th>
+              <th><div align="center">Persentase</div></th>
+            </tr>
+          </thead>
+          <tbody>
+          <?php
+          $no_hgr = 1;
+          if($qry_hgr){
+            while($row_hgr = sqlsrv_fetch_array($qry_hgr)){
+              $pct = ($total_hgr > 0) ? round(($row_hgr['jumlah'] / $total_hgr) * 100, 2) : 0;
+          ?>
+            <tr>
+              <td align="center"><?php echo $no_hgr; ?></td>
+              <td align="center"><?php echo htmlspecialchars($row_hgr['no_hanger']); ?></td>
+              <td align="center"><?php echo $row_hgr['jumlah']; ?></td>
+              <td align="center"><?php echo $pct; ?>%</td>
+            </tr>
+          <?php $no_hgr++; }
+          } else { ?>
+            <tr><td colspan="4" align="center">Tidak ada data</td></tr>
+          <?php } ?>
+          </tbody>
+          <?php if($total_hgr > 0){ ?>
+          <tfoot>
+            <tr>
+              <th colspan="2" align="right">Total</th>
+              <th align="center"><?php echo $total_hgr; ?></th>
+              <th align="center">100%</th>
+            </tr>
+          </tfoot>
+          <?php } ?>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- === Persentase per No Warna === -->
+  <div class="col-xs-12 col-md-3">
+    <div class="box box-success">
+      <div class="box-header with-border">
+        <h3 class="box-title">Persentase per No Warna</h3>
+        <div class="box-tools pull-right">
+          <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+      </div>
+      <div class="box-body">
+        <table class="table table-bordered table-hover table-striped" id="summaryWarna" style="width:100%;">
+          <thead class="bg-green">
+            <tr>
+              <th><div align="center">No</div></th>
+              <th><div align="center">No Warna</div></th>
+              <th><div align="center">Jumlah</div></th>
+              <th><div align="center">Persentase</div></th>
+            </tr>
+          </thead>
+          <tbody>
+          <?php
+          $no_wn = 1;
+          if($qry_warna){
+            while($row_wn = sqlsrv_fetch_array($qry_warna)){
+              $pct_wn = ($total_hgr > 0) ? round(($row_wn['jumlah'] / $total_hgr) * 100, 2) : 0;
+          ?>
+            <tr>
+              <td align="center"><?php echo $no_wn; ?></td>
+              <td align="center"><?php echo htmlspecialchars($row_wn['no_warna']); ?></td>
+              <td align="center"><?php echo $row_wn['jumlah']; ?></td>
+              <td align="center"><?php echo $pct_wn; ?>%</td>
+            </tr>
+          <?php $no_wn++; }
+          } else { ?>
+            <tr><td colspan="4" align="center">Tidak ada data</td></tr>
+          <?php } ?>
+          </tbody>
+          <?php if($total_hgr > 0){ ?>
+          <tfoot>
+            <tr>
+              <th colspan="2" align="right">Total</th>
+              <th align="center"><?php echo $total_hgr; ?></th>
+              <th align="center">100%</th>
+            </tr>
+          </tfoot>
+          <?php } ?>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- === Persentase per No Item === -->
+  <div class="col-xs-12 col-md-3">
+    <div class="box box-warning">
+      <div class="box-header with-border">
+        <h3 class="box-title">Persentase per No Item</h3>
+        <div class="box-tools pull-right">
+          <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+      </div>
+      <div class="box-body">
+        <table class="table table-bordered table-hover table-striped" id="summaryItem" style="width:100%;">
+          <thead class="bg-yellow">
+            <tr>
+              <th><div align="center">No</div></th>
+              <th><div align="center">No Item</div></th>
+              <th><div align="center">Jumlah</div></th>
+              <th><div align="center">Persentase</div></th>
+            </tr>
+          </thead>
+          <tbody>
+          <?php
+          $no_itm = 1;
+          if($qry_item){
+            while($row_itm = sqlsrv_fetch_array($qry_item)){
+              $pct_itm = ($total_hgr > 0) ? round(($row_itm['jumlah'] / $total_hgr) * 100, 2) : 0;
+          ?>
+            <tr>
+              <td align="center"><?php echo $no_itm; ?></td>
+              <td align="center"><?php echo htmlspecialchars($row_itm['no_item']); ?></td>
+              <td align="center"><?php echo $row_itm['jumlah']; ?></td>
+              <td align="center"><?php echo $pct_itm; ?>%</td>
+            </tr>
+          <?php $no_itm++; }
+          } else { ?>
+            <tr><td colspan="4" align="center">Tidak ada data</td></tr>
+          <?php } ?>
+          </tbody>
+          <?php if($total_hgr > 0){ ?>
+          <tfoot>
+            <tr>
+              <th colspan="2" align="right">Total</th>
+              <th align="center"><?php echo $total_hgr; ?></th>
+              <th align="center">100%</th>
+            </tr>
+          </tfoot>
+          <?php } ?>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- === Persentase per Status === -->
+  <div class="col-xs-12 col-md-3">
+    <div class="box box-danger">
+      <div class="box-header with-border">
+        <h3 class="box-title">Persentase per Status</h3>
+        <div class="box-tools pull-right">
+          <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+      </div>
+      <div class="box-body">
+        <table class="table table-bordered table-hover table-striped" id="summaryStatus" style="width:100%;">
+          <thead class="bg-red">
+            <tr>
+              <th><div align="center">No</div></th>
+              <th><div align="center">Status</div></th>
+              <th><div align="center">Jumlah</div></th>
+              <th><div align="center">Persentase</div></th>
+            </tr>
+          </thead>
+          <tbody>
+          <?php
+          $no_sts = 1;
+          if($qry_status){
+            while($row_sts = sqlsrv_fetch_array($qry_status)){
+              $pct_sts = ($total_hgr > 0) ? round(($row_sts['jumlah'] / $total_hgr) * 100, 2) : 0;
+              $label_sts = ($row_sts['status'] == 1 ? 'OK' : ($row_sts['status'] == 2 ? 'TIDAK OK' : '-'));
+          ?>
+            <tr>
+              <td align="center"><?php echo $no_sts; ?></td>
+              <td align="center"><?php echo htmlspecialchars($label_sts); ?></td>
+              <td align="center"><?php echo $row_sts['jumlah']; ?></td>
+              <td align="center"><?php echo $pct_sts; ?>%</td>
+            </tr>
+          <?php $no_sts++; }
+          } else { ?>
+            <tr><td colspan="4" align="center">Tidak ada data</td></tr>
+          <?php } ?>
+          </tbody>
+          <?php if($total_hgr > 0){ ?>
+          <tfoot>
+            <tr>
+              <th colspan="2" align="right">Total</th>
+              <th align="center"><?php echo $total_hgr; ?></th>
+              <th align="center">100%</th>
+            </tr>
+          </tfoot>
+          <?php } ?>
         </table>
       </div>
     </div>
@@ -268,11 +492,5 @@ $stop_date  = $Akhir." ".$jamAr;
       document.getElementById('delete_link').setAttribute('href' , delete_url);
     }
 </script>	
-<script>
-		$(document).ready(function() {
-			$('[data-toggle="tooltip"]').tooltip();
-		});
-
-	</script>
 </body>
 </html>

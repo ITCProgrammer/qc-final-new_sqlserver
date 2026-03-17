@@ -350,6 +350,16 @@ $rowr = db2_fetch_assoc($stmt1);
                             <textarea name="comment" class="form-control" id="comment" placeholder="Comments"><?php echo $row['comment'];?></textarea>  
                         </div>				   
                     </div>
+                    <div class="form-group">
+                        <label for="status" class="col-sm-3 control-label">Status</label>
+                        <div class="col-sm-3">
+                            <select class="form-control select2" name="status" id="status">
+                                <option value="0">Pilih</option>
+                                <option value="1"><?php echo 'Ok';?></option>	
+                                <option value="2"><?php echo 'Tidak Ok';?></option>	
+                            </select>
+                        </div>				   
+                    </div>
                 </div>
             </div>
             <div class="box-footer">
@@ -447,7 +457,8 @@ if(isset($_POST['simpan']))
             ip              = '$_SERVER[REMOTE_ADDR]',
             comment         = '$_POST[comment]',
             lot_legacy      = '$_POST[lot_legacy]',
-            kk_legacy       = '$_POST[kk_legacy]'
+            kk_legacy       = '$_POST[kk_legacy]',
+            status          = '$_POST[status]'
         WHERE nodemand = '$_POST[nodemand]' and shift = '$_POST[shift]' and groupshift = '$_POST[groupshift]'");
         if($sql1){
             //echo " <script>alert('Data has been updated!');</script>";
@@ -493,6 +504,7 @@ if(isset($_POST['simpan']))
             comment,
             lot_legacy,
             kk_legacy,
+            status,
             tgl_update,
             tgl_buat,
             ip
@@ -518,6 +530,7 @@ if(isset($_POST['simpan']))
             '$_POST[comment]',
             '$_POST[lot_legacy]',
             '$_POST[kk_legacy]',
+            '$_POST[status]',
             GETDATE(),
             GETDATE(),
             '$_SERVER[REMOTE_ADDR]'

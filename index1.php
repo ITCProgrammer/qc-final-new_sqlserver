@@ -4550,6 +4550,54 @@ $page = strtolower($page);
             }
             });
         });
+        $(document).ready(function() {
+			$('[data-toggle="tooltip"]').tooltip();
+                $('.status_beda_roll').editable({
+                    type: 'select',
+                    url: 'pages/editable/editable_status_beda_roll.php',
+                    disabled: false,
+                    showbuttons: false,
+                    source: [{
+                    value: 0,
+                    text: 'PILIH'
+                    },{
+                    value: 1,
+                    text: 'OK'
+                    }, {
+                    value: 2,
+                    text: 'TIDAK OK'
+                    }]
+                });
+
+                $('#summaryHanger').DataTable({
+                    paging: true,
+                    scrollX: true,
+                    dom: 'Bfrtip',
+                    buttons: ['excel']
+                });
+
+                $('#summaryWarna').DataTable({
+                    paging: true,
+                    scrollX: true,
+                    dom: 'Bfrtip',
+                    buttons: ['excel']
+                });
+
+                $('#summaryItem').DataTable({
+                    paging: true,
+                    scrollX: true,
+                    dom: 'Bfrtip',
+                    buttons: ['excel']
+                });
+
+                $('#summaryStatus').DataTable({
+                    paging: false,
+                    scrollX: true,
+                    dom: 'Bfrtip',
+                    buttons: ['excel']
+                });
+                    });
+
     </script>
     <script src="bower_components/ckeditor/ckeditor.js"></script>
     <!-- Bootstrap WYSIHTML5 -->
