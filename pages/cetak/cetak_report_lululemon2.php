@@ -163,38 +163,38 @@ function cekstandart($test, $jns, $protocol)
 
         'WASHING' => [
             'PREDOMINANLY NATURAL' => [
-                'LIGHT'  => 'Min grade 3.5',
-                'MEDIUM' => 'Min grade 3.0',
-                'DARK'   => 'Min grade 3.0',
+                'LIGHT'  => 'Min grade 3-4',
+                'MEDIUM' => 'Min grade 3',
+                'DARK'   => 'Min grade 3',
             ],
             'PREDOMINANLY SYNTHETIC' => [
-                'LIGHT'  => 'Min grade 3.5',
-                'MEDIUM' => 'Min grade 3.0',
-                'DARK'   => 'Min grade 3.0',
+                'LIGHT'  => 'Min grade 3-4',
+                'MEDIUM' => 'Min grade 3',
+                'DARK'   => 'Min grade 3',
             ],
         ],
 
         'WATER' => [
             'PREDOMINANLY NATURAL' => [
-                'LIGHT'  => 'Min grade 4.0',
-                'MEDIUM' => 'Min grade 3.5',
-                'DARK'   => 'Min grade 3.5',
+                'LIGHT'  => 'Min grade 4',
+                'MEDIUM' => 'Min grade 3-4',
+                'DARK'   => 'Min grade 3-4',
             ],
             'PREDOMINANLY SYNTHETIC' => [
-                'LIGHT'  => 'Min grade 4.0',
-                'MEDIUM' => 'Min grade 3.5',
-                'DARK'   => 'Min grade 3.5',
+                'LIGHT'  => 'Min grade 4',
+                'MEDIUM' => 'Min grade 3-4',
+                'DARK'   => 'Min grade 3-4',
             ],
         ],
 
         'PERSPIRATION' => [
             'PREDOMINANLY NATURAL' => [
-                'LIGHT'  => 'Min grade 4.0',
+                'LIGHT'  => 'Min grade 4',
                 'MEDIUM' => 'Min grade 3-4',
                 'DARK'   => 'Min grade 3-4',
             ],
             'PREDOMINANLY SYNTHETIC' => [
-                'LIGHT'  => 'Min grade 4.0',
+                'LIGHT'  => 'Min grade 4',
                 'MEDIUM' => 'Min grade 3-4',
                 'DARK'   => 'Min grade 3-4',
             ],
@@ -202,12 +202,12 @@ function cekstandart($test, $jns, $protocol)
 
         'ACID' => [
             'PREDOMINANLY NATURAL' => [
-                'LIGHT'  => 'Min grade 4.0',
+                'LIGHT'  => 'Min grade 4',
                 'MEDIUM' => 'Min grade 3-4',
                 'DARK'   => 'Min grade 3-4',
             ],
             'PREDOMINANLY SYNTHETIC' => [
-                'LIGHT'  => 'Min grade 4.0',
+                'LIGHT'  => 'Min grade 4',
                 'MEDIUM' => 'Min grade 3-4',
                 'DARK'   => 'Min grade 3-4',
             ],
@@ -215,14 +215,14 @@ function cekstandart($test, $jns, $protocol)
 
         'CROCKING_DRY' => [
             'PREDOMINANLY NATURAL' => [
-                'LIGHT'  => 'Min grade 4.0',
-                'MEDIUM' => 'Min grade 4.0',
-                'DARK'   => 'Min grade 4.0',
+                'LIGHT'  => 'Min grade 4',
+                'MEDIUM' => 'Min grade 4',
+                'DARK'   => 'Min grade 4',
             ],
             'PREDOMINANLY SYNTHETIC' => [
-                'LIGHT'  => 'Min grade 4.0',
-                'MEDIUM' => 'Min grade 4.0',
-                'DARK'   => 'Min grade 4.0',
+                'LIGHT'  => 'Min grade 4',
+                'MEDIUM' => 'Min grade 4',
+                'DARK'   => 'Min grade 4',
             ],
         ],
 
@@ -254,14 +254,14 @@ function cekstandart($test, $jns, $protocol)
 
         'DYE_TRANSFER' => [
             'PREDOMINANLY NATURAL' => [
-                'LIGHT'  => 'Min grade 4.0',
-                'MEDIUM' => 'Min grade 4.0',
-                'DARK'   => 'Min grade 4.0',
+                'LIGHT'  => 'Min grade 4',
+                'MEDIUM' => 'Min grade 4',
+                'DARK'   => 'Min grade 4',
             ],
             'PREDOMINANLY SYNTHETIC' => [
-                'LIGHT'  => 'Min grade 4.0',
-                'MEDIUM' => 'Min grade 4.0',
-                'DARK'   => 'Min grade 4.0',
+                'LIGHT'  => 'Min grade 4',
+                'MEDIUM' => 'Min grade 4',
+                'DARK'   => 'Min grade 4',
             ],
         ],
     ];
@@ -1774,17 +1774,17 @@ textarea {
                 <tr>
                     <td align="left" style="font-size: 11px;" width="33%">PILLING</td>
                     <td align="center" style="font-size: 11px;" width="33%">N/A</td>
-                    <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                    <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
                 </tr>
                 <tr>
                     <td align="left" style="font-size: 11px;" width="33%">FUZZING</td>
                     <td align="center" style="font-size: 11px;" width="33%">N/A</td>
-                    <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                    <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
                 </tr>
                 <tr>
                     <td align="left" style="font-size: 11px;" width="33%">MATTING</td>
                     <td align="center" style="font-size: 11px;" width="33%">N/A</td>
-                    <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                    <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
                 </tr>
                 <tr>
                     <td style="font-size: 12px;" Width="33%" ><strong> Conclusion </strong></td>
@@ -1846,12 +1846,12 @@ textarea {
                 <tr>
                     <td align="left" style="font-size: 11px;" width="33%">AFTER 50 CYCLES</td>
                     <td align="center" style="font-size: 11px; <?php if($rcek1['sb_l1']!="" AND $rcek1['sb_l1'] < 3){echo "color:red;";}?>" width="33%"><?php if($rcek1['sb_l1']!=""){echo $rcek1['sb_l1'];}else{echo "N/A";}?></td>
-                    <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                    <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
                 </tr>
                 <tr>
                     <td align="left" style="font-size: 11px;" width="33%">AFTER 75 CYCLES</td>
                     <td align="center" style="font-size: 11px; <?php if($rcek1['sb_w1']!="" AND $rcek1['sb_w1'] < 3){echo "color:red;";}?>" width="33%"><?php if($rcek1['sb_w1']!=""){echo $rcek1['sb_w1'];}else{echo "N/A";}?></td>
-                    <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 3.5</td>
+                    <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 3-4</td>
                 </tr>
                 <tr>
                     <td style="font-size: 12px;" Width="33%" ><strong> Conclusion </strong></td>
@@ -1907,7 +1907,7 @@ textarea {
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">SELF - STAINING</td>
             <td align="center" style="font-size: 11px; <?php echo hasil('WASHING', cekstandart('WASHING', $rd2['protocol'], $rd2['cstandar']), $rcek1['wash_staining'], 'warna');?>" width="33%"><?php echo hasil('WASHING', cekstandart('WASHING', $rd2['protocol'], $rd2['cstandar']), $rcek1['wash_staining'], 'nilai')?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.5</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4-5</td>
         </tr>
         <tr>
             <!-- <td align="left" style="font-size: 11px;" colspan="3"><u>COLOR STAINING ON</u></td> -->
@@ -2049,13 +2049,13 @@ textarea {
                 <!-- <td align="left" style="font-size: 11px;" width="33%">DRY (COLOR STAIN)</td> -->
                 <td align="left" style="font-size: 11px;" width="33%">DRY STAINING</td>
                 <td align="center" style="font-size: 11px; <?php if($rcek1['stat_cr']=="MARGINAL PASS" AND $rcekM['mcrock_len1']!="" AND $rcekM['mcrock_len1'] < 4){echo "color:red;";}else if($rcek1['crock_len1']!="" AND $rcek1['crock_len1'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcekM['mcrock_len1']=="" AND $rcek1['crock_len1']==""){echo "N/A";}else if($rcek1['stat_cr']=="MARGINAL PASS"){echo $rcekM['mcrock_len1'];}else if($rcek1['stat_cr']=="MARGINAL PASS" AND $rcekM['mcrock_len1']==""){echo "N/A";}else{echo $rcek1['crock_len1'];}?></td>
-                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
             </tr>
             <tr>
                 <!-- <td align="left" style="font-size: 11px;" width="33%">WET (COLOR STAIN)</td> -->
                 <td align="left" style="font-size: 11px;" width="33%">WET STAINING</td>
                 <td align="center" style="font-size: 11px; <?php if($rcek1['stat_cr']=="MARGINAL PASS" AND $rcekM['mcrock_len2']!="" AND $rcekM['mcrock_len2'] < 3.5){echo "color:red;";}else if($rcek1['crock_len2']!="" AND $rcek1['crock_len2'] < 3.5){echo "color:red;";}?>" width="33%"><?php if($rcekM['mcrock_len2']=="" AND $rcek1['crock_len2']==""){echo "N/A";}else if($rcek1['stat_cr']=="MARGINAL PASS"){echo $rcekM['mcrock_len2'];}else if($rcek1['stat_cr']=="MARGINAL PASS" AND $rcekM['mcrock_len2']==""){echo "N/A";}else{echo $rcek1['crock_len2'];}?></td>
-                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 3.5</td>
+                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 3-4</td>
             </tr>
             <tr>
                 <td style="font-size: 12px;" Width="33%" ><strong> Conclusion </strong></td>
@@ -2131,12 +2131,12 @@ textarea {
             <tr>
                 <td align="left" style="font-size: 11px;" width="33%">COLOR CHANGE</td>
                 <td align="center" style="font-size: 11px; <?php if($rcek1['water_colorchange']!="" AND $rcek1['water_colorchange'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['water_colorchange']!=""){echo $rcek1['water_colorchange'];}else{echo "N/A";}?></td>
-                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
             </tr>
             <tr>
                 <td align="left" style="font-size: 11px;" width="33%">SELF - STAINING</td>
                 <td align="center" style="font-size: 11px; <?php if($rcek1['water_staining']!="" AND $rcek1['water_staining'] < 4.5){echo "color:red;";}?>" width="33%"><?php if($rcek1['water_staining']!=""){echo $rcek1['water_staining'];}else{echo "N/A";}?></td>
-                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.5</td>
+                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
             </tr>
             <!-- <tr>
                 <td align="left" style="font-size: 11px;" colspan="3"><u>COLOR STAINING ON</u></td>
@@ -2147,32 +2147,32 @@ textarea {
             <tr>
                 <td align="left" style="font-size: 11px;" width="33%">ACETATE</td>
                 <td align="center" style="font-size: 11px; <?php if($rcek1['water_acetate']!="" AND $rcek1['water_acetate'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['water_acetate']!=""){echo $rcek1['water_acetate'];}else{echo "N/A";}?></td>
-                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
             </tr>
             <tr>
                 <td align="left" style="font-size: 11px;" width="33%">COTTON</td>
                 <td align="center" style="font-size: 11px; <?php if($rcek1['water_cotton']!="" AND $rcek1['water_cotton'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['water_cotton']!=""){echo $rcek1['water_cotton'];}else{echo "N/A";}?></td>
-                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
             </tr>
             <tr>
                 <td align="left" style="font-size: 11px;" width="33%">NYLON</td>
                 <td align="center" style="font-size: 11px; <?php if($rcek1['water_nylon']!="" AND $rcek1['water_nylon'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['water_nylon']!=""){echo $rcek1['water_nylon'];}else{echo "N/A";}?></td>
-                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
             </tr>
             <tr>
                 <td align="left" style="font-size: 11px;" width="33%">POLYESTER</td>
                 <td align="center" style="font-size: 11px; <?php if($rcek1['water_poly']!="" AND $rcek1['water_poly'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['water_poly']!=""){echo $rcek1['water_poly'];}else{echo "N/A";}?></td>
-                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
             </tr>
             <tr>
                 <td align="left" style="font-size: 11px;" width="33%">ACRYLIC</td>
                 <td align="center" style="font-size: 11px; <?php if($rcek1['water_acrylic']!="" AND $rcek1['water_acrylic'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['water_acrylic']!=""){echo $rcek1['water_acrylic'];}else{echo "N/A";}?></td>
-                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
             </tr>
             <tr>
                 <td align="left" style="font-size: 11px;" width="33%">WOOL</td>
                 <td align="center" style="font-size: 11px; <?php if($rcek1['water_wool']!="" AND $rcek1['water_wool'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['water_wool']!=""){echo $rcek1['water_wool'];}else{echo "N/A";}?></td>
-                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
             </tr>
             <tr>
                 <td style="font-size: 12px;" Width="33%" ><strong> Conclusion </strong></td>
@@ -2337,7 +2337,7 @@ textarea {
             </tr> -->
             <tr>
                 <td align="left" style="font-size: 11px;" width="33%">AFTER 20 HOURS</td>
-                <td align="center" style="font-size: 11px; <?php if($rcek1['stat_lg']=="MARGINAL PASS" AND $rcekM['mlight_rating1']!="" AND $rcekM['mlight_rating1'] < 4){echo "color:red;";}else if($rcek1['light_rating1']!="" AND $rcek1['light_rating1'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcekM['mlight_rating1']=="" AND $rcek1['light_rating1']==""){echo "N/A";}else if($rcek1['stat_lg']=="MARGINAL PASS"){echo $rcekM['mlight_rating1'];}else if($rcek1['stat_lg']=="MARGINAL PASS" AND $rcekM['mlight_rating1']==""){echo "N/A";}else{echo $rcek1['light_rating1'];}?></td>
+                <td align="center" style="font-size: 11px; <?php if($rcek1['stat_lg']=="MARGINAL PASS" AND $rcekM['mlight_rating1']!="" AND $rcekM['mlight_rating1'] < 3){echo "color:red;";}else if($rcek1['light_rating1']!="" AND $rcek1['light_rating1'] < 3){echo "color:red;";}?>" width="33%"><?php if($rcekM['mlight_rating1']=="" AND $rcek1['light_rating1']==""){echo "N/A";}else if($rcek1['stat_lg']=="MARGINAL PASS"){echo $rcekM['mlight_rating1'];}else if($rcek1['stat_lg']=="MARGINAL PASS" AND $rcekM['mlight_rating1']==""){echo "N/A";}else{echo $rcek1['light_rating1'];}?></td>
                 <td align="right" style="font-size: 11px;" width="33%"><?= cekstandart('LIGHT', $rd2['protocol'], $rd2['cstandar']);?></td>
             </tr>
             <tr>
@@ -2372,7 +2372,7 @@ textarea {
             <tr>
                 <td align="left" style="font-size: 11px;" width="33%">COLOR STAINING</td>
                 <td align="center" style="font-size: 11px; <?php if($rcek1['phenolic_colorchange']!="" AND $rcek1['phenolic_colorchange'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['phenolic_colorchange']!=""){echo $rcek1['phenolic_colorchange'];}else{echo "N/A";}?></td>
-                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
             </tr>
             <tr>
                 <td style="font-size: 12px;" Width="33%" ><strong> Conclusion </strong></td>
@@ -2403,7 +2403,7 @@ textarea {
             <tr>
                 <td align="left" style="font-size: 11px;" width="33%">FACE</td>
                 <td align="center" style="font-size: 11px;" width="33%"><?php if($rcek1['prt_f1']!=""){echo $rcek1['prt_f1'];}else{echo "N/A";}?></td>
-                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
             </tr>
             <!--
             <tr>
@@ -2422,7 +2422,7 @@ textarea {
             <tr>
               <td align="left" style="font-size: 11px;">FACE</td>
               <td align="center" style="font-size: 11px;"><?php if($rcek1['prt_f2']!=""){echo $rcek1['prt_f2'];}else{echo "N/A";}?></td>
-              <td align="right" style="font-size: 11px;">MIN GRADE 3.5</td>
+              <td align="right" style="font-size: 11px;">MIN GRADE 3-4</td>
             </tr>
             <tr>
               <td align="left" style="font-size: 11px;" colspan="3">&nbsp;</td>
@@ -2451,32 +2451,32 @@ textarea {
             <tr>
               <td align="left" style="font-size: 11px;">ACETATE</td>
               <td align="center" style="font-size: 11px; <?php if($rcek1['dye_tf_acetate']!="" AND $rcek1['dye_tf_acetate'] < 4){echo "color:red;";}?>"><?php if($rcek1['dye_tf_acetate']==""){echo "N/A";}else{echo $rcek1['dye_tf_acetate'];}?></td>
-              <td align="right" style="font-size: 11px;">MIN GRADE 4.0</td>
+              <td align="right" style="font-size: 11px;">MIN GRADE 4</td>
             </tr>
             <tr>
               <td align="left" style="font-size: 11px;">COTTON</td>
               <td align="center" style="font-size: 11px; <?php if($rcek1['dye_tf_cotton']!="" AND $rcek1['dye_tf_cotton'] < 4){echo "color:red;";}?>"><?php if($rcek1['dye_tf_cotton']==""){echo "N/A";}else{echo $rcek1['dye_tf_cotton'];}?></td>
-              <td align="right" style="font-size: 11px;">MIN GRADE 4.0</td>
+              <td align="right" style="font-size: 11px;">MIN GRADE 4</td>
             </tr>
             <tr>
               <td align="left" style="font-size: 11px;">NYLON</td>
               <td align="center" style="font-size: 11px; <?php if($rcek1['dye_tf_nylon']!="" AND $rcek1['dye_tf_nylon'] < 4){echo "color:red;";}?>"><?php if($rcek1['dye_tf_nylon']==""){echo "N/A";}else{echo $rcek1['dye_tf_nylon'];}?></td>
-              <td align="right" style="font-size: 11px;">MIN GRADE 4.0</td>
+              <td align="right" style="font-size: 11px;">MIN GRADE 4</td>
             </tr>
             <tr>
               <td align="left" style="font-size: 11px;">POLYESTER</td>
               <td align="center" style="font-size: 11px; <?php if($rcek1['dye_tf_poly']!="" AND $rcek1['dye_tf_poly'] < 4){echo "color:red;";}?>"><?php if($rcek1['dye_tf_poly']==""){echo "N/A";}else{echo $rcek1['dye_tf_poly'];}?></td>
-              <td align="right" style="font-size: 11px;">MIN GRADE 4.0</td>
+              <td align="right" style="font-size: 11px;">MIN GRADE 4</td>
             </tr>
             <tr>
               <td align="left" style="font-size: 11px;">ACRYLIC</td>
               <td align="center" style="font-size: 11px; <?php if($rcek1['dye_tf_acrylic']!="" AND $rcek1['dye_tf_acrylic'] < 4){echo "color:red;";}?>"><?php if($rcek1['dye_tf_acrylic']==""){echo "N/A";}else{echo $rcek1['dye_tf_acrylic'];}?></td>
-              <td align="right" style="font-size: 11px;">MIN GRADE 4.0</td>
+              <td align="right" style="font-size: 11px;">MIN GRADE 4</td>
             </tr>
             <tr>
               <td align="left" style="font-size: 11px;">WOOL</td>
               <td align="center" style="font-size: 11px; <?php if($rcek1['dye_tf_wool']!="" AND $rcek1['dye_tf_wool'] < 4){echo "color:red;";}?>"><?php if($rcek1['dye_tf_wool']==""){echo "N/A";}else{echo $rcek1['dye_tf_wool'];}?></td>
-              <td align="right" style="font-size: 11px;">MIN GRADE 4.0</td>
+              <td align="right" style="font-size: 11px;">MIN GRADE 4</td>
             </tr>
             <tr>
               <td align="left" style="font-size: 11px;" colspan="3">&nbsp;</td>
@@ -2540,12 +2540,12 @@ textarea {
             <!-- <td align="left" style="font-size: 11px;" width="33%">COLOR CHANGE</td> -->
             <td align="left" style="font-size: 11px;" width="33%">CHANGE IN SHADE</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['acid_colorchange']!="" AND $rcek1['acid_colorchange'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['acid_colorchange']!=""){echo $rcek1['acid_colorchange'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">SELF - STAINING</td>
-            <td align="center" style="font-size: 11px; <?php if($rcek1['acid_staining']!="" AND $rcek1['acid_staining'] < 4.5){echo "color:red;";}?>" width="33%"><?php if($rcek1['acid_staining']!=""){echo $rcek1['acid_staining'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.5</td>
+            <td align="center" style="font-size: 11px; <?php if($rcek1['acid_staining']!="" AND $rcek1['acid_staining'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['acid_staining']!=""){echo $rcek1['acid_staining'];}else{echo "N/A";}?></td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <!-- <td align="left" style="font-size: 11px;" colspan="3"><u>COLOR STAINING ON</u></td> -->
@@ -2554,32 +2554,32 @@ textarea {
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">ACETATE</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['acid_acetate']!="" AND $rcek1['acid_acetate'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['acid_acetate']!=""){echo $rcek1['acid_acetate'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">COTTON</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['acid_cotton']!="" AND $rcek1['acid_cotton'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['acid_cotton']!=""){echo $rcek1['acid_cotton'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">NYLON</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['acid_nylon']!="" AND $rcek1['acid_nylon'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['acid_nylon']!=""){echo $rcek1['acid_nylon'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">POLYESTER</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['acid_poly']!="" AND $rcek1['acid_poly'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['acid_poly']!=""){echo $rcek1['acid_poly'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">ACRYLIC</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['acid_acrylic']!="" AND $rcek1['acid_acrylic'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['acid_acrylic']!=""){echo $rcek1['acid_acrylic'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">WOOL</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['acid_wool']!="" AND $rcek1['acid_wool'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['acid_wool']!=""){echo $rcek1['acid_wool'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <!-- PERSPIRATION ACID END -->
         <tr>
@@ -2597,12 +2597,12 @@ textarea {
             <!-- <td align="left" style="font-size: 11px;" width="33%">COLOR CHANGE</td> -->
             <td align="left" style="font-size: 11px;" width="33%">CHANGE IN SHADE</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['alkaline_colorchange']!="" AND $rcek1['alkaline_colorchange'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['alkaline_colorchange']!=""){echo $rcek1['alkaline_colorchange'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">SELF - STAINING</td>
-            <td align="center" style="font-size: 11px; <?php if($rcek1['alkaline_staining']!="" AND $rcek1['alkaline_staining'] < 4.5){echo "color:red;";}?>" width="33%"><?php if($rcek1['alkaline_staining']!=""){echo $rcek1['alkaline_staining'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.5</td>
+            <td align="center" style="font-size: 11px; <?php if($rcek1['alkaline_staining']!="" AND $rcek1['alkaline_staining'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['alkaline_staining']!=""){echo $rcek1['alkaline_staining'];}else{echo "N/A";}?></td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <!-- <td align="left" style="font-size: 11px;" colspan="3"><u>COLOR STAINING ON</u></td> -->
@@ -2611,32 +2611,32 @@ textarea {
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">ACETATE</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['alkaline_acetate']!="" AND $rcek1['alkaline_acetate'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['alkaline_acetate']!=""){echo $rcek1['alkaline_acetate'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">COTTON</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['alkaline_cotton']!="" AND $rcek1['alkaline_cotton'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['alkaline_cotton']!=""){echo $rcek1['alkaline_cotton'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">NYLON</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['alkaline_nylon']!="" AND $rcek1['alkaline_nylon'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['alkaline_nylon']!=""){echo $rcek1['alkaline_nylon'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">POLYESTER</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['alkaline_poly']!="" AND $rcek1['alkaline_poly'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['alkaline_poly']!=""){echo $rcek1['alkaline_poly'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">ACRYLIC</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['alkaline_acrylic']!="" AND $rcek1['alkaline_acrylic'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['alkaline_acrylic']!=""){echo $rcek1['alkaline_acrylic'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">WOOL</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['alkaline_wool']!="" AND $rcek1['alkaline_wool'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['alkaline_wool']!=""){echo $rcek1['alkaline_wool'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
            <tr>
             <td style="font-size: 12px;" Width="33%" ><strong> Conclusion </strong></td>
@@ -2907,7 +2907,7 @@ textarea {
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">COLOR CHANGE</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_cc1']!="" AND $rcek1['apper_cc1'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['apper_cc1']!=""){echo $rcek1['apper_cc1'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN. GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <!-- HERE -->
         <tr>
@@ -2915,7 +2915,7 @@ textarea {
             <td align="left" style="font-size: 11px;" width="33%">CROSS - STAINING</td>
             <!-- <td align="center" style="font-size: 11px; <?php if($rcek1['apper_st']!="" AND $rcek1['apper_st'] < 4.5){echo "color:red;";}?>" width="33%"><?php if($rcek1['apper_st']!=""){echo $rcek1['apper_st'];}else{echo "N/A";}?></td> -->
             <td align="center" style="font-size: 11px;" width="33%"><?php echo "N/A";?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN. GRADE 4.5</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4-5</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">FABRIC WRINKLING</td>
@@ -2926,12 +2926,12 @@ textarea {
             <!-- <td align="left" style="font-size: 11px;" width="33%">PILLING AND FUZZING HAIR</td> -->
             <td align="left" style="font-size: 11px;" width="33%">PILLING/FUZZING</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_pf1']!="" AND $rcek1['apper_pf1'] < 4){echo "color:red;";}?>" width="33%">FACE: <?php if($rcek1['apper_pf1']!=""){echo $rcek1['apper_pf1'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN. GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">&nbsp;</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_pb1']!="" AND $rcek1['apper_pb1'] < 4){echo "color:red;";}?>" width="33%">BACK: <?php if($rcek1['apper_pb1']!=""){echo $rcek1['apper_pb1'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN. GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="right" style="font-size: 11px;">&nbsp;</td> 
@@ -2983,32 +2983,32 @@ textarea {
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">ACETATE</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_acetate']!="" AND $rcek1['apper_acetate'] < 4.5){echo "color:red;";}?>" width="33%"><?php if($rcek1['apper_acetate']!=""){echo $rcek1['apper_acetate'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.5</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4-5</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">COTTON</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_cotton']!="" AND $rcek1['apper_cotton'] < 4.5){echo "color:red;";}?>" width="33%"><?php if($rcek1['apper_cotton']!=""){echo $rcek1['apper_cotton'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.5</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4-5</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">NYLON</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_nylon']!="" AND $rcek1['apper_nylon'] < 4.5){echo "color:red;";}?>" width="33%"><?php if($rcek1['apper_nylon']!=""){echo $rcek1['apper_nylon'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.5</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4-5</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">POLYESTER</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_poly']!="" AND $rcek1['apper_poly'] < 4.5){echo "color:red;";}?>" width="33%"><?php if($rcek1['apper_poly']!=""){echo $rcek1['apper_poly'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.5</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4-5</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">ACRYLIC</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_acrylic']!="" AND $rcek1['apper_acrylic'] < 4.5){echo "color:red;";}?>" width="33%"><?php if($rcek1['apper_acrylic']!=""){echo $rcek1['apper_acrylic'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.5</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4-5</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">WOOL</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_wool']!="" AND $rcek1['apper_wool'] < 4.5){echo "color:red;";}?>" width="33%"><?php if($rcek1['apper_wool']!=""){echo $rcek1['apper_wool'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4.5</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4-5</td>
         </tr>
         <tr>
             <td align="right" style="font-size: 11px;">&nbsp;</td> 
@@ -3028,7 +3028,7 @@ textarea {
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">COLOR CHANGE</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_cc2']!="" AND $rcek1['apper_cc2'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['apper_cc2']!=""){echo $rcek1['apper_cc2'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN. GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <!-- HERE -->
         <tr>
@@ -3036,7 +3036,7 @@ textarea {
             <td align="left" style="font-size: 11px;" width="33%">CROSS - STAINING</td>
             <!-- <td align="center" style="font-size: 11px; <?php if($rcek1['apper_st2']!="" AND $rcek1['apper_st2'] < 4.5){echo "color:red;";}?>" width="33%"><?php if($rcek1['apper_st2']!=""){echo $rcek1['apper_st2'];}else{echo "N/A";}?></td> -->
             <td align="center" style="font-size: 11px;" width="33%"><?php echo "N/A";?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN. GRADE 4.5</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4-5</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">FABRIC WRINKLING</td>
@@ -3046,12 +3046,12 @@ textarea {
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">PILLING/FUZZING</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_pf2']!="" AND $rcek1['apper_pf2'] < 4){echo "color:red;";}?>" width="33%">FACE: <?php if($rcek1['apper_pf2']!=""){echo $rcek1['apper_pf2'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN. GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">&nbsp;</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_pb2']!="" AND $rcek1['apper_pb2'] < 4){echo "color:red;";}?>" width="33%">BACK: <?php if($rcek1['apper_pb2']!=""){echo $rcek1['apper_pb2'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN. GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="right" style="font-size: 11px;">&nbsp;</td> 
@@ -3094,13 +3094,13 @@ textarea {
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">COLOR CHANGE</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_cc3']!="" AND $rcek1['apper_cc3'] < 4){echo "color:red;";}?>" width="33%"><?php if($rcek1['apper_cc3']!=""){echo $rcek1['apper_cc3'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN. GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">CROSS - STAINING</td>
             <!-- <td align="center" style="font-size: 11px; <?php if($rcek1['apper_st3']!="" AND $rcek1['apper_st3'] < 4.5){echo "color:red;";}?>" width="33%"><?php if($rcek1['apper_st3']!=""){echo $rcek1['apper_st3'];}else{echo "N/A";}?></td> -->
             <td align="center" style="font-size: 11px;" width="33%"><?php echo "N/A";?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN. GRADE 4.5</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4-5</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">FABRIC WRINKLING</td>
@@ -3110,12 +3110,12 @@ textarea {
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">PILLING/FUZZING</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_pf3']!="" AND $rcek1['apper_pf3'] < 4){echo "color:red;";}?>" width="33%">FACE: <?php if($rcek1['apper_pf3']!=""){echo $rcek1['apper_pf3'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN. GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="left" style="font-size: 11px;" width="33%">&nbsp;</td>
             <td align="center" style="font-size: 11px; <?php if($rcek1['apper_pb3']!="" AND $rcek1['apper_pb3'] < 4){echo "color:red;";}?>" width="33%">BACK: <?php if($rcek1['apper_pb3']!=""){echo $rcek1['apper_pb3'];}else{echo "N/A";}?></td>
-            <td align="right" style="font-size: 11px;" width="33%">MIN. GRADE 4.0</td>
+            <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 4</td>
         </tr>
         <tr>
             <td align="right" style="font-size: 11px;">&nbsp;</td> 
@@ -3265,19 +3265,7 @@ textarea {
             <td align="left" style="font-size: 11px;">LENGTH - RECOVERY AFTER 30 MINUTES</td> 
             <td align="center" style="font-size: 11px;"><?php if($rcek1['recover_l2']!=""){echo $rcek1['recover_l2'];}else{echo "N/A";}?></td> 
             <!-- <td align="center" style="font-size: 11px;">N/A</td>  -->
-            <td align="right" style="font-size: 11px;">
-                <?php
-                $protocolText = $rd2['protocol'] ?? '';
-
-                if ($protocolText == "Predominanly Synthetic") {
-                    echo "MIN. 90%";
-                } elseif ($protocolText == "Predominanly Natural") {
-                    echo "MIN. 80%";
-                } else {
-                    echo "";
-                }
-                ?>
-            </td>
+            <td align="right" style="font-size: 11px;">DATA ONLY</td>
         </tr>
         <tr>
             <td align="right" style="font-size: 11px;">&nbsp;</td> 
@@ -3334,19 +3322,7 @@ textarea {
             <td align="left" style="font-size: 11px;">WIDTH - RECOVERY AFTER 30 MINUTES</td> 
             <td align="center" style="font-size: 11px;"><?php if($rcek1['recover_w2']!=""){echo $rcek1['recover_w2'];}else{echo "N/A";}?></td> 
             <!-- <td align="center" style="font-size: 11px;">N/A</td>  -->
-            <td align="right" style="font-size: 11px;">
-                <?php
-                $protocolText = $rd2['protocol'] ?? '';
-
-                if ($protocolText == "Predominanly Synthetic" or $protocolText == "Knit Predominanly Synthetic") {
-                    echo "MIN. 90%";
-                } elseif ($protocolText == "Predominanly Natural" or $protocolText == "Knit Predominanly Natural") {
-                    echo "MIN. 80%";
-                } else {
-                    echo "";
-                }
-                ?>
-            </td>
+            <td align="right" style="font-size: 11px;">DATA ONLY</td>
         </tr>
         <!-- STRETCH AND RECOVERY END -->
         <!-- <tr>

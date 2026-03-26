@@ -10528,17 +10528,9 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 									<input name="crock_len1" type="text" class="form-control" id="crock_len1"
 										value="<?php echo $rcek1['crock_len1']; ?>" placeholder="4 Dry">
 								</div>
-								<div class="col-sm-1">WID 1
-									<input name="crock_wid1" type="text" class="form-control" id="crock_wid1"
-										value="<?php echo $rcek1['crock_wid1']; ?>" placeholder="4 Dry">
-								</div>
 								<div class="col-sm-1">LEN 2
 									<input name="crock_len2" type="text" class="form-control" id="crock_len2"
 										value="<?php echo $rcek1['crock_len2']; ?>" placeholder="3 Wet">
-								</div>
-								<div class="col-sm-1">WID 2
-									<input name="crock_wid2" type="text" class="form-control" id="crock_wid2"
-										value="<?php echo $rcek1['crock_wid2']; ?>" placeholder="3 Wet">
 								</div>
 								<div class="col-sm-2">
 									<textarea class="form-control" placeholder="Note harus diakhir tanda titik"
@@ -16167,21 +16159,35 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 							</td>
 						</tr>
 						<tr>
-							<th>Wid</th>
+							
+						</tr>
+					<?php } ?>
+					<?php if ($rcek1['crock_len12'] != "" or $rcek1['crock_wid12'] != "" or $rcek1['crock_len22'] != "" or $rcek1['crock_wid22'] != "") { ?>
+						<tr>
+							<th rowspan="3">Crocking ISO</th>
+							<th>Srt</th>
+							<th>Dry</th>
+							<th>Wet</th>
+						</tr>
+						<tr>
+							<th>Len</th>
 							<td>
-								<?php if ($rcek1['crock_wid1'] != "") {
-									echo $rcek1['crock_wid1'];
+								<?php if ($rcek1['crock_len12'] != "") {
+									echo $rcek1['crock_len12'];
 								} else {
-									echo $rcekR['rcrock_wid1'];
+									echo $rcekR['rcrock_len12'];
 								} ?>
 							</td>
-							<td colspan="3">
-								<?php if ($rcek1['crock_wid2'] != "") {
-									echo $rcek1['crock_wid2'];
+							<td colspan="2">
+								<?php if ($rcek1['crock_len22'] != "") {
+									echo $rcek1['crock_len22'];
 								} else {
-									echo $rcekR['rcrock_wid2'];
+									echo $rcekR['rcrock_len22'];
 								} ?>
 							</td>
+						</tr>
+						<tr>
+						
 						</tr>
 					<?php } ?>
 					<?php if ($rcek1['phenolic_colorchange'] != "") { ?>
@@ -16339,7 +16345,7 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 							<th>Non-Chlorin</th>
 							<th>&nbsp;</th>
 							<!-- <td colspan="2"><?php //if($rcek1['stat_nchl']=="RANDOM"){echo $rcekR['rnchlorin1'];}else{echo $rcek1['nchlorin1'];}  ?></td>
-				<td colspan="2"><?php //if($rcek1['stat_nchl']=="RANDOM"){echo $rcekR['rnchlorin2'];}else{echo $rcek1['nchlorin2'];}  ?></td> -->
+							<td colspan="2"><?php //if($rcek1['stat_nchl']=="RANDOM"){echo $rcekR['rnchlorin2'];}else{echo $rcek1['nchlorin2'];}  ?></td> -->
 
 							<td colspan="2">
 								<?php if ($rcek1['nchlorin1'] != "") {
@@ -16409,9 +16415,9 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 						<tr>
 							<!-- <th>&nbsp;</th> -->
 							<!-- <td><?php //if($rcek1['stat_dye']=="RANDOM"){echo $rcekR['rdye_tf_acrylic'];}else{echo $rcek1['dye_tf_acrylic'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_dye']=="RANDOM"){echo $rcekR['rdye_tf_wool'];}else{echo $rcek1['dye_tf_wool'];}  ?></td>
-			<td><?php //if($rcek1['stat_dye']=="RANDOM"){echo $rcekR['rdye_tf_cstaining'];}else{echo $rcek1['dye_tf_cstaining'];}  ?></td>
-			<td colspan="2"><?php //if($rcek1['stat_dye']=="RANDOM"){echo $rcekR['rdye_tf_sstaining'];}else{echo $rcek1['dye_tf_sstaining'];}  ?></td> -->
+						<td colspan="2"><?php //if($rcek1['stat_dye']=="RANDOM"){echo $rcekR['rdye_tf_wool'];}else{echo $rcek1['dye_tf_wool'];}  ?></td>
+						<td><?php //if($rcek1['stat_dye']=="RANDOM"){echo $rcekR['rdye_tf_cstaining'];}else{echo $rcek1['dye_tf_cstaining'];}  ?></td>
+						<td colspan="2"><?php //if($rcek1['stat_dye']=="RANDOM"){echo $rcekR['rdye_tf_sstaining'];}else{echo $rcek1['dye_tf_sstaining'];}  ?></td> -->
 
 							<td>
 								<?php if ($rcek1['dye_tf_acrylic'] != "") {
@@ -16444,83 +16450,82 @@ $tq_test_2_array = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 							<td>&nbsp;</td>
 						</tr>
 					<?php } ?>
-
 					<?php
-					//SWEAT CONCEAL RESULT START
-					if (
-						strlen($rcek1['sco_acid_original']) > 2
-						or strlen($rcek1['sca_acid_original']) > 2
-						or strlen($rcek1['sco_alkaline_afterwash']) > 2
-						or strlen($rcek1['sca_alkaline_afterwash']) > 2
-					) { ?>
-						<?php
+						//SWEAT CONCEAL RESULT START
+						if (
+							strlen($rcek1['sco_acid_original']) > 2
+							or strlen($rcek1['sca_acid_original']) > 2
+							or strlen($rcek1['sco_alkaline_afterwash']) > 2
+							or strlen($rcek1['sca_alkaline_afterwash']) > 2
+						) { ?>
+							<?php
 
-						$sco_acid_original = explode("/", $rcek1['sco_acid_original']);
-						$sca_acid_original = explode("/", $rcek1['sca_acid_original']);
-						$sco_alkaline_afterwash = explode("/", $rcek1['sco_alkaline_afterwash']);
-						$sca_alkaline_afterwash = explode("/", $rcek1['sca_alkaline_afterwash']);
-						?>
-						<tr>
-							<th width=100px>Sweat Conceal</th>
-							<td> Original Acid</td>
-							<td>
-								<?= $sco_acid_original[0] ?>
-							</td>
-							<td colspan="2">
-								<?= $sco_acid_original[1] ?>
-							</td>
-							<td>
-								<?= $sco_acid_original[2] ?>
-							</td>
-							<td colspan="2"> </td>
-							<td>&nbsp;</td>
-						</tr>
-						<tr>
-							<th> </th>
-							<td> Afterwash Acid</td>
-							<td>
-								<?= $sca_acid_original[0] ?>
-							</td>
-							<td colspan="2">
-								<?= $sca_acid_original[1] ?>
-							</td>
-							<td>
-								<?= $sca_acid_original[2] ?>
-							</td>
-							<td colspan="2"></td>
-							<td>&nbsp;</td>
-						</tr>
-						<tr>
-							<th> </th>
-							<td> Original Alkaline</td>
-							<td>
-								<?= $sco_alkaline_afterwash[0] ?>
-							</td>
-							<td colspan="2">
-								<?= $sco_alkaline_afterwash[1] ?>
-							</td>
-							<td>
-								<?= $sco_alkaline_afterwash[2] ?>
-							</td>
-							<td colspan="2"></td>
-							<td>&nbsp;</td>
-						</tr>
-						<tr>
-							<th> </th>
-							<td> Afterwash Alkaline</td>
-							<td>
-								<?= $sca_alkaline_afterwash[0] ?>
-							</td>
-							<td colspan="2">
-								<?= $sca_alkaline_afterwash[1] ?>
-							</td>
-							<td>
-								<?= $sca_alkaline_afterwash[2] ?>
-							</td>
-							<td colspan="2"></td>
-							<td>&nbsp;</td>
-						</tr>
-						<?php
+							$sco_acid_original = explode("/", $rcek1['sco_acid_original']);
+							$sca_acid_original = explode("/", $rcek1['sca_acid_original']);
+							$sco_alkaline_afterwash = explode("/", $rcek1['sco_alkaline_afterwash']);
+							$sca_alkaline_afterwash = explode("/", $rcek1['sca_alkaline_afterwash']);
+							?>
+							<tr>
+								<th width=100px>Sweat Conceal</th>
+								<td> Original Acid</td>
+								<td>
+									<?= $sco_acid_original[0] ?>
+								</td>
+								<td colspan="2">
+									<?= $sco_acid_original[1] ?>
+								</td>
+								<td>
+									<?= $sco_acid_original[2] ?>
+								</td>
+								<td colspan="2"> </td>
+								<td>&nbsp;</td>
+							</tr>
+							<tr>
+								<th> </th>
+								<td> Afterwash Acid</td>
+								<td>
+									<?= $sca_acid_original[0] ?>
+								</td>
+								<td colspan="2">
+									<?= $sca_acid_original[1] ?>
+								</td>
+								<td>
+									<?= $sca_acid_original[2] ?>
+								</td>
+								<td colspan="2"></td>
+								<td>&nbsp;</td>
+							</tr>
+							<tr>
+								<th> </th>
+								<td> Original Alkaline</td>
+								<td>
+									<?= $sco_alkaline_afterwash[0] ?>
+								</td>
+								<td colspan="2">
+									<?= $sco_alkaline_afterwash[1] ?>
+								</td>
+								<td>
+									<?= $sco_alkaline_afterwash[2] ?>
+								</td>
+								<td colspan="2"></td>
+								<td>&nbsp;</td>
+							</tr>
+							<tr>
+								<th> </th>
+								<td> Afterwash Alkaline</td>
+								<td>
+									<?= $sca_alkaline_afterwash[0] ?>
+								</td>
+								<td colspan="2">
+									<?= $sca_alkaline_afterwash[1] ?>
+								</td>
+								<td>
+									<?= $sca_alkaline_afterwash[2] ?>
+								</td>
+								<td colspan="2"></td>
+								<td>&nbsp;</td>
+							</tr>
+							<?php
 						//SWEAT CONCEAL RESULT END
 					}
 					?>

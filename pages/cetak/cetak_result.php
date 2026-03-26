@@ -2848,6 +2848,7 @@ $rd = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
                 <!--<td><?php echo $rcek1['water_staining']; ?></td>-->
               </tr>
             <?php } ?>
+            <!-- Result Testing Crocking -->
             <?php if ($rcek1['crock_len1'] != "" or $rcek1['crock_wid1'] != "" or $rcek1['crock_len2'] != "" or $rcek1['crock_wid2'] != "") { ?>
               <tr>
                 <th rowspan="3" align="left" style="font-size: 7px;">Crocking</th>
@@ -2873,21 +2874,36 @@ $rd = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
                 </td>
               </tr>
               <tr>
-                <th align="left" style="font-size: 7px;">Wid</th>
+                
+              </tr>
+            <?php } ?>
+            <!-- Result Testing Crocking ISO --> 
+            <?php if ($rcek1['crock_len12'] != "" or $rcek1['crock_wid12'] != "" or $rcek1['crock_len2'] != "" or $rcek1['crock_wid2'] != "") { ?>
+              <tr>
+                <th rowspan="3" align="left" style="font-size: 7px;">Crocking ISO</th>
+                <th align="left" style="font-size: 7px;">Srt</th>
+                <th align="left" style="font-size: 7px;">Dry</th>
+                <th align="left" style="font-size: 7px;">Wet</th>
+              </tr>
+              <tr>
+                <th align="left" style="font-size: 7px;">Len</th>
                 <td style="font-size: 7px; <?= ($rcek1['stat_cr'] == "FAIL") ? 'color: red;' : (($rcek1['stat_cr'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
                   <?php if ($rcek1['stat_cr'] == "RANDOM") {
-                    echo $rcekR['rcrock_wid1'];
+                    echo $rcekR['rcrock_len12'];
                   } else {
-                    echo $rcek1['crock_wid1'];
+                    echo $rcek1['crock_len12'];
                   } ?>
                 </td>
-                <td colspan="3" style="font-size: 7px; <?= ($rcek1['stat_cr'] == "FAIL") ? 'color: red;' : (($rcek1['stat_cr'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                <td colspan="2" style="font-size: 7px; <?= ($rcek1['stat_cr'] == "FAIL") ? 'color: red;' : (($rcek1['stat_cr'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
                   <?php if ($rcek1['stat_cr'] == "RANDOM") {
-                    echo $rcekR['rcrock_wid2'];
+                    echo $rcekR['rcrock_len2'];
                   } else {
-                    echo $rcek1['crock_wid2'];
+                    echo $rcek1['crock_len2'];
                   } ?>
                 </td>
+              </tr>
+              <tr>
+                
               </tr>
             <?php } ?>
             <?php if ($rcek1['phenolic_colorchange'] != "") { ?>
