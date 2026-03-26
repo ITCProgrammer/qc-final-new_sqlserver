@@ -2887,15 +2887,15 @@ $rd = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
               </tr>
               <tr>
                 <th align="left" style="font-size: 7px;">Len</th>
-                <td style="font-size: 7px; <?= ($rcek1['stat_cr'] == "FAIL") ? 'color: red;' : (($rcek1['stat_cr'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
-                  <?php if ($rcek1['stat_cr'] == "RANDOM") {
+                <td style="font-size: 7px; <?= ($rcek1['stat_cr2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_cr2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_cr2'] == "RANDOM") {
                     echo $rcekR['rcrock_len12'];
                   } else {
                     echo $rcek1['crock_len12'];
                   } ?>
                 </td>
-                <td colspan="2" style="font-size: 7px; <?= ($rcek1['stat_cr'] == "FAIL") ? 'color: red;' : (($rcek1['stat_cr'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
-                  <?php if ($rcek1['stat_cr'] == "RANDOM") {
+                <td colspan="2" style="font-size: 7px; <?= ($rcek1['stat_cr2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_cr2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
+                  <?php if ($rcek1['stat_cr2'] == "RANDOM") {
                     echo $rcekR['rcrock_len2'];
                   } else {
                     echo $rcek1['crock_len2'];
