@@ -286,8 +286,7 @@ $cekP = $rcekP['total_rows'] ?? 0;
 						<div class="input-group date">
 							<div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
 							<input name="tgl_approve" type="text" class="form-control pull-right" id="datepicker" placeholder="0000-00-00" value="<?php if ($cek > 0 and !empty($rcek['tgl_approve'])) {
-																																																																			echo date_format($rcek['tgl_approve'], 'Y-m-d');
-																																																																		} ?>" />
+								echo date_format($rcek['tgl_approve'], 'Y-m-d');} ?>" />
 						</div>
 					</div>
 				</div>
@@ -297,8 +296,8 @@ $cekP = $rcekP['total_rows'] ?? 0;
 						<div class="input-group date">
 							<div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
 							<input name="tgl_kirim" type="text" class="form-control pull-right" id="datepicker1" placeholder="0000-00-00" value="<?php if ($cek > 0 and !empty($rcek['tgl_kirim'])) {
-																																																																		echo date_format($rcek['tgl_kirim'], 'Y-m-d');
-																																																																		} ?>" />
+								echo date_format($rcek['tgl_kirim'], 'Y-m-d');
+								} ?>" />
 						</div>
 					</div>
 				</div>
@@ -436,8 +435,8 @@ if ($_POST['save'] == "save") {
 		$cmt_buyer = str_replace("'", "''", $_POST['cmt_buyer']);
 		$ket = str_replace("'", "''", $_POST['ket']);
 		$lot = trim($_POST['lot']);
-		$tgl_approve = $_POST['tgl_approve'];
-		$tgl_kirim = $_POST['tgl_kirim'];
+		$tgl_approve = !empty($_POST['tgl_approve']) ? "'" . $_POST['tgl_approve'] . "'" : "NULL";
+		$tgl_kirim   = !empty($_POST['tgl_kirim'])   ? "'" . $_POST['tgl_kirim'] . "'"   : "NULL";
 		$pos = strpos($_POST['langganan'], "/");
 		$posbuyer = substr($_POST['langganan'], $pos + 1, 50);
 		$buyer = str_replace("'", "''", $posbuyer);
@@ -519,8 +518,8 @@ if ($_POST['save'] == "save") {
 		  	'$cmt_internal',
 				'$cmt_buyer',
 		  	'$ket',
-		  	'$tgl_approve',
-		  	'$tgl_kirim',
+		  	$tgl_approve,
+		  	$tgl_kirim',
 		  	'$file',
 		  	'$_POST[acc_buyer]',
 		  	'$tgl_expired',
@@ -613,8 +612,8 @@ if ($_POST['ubah'] == "ubah") {
 	$cmt_buyer = str_replace("'", "''", $_POST['cmt_buyer']);
 	$ket = str_replace("'", "''", $_POST['ket']);
 	$lot = trim($_POST['lot']);
-	$tgl_approve = $_POST['tgl_approve'];
-	$tgl_kirim = $_POST['tgl_kirim'];
+	$tgl_approve = !empty($_POST['tgl_approve']) ? "'" . $_POST['tgl_approve'] . "'" : "NULL";
+	$tgl_kirim   = !empty($_POST['tgl_kirim'])   ? "'" . $_POST['tgl_kirim'] . "'"   : "NULL";
 	$pos = strpos($_POST['langganan'], "/");
 	$posbuyer = substr($_POST['langganan'], $pos + 1, 50);
 	$buyer = str_replace("'", "''", $posbuyer);
@@ -637,27 +636,27 @@ if ($_POST['ubah'] == "ubah") {
 	}
 	$sqlData = sqlsrv_query($con_db_qc_sqlsrv, "UPDATE db_qc.tbl_firstlot SET 
 					langganan				='$_POST[langganan]',
-					buyer						='$buyer',
+					buyer					='$buyer',
 					no_order				='$_POST[no_order]',
 					no_hanger				='$_POST[no_hanger]',
 					no_item					='$_POST[no_item]',
-					po							='$po',
-					jenis_kain			='$jns',
-					lebar						=$lebar,
+					po						='$po',
+					jenis_kain				='$jns',
+					lebar					=$lebar,
 					gramasi					=$gramasi,
-					lot							='$lot',
-					warna						='$warna',
+					lot						='$lot',
+					warna					='$warna',
 					no_warna				='$nowarna',
 					season					='$_POST[season]',
 					validity				='$_POST[validity]',
-					cmt_internal		='$cmt_internal',
+					cmt_internal			='$cmt_internal',
 					cmt_buyer				='$cmt_buyer',
-					ket							='$ket',
-					tgl_approve			='$tgl_approve',
-					tgl_kirim				='$tgl_kirim',
+					ket						='$ket',
+					tgl_approve				=$tgl_approve,
+					tgl_kirim				=$tgl_kirim,
 					acc_buyer				='$_POST[acc_buyer]',
 					spectro					='$file',
-					sts_potong			='$sts_potong',
+					sts_potong				='$sts_potong',
 					sample					='$_POST[sample]',
 					tgl_update			=GETDATE()
 					WHERE nodemand ='$_GET[nodemand]'

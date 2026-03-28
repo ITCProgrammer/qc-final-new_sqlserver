@@ -17,6 +17,8 @@ $Awal	          = isset($_POST['awal']) ? $_POST['awal'] : '';
 $Akhir	        = isset($_POST['akhir']) ? $_POST['akhir'] : '';
 $Approve_Awal	  = isset($_POST['approve_awal']) ? $_POST['approve_awal'] : '';
 $Approve_Akhir	= isset($_POST['approve_akhir']) ? $_POST['approve_akhir'] : '';
+$Kirim_Awal	    = isset($_POST['kirim_awal']) ? $_POST['kirim_awal'] : '';
+$Kirim_Akhir	  = isset($_POST['kirim_akhir']) ? $_POST['kirim_akhir'] : '';
 $Nodemand	      = isset($_POST['nodemand']) ? $_POST['nodemand'] : '';
 $Langganan	    = isset($_POST['langganan']) ? $_POST['langganan'] : '';
 $Order	        = isset($_POST['order']) ? $_POST['order'] : '';
@@ -70,6 +72,26 @@ $Warna	        = isset($_POST['warna']) ? $_POST['warna'] : '';
             <div class="input-group date">
                 <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
                 <input name="approve_akhir" type="date" class="form-control pull-right" placeholder="Tanggal Approve Akhir" value="<?php echo $Approve_Akhir;  ?>" autocomplete="off"/>
+            </div>
+            </div>
+            <!-- /.input group -->
+        </div>
+        <div class="form-group">
+            <label for="tgl_approve" class="col-sm-1 control-label">Tgl Kirim Awal</label>
+            <div class="col-sm-2">
+            <div class="input-group date">
+                <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
+                <input name="kirim_awal" type="date" class="form-control pull-right" placeholder="Tanggal Kirim Awal" value="<?php echo $Kirim_Awal;  ?>" autocomplete="off"/>
+            </div>
+            </div>
+            <!-- /.input group -->
+        </div>
+        <div class="form-group">
+            <label for="tgl_approve" class="col-sm-1 control-label">Tgl Kirim Akhir</label>
+            <div class="col-sm-2">
+            <div class="input-group date">
+                <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
+                <input name="kirim_akhir" type="date" class="form-control pull-right" placeholder="Tanggal Kirim Akhir" value="<?php echo $Kirim_Akhir;  ?>" autocomplete="off"/>
             </div>
             </div>
             <!-- /.input group -->
@@ -164,9 +186,10 @@ $Warna	        = isset($_POST['warna']) ? $_POST['warna'] : '';
           <?php
             $no=1;
             if($Awal!=""){ $Where =" AND CAST(tgl_buat AS DATE) BETWEEN '$Awal' AND '$Akhir' "; }
+            if($Kirim_Awal!=""){ $kirim=" AND CAST(tgl_kirim AS DATE) BETWEEN '$Kirim_Awal' AND '$Kirim_Akhir' ";}else{$kirim=" ";}
             if($Approve_Awal!=""){ $appr=" AND CAST(tgl_approve AS DATE) BETWEEN '$Approve_Awal' AND '$Approve_Akhir' ";}else{$appr=" ";}
-            if($Awal!="" or $Order!="" or $Item!="" or $Langganan!="" or $Nodemand!="" or $Warna!="" or $Approve_Awal!=""){
-              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_firstlot WHERE nodemand LIKE '%$Nodemand%' AND no_order LIKE '%$Order%' AND po LIKE '%$PO%' AND no_item LIKE '%$Item%' AND langganan LIKE '%$Langganan%' AND warna LIKE '%$Warna%' $Where $appr ORDER BY id ASC");
+            if($Awal!="" or $Order!="" or $Item!="" or $Langganan!="" or $Nodemand!="" or $Warna!="" or $Approve_Awal!="" or $Kirim_Awal!=""){
+              $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_firstlot WHERE nodemand LIKE '%$Nodemand%' AND no_order LIKE '%$Order%' AND po LIKE '%$PO%' AND no_item LIKE '%$Item%' AND langganan LIKE '%$Langganan%' AND warna LIKE '%$Warna%' $Where $appr $kirim ORDER BY id ASC");
             }else{
               $qry1=sqlsrv_query($con_db_qc_sqlsrv,"SELECT * FROM db_qc.tbl_firstlot WHERE nodemand LIKE '%$Nodemand%' AND no_order LIKE '$Order' AND po LIKE '$PO' AND no_item LIKE '$Item' AND langganan LIKE '$Langganan' AND warna LIKE '$Warna' $Where $appr ORDER BY id ASC");
             }
