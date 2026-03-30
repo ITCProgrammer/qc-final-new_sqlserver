@@ -519,7 +519,7 @@ if ($_POST['save'] == "save") {
 				'$cmt_buyer',
 		  	'$ket',
 		  	$tgl_approve,
-		  	$tgl_kirim',
+		  	$tgl_kirim,
 		  	'$file',
 		  	'$_POST[acc_buyer]',
 		  	'$tgl_expired',
