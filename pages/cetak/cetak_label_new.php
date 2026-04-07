@@ -104,7 +104,7 @@ QRcode::png($codeContents1, $tempdir1 . $namaFile1, $level1, $UkuranPixel1, $Uku
             </tr>
             <tr>
               <td colspan="4">
-                <div style="font-size:9px;">
+                <div style="font-size:8px;">
                   <?php
                   $pos = strpos($r['pelanggan'], "/");
                   if ($pos > 0) {
@@ -120,14 +120,14 @@ QRcode::png($codeContents1, $tempdir1 . $namaFile1, $level1, $UkuranPixel1, $Uku
             </tr>
             <tr>
               <td colspan="4">
-                <div style="font-size:9px;">
+                <div style="font-size:8px;">
                   <?php echo substr($r['no_po'], 0, 31); ?>
                 </div>
               </td>
             </tr>
             <tr>
               <td colspan="4">
-                <div style="font-size:9px;">
+                <div style="font-size:8px;">
                   <strong><?php echo $r['no_order']; ?></strong>
                   <?php echo " (" . $r['no_item'] . ")"; ?>
                   <?= $rowDB2Season['INTERNALREFERENCE'] ?? '' ?>
@@ -218,7 +218,7 @@ QRcode::png($codeContents1, $tempdir1 . $namaFile1, $level1, $UkuranPixel1, $Uku
               ?>
               <tr>
                 <td colspan="4">
-                  <div style="font-size: 8px;">
+                  <div style="font-size: 7px;">
                     Waktu Shrinkage <br>
                     Waktu Testing :
                     <?php
@@ -230,14 +230,14 @@ QRcode::png($codeContents1, $tempdir1 . $namaFile1, $level1, $UkuranPixel1, $Uku
               </tr>
               <tr>
                 <td colspan="4">
-                  <div style="font-size: 8px;">Waktu Selesai Test :
+                  <div style="font-size: 7px;">Waktu Selesai Test :
                     <?php echo $waktu_selesai = date('d-m-Y H:i', strtotime($waktu_testing . '+ 6 hour')); ?>
                   </div>
                 </td>
               </tr>
               <tr>
                 <td colspan="4">
-                  <div style="font-size: 8px;">Waktu Ukur :
+                  <div style="font-size: 7px;">Waktu Ukur :
                     <?php echo $waktu_ukur = date('d-m-Y H:i', strtotime($waktu_selesai . '+ 4 hour')); ?>
                   </div>
                 </td>
@@ -279,7 +279,7 @@ QRcode::png($codeContents1, $tempdir1 . $namaFile1, $level1, $UkuranPixel1, $Uku
             </tr>
             <tr>
               <td colspan="4">
-                <div style="font-size:9px;">
+                <div style="font-size:8px;">
                   <?php
                   $pos = strpos($r['pelanggan'], "/");
                   if ($pos > 0) {
@@ -295,14 +295,14 @@ QRcode::png($codeContents1, $tempdir1 . $namaFile1, $level1, $UkuranPixel1, $Uku
             </tr>
             <tr>
               <td colspan="4">
-                <div style="font-size:9px;">
+                <div style="font-size:8px;">
                   <?php echo substr($r['no_po'], 0, 31); ?>
                 </div>
               </td>
             </tr>
             <tr>
               <td colspan="4">
-                <div style="font-size:9px;">
+                <div style="font-size:8px;">
                   <strong><?php echo $r['no_order']; ?></strong>
                   <?php echo " (" . $r['no_item'] . ")"; ?>
                   <?= $rowDB2Season['INTERNALREFERENCE'] ?? '' ?>
@@ -393,7 +393,7 @@ QRcode::png($codeContents1, $tempdir1 . $namaFile1, $level1, $UkuranPixel1, $Uku
               ?>
               <tr>
                 <td colspan="4">
-                  <div style="font-size: 8px;">
+                  <div style="font-size: 7px;">
                     Waktu Shrinkage <br>
                     Waktu Testing :
                     <?php
@@ -405,14 +405,14 @@ QRcode::png($codeContents1, $tempdir1 . $namaFile1, $level1, $UkuranPixel1, $Uku
               </tr>
               <tr>
                 <td colspan="4">
-                  <div style="font-size: 8px;">Waktu Selesai Test :
+                  <div style="font-size: 7px;">Waktu Selesai Test :
                     <?php echo $waktu_selesai = date('d-m-Y H:i', strtotime($waktu_testing . '+ 6 hour')); ?>
                   </div>
                 </td>
               </tr>
               <tr>
                 <td colspan="4">
-                  <div style="font-size: 8px;">Waktu Ukur :
+                  <div style="font-size: 7px;">Waktu Ukur :
                     <?php echo $waktu_ukur = date('d-m-Y H:i', strtotime($waktu_selesai . '+ 4 hour')); ?>
                   </div>
                 </td>
@@ -454,7 +454,7 @@ QRcode::png($codeContents1, $tempdir1 . $namaFile1, $level1, $UkuranPixel1, $Uku
             </tr>
             <tr>
               <td colspan="4">
-                <div style="font-size:9px;">
+                <div style="font-size:8px;">
                   <?php
                   $pos = strpos($r['pelanggan'], "/");
                   if ($pos > 0) {
@@ -470,14 +470,14 @@ QRcode::png($codeContents1, $tempdir1 . $namaFile1, $level1, $UkuranPixel1, $Uku
             </tr>
             <tr>
               <td colspan="4">
-                <div style="font-size:9px;">
+                <div style="font-size:8px;">
                   <?php echo substr($r['no_po'], 0, 31); ?>
                 </div>
               </td>
             </tr>
             <tr>
               <td colspan="4">
-                <div style="font-size:9px;">
+                <div style="font-size:8px;">
                   <strong><?php echo $r['no_order']; ?></strong>
                   <?php echo " (" . $r['no_item'] . ")"; ?>
                   <?= $rowDB2Season['INTERNALREFERENCE'] ?? '' ?>
@@ -540,7 +540,7 @@ QRcode::png($codeContents1, $tempdir1 . $namaFile1, $level1, $UkuranPixel1, $Uku
                 <div style="font-size:9px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
               </td>
               <td colspan="1">
-                <div style="font-size:9px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                <div style="font-size:8px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
               </td>
             </tr>
             <?php
@@ -568,7 +568,7 @@ QRcode::png($codeContents1, $tempdir1 . $namaFile1, $level1, $UkuranPixel1, $Uku
               ?>
               <tr>
                 <td colspan="4">
-                  <div style="font-size: 8px;">
+                  <div style="font-size: 7px;">
                     Waktu Shrinkage <br>
                     Waktu Testing :
                     <?php
@@ -580,14 +580,14 @@ QRcode::png($codeContents1, $tempdir1 . $namaFile1, $level1, $UkuranPixel1, $Uku
               </tr>
               <tr>
                 <td colspan="4">
-                  <div style="font-size: 8px;">Waktu Selesai Test :
+                  <div style="font-size: 7px;">Waktu Selesai Test :
                     <?php echo $waktu_selesai = date('d-m-Y H:i', strtotime($waktu_testing . '+ 6 hour')); ?>
                   </div>
                 </td>
               </tr>
               <tr>
                 <td colspan="4">
-                  <div style="font-size: 8px;">Waktu Ukur :
+                  <div style="font-size: 7px;">Waktu Ukur :
                     <?php echo $waktu_ukur = date('d-m-Y H:i', strtotime($waktu_selesai . '+ 4 hour')); ?>
                   </div>
                 </td>
