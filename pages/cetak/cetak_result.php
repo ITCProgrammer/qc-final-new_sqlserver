@@ -2878,7 +2878,7 @@ $rd = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
               </tr>
             <?php } ?>
             <!-- Result Testing Crocking ISO --> 
-            <?php if ($rcek1['crock_len12'] != "" or $rcek1['crock_wid12'] != "" or $rcek1['crock_len2'] != "" or $rcek1['crock_wid2'] != "") { ?>
+            <?php if ($rcek1['crock_len12'] != "" or $rcek1['crock_wid12'] != "" or $rcek1['crock_len22'] != "" or $rcek1['crock_wid22'] != "") { ?>
               <tr>
                 <th rowspan="3" align="left" style="font-size: 7px;">Crocking ISO</th>
                 <th align="left" style="font-size: 7px;">Srt</th>
@@ -2896,9 +2896,9 @@ $rd = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC);
                 </td>
                 <td colspan="2" style="font-size: 7px; <?= ($rcek1['stat_cr2'] == "FAIL") ? 'color: red;' : (($rcek1['stat_cr2'] == "DISPOSISI") ? 'color: darkorange;' : '') ?>">
                   <?php if ($rcek1['stat_cr2'] == "RANDOM") {
-                    echo $rcekR['rcrock_len2'];
+                    echo $rcekR['rcrock_len22'];
                   } else {
-                    echo $rcek1['crock_len2'];
+                    echo $rcek1['crock_len22'];
                   } ?>
                 </td>
               </tr>
