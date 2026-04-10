@@ -43,7 +43,8 @@ WHERE
 GROUP BY
 	id
 ORDER BY
-	max(no_mesin) ASC, max(no_urut) ASC");
+    MAX(no_mesin) ASC,
+    CAST(MAX(no_urut) AS INT) ASC;");
   $no = 1;
   $n = 1;
   $c = 0;
