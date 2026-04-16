@@ -138,7 +138,10 @@ include "koneksi.php";
     $Where = "";
     $WhereDate = "";
     if ($Awal != "") {
-      $Where = " AND TRY_CAST( CONCAT(tgl_update,' ',jam_update) AS DATE) between '$start_date' AND '$stop_date' ";
+      $Where = " AND CONVERT(datetime,
+                CONVERT(varchar(10), tgl_update, 120) + ' ' + LEFT(CONVERT(varchar(8), jam_update, 108), 5),
+                120
+              ) BETWEEN CONVERT(datetime, '$start_date', 120) AND CONVERT(datetime, '$stop_date', 120) ";
       $WhereDate = " AND TRY_CAST(tgl_update AS DATE) BETWEEN '$Awal' AND '$Akhir' ";
     } else {
       $Where = " AND 1=0";
