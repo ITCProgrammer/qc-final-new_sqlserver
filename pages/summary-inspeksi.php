@@ -421,7 +421,8 @@ $Item = isset($_POST['item']) ? $_POST['item'] : '';
       D.ORDERLINE,
       D.SUBCODE02,
       D.SUBCODE03,
-      E.LONGDESCRIPTION";
+      E.LONGDESCRIPTION 
+      LIMIT 2";
                 $stmt = db2_exec($conn1, $sql, array('cursor' => DB2_SCROLLABLE));
               } else {
               }
@@ -1265,7 +1266,7 @@ $Item = isset($_POST['item']) ? $_POST['item'] : '';
                   </td>
                   <td align="center">
                     <?php if ($rGA['JML_A'] != '') {
-                      echo $rGA['JML_A'];
+                      echo $rGA['JML_A'].'TEST';
                     } else {
                       echo "0";
                     } ?>

@@ -326,7 +326,65 @@ WHERE
     $Wshift $WGshift $WProses
 	a.tgl_update BETWEEN '$start_date' 
 	AND '$stop_date' and a.status='selesai'
-GROUP BY b.g_shift	");
+GROUP BY b.g_shift	
+ORDER BY b.g_shift ASC");
+echo "SELECT
+	COUNT(DISTINCT a.personil) as inspektor,
+	sum( a.qty ) AS bruto,
+	sum( a.yard ) AS panjang,
+  	b.g_shift,
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN c.status_produk = '1' AND (b.proses='Inspect Finish' OR b.proses='Inspect Packing' OR b.proses='Inspect White' OR b.proses='Inspect Qty Kecil') THEN a.qty
+			ELSE 0
+		END)) sts_ok,
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN c.status_produk = '2' AND (b.proses='Inspect Finish' OR b.proses='Inspect Packing' OR b.proses='Inspect White' OR b.proses='Inspect Qty Kecil') THEN a.qty
+			ELSE 0
+		END)) sts_x,
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN c.status_produk = '3' AND (b.proses='Inspect Finish' OR b.proses='Inspect Packing' OR b.proses='Inspect White' OR b.proses='Inspect Qty Kecil') THEN a.qty
+			ELSE 0
+		END)) sts_pr,
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN b.proses='Inspect Finish' THEN a.qty
+			ELSE 0
+		END)) sts_fin,
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN b.proses='Inspect Oven' THEN a.qty
+			ELSE 0
+		END)) sts_oven,
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN b.proses='Pisah' THEN a.qty
+			ELSE 0
+		END)) sts_pisah,	
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN b.proses='Perbaikan' OR b.proses='Perbaikan Grade' OR b.proses='Tandai Defect' OR b.proses='Inspect Ulang (Setelah Perbaikan)' THEN a.qty
+			ELSE 0
+		END)) sts_perbaikan,	
+  	CONVERT(VARCHAR(50),
+		SUM(CASE
+			WHEN b.proses='Kragh' THEN a.qty
+			ELSE 0
+		END)) sts_kragh,
+	sum(a.qty) as sts_tot,
+	sum(a.yard) as sts_yard
+FROM
+	db_qc.tbl_inspection a 
+INNER JOIN db_qc.tbl_schedule b ON a.id_schedule = b.id
+INNER JOIN db_qc.tbl_gerobak c ON c.id_schedule = b.id
+WHERE
+    $Wshift $WGshift $WProses
+	a.tgl_update BETWEEN '$start_date' 
+	AND '$stop_date' and a.status='selesai'
+GROUP BY b.g_shift	
+ORDER BY b.g_shift ASC";
 						$totOKS = 0;
 						$totXS = 0;
 						$totPRS = 0;
