@@ -156,6 +156,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_proses_gerobak
                     <div align="center">Tanggal Buat</div>
                   </th>
                   <th>
+                    <div align="center">Tanggal Inspect</div>
+                  </th>
+                  <th>
                     <div align="center">Delivery</div>
                   </th>
                 </tr>
@@ -376,6 +379,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_proses_gerobak
                         $selisih  = $interval->days;
                         echo "<br> <span class='badge bg-orange blink_me'><i class='fa fa-exclamation-triangle'> </i> Delay $selisih Hari Dari Delivery!</span>";
                       }
+                      ?>
+                    </td>
+                    <td align="center">
+                      <?php 
+                        $query_mulai_inspect = "SELECT
+                                                  MAX(PROPROGRESSPROGRESSNUMBER) AS PROPROGRESSPROGRESSNUMBER,
+                                                  MAX(MULAI) AS DATETIME_END,
+                                                  DATE(MAX(MULAI)) AS TANGGAL_END,
+                                                  LISTAGG( DISTINCT OP, ',') AS OPERATOR,
+                                                  PRODUCTIONORDERCODE
+                                                FROM
+                                                  ITXVIEW_POSISIKK_TGL_IN_PRODORDER_INS3
+                                                WHERE
+                                                  PRODUCTIONORDERCODE = '$rowd[nokk]'
+                                                GROUP BY PRODUCTIONORDERCODE, OPERATIONCODE, DEMANDSTEPSTEPNUMBER, PROGRESSTEMPLATECODE";
+                        $stmt_mulai_inspect = @db2_prepare($conn1, $query_mulai_inspect);
+                        if ($stmt_mulai_inspect && @db2_execute($stmt_mulai_inspect)) {
+                          $rowd_selesai_inspect = db2_fetch_assoc($stmt_mulai_inspect);
+                          if (isset($rowd_selesai_inspect['TANGGAL_END'])) {
+                            echo $rowd_selesai_inspect['TANGGAL_END'];
+                          } else {
+                            echo "";
+                          }
+                        }
                       ?>
                     </td>
                     <td align="center">

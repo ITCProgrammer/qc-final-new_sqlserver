@@ -82,17 +82,20 @@ if (!function_exists('qcf_sqlsrv_fetch_array')) {
 
   $start_date = '';
   $stop_date = '';
-  $Where = "1 = 0 AND ";
+  $Where = "1 = 0 AND";
+  $Where2 = "1 = 0 AND";
   if ($Awal != "") {
     if ($jamA != "" || $jamAr != "") {
       $jamA_fmt = (strlen($jamA) == 5) ? $jamA : "0" . $jamA;
       $jamAr_fmt = (strlen($jamAr) == 5) ? $jamAr : "0" . $jamAr;
       $start_date = $Awal . " " . $jamA_fmt;
       $stop_date = $Akhir . " " . $jamAr_fmt;
+      $Where2 = " a.tgl_update BETWEEN '$start_date:00' and '$stop_date:59' and "; 
       $Where = " DATEADD(second, DATEDIFF(second, 0, TRY_CAST(jam_update AS time)), TRY_CAST(tgl_update AS datetime)) between '$start_date:00' and '$stop_date:59' and ";
     } else {
       $start_date = $Awal;
       $stop_date = $Akhir;
+      $Where2 = " a.tgl_update BETWEEN '$start_date 0:00' AND '$stop_date 0:59' and "; 
       $Where = " CONVERT(date, tgl_update) between '$start_date' and '$stop_date' and ";
     }
   }
@@ -319,8 +322,59 @@ if (!function_exists('qcf_sqlsrv_fetch_array')) {
               $t_rollR = 0;
               $t_kgR = 0;
               $t_yardR = 0;
+              $rft_total = 0;
               $total_rluluR = $total_kgluluR = $total_yluluR = $total_radiR = $total_kgadiR = $total_yadiR = $total_rdllR = $total_kgdllR = $total_ydllR = 0;
               $persen_kgluluR = $persen_yluluR = $persen_kgadiR = $persen_yadiR = $persen_kgdllR = $persen_ydllR = 0;
+              $q_ins = "SELECT
+                          sum(qty) as sts_tot,
+                          sum(yard) as sts_yard
+                        FROM
+                          db_qc.tbl_inspection a
+                        INNER JOIN db_qc.tbl_schedule b ON
+                          a.id_schedule = b.id
+                        INNER JOIN db_qc.tbl_gerobak c ON
+                          c.id_schedule = b.id
+                        WHERE
+                          $Where2
+                          a.status='selesai'";
+  $stmt_ins = sqlsrv_query($con_db_qc_sqlsrv, $q_ins);
+  $rowIns = sqlsrv_fetch_array($stmt_ins);
+  // echo $q_ins;
+
+  // Hitung total kg schedule packing (sch_ins) berdasar rentang tanggal inspeksi (TANGGAL_END)
+    $sch_ins = 0;
+    if ($Awal != "") {
+      $startDateObj = new DateTime($Awal);
+      $endDateObj   = new DateTime($Akhir);
+
+      // Ambil semua schedule packing lalu cocokkan tanggal selesai inspeksi dari DB2
+      $qrySchedulePack = sqlsrv_query($con_db_qc_sqlsrv, "SELECT nokk, bruto FROM db_qc.tbl_schedule_packing where [status] <> 'selesai'");
+      while ($rowSchedule = sqlsrv_fetch_array($qrySchedulePack)) {
+        $nokkSchedule = isset($rowSchedule['nokk']) ? $rowSchedule['nokk'] : '';
+        $query_mulai_inspect = "SELECT
+                                  MAX(PROPROGRESSPROGRESSNUMBER) AS PROPROGRESSPROGRESSNUMBER,
+                                  MAX(MULAI) AS DATETIME_END,
+                                  DATE(MAX(MULAI)) AS TANGGAL_END,
+                                  LISTAGG( DISTINCT OP, ',') AS OPERATOR,
+                                  PRODUCTIONORDERCODE
+                                FROM
+                                  ITXVIEW_POSISIKK_TGL_IN_PRODORDER_INS3
+                                WHERE
+                                  PRODUCTIONORDERCODE = '$nokkSchedule'
+                                GROUP BY PRODUCTIONORDERCODE, OPERATIONCODE, DEMANDSTEPSTEPNUMBER, PROGRESSTEMPLATECODE";
+
+        $stmt_mulai_inspect = @db2_prepare($conn1, $query_mulai_inspect);
+        if ($stmt_mulai_inspect && @db2_execute($stmt_mulai_inspect)) {
+          $rowd_selesai_inspect = db2_fetch_assoc($stmt_mulai_inspect);
+          if (!empty($rowd_selesai_inspect['TANGGAL_END'])) {
+            $tanggalEnd = new DateTime($rowd_selesai_inspect['TANGGAL_END']);
+            if ($tanggalEnd >= $startDateObj && $tanggalEnd <= $endDateObj) {
+              $sch_ins += floatval($rowSchedule['bruto']);
+            }
+          }
+        }
+      }
+    }
               ?>
               <?php
               $qryPAR = sqlsrv_query($con_db_qc_sqlsrv, "SELECT
@@ -449,6 +503,8 @@ if (!function_exists('qcf_sqlsrv_fetch_array')) {
               $t_rollR = round($rowPAR['tot_roll']) + round($rowPBR['tot_roll']) + round($rowPCR['tot_roll']);
               $t_kgR = round($rowPAR['tot_kg'], 2) + round($rowPBR['tot_kg'], 2) + round($rowPCR['tot_kg'], 2);
               $t_yardR = round($rowPAR['tot_yd'], 2) + round($rowPBR['tot_yd'], 2) + round($rowPCR['tot_yd'], 2);
+              $rft_total = ($rowIns['sts_tot']==0) ? 0 : ROUND($t_kgR / $rowIns['sts_tot'], 2)*100;
+              $rft2_total = ($rowIns['sts_tot']==0) ? 0 : ROUND(($t_kgR + $sch_ins) / $rowIns['sts_tot'], 2)*100;
 
               if ($Awal != "") {
                 if ($total_kgluluR != 0) {
@@ -629,9 +685,38 @@ if (!function_exists('qcf_sqlsrv_fetch_array')) {
                                               } else {
                                                 echo "0";
                                               } ?></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
               </tr>
+			  <tr>
+          <td colspan='2'><?= 'Tot QTY Inspek '?></td>
+          <td class='text-right' colspan='2'><?= $rowIns['sts_tot']. ' Kg';?></td>
+				  <td></td>
+				  <td colspan='2'><?= 'Total QTY Sisa Packing Per Tanggal Inspek '?></td>
+				  <td colspan='2' class='text-right'><?= $sch_ins. ' Kg';?></td>
+          <td></td>
+				  <td></td>
+				  <td></td>
+				  <td></td>
+			  </tr>
+			  <tr>
+				  <td colspan='2'><strong>Laporan RFT</strong></td>
+          <td class='text-right' colspan='2'><strong><?php echo $rft_total.' %'?></strong></td>
+          <td></td>
+				  <td colspan='2'><strong>Laporan RFT Sisa Packing</strong></td>
+          <td class='text-right text-strong' colspan='2'><strong><?php echo $rft2_total.' %'?></strong></td>
+				  <td></td>
+				  <td></td>
+				  <td></td>
+				  <td></td>
+			  </tr>
             </tbody>
           </table>
+          <p><br>
         </div>
       </div>
     </div>
