@@ -238,7 +238,13 @@ WHERE LENGTH(TRIM(x.ELEMENTCODE)) > 11 AND ELEMENTITEMTYPECODE ='KFF' AND x.DEMA
 									</tr>
 								</tfoot>
 							</table>
-			
+							<!-- Modal Popup untuk Edit-->
+							<div id="DetailProduksi" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+						  </div>
+							<div id="CekButuhBenang" class="modal fade modal-3d-slit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+							</div>
+							<div id="GDBTerima" class="modal fade modal-3d-slit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+							</div>
 
 					  </div>
 					</div>

@@ -6755,7 +6755,7 @@ $cekM = $rowCntM['total'];
         <div class="col-xs-12">
           <h2 class="page-header">
             <i class="fa fa-globe"></i> Result.
-            <small class="pull-right">Date: </small>
+            <small class="pull-right">Date: <?php echo $rcek1['tgl_buat'];?></small>
           </h2>
         </div>
         <!-- /.col -->

@@ -1829,13 +1829,6 @@ if($_POST['save']=="save"){
 		];
 
 		$sqlData = sqlsrv_query($con_db_qc_sqlsrv, $sql, $params);
-		
-		if ($sqlData === false) {
-			echo "<pre>";
-			print_r(sqlsrv_errors(SQLSRV_ERR_ALL)); // gabungan error + warning
-			echo "</pre>";
-			exit;
-		}
 	  
 		if($sqlData){
 			echo "<script>swal({
@@ -1849,9 +1842,6 @@ if($_POST['save']=="save"){
 				}
 				});</script>";
 		}else{
-			sqlsrv_errors($sqlData);
-			die();
-			p(sqlsrv_errors());
 			$errorMsg = implode(", ", []);
 			echo "<script>swal({
 				title: 'Gagal Menyimpan Data',   
@@ -1862,7 +1852,7 @@ if($_POST['save']=="save"){
 					window.location.href='InputDataNew'; 
 				}
 			});</script>";
-			
+			p(sqlsrv_errors());
 		}
 	}else{
 		// Prepare parameterized query untuk INSERT tanpa file upload
@@ -1984,9 +1974,6 @@ if($_POST['save']=="save"){
 				}
 				});</script>";
 		}else{
-			sqlsrv_errors();
-			die();
-			p(sqlsrv_errors());
 			$errorMsg = implode(", ", []);
 			echo "<script>swal({
 				title: 'Gagal Menyimpan Data (tanpa upload)',   

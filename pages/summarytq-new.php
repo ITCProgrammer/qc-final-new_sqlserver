@@ -3644,8 +3644,6 @@ if($rcekD){
        <?php } ?> 
 
 <?php
-// echo $cek1;
-// die();
 if ($_POST['status_save'] == "save" and $_POST['status'] == "") {
     echo "<script>swal({
     title: 'Status Tidak Tersimpan',   
