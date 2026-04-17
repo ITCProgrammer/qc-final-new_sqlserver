@@ -34,15 +34,15 @@ if (!function_exists('sqlsrv_fetch_all_assoc')) {
 ?>
 <?php
 date_default_timezone_set('Asia/Jakarta');
-$host="10.0.0.174";
-$username="ditprogram";
-$password="Xou@RUnivV!6";
-$db_name="TM";
-$connInfo = array( "Database"=>$db_name, "UID"=>$username, "PWD"=>$password);
+// $host="10.0.0.174";
+// $username="ditprogram";
+// $password="Xou@RUnivV!6";
+// $db_name="TM";
+// $connInfo = array( "Database"=>$db_name, "UID"=>$username, "PWD"=>$password);
 // $conn     = sqlsrv_connect( $host, $connInfo);
 
 // SQL Server: database db_qc (migrated from MySQL)
-$db_qc_host = "10.0.0.221";
+$db_qc_host = "sql-db-prd.indotaichen.com";
 $db_qc_option = array(
     "Database" => "db_qc",
     "UID" => "sa",
@@ -52,7 +52,7 @@ $db_qc_option = array(
 $con_db_qc_sqlsrv = sqlsrv_connect($db_qc_host, $db_qc_option);
 
 // SQL Server: database db_laborat (migrated from MySQL)
-$db_laborat_host = "10.0.0.221";
+$db_laborat_host = "sql-db-prd.indotaichen.com";
 $db_laborat_option = array(
     "Database" => "db_laborat",
     "UID" => "sa",
@@ -62,7 +62,7 @@ $db_laborat_option = array(
 $con_db_laborat_sqlsrv = sqlsrv_connect($db_laborat_host, $db_laborat_option);
 
 // SQL Server: database db_dying (migrated from MySQL)
-$db_dying_host = "10.0.0.221";
+$db_dying_host = "sql-db-prd.indotaichen.com";
 $db_dying_option = array(
     "Database" => "db_dying",
     "UID" => "sa",
@@ -72,7 +72,7 @@ $db_dying_option = array(
 $con_db_dying_sqlsrv = sqlsrv_connect($db_dying_host, $db_dying_option);
 
 // SQL Server: database db_adm (migrated from MySQL)
-$db_adm_host = "10.0.0.221";
+$db_adm_host = "sql-db-prd.indotaichen.com";
 $db_adm_option = array(
     "Database" => "db_adm",
     "UID" => "sa",
@@ -82,7 +82,7 @@ $db_adm_option = array(
 $con_db_adm_sqlsrv = sqlsrv_connect($db_adm_host, $db_adm_option);
 
 // SQL Server: database invqc (migrated from MySQL)
-$invqc_host = "10.0.0.221";
+$invqc_host = "sql-db-prd.indotaichen.com";
 $invqc_option = array(
     "Database" => "invqc",
     "UID" => "sa",
