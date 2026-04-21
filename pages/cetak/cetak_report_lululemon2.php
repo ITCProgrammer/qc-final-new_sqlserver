@@ -163,12 +163,12 @@ function cekstandart($test, $jns, $protocol)
 
         'WASHING' => [
             'PREDOMINANLY NATURAL' => [
-                'LIGHT'  => 'Min grade 3.4',
+                'LIGHT'  => 'Min grade 3.5',
                 'MEDIUM' => 'Min grade 3',
                 'DARK'   => 'Min grade 3',
             ],
             'PREDOMINANLY SYNTHETIC' => [
-                'LIGHT'  => 'Min grade 3.4',
+                'LIGHT'  => 'Min grade 3.5',
                 'MEDIUM' => 'Min grade 3',
                 'DARK'   => 'Min grade 3',
             ],
@@ -1851,7 +1851,7 @@ textarea {
                 <tr>
                     <td align="left" style="font-size: 11px;" width="33%">AFTER 75 CYCLES</td>
                     <td align="center" style="font-size: 11px; <?php if($rcek1['sb_w1']!="" AND $rcek1['sb_w1'] < 3){echo "color:red;";}?>" width="33%"><?php if($rcek1['sb_w1']!=""){echo $rcek1['sb_w1'];}else{echo "N/A";}?></td>
-                    <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 3.4</td>
+                    <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 3.5</td>
                 </tr>
                 <tr>
                     <td style="font-size: 12px;" Width="33%" ><strong> Conclusion </strong></td>
@@ -2055,7 +2055,7 @@ textarea {
                 <!-- <td align="left" style="font-size: 11px;" width="33%">WET (COLOR STAIN)</td> -->
                 <td align="left" style="font-size: 11px;" width="33%">WET STAINING</td>
                 <td align="center" style="font-size: 11px; <?php if($rcek1['stat_cr']=="MARGINAL PASS" AND $rcekM['mcrock_len2']!="" AND $rcekM['mcrock_len2'] < 3.5){echo "color:red;";}else if($rcek1['crock_len2']!="" AND $rcek1['crock_len2'] < 3.5){echo "color:red;";}?>" width="33%"><?php if($rcekM['mcrock_len2']=="" AND $rcek1['crock_len2']==""){echo "N/A";}else if($rcek1['stat_cr']=="MARGINAL PASS"){echo $rcekM['mcrock_len2'];}else if($rcek1['stat_cr']=="MARGINAL PASS" AND $rcekM['mcrock_len2']==""){echo "N/A";}else{echo $rcek1['crock_len2'];}?></td>
-                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 3.4</td>
+                <td align="right" style="font-size: 11px;" width="33%">MIN GRADE 3.5</td>
             </tr>
             <tr>
                 <td style="font-size: 12px;" Width="33%" ><strong> Conclusion </strong></td>
@@ -2422,7 +2422,7 @@ textarea {
             <tr>
               <td align="left" style="font-size: 11px;">FACE</td>
               <td align="center" style="font-size: 11px;"><?php if($rcek1['prt_f2']!=""){echo $rcek1['prt_f2'];}else{echo "N/A";}?></td>
-              <td align="right" style="font-size: 11px;">MIN GRADE 3.4</td>
+              <td align="right" style="font-size: 11px;">MIN GRADE 3.5</td>
             </tr>
             <tr>
               <td align="left" style="font-size: 11px;" colspan="3">&nbsp;</td>
