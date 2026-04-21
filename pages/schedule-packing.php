@@ -397,8 +397,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_proses_gerobak
                         $stmt_mulai_inspect = @db2_prepare($conn1, $query_mulai_inspect);
                         if ($stmt_mulai_inspect && @db2_execute($stmt_mulai_inspect)) {
                           $rowd_selesai_inspect = db2_fetch_assoc($stmt_mulai_inspect);
-                          if (isset($rowd_selesai_inspect['TANGGAL_END'])) {
-                            echo $rowd_selesai_inspect['TANGGAL_END'];
+                          if (isset($rowd_selesai_inspect['DATETIME_END'])) {
+                            echo $rowd_selesai_inspect['DATETIME_END'];
                           } else {
                             echo "";
                           }
