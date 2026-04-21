@@ -396,10 +396,10 @@ if(!empty($nodemand)){
                         <div class="input-group date">
                             <div class="input-group-addon"> <i class="fa fa-calendar"></i> </div>
                             <input name="tgl_celup" type="text" class="form-control pull-right" id="datepicker1" placeholder="0000-00-00" value="<?php if ($crow > 0) {
-                                                                                                                                                        echo $row['tgl_celup'];
+                                                                                                                                                        echo date_format($row['tgl_celup'], 'Y-m-d');
                                                                                                                                                     } else {
                                                                                                                                                         if ($dtDyeing['tgl_buat'] != "") {
-                                                                                                                                                            echo substr($dtDyeing['tgl_buat'], 0, 10);
+                                                                                                                                                            echo date_format($dtDyeing['tgl_buat'], 'Y-m-d');
                                                                                                                                                         }
                                                                                                                                                     } ?>" required />
                         </div>
