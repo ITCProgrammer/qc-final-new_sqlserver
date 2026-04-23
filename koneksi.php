@@ -91,7 +91,7 @@ $invqc_option = array(
 );
 $con_invqc_sqlsrv = sqlsrv_connect($invqc_host, $invqc_option);
 
-$hostname="10.0.0.21";
+$hostname="db2-db-prd.indotaichen.com";
 $database = "NOWPRD";
 $user = "db2admin";
 $passworddb2 = "Sunkam@24809";

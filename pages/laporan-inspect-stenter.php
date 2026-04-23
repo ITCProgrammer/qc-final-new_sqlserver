@@ -531,6 +531,82 @@
 					</div>
 				</div>
 				<div class="form-group">
+					<label for="l_g" class="col-sm-3 control-label">Mesin Stop 1</label>
+					<div class="col-sm-2">
+						<select name="dept_penyebab1" class="form-control" id="dept_penyebab1">
+							<option value="">Pilih</option>
+						</select>
+					</div>
+					<div class="col-sm-2">
+						<input name="jml_stop1" type="number" class="form-control" id="jml_stop1" placeholder="0">
+					</div>
+					<div class="col-sm-4">
+						<div class="input-group">
+							<select class="form-control select2" data-placeholder="Remarks 1" name="remarks1" id="remarks1">
+								<option value="" disabled selected>Remarks 1</option>
+							</select>
+							<span class="input-group-btn"><button type="button" class="btn btn-default" data-toggle="modal" data-target="#data-remarks"> ...</button></span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="l_g" class="col-sm-3 control-label">Mesin Stop 2</label>
+					<div class="col-sm-2">
+						<select name="dept_penyebab2" class="form-control" id="dept_penyebab2">
+							<option value="">Pilih</option>
+						</select>
+					</div>
+					<div class="col-sm-2">
+						<input name="jml_stop2" type="number" class="form-control" id="jml_stop2" placeholder="0">
+					</div>
+					<div class="col-sm-4">
+						<div class="input-group">
+							<select class="form-control select2" data-placeholder="Remarks 2" name="remarks2" id="remarks2">
+								<option value="" disabled selected>Remarks 2</option>
+							</select>
+							<span class="input-group-btn"><button type="button" class="btn btn-default" data-toggle="modal" data-target="#data-remarks"> ...</button></span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="l_g" class="col-sm-3 control-label">Mesin Stop 3</label>
+					<div class="col-sm-2">
+						<select name="dept_penyebab3" class="form-control" id="dept_penyebab3">
+							<option value="">Pilih</option>
+						</select>
+					</div>
+					<div class="col-sm-2">
+						<input name="jml_stop3" type="number" class="form-control" id="jml_stop3" placeholder="0">
+					</div>
+					<div class="col-sm-4">
+						<div class="input-group">
+							<select class="form-control select2" data-placeholder="Remarks 3" name="remarks3" id="remarks3">
+								<option value="" disabled selected>Remarks 3</option>
+							</select>
+							<span class="input-group-btn"><button type="button" class="btn btn-default" data-toggle="modal" data-target="#data-remarks"> ...</button></span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="l_g" class="col-sm-3 control-label">Mesin Stop 4</label>
+					<div class="col-sm-2">
+						<select name="dept_penyebab4" class="form-control" id="dept_penyebab4">
+							<option value="">Pilih</option>
+						</select>
+					</div>
+					<div class="col-sm-2">
+						<input name="jml_stop4" type="number" class="form-control" id="jml_stop4" placeholder="0">
+					</div>
+					<div class="col-sm-4">
+						<div class="input-group">
+							<select class="form-control select2" data-placeholder="Remarks 4" name="remarks4" id="remarks4">
+								<option value="" disabled selected>Remarks 4</option>
+							</select>
+							<span class="input-group-btn"><button type="button" class="btn btn-default" data-toggle="modal" data-target="#data-remarks"> ...</button></span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
 					<label for="gerobak" class="col-sm-3 control-label">Gerobak</label>
 					<div class="col-sm-8">
 						<input name="gerobak" type="text" class="form-control" id="gerobak" placeholder="Gerobak">
@@ -587,70 +663,168 @@
 		<!-- /.modal-dialog -->
 	</div>
 	
+	<div class="modal fade" id="data-remarks">
+		<div class="modal-dialog ">
+			<div class="modal-content">
+				<form class="form-horizontal" name="modal_popup" data-toggle="validator" method="post" action="" enctype="multipart/form-data">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title">Remarks</h4>
+					</div>
+					<div class="modal-body">
+						<!-- <input type="hidden" id="id" name="id"> -->
+						<div class="form-group">
+							<label for="operator" class="col-md-3 control-label">Remarks</label>
+							<div class="col-md-6">
+								<input type="text" class="form-control" id="remarks" name="remarks" required>
+								<span class="help-block with-errors"></span>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+						<input type="submit" value="Simpan" name="simpan_remarks" id="simpan_remarks" class="btn btn-primary pull-right">
+					</div>
+				</form>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+	
 	<?php
 		if (isset($_POST['simpan_operator']) && $_POST['simpan_operator'] == "Simpan") {
 			$sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_user_stenter ([user]) VALUES (?) ",[$_POST['user']]) ;
 			if ($sqlData1) {
 				echo "<script>swal({
-		title: 'Data Telah Tersimpan',   
-		text: 'Klik Ok untuk input data kembali',
-		type: 'success',
-		}).then((result) => {
-		if (result.value) {
-				window.location.href='LaporanInspeksiStanter';
-			
+									title: 'Data Telah Tersimpan',   
+									text: 'Klik Ok untuk input data kembali',
+									type: 'success',
+									}).then((result) => {
+									if (result.value) {
+											window.location.href='LaporanInspeksiStanter';
+										
+									}
+								});</script>";
+			}
 		}
-		});</script>";
+		if (isset($_POST['simpan_remarks']) && $_POST['simpan_remarks'] == "Simpan") {
+			$sqlData1 = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_remarks_stenter ([remarks]) VALUES (?) ",[$_POST['remarks']]) ;
+			if ($sqlData1) {
+				echo "<script>swal({
+									title: 'Data Telah Tersimpan',   
+									text: 'Klik Ok untuk input data kembali',
+									type: 'success',
+									}).then((result) => {
+									if (result.value) {
+											window.location.href='LaporanInspeksiStanter';
+										
+									}
+								});</script>";
 			}
 		}
 	?>
 
 <?php
 if (isset($_POST['save'])) {
-    // Escape special characters in input data
-    $nokk = $_POST['nokk'];
-    $nodemand = $_POST['nodemand'];
-    $langganan = $_POST['langganan'];
-    $buyer = $_POST['buyer'];
-    $no_order = $_POST['no_order'];
-    $jenis_kain = $_POST['jenis_kain'];
-    $warna = $_POST['warna'];
-    $no_mc = $_POST['no_mc'];
-    $bruto = $_POST['bruto'];
-    $no_hanger = $_POST['no_hanger'];
-    $no_item = $_POST['no_item'];
-    $status = $_POST['status'];
-    $catatan = $_POST['catatan'];
-    $no_po = $_POST['no_po'];
-    $lebar = $_POST['lebar'];
-    $gramasi = $_POST['gramasi'];
-    $operator = $_POST['operator'];
-    $roll = $_POST['roll'];
-    $no_warna = $_POST['no_warna'];
-    $shift = $_POST['shift'];
-    $proses = $_POST['proses'];
-    $gerobak = $_POST['gerobak'];
+	sqlsrv_begin_transaction($con_db_qc_sqlsrv);
+	try {
+		$nokk = $_POST['nokk'];
+		$nodemand = $_POST['nodemand'];
+		$langganan = $_POST['langganan'];
+		$buyer = $_POST['buyer'];
+		$no_order = $_POST['no_order'];
+		$jenis_kain = $_POST['jenis_kain'];
+		$warna = $_POST['warna'];
+		$no_mc = $_POST['no_mc'];
+		$bruto = $_POST['bruto'];
+		$no_hanger = $_POST['no_hanger'];
+		$no_item = $_POST['no_item'];
+		$status = $_POST['status'];
+		$catatan = $_POST['catatan'];
+		$no_po = $_POST['no_po'];
+		$lebar = $_POST['lebar'];
+		$gramasi = $_POST['gramasi'];
+		$operator = $_POST['operator'];
+		$roll = $_POST['roll'];
+		$no_warna = $_POST['no_warna'];
+		$shift = $_POST['shift'];
+		$proses = $_POST['proses'];
+		$gerobak = $_POST['gerobak'];
 
-    // Insert data into db_qc.tbl_lap_stenter
-    $sqlData = sqlsrv_query($con_db_qc_sqlsrv, "INSERT INTO db_qc.tbl_lap_stenter 
-        (nokk,nodemand,langganan,buyer,no_order,jenis_kain,warna,no_mc,bruto,no_hanger,no_item,[status],catatan,no_po,lebar,
-        gramasi,operator,roll,no_warna,shift,proses,gerobak,tanggal_buat) VALUES 
-        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)",
-        [$nokk,$nodemand,$langganan,$buyer,$no_order,$jenis_kain,$warna,$no_mc,$bruto,$no_hanger,$no_item,$status,$catatan,$no_po,$lebar
-        ,$gramasi,$operator,$roll,$no_warna,$shift,$proses,$gerobak]);
+		$sql1 = "INSERT INTO db_qc.tbl_lap_stenter 
+                (nokk,nodemand,langganan,buyer,no_order,jenis_kain,warna,no_mc,bruto,no_hanger,no_item,[status],catatan,no_po,lebar,
+                gramasi,operator,roll,no_warna,shift,proses,gerobak,tanggal_buat) 
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP);
+                SELECT SCOPE_IDENTITY() AS last_id;";
+		$params1 = [$nokk,$nodemand,$langganan,$buyer,$no_order,$jenis_kain,$warna,$no_mc,$bruto,$no_hanger,$no_item,$status,$catatan,$no_po,$lebar
+                   ,$gramasi,$operator,$roll,$no_warna,$shift,$proses,$gerobak];
+		$stmt1 = sqlsrv_query($con_db_qc_sqlsrv, $sql1, $params1);
 
-    if ($sqlData) {
-        echo "<script>swal({
-            title: 'Data Tersimpan',
-            text: 'Klik Ok untuk input data kembali',
-            type: 'success',
-        }).then((result) => {
-            if (result.value) {
+		if ($stmt1 === false) {
+            throw new Exception("Gagal simpan Laporan Stenter: " . print_r(sqlsrv_errors(), true));
+        }
+
+		sqlsrv_next_result($stmt1); 
+        sqlsrv_fetch($stmt1);
+
+        $lastIdLap = sqlsrv_get_field($stmt1, 0);
+			
+		$dept1 = $_POST['dept_penyebab1'] ?: null;
+        $jml1  = $_POST['jml_stop1'] ?: null;
+        $rem1  = $_POST['remarks1'] ?: null;
+
+        $dept2 = $_POST['dept_penyebab2'] ?: null;
+        $jml2  = $_POST['jml_stop2'] ?: null;
+        $rem2  = $_POST['remarks2'] ?: null;
+
+        $dept3 = $_POST['dept_penyebab3'] ?: null;
+        $jml3  = $_POST['jml_stop3'] ?: null;
+        $rem3  = $_POST['remarks3'] ?: null;
+
+        $dept4 = $_POST['dept_penyebab4'] ?: null;
+        $jml4  = $_POST['jml_stop4'] ?: null;
+        $rem4  = $_POST['remarks4'] ?: null;
+
+		$sql2 = "INSERT INTO db_qc.tbl_mesin_stop_stenter 
+                 (id_lap_stenter, dept_mesin_stop1, jml_stop1, remarks1, 
+                  dept_mesin_stop2, jml_stop2, remarks2, 
+                  dept_mesin_stop3, jml_stop3, remarks3, 
+                  dept_mesin_stop4, jml_stop4, remarks4) 
+                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        
+        $params2 = [$lastIdLap, $dept1, $jml1, $rem1, $dept2, $jml2, $rem2, $dept3, $jml3, $rem3, $dept4, $jml4, $rem4];
+        
+        $stmt2 = sqlsrv_query($con_db_qc_sqlsrv, $sql2, $params2);
+
+        if ($stmt2 === false) {
+            throw new Exception("Gagal simpan Mesin Stop: " . print_r(sqlsrv_errors(), true));
+        }
+
+		sqlsrv_commit($con_db_qc_sqlsrv);
+
+		echo "<script>
+            swal({
+                title: 'Data Tersimpan',
+                text: 'Data laporan dan mesin stop berhasil disimpan',
+                type: 'success',
+            }).then(() => {
                 window.location.href='LaporanInspeksiStanter';
-            }
-        });</script>";
-    } else {
-        echo "<script>alert('Gagal menyimpan data ke db_qc.tbl_lap_stenter: " . sqlserver_errors() . "');</script>";
-    }
+            });
+        </script>";
+	} catch (Exception $e) {
+		sqlsrv_rollback($con_db_qc_sqlsrv);
+        
+        $errorMsg = addslashes($e->getMessage());
+        echo "<script>
+            swal({
+                title: 'Gagal Simpan!',
+                text: 'Terjadi kesalahan sistem.',
+                type: 'error'
+            });
+            console.error('$errorMsg');
+        </script>";
+	}
 }
 ?>

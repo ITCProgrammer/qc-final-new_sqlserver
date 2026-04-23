@@ -13,6 +13,7 @@ $Akhir = isset($_POST['akhir']) ? $_POST['akhir'] : '';
 $shift = isset($_POST['shift']) ? $_POST['shift'] : '';
 $jamA = isset($_POST['jam_awal']) ? $_POST['jam_awal'] : '';
 $jamAr = isset($_POST['jam_akhir']) ? $_POST['jam_akhir'] : '';
+$demand = isset($_POST['demand']) ? $_POST['demand'] : '';
 if (strlen($jamA) == 5) {
 	$start_date = $Awal . ' ' . $jamA.':00';
 } else {
@@ -100,6 +101,12 @@ if (strlen($jamAr) == 5) {
 									</div>
 								</div>
 							</div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" name="demand" 
+                                    placeholder="Demand" value="<?php echo $demand; ?>" autocomplete="off">
+                            </div>
                         </div>
                         <div class="form-group">
                             <div class="col-sm-8">
@@ -272,22 +279,43 @@ if (strlen($jamAr) == 5) {
                     </b> <br><br>
                 </div>
                 <?php
-                if ($_POST['shift'] == 'ALL') {
-                    $qryb = "SELECT
-                            *,CONVERT(VARCHAR(19),tanggal_buat) tanggal_buat
-                        FROM
-                            db_qc.tbl_lap_stenter
-                        WHERE
-                            tanggal_buat BETWEEN '$start_date' AND '$stop_date'";
-                } else {
-                    $qryb = "SELECT
-                            *,CONVERT(VARCHAR(19),tanggal_buat) tanggal_buat
-                        FROM
-                            db_qc.tbl_lap_stenter
-                        WHERE
-                            tanggal_buat BETWEEN '$start_date' AND '$stop_date' AND shift = '$shift'";
+                $conditions = [];
+                $params = [];
+
+                $conditions[] = "tanggal_buat BETWEEN ? AND ?";
+                $params[] = $start_date;
+                $params[] = $stop_date;
+
+                if ($shift !== 'ALL' && !empty($shift)) {
+                    $conditions[] = "shift = ?";
+                    $params[] = $shift;
                 }
-                $stmt1 = sqlsrv_query($con_db_qc_sqlsrv, $qryb);
+
+                if (!empty($demand)) {
+                    $conditions[] = "nodemand = ?";
+                    $params[] = $demand;
+                }
+
+                $whereClause = "";
+                if (count($conditions) > 0) {
+                    $whereClause = " WHERE " . implode(" AND ", $conditions);
+                }
+
+                $qryb = "SELECT *,CONVERT(VARCHAR(19),tanggal_buat) tanggal_buat
+                        FROM db_qc.tbl_lap_stenter 
+                        $whereClause 
+                        ORDER BY id DESC";
+
+                // echo "<pre>";
+                // print_r($qryb);
+                // echo "</pre>";
+
+                $stmt1 = sqlsrv_query($con_db_qc_sqlsrv, $qryb, $params);
+
+                if ($stmt1 === false) {
+                    die(print_r(sqlsrv_errors(), true));
+                }
+
                 if ($stmt1) {
                 ?>
 
@@ -338,8 +366,25 @@ if (strlen($jamAr) == 5) {
                                         <td><?php echo $row['jenis_kain']; ?></td>
                                         <td><?php echo $row['warna']; ?></td>
                                         <td><?php echo $row['no_mc']; ?></td>
-                                        <td><?php echo $row['bruto']; ?></td>
-                                        <td><?php echo $row['roll']; ?></td>
+                                        
+                                        <td><a href="#" class="bruto-inspect-stenter-editable"
+                                                data-type="text"
+                                                data-pk="<?= htmlspecialchars($row['id']) ?>"
+                                                data-value="<?= htmlspecialchars($row['bruto']) ?>"
+                                                data-url="pages/editable/inspect_stenter/editable_bruto.php"
+                                                data-title="Pilih ACC Resep">
+                                                <?= htmlspecialchars($row['bruto']) ?>
+                                            </a>
+                                        </td>
+                                        <td><a href="#" class="roll-inspect-stenter-editable"
+                                                data-type="text"
+                                                data-pk="<?= htmlspecialchars($row['id']) ?>"
+                                                data-value="<?= htmlspecialchars($row['roll']) ?>"
+                                                data-url="pages/editable/inspect_stenter/editable_roll.php"
+                                                data-title="Pilih ACC Resep">
+                                                <?= htmlspecialchars($row['roll']) ?>
+                                            </a>
+                                        </td>
                                         <td><?php echo $row['no_hanger']; ?></td>
                                         <td><?php echo $row['no_item']; ?></td>
                                         <td><?php echo $row['status']; ?></td>
@@ -363,7 +408,15 @@ if (strlen($jamAr) == 5) {
                                         <td><?php echo $row['operator']; ?></td>
                                         <td><?php echo $row['no_warna']; ?></td>
                                         <td><?php echo $row['proses']; ?></td>
-                                        <td><?php echo $row['gerobak']; ?></td>
+                                        <td><a href="#" class="gerobak-inspect-stenter-editable"
+                                                data-type="text"
+                                                data-pk="<?= htmlspecialchars($row['id']) ?>"
+                                                data-value="<?= htmlspecialchars($row['gerobak']) ?>"
+                                                data-url="pages/editable/inspect_stenter/editable_gerobak.php"
+                                                data-title="Pilih ACC Resep">
+                                                <?= htmlspecialchars($row['gerobak']) ?>
+                                            </a>
+                                        </td>
                                         <td><?php echo $row['shift']; ?></td>
                                         <td><?php echo $row['tanggal_buat']; ?></td>
                                     </tr>

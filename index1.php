@@ -1866,7 +1866,7 @@ $page = strtolower($page);
     <script src="bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
     <script src="bower_components/toast-master/js/jquery.toast.js"></script>
     <script src="plugins/timepicker/bootstrap-timepicker.min.js"></script>
-    <?php if ($_GET['p'] == "Lap-Inspeksi" or $_GET['p'] == "Lap-GantiKainDisposisi" or $_GET['p'] == "Lap-GantiKain" or $_GET['p'] == "Lap-Retur" or $_GET['p'] == "Summary-Order" or $_GET['p'] == "Lihat-Data-Cwarna-Dye-New" or $_GET['p'] == "Lihat-Data-Cwarna-Fin-New" or $_GET['p'] == "Lihat-Data-Jahit" or $_GET['p'] == "Lap-Potong" or $_GET['p'] == "Input-Sisa-Lap-Packing" or $_GET['p'] == "Lihat-Data-Shading" or $_GET['p'] == "Lihat-Data-Beda-Roll" or $_GET['p'] == "Mutasi-BS" or $_GET['p'] == "Mutasi-BS-Detail" or $_GET['p'] == "CetakRandom" or $_GET['p'] == "Kain-Masuk-Lab" or $_GET['p'] == "LihatTempelBedaRoll" or $_GET['p'] == "Lap-PotongNew" or $_GET['p'] == "laporan-inspect-stenter-report"): ?>
+    <?php if ($_GET['p'] == "laporan-inspect-stenter-report" or $_GET['p'] == "Lap-Inspeksi" or $_GET['p'] == "Lap-GantiKainDisposisi" or $_GET['p'] == "Lap-GantiKain" or $_GET['p'] == "Lap-Retur" or $_GET['p'] == "Summary-Order" or $_GET['p'] == "Lihat-Data-Cwarna-Dye-New" or $_GET['p'] == "Lihat-Data-Cwarna-Fin-New" or $_GET['p'] == "Lihat-Data-Jahit" or $_GET['p'] == "Lap-Potong" or $_GET['p'] == "Input-Sisa-Lap-Packing" or $_GET['p'] == "Lihat-Data-Shading" or $_GET['p'] == "Lihat-Data-Beda-Roll" or $_GET['p'] == "Mutasi-BS" or $_GET['p'] == "Mutasi-BS-Detail" or $_GET['p'] == "CetakRandom" or $_GET['p'] == "Kain-Masuk-Lab" or $_GET['p'] == "LihatTempelBedaRoll" or $_GET['p'] == "Lap-PotongNew" or $_GET['p'] == "laporan-inspect-stenter-report"): ?>
         <script src="bower_components/xeditable/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
     <?php endif; ?>
 
@@ -3677,6 +3677,159 @@ $page = strtolower($page);
                     $("#DetailMutasi").modal('show', {
                         backdrop: 'true'
                     });
+                }
+            });
+        });
+        $(document).ready(function() {
+            $('#dept_penyebab1').select2({
+                placeholder: 'Pilih Department',
+                allowClear: true,
+                ajax: {
+                    url: 'pages/ajax/inspectStenter/ajax_dept1.php',
+                    dataType: 'json',
+                    delay: 250,
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+            $('#dept_penyebab2').select2({
+                placeholder: 'Pilih Department',
+                allowClear: true,
+                ajax: {
+                    url: 'pages/ajax/inspectStenter/ajax_dept1.php',
+                    dataType: 'json',
+                    delay: 250,
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+            $('#dept_penyebab3').select2({
+                placeholder: 'Pilih Department',
+                allowClear: true,
+                ajax: {
+                    url: 'pages/ajax/inspectStenter/ajax_dept1.php',
+                    dataType: 'json',
+                    delay: 250,
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+            $('#dept_penyebab4').select2({
+                placeholder: 'Pilih Department',
+                allowClear: true,
+                ajax: {
+                    url: 'pages/ajax/inspectStenter/ajax_dept1.php',
+                    dataType: 'json',
+                    delay: 250,
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+            $('#remarks1').select2({
+                placeholder: 'Remarks 1',
+                allowClear: true,
+                ajax: {
+                    url: 'pages/ajax/inspectStenter/ajax_remarks1.php',
+                    dataType: 'json',
+                    delay: 250,
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+            $('#remarks2').select2({
+                placeholder: 'Remarks 2',
+                allowClear: true,
+                ajax: {
+                    url: 'pages/ajax/inspectStenter/ajax_remarks1.php',
+                    dataType: 'json',
+                    delay: 250,
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+            $('#remarks3').select2({
+                placeholder: 'Remarks 3',
+                allowClear: true,
+                ajax: {
+                    url: 'pages/ajax/inspectStenter/ajax_remarks1.php',
+                    dataType: 'json',
+                    delay: 250,
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+            $('#remarks4').select2({
+                placeholder: 'Remarks 4',
+                allowClear: true,
+                ajax: {
+                    url: 'pages/ajax/inspectStenter/ajax_remarks1.php',
+                    dataType: 'json',
+                    delay: 250,
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+            $('.bruto-inspect-stenter-editable').editable({
+                mode: 'inline', // atau 'popup'
+                success: function(response, newValue) {
+                    // Optional: Tambahkan pesan sukses jika perlu
+                    console.log('Update Berhasil: ' + newValue);
+                },
+                error: function(response, newValue) {
+                    return 'Gagal memperbarui data.';
+                }
+            });
+            $('.roll-inspect-stenter-editable').editable({
+                mode: 'inline', // atau 'popup'
+                success: function(response, newValue) {
+                    // Optional: Tambahkan pesan sukses jika perlu
+                    console.log('Update Berhasil: ' + newValue);
+                },
+                error: function(response, newValue) {
+                    return 'Gagal memperbarui data.';
+                }
+            });
+            $('.gerobak-inspect-stenter-editable').editable({
+                mode: 'inline', // atau 'popup'
+                success: function(response, newValue) {
+                    // Optional: Tambahkan pesan sukses jika perlu
+                    console.log('Update Berhasil: ' + newValue);
+                },
+                error: function(response, newValue) {
+                    return 'Gagal memperbarui data.';
                 }
             });
         });
