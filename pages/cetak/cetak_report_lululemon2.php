@@ -1351,12 +1351,12 @@ textarea {
             <td align="center" style="font-size: 12px;" colspan="3">&nbsp;</td>
         </tr> -->
         <tr>
-            <td align="center" style="font-size: 12px;"><u>VIVIK KURNIAWATI</u></td>
+            <td align="center" style="font-size: 12px;"><u>JANU DWI LAKSONO</u></td>
             <td align="center" style="font-size: 12px;">&nbsp;</td>
             <td align="center" style="font-size: 12px;"><u>FERRY WIBOWO</u></td>
         </tr>
         <tr>
-            <td align="center" style="font-size: 12px;">SUPERVISOR QCF</td>
+            <td align="center" style="font-size: 12px;">LEADER QCF</td>
             <td align="center" style="font-size: 12px;">&nbsp;</td>
             <td align="center" style="font-size: 12px;">MANAGER QCF</td>
         </tr>
